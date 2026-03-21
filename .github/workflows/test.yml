@@ -19,9 +19,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          # No cache — this project has no lock file (zero npm runtime deps)
 
-      - name: Install Playwright
+      - name: Install Playwright chromium
         run: npx playwright install chromium --with-deps
 
       - name: Run non-regression tests
@@ -34,3 +34,4 @@ jobs:
           name: snapshot-diffs
           path: tests/snapshots/*-current.png
           retention-days: 7
+          if-no-files-found: ignore
