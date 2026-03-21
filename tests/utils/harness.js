@@ -52,12 +52,16 @@ function resetStats() { _pass = 0; _fail = 0; _warn = 0; }
 
 // ─── browser helpers ──────────────────────────────────────────────────────────
 async function launch({ width = 1440, height = 900, mobile = false } = {}) {
-  const browser = await chromium.launch({
+  // Let Playwright find the browser automatically.
+  // The env var override is kept for unusual local setups only.
+  const launchOpts = {
     headless: true,
-    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ||
-      '/home/user/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  };
+  if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
+    launchOpts.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  }
+  const browser = await chromium.launch(launchOpts);
 
   const context = await browser.newContext({
     viewport: { width: mobile ? 768 : width, height: mobile ? 1024 : height },
