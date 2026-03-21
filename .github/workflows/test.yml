@@ -1,0 +1,36 @@
+name: Non-regression tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Playwright
+        run: npx playwright install chromium --with-deps
+
+      - name: Run non-regression tests
+        run: node tests/run-all.js --ci
+
+      - name: Upload snapshot diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-diffs
+          path: tests/snapshots/*-current.png
+          retention-days: 7

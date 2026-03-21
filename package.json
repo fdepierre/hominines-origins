@@ -1,0 +1,32 @@
+{
+  "name": "hominines-origins",
+  "version": "0.1.0",
+  "description": "Interactive map of human evolution — open source, for everyone",
+  "scripts": {
+    "test":                    "node tests/run-all.js",
+    "test:unit":               "node tests/unit.test.js",
+    "test:visual":             "node tests/visual.test.js",
+    "test:a11y":               "node tests/a11y.test.js",
+    "test:update-snapshots":   "UPDATE_SNAPSHOTS=1 node tests/visual.test.js",
+    "test:ci":                 "node tests/run-all.js --ci",
+    "setup":                   "npx playwright install chromium"
+  },
+  "keywords": [
+    "human-evolution",
+    "paleoanthropology",
+    "interactive-map",
+    "open-science",
+    "education",
+    "hominines",
+    "leaflet",
+    "visualisation"
+  ],
+  "author": "Franck Depierre <franck.depierre@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.44.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

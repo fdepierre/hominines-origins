@@ -1,0 +1,2938 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+
+<!-- Perplexity Computer Attribution — SEO Meta Tags -->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hominines — Évolution & Migrations sur Terre</title>
+<meta name="description" content="Carte interactive de l'évolution des hominines : apparition, migrations, pigmentation et outils de -4,1 Ma à -2 000 ans.">
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+  --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+  --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+  --text-2xl:  clamp(2rem,     1.2rem  + 2.5vw,  3.5rem);
+
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+  --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+/* Palette inspirée de l'archéologie : terre, os, obsidienne */
+:root, [data-theme="dark"] {
+  --color-bg:             #0e0d0b;
+  --color-surface:        #161410;
+  --color-surface-2:      #1e1b16;
+  --color-surface-offset: #252018;
+  --color-divider:        #2e2820;
+  --color-border:         #3a3228;
+  --color-text:           #e8e0d0;
+  --color-text-muted:     #9a8f7a;
+  --color-text-faint:     #5a5248;
+  --color-text-inverse:   #0e0d0b;
+
+  /* Amber / ocre = accent principal */
+  --color-primary:        #d4820a;
+  --color-primary-hover:  #f09a1a;
+  --color-primary-active: #ffb030;
+  --color-primary-highlight: #3a2a0a;
+
+  /* Vert ancien */
+  --color-success:        #5e8c4a;
+  --color-blue:           #4a7a9b;
+  --color-purple:         #7a5e9b;
+  --color-error:          #a84040;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+}
+
+[data-theme="light"] {
+  --color-bg:             #f0ebe0;
+  --color-surface:        #faf6ee;
+  --color-surface-2:      #fff;
+  --color-surface-offset: #e6dfd0;
+  --color-divider:        #c8bfa8;
+  --color-border:         #b0a488;
+  --color-text:           #1a1208;
+  --color-text-muted:     #4a3e2c;
+  --color-text-faint:     #7a6e58;
+  --color-text-inverse:   #f0ebe0;
+
+  /* Primary darker for WCAG AA on light bg */
+  --color-primary:        #8a4f00;
+  --color-primary-hover:  #6a3800;
+  --color-primary-active: #4e2a00;
+  --color-primary-highlight: #eed8a0;
+
+  --color-success:        #3a6020;
+  --color-blue:           #1a4e7a;
+  --color-purple:         #4a2e7a;
+  --color-error:          #7a1a1a;
+
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.18);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.24);
+}
+
+/* ===== BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+a { color: var(--color-primary); }
+
+/* ===== LAYOUT ===== */
+#app {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+#header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
+  padding: var(--space-3) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  z-index: 1000;
+  flex-wrap: wrap;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+.logo svg { color: var(--color-primary); }
+.logo-text {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.logo-text span { color: var(--color-primary); }
+.logo-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  transition: all var(--transition-interactive);
+}
+.btn-icon:hover {
+  background: var(--color-surface-offset);
+  color: var(--color-text);
+}
+
+/* ===== MAIN CONTENT ===== */
+#main {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===== MAP ===== */
+#map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: #0a0e18;
+}
+
+/* Leaflet overrides */
+.leaflet-container { font-family: var(--font-body); background: #0a0e18; }
+.leaflet-control-zoom { display: none; }
+.leaflet-attribution-flag { display: none !important; }
+.leaflet-control-attribution { 
+  background: rgba(14,13,11,0.8) !important; 
+  color: var(--color-text-faint) !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a { color: var(--color-text-muted) !important; }
+/* Light mode: tooltip popups need dark text */
+[data-theme="light"] .leaflet-tooltip {
+  background: rgba(250,246,238,0.96);
+  color: #1a1208;
+  border-color: #b0a488;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+[data-theme="light"] .leaflet-tooltip-custom {
+  color: #1a1208;
+}
+
+/* Custom markers */
+.hominine-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 0 0 transparent;
+  font-size: 16px;
+  text-align: center;
+  line-height: 1;
+}
+.hominine-marker:hover {
+  transform: scale(1.2);
+  z-index: 999 !important;
+}
+.hominine-marker.active {
+  box-shadow: 0 0 0 4px var(--color-primary);
+  z-index: 999 !important;
+}
+
+/* Migration arrows */
+.migration-path {
+  stroke-dasharray: 8 4;
+  animation: dashMove 1.5s linear infinite;
+}
+@keyframes dashMove {
+  to { stroke-dashoffset: -24; }
+}
+
+/* ===== SIDE PANEL ===== */
+#side-panel {
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-divider);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-panel-header {
+  padding: var(--space-5) var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--color-divider);
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  z-index: 10;
+}
+
+.period-label {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-1);
+}
+
+.species-name {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.2;
+  margin-bottom: var(--space-1);
+}
+.species-name-common {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-style: normal;
+}
+
+/* Pigmentation showcase */
+.pigmentation-section {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-divider);
+}
+.pigmentation-title {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-4);
+}
+
+.pigmentation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.pig-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+.pig-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.pig-swatch {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border);
+  position: relative;
+  flex-shrink: 0;
+}
+/* Split swatch for variants */
+.pig-swatch.split {
+  background: conic-gradient(var(--c1) 0% 60%, var(--c2) 60% 100%);
+}
+.pig-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text);
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* Certainty badge */
+.certainty-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+}
+.certainty-badge.dna-direct { background: rgba(94,140,74,0.15); color: #4a8a34; border: 1px solid rgba(94,140,74,0.4); }
+.certainty-badge.genetic { background: rgba(74,122,155,0.15); color: #1a5e90; border: 1px solid rgba(74,122,155,0.4); }
+.certainty-badge.inference { background: rgba(212,130,10,0.15); color: var(--color-primary); border: 1px solid rgba(212,130,10,0.4); }
+.certainty-badge.debate { background: rgba(168,64,64,0.15); color: #902020; border: 1px solid rgba(168,64,64,0.4); }
+/* Light mode overrides for better contrast */
+[data-theme="light"] .certainty-badge.dna-direct { color: #2a6018; background: rgba(94,140,74,0.2); }
+[data-theme="light"] .certainty-badge.genetic { color: #0e3e6a; background: rgba(74,122,155,0.2); }
+[data-theme="light"] .certainty-badge.inference { color: #6a3800; background: rgba(212,130,10,0.25); }
+[data-theme="light"] .certainty-badge.debate { color: #6a0e0e; background: rgba(168,64,64,0.2); }
+
+/* Biometrics */
+.biometrics-section {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-divider);
+}
+.bio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.bio-item {
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+.bio-item-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+}
+.bio-item-value {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--color-primary);
+}
+
+/* Tools & technology */
+.tools-section {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-divider);
+}
+.tool-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  margin: var(--space-1);
+}
+
+/* Debate section */
+.debate-section {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-divider);
+}
+.debate-item {
+  background: rgba(168,64,64,0.08);
+  border-left: 3px solid #a84040;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-3) var(--space-4);
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* Empty state */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  text-align: center;
+  gap: var(--space-4);
+}
+.empty-state-icon { font-size: 48px; opacity: 0.3; }
+.empty-state-title { font-size: var(--text-lg); font-weight: 600; }
+.empty-state-desc { font-size: var(--text-sm); color: var(--color-text-muted); max-width: 28ch; line-height: 1.6; }
+
+/* ===== TIMELINE ===== */
+#timeline {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-divider);
+  padding: var(--space-3) var(--space-5) var(--space-3);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.timeline-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+.timeline-current-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.timeline-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+}
+
+/* === MAIN SPECIES TRACK === */
+.timeline-species-track {
+  position: relative;
+  height: 64px;
+  margin-bottom: var(--space-1);
+}
+/* The rail underneath */
+.timeline-rail {
+  position: absolute;
+  left: 0; right: 0;
+  height: 3px;
+  background: var(--color-border);
+  border-radius: 2px;
+  top: 32px;
+}
+/* Each species gets its own horizontal lane */
+.species-lane {
+  position: absolute;
+  height: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.15s, filter 0.15s;
+  touch-action: manipulation;
+}
+.species-lane:hover, .species-lane.active {
+  opacity: 1;
+  filter: brightness(1.3);
+  z-index: 5;
+}
+/* Lane label shown on hover */
+.species-lane-label {
+  position: absolute;
+  white-space: nowrap;
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--color-text-faint);
+  top: -12px;
+  left: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.species-lane:hover .species-lane-label { opacity: 1; }
+
+/* === NEEDLE wrapper — spans ALL rows of the footer === */
+/* This is placed in a separate absolute container that covers
+   species-track + ticks + skin-band + events-band */
+.timeline-full-needle {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--color-primary);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 30;
+}
+/* The round handle at the TOP of the needle */
+.timeline-needle-handle {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 3px solid var(--color-bg);
+  box-shadow: 0 0 0 2px var(--color-primary), 0 2px 8px rgba(0,0,0,0.5);
+  cursor: grab;
+  pointer-events: all;
+  z-index: 31;
+  touch-action: none;
+  transition: box-shadow 0.15s;
+}
+.timeline-needle-handle:active { cursor: grabbing; }
+.timeline-needle-handle:hover {
+  box-shadow: 0 0 0 4px var(--color-primary), 0 0 16px rgba(212,130,10,0.5);
+}
+/* Glow line effect */
+.timeline-full-needle::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 100%;
+  background: var(--color-primary);
+  filter: blur(4px);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Old needle (keep for compat) */
+.timeline-needle {
+  display: none;
+}
+.timeline-needle-handle-old {
+  display: none;
+}
+
+/* === PLAY BUTTON === */
+#play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: var(--color-primary-highlight);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+#play-btn:hover {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+#play-btn.playing {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary-active);
+}
+#play-btn svg {
+  flex-shrink: 0;
+  transition: all 0.18s;
+}
+
+/* Speed select */
+#play-speed {
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+/* Animated migration arrow */
+@keyframes migrationPulse {
+  0%   { stroke-dashoffset: 0; opacity: 0.9; }
+  100% { stroke-dashoffset: -40; opacity: 0.6; }
+}
+.migration-animated {
+  animation: migrationPulse 0.6s linear infinite;
+  stroke-dasharray: 10 6;
+}
+
+/* === DATE TICKS === */
+.timeline-ticks-row {
+  position: relative;
+  height: 18px;
+  margin-bottom: 2px;
+}
+.tl-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.tl-tick-line {
+  width: 1px;
+  height: 6px;
+  background: var(--color-border);
+}
+.tl-tick-text {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+
+/* === SKIN BAND === */
+.timeline-band {
+  position: relative;
+  height: 20px;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+}
+.timeline-band-label {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--color-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  width: 54px;
+  flex-shrink: 0;
+  padding-right: 4px;
+  text-align: right;
+  line-height: 1.2;
+}
+.timeline-band-track {
+  position: relative;
+  flex: 1;
+  height: 100%;
+}
+.band-segment {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 16px;
+  border-radius: 3px;
+  cursor: default;
+}
+.band-segment:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  white-space: nowrap;
+  color: var(--color-text);
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* === EVENTS BAND (tools, fire, art, etc.) === */
+.events-band {
+  position: relative;
+  height: 22px;
+  display: flex;
+  align-items: center;
+}
+.events-band-track {
+  position: relative;
+  flex: 1;
+  height: 100%;
+}
+.event-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 5;
+  transition: transform 0.15s;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+}
+.event-marker:hover {
+  transform: translate(-50%, -50%) scale(1.4);
+  z-index: 10;
+}
+.event-marker:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  white-space: nowrap;
+  color: var(--color-text);
+  z-index: 100;
+  pointer-events: none;
+  max-width: 220px;
+  text-wrap: wrap;
+}
+
+/* Touch target enlargement on mobile */
+@media (max-width: 900px) {
+  .timeline-needle-handle { width: 28px; height: 28px; }
+  .event-marker { font-size: 16px; }
+  .tl-tick-text { display: none; }
+  #timeline { padding: var(--space-2) var(--space-3); }
+}
+
+/* ===== LEGEND ===== */
+.map-legend {
+  position: absolute;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  z-index: 500;
+  min-width: 180px;
+  box-shadow: var(--shadow-md);
+}
+.map-legend-title {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-2);
+}
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+  font-size: var(--text-xs);
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== TOOLTIP ===== */
+.map-tooltip {
+  position: absolute;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  z-index: 1000;
+  pointer-events: none;
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-md);
+  max-width: 200px;
+  transition: opacity 0.15s;
+}
+
+/* ===== HUMAN FIGURE ===== */
+.human-figure-container {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.human-figure-svg {
+  width: 120px;
+  height: 160px;
+}
+
+/* Scrollbar */
+#side-panel::-webkit-scrollbar { width: 4px; }
+#side-panel::-webkit-scrollbar-track { background: transparent; }
+#side-panel::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+
+/* Layer toggles */
+.layer-toggle-group {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.layer-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-interactive);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.layer-btn:hover { background: var(--color-surface-offset); }
+.layer-btn.active { 
+  background: var(--color-primary-highlight); 
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.layer-btn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Map container relative position */
+.map-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Section title shared */
+.section-title {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-3);
+}
+
+/* Animation fade */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeIn 0.3s ease forwards; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  #main { grid-template-columns: 1fr; }
+  #side-panel {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 45vh;
+    z-index: 200;
+    border-top: 1px solid var(--color-divider);
+    border-left: none;
+  }
+}
+
+/* === PLAY BUTTON — prominent top-left of footer === */
+.timeline-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+/* Play first, then time label */
+#play-btn {
+  order: -1;
+  font-size: var(--text-sm);
+  padding: 7px 18px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+}
+/* Pulse highlight when waiting for first interaction */
+@keyframes playPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(212,130,10,0.7); }
+  60%  { box-shadow: 0 0 0 10px rgba(212,130,10,0); }
+  100% { box-shadow: 0 0 0 0 rgba(212,130,10,0); }
+}
+#play-btn.pulse {
+  animation: playPulse 1.2s ease-out infinite;
+}
+
+/* === FUR TEXTURE on skin band === */
+/* SVG data URI for hair strokes, repeated as pattern */
+.band-segment.fur {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,0) 3px,
+    rgba(255,255,255,0.18) 3px,
+    rgba(255,255,255,0.18) 4px
+  ),
+  repeating-linear-gradient(
+    175deg,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,0) 5px,
+    rgba(0,0,0,0.25) 5px,
+    rgba(0,0,0,0.25) 6px
+  );
+}
+/* Transition period — dotted stipple for partial fur loss */
+.band-segment.partial-fur {
+  background-image: radial-gradient(
+    circle,
+    rgba(0,0,0,0.3) 1px,
+    rgba(0,0,0,0) 2px
+  );
+  background-size: 5px 5px;
+}
+
+/* === WELCOME HINT OVERLAY === */
+#welcome-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14,13,11,0.88);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-sm);
+  color: #e8e0d0;
+  pointer-events: none;
+  z-index: 600;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+  transition: opacity 0.6s;
+}
+#welcome-hint.hidden { opacity: 0; }
+[data-theme="light"] #welcome-hint {
+  background: rgba(26,18,8,0.82);
+  color: #f0ebe0;
+  border-color: rgba(0,0,0,0.3);
+}
+
+/* Migration arrow marker */
+.mig-arrow-head {
+  pointer-events: none;
+}
+
+/* Speed selector — hidden, speed is fixed */
+#play-speed { display: none; }
+#tl-hint-desktop { display: none; }
+
+/* ===== LANGUAGE SELECTOR ===== */
+.lang-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 4px var(--space-2);
+  transition: border-color var(--transition-interactive);
+}
+.lang-selector:focus-within {
+  border-color: var(--color-primary);
+  outline: none;
+}
+.lang-globe {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+#lang-select {
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  max-width: 90px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+#lang-select:hover { color: var(--color-text); }
+[data-theme="light"] #lang-select { color: var(--color-text-muted); }
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-label="Hominines logo">
+        <!-- Skull stylisé -->
+        <circle cx="16" cy="13" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <path d="M11 22 Q16 28 21 22" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <circle cx="13" cy="12" r="2" fill="currentColor" opacity="0.7"/>
+        <circle cx="19" cy="12" r="2" fill="currentColor" opacity="0.7"/>
+        <path d="M14 16 Q16 17.5 18 16" stroke="currentColor" stroke-width="1" fill="none"/>
+        <!-- Flèche migration -->
+        <path d="M4 24 Q8 20 12 22" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" fill="none" opacity="0.5"/>
+        <path d="M20 22 Q26 18 28 22" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" fill="none" opacity="0.5"/>
+      </svg>
+      <div>
+        <div class="logo-text">Hominin<span>es</span></div>
+        <div class="logo-sub">Évolution · Migrations · Pigmentation</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Language selector -->
+      <div class="lang-selector" title="Language / Langue / Idioma" aria-label="Select language">
+        <span class="lang-globe">🌐</span>
+        <select id="lang-select" aria-label="Language">
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+          <option value="zh">中文</option>
+          <option value="ar">العربية</option>
+          <option value="pt">Português</option>
+          <option value="it">Italiano</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+        </select>
+      </div>
+      <button class="btn-icon" data-theme-toggle data-i18n-title="ui.toggleTheme" aria-label="Switch theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main id="main">
+    <!-- MAP -->
+    <div class="map-container">
+      <div id="map"></div>
+
+      <!-- Layer toggles — shapes/icons to avoid color confusion with timeline -->
+      <div class="layer-toggle-group" id="layer-toggles">
+        <button class="layer-btn active" data-layer="sites" title="Sites fossiles">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="7" cy="7" r="2" fill="currentColor"/>
+          </svg>Sites fossiles
+        </button>
+        <button class="layer-btn active" data-layer="migrations" title="Routes de migration">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7 Q5 3 9 7 L12 7M10 5l2 2-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 2"/>
+          </svg>Migrations
+        </button>
+        <button class="layer-btn active" data-layer="range" title="Zones géographiques">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="7" cy="7" r="5" fill="currentColor" opacity="0.15"/>
+          </svg>Zones
+        </button>
+        <button class="layer-btn active" data-layer="events" title="Jalons culturels et technologiques">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <polygon points="7,2 9,6 13,6.5 10,9.5 10.5,13 7,11 3.5,13 4,9.5 1,6.5 5,6" stroke="currentColor" stroke-width="1" fill="currentColor" opacity="0.6"/>
+          </svg>Jalons culturels
+        </button>
+      </div>
+
+      <!-- Welcome hint -->
+      <div id="welcome-hint">
+        ▶ Appuyez sur <strong style="color:var(--color-primary)">Play</strong> pour voir l'évolution en direct
+      </div>
+
+      <!-- Legend -->
+      <div class="map-legend">
+        <div class="map-legend-title">Espèces visibles</div>
+        <div id="legend-content"></div>
+      </div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <aside id="side-panel">
+      <div id="panel-content">
+        <div class="empty-state">
+          <div class="empty-state-icon">🦴</div>
+          <div class="empty-state-title">Sélectionnez une espèce</div>
+          <div class="empty-state-desc">Cliquez sur un marqueur sur la carte ou déplacez la barre chronologique pour explorer</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- TIMELINE -->
+  <footer id="timeline">
+
+    <!-- Row 1: play button first (top-left), then time label -->
+    <div class="timeline-header-row">
+      <button id="play-btn" title="Lecture automatique — voir les migrations en direct">
+        <svg id="play-icon" width="16" height="16" viewBox="0 0 14 14" fill="currentColor">
+          <polygon points="3,1 13,7 3,13"/>
+        </svg>
+        <span id="play-label">Play</span>
+      </button>
+      <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
+      <span class="timeline-hint" style="margin-left:auto;font-size:var(--text-xs)">◀ glissez ou tapez sur la timeline ▶</span>
+      <!-- hidden speed + hints kept for JS compat -->
+      <select id="play-speed" title="Vitesse"><option value="1" selected>×1</option><option value="2">×2</option><option value="3">×3</option></select>
+      <span id="tl-hint-desktop"></span>
+    </div>
+
+    <!-- Needle wrapper: absolutely covers species-track + ticks + bands -->
+    <!-- The label col (54px) offsets the band tracks, so needle needs left offset too -->
+    <div id="needle-wrapper" style="position:relative;">
+
+      <!-- Row 2: species lanes track -->
+      <div class="timeline-species-track" id="timeline-species-track">
+        <div class="timeline-rail"></div>
+        <div id="timeline-lanes"></div>
+      </div>
+
+      <!-- Row 3: date ticks -->
+      <div class="timeline-ticks-row" id="timeline-ticks-row"></div>
+
+      <!-- Row 4: skin tones band -->
+      <div class="timeline-band" id="skin-band">
+        <div class="timeline-band-label">Peau</div>
+        <div class="timeline-band-track" id="skin-band-track"></div>
+      </div>
+
+      <!-- Row 5: technology / events band -->
+      <div class="events-band" id="events-band">
+        <div class="timeline-band-label">Jalons</div>
+        <div class="events-band-track" id="events-band-track"></div>
+      </div>
+
+      <!-- THE NEEDLE — full height, round handle on top -->
+      <div class="timeline-full-needle" id="timeline-full-needle">
+        <div class="timeline-needle-handle" id="timeline-scrubber" title="Glissez"></div>
+      </div>
+
+    </div><!-- /needle-wrapper -->
+
+  </footer>
+
+</div>
+
+<!-- i18next — lightweight internationalisation (auto-detects browser language) -->
+<script src="https://unpkg.com/i18next@23.11.5/i18next.min.js"></script>
+<script src="https://unpkg.com/i18next-browser-languagedetector@8.0.0/i18nextBrowserLanguageDetector.min.js"></script>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// =====================================================================
+// DATA — HOMININES
+// =====================================================================
+const SPECIES_DATA = [
+  {
+    id: 'afarensis',
+    name: 'Australopithecus afarensis',
+    common: '"Lucy" et ses contemporains',
+    start: -4100000,
+    end: -2700000,
+    color: '#8B6914',
+    regions: [
+      { name: 'Afar (Éthiopie)', lat: 11.5, lng: 41.0, radius: 700000, note: 'Hadar — "Lucy" AL 288-1, ~3,2 Ma' },
+      { name: 'Laetoli (Tanzanie)', lat: -3.5, lng: 35.5, radius: 600000, note: 'Empreintes de Laetoli, ~3,7 Ma' },
+      { name: 'Afrique de l\'Est', lat: 2.0, lng: 38.0, radius: 400000, note: 'Distribution générale' },
+    ],
+    sites: [
+      { name: 'Hadar (Éthiopie)', lat: 11.1, lng: 40.6, note: '"Lucy" AL 288-1 — 3,2 Ma' },
+      { name: 'Laetoli (Tanzanie)', lat: -3.53, lng: 35.35, note: 'Empreintes de bipédie — 3,7 Ma' },
+      { name: 'Omo (Éthiopie)', lat: 5.0, lng: 35.9, note: 'Nombreux fossiles, 2,8–3,9 Ma' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Fourrure + peau peu pigmentée (sous couverture)', color: '#c8956a', variant: null },
+      eyes: { desc: 'Bruns', color: '#5c3317' },
+      hair: { desc: 'Fourrure sombre', color: '#1a0a00' },
+      certainty: 'inference',
+      certLabel: '⚠️ Inférence évolutive',
+    },
+    biometrics: { heightM: '~150 cm', heightF: '~105 cm', weightM: '~42 kg', brain: '385–550 cm³', dimorphism: 'Très marqué (~40%)' },
+    tools: ['Aucun outil connu', 'Comportement proche des grands singes', 'Bipédie régulière'],
+    debate: 'Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées.',
+    migrations: [],
+  },
+  {
+    id: 'habilis',
+    name: 'Homo habilis',
+    common: '"L\'homme habile" — 1er genre Homo',
+    start: -2400000,
+    end: -1400000,
+    color: '#A07820',
+    regions: [
+      { name: 'Afrique de l\'Est', lat: -2.5, lng: 35.0, radius: 800000, note: 'Distribution principale' },
+    ],
+    sites: [
+      { name: 'Olduvai Gorge (Tanzanie)', lat: -2.99, lng: 35.35, note: 'Site type — Industrie Oldowayen' },
+      { name: 'Koobi Fora (Kenya)', lat: 3.94, lng: 36.17, note: 'Nombreux fossiles H. habilis' },
+      { name: 'Omo (Éthiopie)', lat: 5.0, lng: 35.9, note: 'Fossiles mixtes H. habilis / Au.' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Transition pelage → peau sombre émergente', color: '#8B4513', variant: null },
+      eyes: { desc: 'Bruns', color: '#5c3317' },
+      hair: { desc: 'Transition vers cheveux crépus sombres', color: '#2a1200' },
+      certainty: 'inference',
+      certLabel: '⚠️ Inférence évolutive',
+    },
+    biometrics: { heightM: '~130–135 cm', heightF: '~100–120 cm', weightM: '~37 kg', brain: '500–900 cm³', dimorphism: 'Marqué' },
+    tools: ['Industrie Oldowayen', 'Galets taillés (choppers)', 'Outils sur éclats'],
+    debate: 'Statut d\'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces.',
+    migrations: [],
+  },
+  {
+    id: 'erectus',
+    name: 'Homo erectus',
+    common: '"L\'homme debout" — 1er grand voyageur',
+    start: -1800000,
+    end: -250000,
+    color: '#C04010',
+    regions: [
+      { name: 'Afrique', lat: 5.0, lng: 20.0, radius: 2000000, note: 'Origine et longue présence africaine' },
+      { name: 'Asie du Sud-Est', lat: 0.0, lng: 110.0, radius: 1500000, note: 'Java, Chine — formes asiatiques robustes' },
+      { name: 'Eurasie', lat: 42.0, lng: 44.0, radius: 900000, note: 'Dmanisi (Géorgie) — ~1,8 Ma' },
+    ],
+    sites: [
+      { name: 'Turkana (Kenya)', lat: 3.9, lng: 36.1, note: '"Turkana Boy" KNM-WT 15000 — ~1,5 Ma' },
+      { name: 'Dmanisi (Géorgie)', lat: 41.33, lng: 44.1, note: 'Plus ancien hors Afrique — 1,8 Ma' },
+      { name: 'Sangiran (Java)', lat: -7.46, lng: 110.83, note: 'H. erectus asiatique — 1,5 Ma' },
+      { name: 'Zhoukoudian (Chine)', lat: 39.7, lng: 115.9, note: '"Homme de Pékin" — 780–250 ka' },
+      { name: 'Ndutu (Tanzanie)', lat: -3.2, lng: 35.5, note: 'Forme africaine tardive' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Noire ou très sombre (depuis ~1,2 Ma)', color: '#3a1800', variant: null },
+      eyes: { desc: 'Bruns', color: '#5c3317' },
+      hair: { desc: 'Noirs, probablement crépus', color: '#0a0500' },
+      certainty: 'genetic',
+      certLabel: '🔬 MC1R sweep génétique (~1,2 Ma)',
+    },
+    biometrics: { heightM: '145–185 cm', heightF: '130–160 cm', weightM: '40–68 kg', brain: '600–1 100 cm³ (moy. ~900)', dimorphism: 'Modéré' },
+    tools: ['Industrie Acheuléenne', 'Bifaces en amande', 'Usage du feu (probable)', 'Outils sur éclats Levallois (tardif)'],
+    debate: 'H. erectus sensu lato est probablement un groupement polyphylétique (Rogers et al. 2020) ; variations régionales importantes.',
+    migrations: [
+      { from: [5.0, 36.0], to: [41.33, 44.1], label: 'Sortie d\'Afrique ~1,8 Ma' },
+      { from: [41.33, 44.1], to: [-7.46, 110.83], label: 'Dispersion asiatique ~1,5 Ma' },
+      { from: [41.33, 44.1], to: [39.7, 115.9], label: 'Dispersion Chine ~0,78 Ma' },
+    ],
+  },
+  {
+    id: 'heidelbergensis',
+    name: 'Homo heidelbergensis',
+    common: 'Ancêtre probable Néandertaliens + Sapiens',
+    start: -700000,
+    end: -200000,
+    color: '#805090',
+    regions: [
+      { name: 'Afrique', lat: 8.0, lng: 20.0, radius: 1800000, note: 'Lignée vers H. sapiens' },
+      { name: 'Europe occidentale', lat: 46.0, lng: 12.0, radius: 1200000, note: 'Lignée vers Néandertaliens' },
+    ],
+    sites: [
+      { name: 'Kabwe (Zambie)', lat: -14.45, lng: 28.45, note: '"Crâne de Broken Hill" — 299 ka' },
+      { name: 'Casablanca (Maroc)', lat: 33.59, lng: -7.62, note: 'Thomas Quarry I — ~773 ka' },
+      { name: 'Mauer (Allemagne)', lat: 49.35, lng: 8.8, note: 'Site type — mâchoire 600 ka' },
+      { name: 'Bodo (Éthiopie)', lat: 10.9, lng: 40.1, note: 'Crâne africain 600 ka' },
+      { name: 'Atapuerca (Espagne)', lat: 42.36, lng: -3.52, note: 'Sima de los Huesos — ~430 ka' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Sombre (continuité africaine)', color: '#4a2200', variant: null },
+      eyes: { desc: 'Bruns', color: '#5c3317' },
+      hair: { desc: 'Sombres', color: '#1a0800' },
+      certainty: 'inference',
+      certLabel: '⚠️ Inférence évolutive (pas d\'ADN)',
+    },
+    biometrics: { heightM: '~175 cm (jusqu\'à 181)', heightF: '~157 cm', weightM: '~62 kg', brain: '1 100–1 400 cm³', dimorphism: 'Modéré' },
+    tools: ['Acheuléen avancé', 'Bifaces façonnés', 'Premières sépultures (Sima de los Huesos)', 'Débitage discoïde'],
+    debate: 'Statut d\'espèce très débattu. Certains chercheurs le séparent en H. antecessor (Europe) et gardent H. heidelbergensis pour l\'Afrique.',
+    migrations: [
+      { from: [8.0, 20.0], to: [46.0, 12.0], label: 'Dispersion vers l\'Europe ~600 ka' },
+    ],
+  },
+  {
+    id: 'neanderthal',
+    name: 'Homo neanderthalensis',
+    common: 'Les Néandertaliens — nos cousins directs',
+    start: -400000,
+    end: -28000,
+    color: '#2070B0',
+    regions: [
+      { name: 'Europe', lat: 47.0, lng: 10.0, radius: 1800000, note: 'Centre principal de dispersion' },
+      { name: 'Proche-Orient', lat: 35.0, lng: 38.0, radius: 700000, note: 'Coexistence avec H. sapiens' },
+      { name: 'Asie centrale', lat: 45.0, lng: 65.0, radius: 900000, note: 'Extension orientale' },
+    ],
+    sites: [
+      { name: 'Néander (Allemagne)', lat: 51.22, lng: 6.95, note: 'Site type — 1856, ~40 ka' },
+      { name: 'El Sidrón (Espagne)', lat: 43.38, lng: -5.38, note: 'ADN MC1R — pigmentation documentée' },
+      { name: 'Shanidar (Irak)', lat: 36.83, lng: 44.22, note: 'Sépultures + fleurs — ~65 ka' },
+      { name: 'La Chapelle (France)', lat: 45.22, lng: 1.75, note: '"Vieillard" — anatomie classique' },
+      { name: 'Vindija (Croatie)', lat: 46.34, lng: 16.07, note: 'Génomes complets séquencés — ~44 ka' },
+      { name: 'Teshik-Tash (Ouzbékistan)', lat: 38.35, lng: 66.83, note: 'Extension orientale — ~70 ka' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Variable : brun-sombre (majorité) ; pâle/rousse ~1% (MC1R R307G)', color: '#7a4020', variantColor: '#e8c090', variant: 'split' },
+      eyes: { desc: 'Bruns (majorité) ; bleus possibles minorité (haplotype OCA2)', color: '#5c3317', variantColor: '#6ea0c8', variant: 'split' },
+      hair: { desc: 'Bruns-châtain (majorité) ; roux (minorité)', color: '#5c2a00', variantColor: '#c06030', variant: 'split' },
+      certainty: 'dna-direct',
+      certLabel: '✅ ADN direct (MC1R + génomes complets)',
+    },
+    biometrics: { heightM: '~164 cm (148–177)', heightF: '~155 cm', weightM: '~65 kg', brain: '1 200–1 750 cm³', dimorphism: 'Faible' },
+    tools: ['Industrie Moustérienne', 'Débitage Levallois', 'Industrie Châtelperronienne (tardif)', 'Bijoux, ocre, sépultures rituelles'],
+    debate: 'Hawks (2023) : limites méthodologiques de l\'inférence phénotypique. Introgression de pigmentation Néandertal → H. sapiens (Iasi et al., Science 2024). Extinction : compétition avec H. sapiens vs absorption génétique.',
+    migrations: [
+      { from: [47.0, 10.0], to: [35.0, 38.0], label: 'Expansion vers Proche-Orient' },
+      { from: [47.0, 10.0], to: [45.0, 65.0], label: 'Extension orientale ~70 ka' },
+    ],
+  },
+  {
+    id: 'denisovan',
+    name: 'Dénisoviens',
+    common: '"Dragon Man" et ses cousins — mystère résolu en 2025',
+    start: -400000,
+    end: -30000,
+    color: '#208060',
+    regions: [
+      { name: 'Asie centrale/orientale', lat: 40.0, lng: 90.0, radius: 2500000, note: 'Vaste distribution en Asie' },
+      { name: 'Altaï (Sibérie)', lat: 51.4, lng: 85.7, radius: 500000, note: 'Grotte de Denisova — fossiles originaux' },
+    ],
+    sites: [
+      { name: 'Denisova (Sibérie)', lat: 51.4, lng: 84.67, note: 'Grotte de Denisova — doigt + dents, ~60 ka' },
+      { name: 'Harbin (Chine)', lat: 45.8, lng: 126.53, note: '"Dragon Man" ~146 ka — identifié Dénisovien en 2025' },
+      { name: 'Xiahe (Tibet)', lat: 35.2, lng: 102.5, note: 'Mâchoire Dénisovienne — ~160 ka, altitude 3280m' },
+      { name: 'Penghu (Taiwan)', lat: 23.57, lng: 119.57, note: 'Mâchoire de Penghu — Dénisovien probable' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Sombre', color: '#3a1800', variant: null },
+      eyes: { desc: 'Sombres', color: '#2a1800' },
+      hair: { desc: 'Sombres', color: '#0a0500' },
+      certainty: 'dna-direct',
+      certLabel: '✅ ADN ancien direct (Denisova 3)',
+    },
+    biometrics: { heightM: '> 180 cm (estimé)', heightF: 'Non documenté', weightM: '~100 kg (estimé)', brain: '≥ H. sapiens (estimé)', dimorphism: 'Inconnu' },
+    tools: ['Industrie intermédiaire (Altaï)', 'Bracelet en chloritolite (Denisova)', 'Parures et ornements'],
+    debate: 'Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (Fu Qiaomei et al., 2025). ADN nucléaire pas encore disponible — certains paléoanthropologues attendent confirmation définitive.',
+    migrations: [
+      { from: [51.4, 84.67], to: [35.2, 102.5], label: 'Présence tibétaine (altitude)' },
+      { from: [51.4, 84.67], to: [45.8, 126.53], label: 'Dragon Man ~146 ka' },
+    ],
+  },
+  {
+    id: 'sapiens-africa',
+    name: 'Homo sapiens — Afrique',
+    common: 'Les premiers "vrais" humains modernes',
+    start: -315000,
+    end: -100000,
+    color: '#C0A000',
+    regions: [
+      { name: 'Afrique', lat: 5.0, lng: 20.0, radius: 3000000, note: 'Berceau de H. sapiens' },
+    ],
+    sites: [
+      { name: 'Jebel Irhoud (Maroc)', lat: 32.12, lng: -8.27, note: 'Plus anciens H. sapiens — 315 ka' },
+      { name: 'Omo Kibish (Éthiopie)', lat: 5.15, lng: 35.87, note: 'Omo I et II — 195 ka' },
+      { name: 'Herto (Éthiopie)', lat: 10.67, lng: 40.67, note: 'Crânes modernes — 160 ka' },
+      { name: 'Florisbad (Afrique du Sud)', lat: -28.77, lng: 26.07, note: 'Fossile 259 ka — "Homo helmei"?' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Très sombre / noire (allèles fixés)', color: '#2a1000', variant: null },
+      eyes: { desc: 'Bruns foncés (fixés)', color: '#2a1400' },
+      hair: { desc: 'Noirs crépus', color: '#080400' },
+      certainty: 'dna-direct',
+      certLabel: '✅ ADN africain ancien (Nature 2025)',
+    },
+    biometrics: { heightM: '~185 cm', heightF: '~170 cm', weightM: '~70 kg', brain: '1 200–1 600 cm³', dimorphism: 'Faible' },
+    tools: ['Industrie MSA (Middle Stone Age)', 'Pointes foliacées', 'Perles en coquillage', 'Art rupestre précoce', 'Pêche, piégeage'],
+    debate: 'Débat "pan-africain" vs origine unique Est-africaine. Jebel Irhoud plaide pour une évolution sur l\'ensemble du continent.',
+    migrations: [],
+  },
+  {
+    id: 'sapiens-levant',
+    name: 'Homo sapiens — Levant',
+    common: '1ère sortie d\'Afrique documentée',
+    start: -130000,
+    end: -90000,
+    color: '#D07010',
+    regions: [
+      { name: 'Levant / Proche-Orient', lat: 32.0, lng: 35.5, radius: 600000, note: '1ère présence hors Afrique' },
+    ],
+    sites: [
+      { name: 'Skhul (Israël)', lat: 32.67, lng: 35.07, note: 'Sépultures — ~100–130 ka' },
+      { name: 'Qafzeh (Israël)', lat: 32.7, lng: 35.27, note: 'Sépultures avec parures — ~90–130 ka' },
+      { name: 'Tinshemet (Israël)', lat: 32.6, lng: 34.97, note: '5 sépultures H. sapiens — ~110 ka (2025)' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Très sombre (continuité africaine)', color: '#3a1800', variant: null },
+      eyes: { desc: 'Bruns foncés', color: '#3a1800' },
+      hair: { desc: 'Noirs', color: '#0a0500' },
+      certainty: 'inference',
+      certLabel: '⚠️ Inférence par continuité génomique',
+    },
+    biometrics: { heightM: '~185 cm', heightF: '~170 cm', weightM: '~70 kg', brain: '~1 450–1 550 cm³', dimorphism: 'Faible' },
+    tools: ['MSA / Early IUP', 'Ocre utilisée', 'Sépultures rituelles', 'Perles et parures'],
+    debate: 'Cette 1ère sortie (~130 ka) ne semble pas avoir contribué au peuplement mondial. La grande dispersion vient d\'une vague ultérieure (~60–70 ka).',
+    migrations: [
+      { from: [5.0, 20.0], to: [32.0, 35.5], label: 'Sortie d\'Afrique ~130 ka' },
+    ],
+  },
+  {
+    id: 'sapiens-upper-paleo',
+    name: 'Homo sapiens — Paléolithique sup.',
+    common: 'Les chasseurs-cueilleurs eurasiens',
+    start: -45000,
+    end: -14000,
+    color: '#E08020',
+    regions: [
+      { name: 'Eurasie', lat: 50.0, lng: 40.0, radius: 3000000, note: 'Dispersion post-sortie d\'Afrique' },
+      { name: 'Australie', lat: -25.0, lng: 133.0, radius: 1500000, note: 'Peuplement ~50 ka' },
+      { name: 'Amériques', lat: 55.0, lng: -120.0, radius: 2000000, note: 'Via Béringie ~16–20 ka' },
+    ],
+    sites: [
+      { name: 'Ust\'-Ishim (Sibérie)', lat: 57.3, lng: 69.0, note: 'Plus ancien génome H. sapiens non-africain — 45 ka' },
+      { name: 'Lascaux (France)', lat: 45.05, lng: 1.07, note: 'Peintures rupestres — ~17 ka' },
+      { name: 'Altamira (Espagne)', lat: 43.38, lng: -4.1, note: 'Peintures rupestres bisons — ~35 ka' },
+      { name: 'Dolní Věstonice (Tchéquie)', lat: 48.88, lng: 16.65, note: 'Vénus paléolithique — ~26 ka' },
+      { name: 'Sungir (Russie)', lat: 56.18, lng: 40.43, note: 'Sépulture parée de perles — ~34 ka' },
+      { name: 'Mungo (Australie)', lat: -33.73, lng: 143.05, note: 'Peuplement australien — ~42 ka' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Sombre (347/348 individus sur toute la période)', color: '#4a2800', variant: null },
+      eyes: { desc: 'Sombres (majorité) ; pic yeux clairs vers 14–4 ka', color: '#3a2000', variantColor: '#6ea0c8', variant: 'split' },
+      hair: { desc: 'Sombres (quasi-unanime)', color: '#1a0800' },
+      certainty: 'dna-direct',
+      certLabel: '✅ ADN direct — 348 génomes (PNAS 2025)',
+    },
+    biometrics: { heightM: '~170–185 cm', heightF: '~158–168 cm', weightM: '~70 kg', brain: '~1 350–1 500 cm³', dimorphism: 'Faible' },
+    tools: ['Industrie Aurignacienne', 'Industrie Gravettienne', 'Sagaies en os', 'Art pariétal (Lascaux, Altamira, Chauvet)', 'Statuettes Vénus', 'Parures élaborées'],
+    debate: 'Découplage yeux/peau : les yeux clairs précèdent la peau claire de plusieurs millénaires. Mécanisme sélectif non élucidé (sélection sexuelle ? dérive ? pléiotropie ?).',
+    migrations: [
+      { from: [5.0, 36.0], to: [57.3, 69.0], label: 'Grande sortie d\'Afrique ~60–70 ka' },
+      { from: [57.3, 69.0], to: [-33.73, 143.05], label: 'Peuplement Australie ~50 ka' },
+      { from: [57.3, 69.0], to: [55.0, -120.0], label: 'Béringie → Amériques ~16–20 ka' },
+    ],
+  },
+  {
+    id: 'sapiens-mesolithic',
+    name: 'Homo sapiens — Mésolithique',
+    common: 'Le paradoxe pigmentaire européen',
+    start: -14000,
+    end: -7000,
+    color: '#909030',
+    regions: [
+      { name: 'Europe', lat: 52.0, lng: 15.0, radius: 1800000, note: 'Chasseurs-cueilleurs WHG post-glaciaires' },
+    ],
+    sites: [
+      { name: 'Cheddar (Grande-Bretagne)', lat: 51.28, lng: -2.77, note: '"Cheddar Man" — peau sombre + yeux bleus, ~9 ka' },
+      { name: 'Skateholm (Suède)', lat: 55.5, lng: 13.57, note: 'SF12 — peau sombre + yeux clairs, ~9 ka' },
+      { name: 'Loschbour (Luxembourg)', lat: 49.78, lng: 6.28, note: 'WHG type — peau sombre + yeux bleus, ~8 ka' },
+      { name: 'La Braña (Espagne)', lat: 42.97, lng: -5.87, note: 'Individu peau sombre + yeux bleus, ~7 ka' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Sombre à intermédiaire (transition en cours)', color: '#5a3010', variantColor: '#c08050', variant: 'split' },
+      eyes: { desc: 'Pic yeux clairs : 11/35 individus (PNAS 2025)', color: '#3a2000', variantColor: '#6ea0c8', variant: 'split' },
+      hair: { desc: 'Sombres (quasi-unanime)', color: '#1a0800' },
+      certainty: 'dna-direct',
+      certLabel: '✅ ADN direct — "Paradoxe pigmentaire" documenté',
+    },
+    biometrics: { heightM: '~167–172 cm', heightF: '~155–163 cm', weightM: '~65 kg', brain: '~1 400 cm³', dimorphism: 'Faible' },
+    tools: ['Industrie Mésolithique', 'Microlithes géométriques', 'Arc et flèches perfectionnés', 'Pirogues', 'Pêche intensive'],
+    debate: 'Paradoxe peau sombre + yeux clairs : combinaison directement attestée par ADN. Le mécanisme de sélection des yeux clairs avant la peau est toujours inexpliqué.',
+    migrations: [],
+  },
+  {
+    id: 'sapiens-neolithic',
+    name: 'Homo sapiens — Néolithique',
+    common: 'L\'agriculture change tout, y compris la peau',
+    start: -10000,
+    end: -5000,
+    color: '#60A040',
+    regions: [
+      { name: 'Europe', lat: 48.0, lng: 18.0, radius: 1800000, note: 'Agriculteurs anatoliens (EEF) + WHG' },
+      { name: 'Proche-Orient (Anatolie)', lat: 39.0, lng: 33.0, radius: 800000, note: 'Berceau de l\'agriculture — 10 ka' },
+    ],
+    sites: [
+      { name: 'Ötzi (Alpes)', lat: 46.78, lng: 10.84, note: '"L\'homme des glaces" — peau sombre + cheveux noirs, ~5 300 ans' },
+      { name: 'Çatalhöyük (Turquie)', lat: 37.67, lng: 32.83, note: 'Grande ville néolithique — ~7 500 ans' },
+      { name: 'Stonehenge (GB)', lat: 51.18, lng: -1.83, note: 'Constructeurs peau intermédiaire — ~4 500 ans' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Intermédiaire → claire en augmentation (SLC24A5 en diffusion) ; Ötzi : peau sombre attestée', color: '#8a5030', variantColor: '#d0a078', variant: 'split' },
+      eyes: { desc: 'Variables ; brun dominant ; clairs augmentant au nord', color: '#5c3317', variantColor: '#6ea0c8', variant: 'split' },
+      hair: { desc: 'Variables ; Ötzi : cheveux noirs (ADN direct)', color: '#2a1000', variantColor: '#7a5020', variant: 'split' },
+      certainty: 'dna-direct',
+      certLabel: '✅ ADN direct (Ötzi + nombreux génomes)',
+    },
+    biometrics: { heightM: '~163–168 cm (légère réduction)', heightF: '~152–158 cm', weightM: '~60–65 kg', brain: '~1 400 cm³', dimorphism: 'Faible' },
+    tools: ['Agriculture (blé, orge, légumineuses)', 'Élevage (bovins, ovins, porcins)', 'Poterie', 'Mégalithes (Stonehenge)', 'Polissage de la pierre', 'Tissage'],
+    debate: 'La réduction de taille est liée à la sédentarisation et aux déficiences alimentaires. Tri-hybridation WHG + EEF (agriculteurs anatoliens) + début apport Yamna.',
+    migrations: [
+      { from: [39.0, 33.0], to: [48.0, 18.0], label: 'Expansion agriculteurs anatoliens ~7 000 ans' },
+    ],
+  },
+  {
+    id: 'sapiens-bronze',
+    name: 'Homo sapiens — Bronze & Fer',
+    common: 'L\'arrivée des steppes change l\'Europe génétiquement',
+    start: -5000,
+    end: -2000,
+    color: '#A06020',
+    regions: [
+      { name: 'Europe', lat: 52.0, lng: 18.0, radius: 2000000, note: 'Peau claire généralisée en Europe du Nord' },
+      { name: 'Steppes pontiques', lat: 48.0, lng: 40.0, radius: 1200000, note: 'Yamna / Cordé — migrants des steppes' },
+    ],
+    sites: [
+      { name: 'Ötmarsum (Pays-Bas)', lat: 52.41, lng: 6.9, note: 'WHG tardif — peau claire émergente, ~3 500 ans' },
+      { name: 'Lolland (Danemark)', lat: 54.77, lng: 11.5, note: 'Bronze Age — peau claire attestée, ~3 200 ans' },
+      { name: 'Hallstatt (Autriche)', lat: 47.56, lng: 13.65, note: 'Civilisation du Fer — ~2 800 ans' },
+    ],
+    pigmentation: {
+      skin: { desc: 'Claire généralisée en Europe du Nord (~3 000 ans BP) ; encore variable au Sud', color: '#d4a878', variantColor: '#f0d0b0', variant: 'split' },
+      eyes: { desc: 'Clairs (élevés en N/NW Europe) ; bruns dominants au Sud', color: '#6ea0c8', variantColor: '#5c3317', variant: 'split' },
+      hair: { desc: 'Blonds augmentant au Nord ; sombres dominants au Sud', color: '#d4b050', variantColor: '#3a1800', variant: 'split' },
+      certainty: 'dna-direct',
+      certLabel: '✅ ADN direct (Ghirotto et al. PNAS 2025)',
+    },
+    biometrics: { heightM: '~168–175 cm', heightF: '~156–163 cm', weightM: '~65–70 kg', brain: '~1 400 cm³', dimorphism: 'Faible' },
+    tools: ['Métallurgie bronze puis fer', 'Chars de combat', 'Écriture (cunéiforme, hiéroglyphes)', 'Navigation avancée', 'Commerce longue distance'],
+    debate: 'Ghirotto et al. (PNAS 2025) et Ju & Kelleher (PNAS 2021) s\'accordent sur le caractère récent (~3 000 ans) de la peau claire mais divergent sur les rythmes de sélection vs dérive.',
+    migrations: [
+      { from: [48.0, 40.0], to: [52.0, 18.0], label: 'Migration Yamna → Europe ~5 000 ans' },
+    ],
+  },
+];
+
+// =====================================================================
+// TIMELINE SETUP
+// =====================================================================
+const TIMELINE_MIN = -4200000;
+const TIMELINE_MAX = -1500;
+
+// Log scale mapping for timeline
+function linearToTime(t) {
+  // t is 0..1
+  const logMin = Math.log10(Math.abs(TIMELINE_MIN));
+  const logMax = Math.log10(Math.abs(TIMELINE_MAX));
+  const logVal = logMin + (logMax - logMin) * t;
+  return -Math.pow(10, logVal);
+}
+function timeToLinear(time) {
+  const logMin = Math.log10(Math.abs(TIMELINE_MIN));
+  const logMax = Math.log10(Math.abs(TIMELINE_MAX));
+  const logVal = Math.log10(Math.abs(time));
+  return (logVal - logMin) / (logMax - logMin);
+}
+
+function formatTime(t) {
+  const abs = Math.abs(t);
+  if (abs >= 1000000) return `— ${(abs/1000000).toFixed(1).replace('.', ',')} Ma`;
+  if (abs >= 1000) return `— ${Math.round(abs/1000)} 000 ans`;
+  return `— ${Math.round(abs)} ans`;
+}
+
+// =====================================================================
+// APP STATE
+// =====================================================================
+let currentTime = -4100000;
+let selectedSpecies = null;
+let layerStates = { sites: true, migrations: true, range: true };
+let mapMarkers = {};
+let mapPolygons = {};
+let mapArrows = {};
+let leafletMap = null;
+let markersLayer = null;
+let migrationsLayer = null;
+let rangesLayer = null;
+let isDragging = false;
+
+// =====================================================================
+// MAP INITIALIZATION
+// =====================================================================
+function initMap() {
+  leafletMap = L.map('map', {
+    center: [20, 30],
+    zoom: 2,
+    minZoom: 1,
+    maxZoom: 7,
+    zoomControl: false,
+    attributionControl: true,
+    worldCopyJump: false,
+  });
+
+  // Dark tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20,
+  }).addTo(leafletMap);
+
+  // Light label overlay
+  const labelLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    opacity: 0.4,
+    maxZoom: 20,
+    pane: 'overlayPane',
+  }).addTo(leafletMap);
+
+  markersLayer = L.layerGroup().addTo(leafletMap);
+  migrationsLayer = L.layerGroup().addTo(leafletMap);
+  rangesLayer = L.layerGroup().addTo(leafletMap);
+}
+
+// =====================================================================
+// UPDATE MAP — show species visible at currentTime
+// =====================================================================
+function getVisibleSpecies() {
+  return SPECIES_DATA.filter(s => s.start <= currentTime && s.end >= currentTime);
+}
+
+function updateMap() {
+  const visible = getVisibleSpecies();
+
+  // Clear layers
+  markersLayer.clearLayers();
+  migrationsLayer.clearLayers();
+  rangesLayer.clearLayers();
+
+  // Update legend
+  const legendContent = document.getElementById('legend-content');
+  legendContent.innerHTML = visible.length === 0
+    ? '<div style="font-size:var(--text-xs);color:var(--color-text-faint)">Aucune espèce à cette période</div>'
+    : visible.map(s => `
+      <div class="map-legend-item">
+        <div class="legend-dot" style="background:${s.color}"></div>
+        <span style="color:${s.color};font-style:italic">${s.name.replace('Homo sapiens — ', 'H.s. ')}</span>
+      </div>
+    `).join('');
+
+  visible.forEach(species => {
+    // --- RANGES ---
+    if (layerStates.range) {
+      species.regions.forEach(region => {
+        const circle = L.circle([region.lat, region.lng], {
+          radius: region.radius * 0.5,
+          color: species.color,
+          fillColor: species.color,
+          fillOpacity: 0.07,
+          weight: 1,
+          opacity: 0.3,
+          dashArray: '4 4',
+        });
+        circle.bindTooltip(`<strong>${species.name}</strong><br>${region.note}`, {
+          permanent: false, direction: 'top', className: 'leaflet-tooltip-custom'
+        });
+        rangesLayer.addLayer(circle);
+      });
+    }
+
+    // --- SITES (MARKERS) ---
+    if (layerStates.sites) {
+      species.sites.forEach(site => {
+        const isSelected = selectedSpecies && selectedSpecies.id === species.id;
+        const size = isSelected ? 18 : 14;
+        const icon = L.divIcon({
+          className: '',
+          html: `<div class="hominine-marker ${isSelected ? 'active' : ''}" style="
+            width:${size}px; height:${size}px;
+            background:${species.color}22;
+            border-color:${species.color};
+            color:${species.color};
+          " title="${site.name}"></div>`,
+          iconSize: [size, size],
+          iconAnchor: [size/2, size/2],
+        });
+
+        const marker = L.marker([site.lat, site.lng], { icon });
+        marker.bindTooltip(`
+          <div style="font-size:11px">
+            <strong style="color:${species.color}">${site.name}</strong><br>
+            <em style="color:#9a8f7a">${species.name}</em><br>
+            ${site.note}
+          </div>
+        `, { direction: 'top', offset: [0, -8] });
+
+        marker.on('click', () => {
+          selectSpecies(species);
+        });
+        markersLayer.addLayer(marker);
+      });
+    }
+
+    // --- MIGRATIONS ---
+    if (layerStates.migrations) {
+      species.migrations.forEach(mig => {
+        const line = L.polyline([mig.from, mig.to], {
+          color: species.color,
+          weight: 2,
+          opacity: 0.6,
+          dashArray: '8 4',
+          className: 'migration-path',
+        });
+        line.bindTooltip(`<span style="color:${species.color}">${mig.label}</span>`, { direction: 'center' });
+        migrationsLayer.addLayer(line);
+
+        // Arrow at endpoint
+        const arrow = L.circleMarker(mig.to, {
+          radius: 5,
+          color: species.color,
+          fillColor: species.color,
+          fillOpacity: 0.8,
+          weight: 1,
+        });
+        migrationsLayer.addLayer(arrow);
+      });
+    }
+  });
+
+  // --- EVENTS ---
+  updateEvents();
+
+  // --- MIGRATION ARROWS (always visible with direction, animated during play) ---
+  if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
+}
+
+function updateEvents() {
+  if (!eventsLayer) return;
+  eventsLayer.clearLayers();
+  if (!showEvents) return;
+
+  const visible = EVENTS_DATA.filter(ev => ev.time >= TIMELINE_MIN && ev.time <= currentTime * 1.001);
+
+  visible.forEach(ev => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="font-size: 18px; line-height: 1; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8)); cursor: pointer;" title="${ev.label}">${ev.icon}</div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+    const marker = L.marker([ev.lat, ev.lng], { icon, zIndexOffset: 200 });
+    marker.bindTooltip(`
+      <div style="font-size:11px;max-width:220px">
+        <strong style="color:${ev.color}">${ev.label}</strong><br>
+        <em style="color:#9a8f7a">${CATEGORY_LABELS[ev.category]}</em><br>
+        ${ev.desc}
+        ${ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + ev.source + '</span>' : ''}
+      </div>
+    `, { direction: 'top', offset: [0, -10] });
+    eventsLayer.addLayer(marker);
+  });
+}
+
+// =====================================================================
+// SIDE PANEL — species detail
+// =====================================================================
+function getSkinSwatch(pig) {
+  if (pig.variant === 'split') {
+    return `<div class="pig-swatch" style="
+      --c1:${pig.color}; --c2:${pig.variantColor};
+      background: conic-gradient(${pig.color} 0% 60%, ${pig.variantColor} 60% 100%);
+    "></div>`;
+  }
+  return `<div class="pig-swatch" style="background:${pig.color}"></div>`;
+}
+
+function getEyeSwatch(pig) {
+  if (pig.variant === 'split') {
+    return `<div class="pig-swatch" style="
+      background: conic-gradient(${pig.color} 0% 55%, ${pig.variantColor} 55% 100%);
+      border-radius: 50%; overflow: hidden; position: relative;
+    ">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 55%, #000 28%, transparent 30%)"></div>
+    </div>`;
+  }
+  return `<div class="pig-swatch" style="background:${pig.color};position:relative;">
+    <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 55%, #000 28%, transparent 30%)"></div>
+  </div>`;
+}
+
+function getHairSwatch(pig) {
+  if (pig.variant === 'split') {
+    return `<div class="pig-swatch" style="
+      background: conic-gradient(${pig.color} 0% 55%, ${pig.variantColor} 55% 100%);
+    "></div>`;
+  }
+  return `<div class="pig-swatch" style="background:${pig.color}"></div>`;
+}
+
+function getCertaintyClass(c) {
+  const map = { 'dna-direct': 'dna-direct', 'genetic': 'genetic', 'inference': 'inference', 'debate': 'debate' };
+  return map[c] || 'inference';
+}
+
+function drawHumanFigure(pigmentation) {
+  const skinColor = pigmentation.skin.color;
+  const eyeColor = pigmentation.eyes.color;
+  const hairColor = pigmentation.hair.color;
+  return `
+    <svg class="human-figure-svg" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Silhouette morphologique">
+      <!-- Body -->
+      <ellipse cx="60" cy="110" rx="22" ry="34" fill="${skinColor}" opacity="0.85"/>
+      <!-- Head -->
+      <ellipse cx="60" cy="45" rx="22" ry="26" fill="${skinColor}" opacity="0.9"/>
+      <!-- Hair -->
+      <ellipse cx="60" cy="26" rx="22" ry="12" fill="${hairColor}"/>
+      <!-- Eyes -->
+      <ellipse cx="52" cy="44" rx="5" ry="4" fill="${eyeColor}" opacity="0.9"/>
+      <ellipse cx="68" cy="44" rx="5" ry="4" fill="${eyeColor}" opacity="0.9"/>
+      <ellipse cx="52" cy="44" rx="2" ry="2" fill="#000" opacity="0.8"/>
+      <ellipse cx="68" cy="44" rx="2" ry="2" fill="#000" opacity="0.8"/>
+      <!-- Brow ridge hint -->
+      <path d="M46 38 Q52 35 58 38" stroke="${hairColor}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M62 38 Q68 35 74 38" stroke="${hairColor}" stroke-width="2" stroke-linecap="round"/>
+      <!-- Nose -->
+      <path d="M57 48 Q60 54 63 48" stroke="${skinColor}" stroke-width="1.5" fill="none" opacity="0.5"/>
+      <!-- Mouth -->
+      <path d="M54 58 Q60 62 66 58" stroke="${skinColor}" stroke-width="1.5" fill="none" opacity="0.4"/>
+      <!-- Arms -->
+      <path d="M38 90 Q28 110 32 130" stroke="${skinColor}" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.8"/>
+      <path d="M82 90 Q92 110 88 130" stroke="${skinColor}" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.8"/>
+      <!-- Legs -->
+      <path d="M50 140 Q46 155 48 158" stroke="${skinColor}" stroke-width="11" stroke-linecap="round" fill="none" opacity="0.85"/>
+      <path d="M70 140 Q74 155 72 158" stroke="${skinColor}" stroke-width="11" stroke-linecap="round" fill="none" opacity="0.85"/>
+    </svg>
+  `;
+}
+
+function selectSpecies(species) {
+  selectedSpecies = species;
+  renderPanel(species);
+  updateMap();
+}
+
+function renderPanel(species) {
+  const pig = species.pigmentation;
+  const bio = species.biometrics;
+
+  const html = `
+    <div class="animate-in">
+      <div class="side-panel-header">
+        <div class="period-label">${formatTime(species.start)} à ${formatTime(species.end)}</div>
+        <div class="species-name">${species.name}</div>
+        <div class="species-name-common">${species.common}</div>
+        <div style="margin-top:var(--space-2)">
+          <span class="certainty-badge ${getCertaintyClass(pig.certainty)}">${pig.certLabel}</span>
+        </div>
+      </div>
+
+      <!-- Human figure -->
+      <div class="human-figure-container">
+        ${drawHumanFigure(pig)}
+      </div>
+
+      <!-- Pigmentation -->
+      <div class="pigmentation-section">
+        <div class="pigmentation-title">Pigmentation</div>
+        <div class="pigmentation-grid">
+          <div class="pig-card">
+            <div class="pig-label">Peau</div>
+            ${getSkinSwatch(pig.skin)}
+            <div class="pig-desc">${pig.skin.desc}</div>
+          </div>
+          <div class="pig-card">
+            <div class="pig-label">Yeux</div>
+            ${getEyeSwatch(pig.eyes)}
+            <div class="pig-desc">${pig.eyes.desc}</div>
+          </div>
+          <div class="pig-card">
+            <div class="pig-label">Cheveux / Pelage</div>
+            ${getHairSwatch(pig.hair)}
+            <div class="pig-desc">${pig.hair.desc}</div>
+          </div>
+        </div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.5">
+          ${pig.variant === 'split' ? 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.' : ''}
+        </p>
+      </div>
+
+      <!-- Biometrics -->
+      <div class="biometrics-section">
+        <div class="section-title">Biométrie</div>
+        <div class="bio-grid">
+          <div class="bio-item">
+            <div class="bio-item-label">Taille (♂)</div>
+            <div class="bio-item-value">${bio.heightM}</div>
+          </div>
+          <div class="bio-item">
+            <div class="bio-item-label">Taille (♀)</div>
+            <div class="bio-item-value">${bio.heightF}</div>
+          </div>
+          <div class="bio-item">
+            <div class="bio-item-label">Poids (♂)</div>
+            <div class="bio-item-value">${bio.weightM}</div>
+          </div>
+          <div class="bio-item">
+            <div class="bio-item-label">Volume cérébral</div>
+            <div class="bio-item-value">${bio.brain}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tools -->
+      <div class="tools-section">
+        <div class="section-title">Technologies & Comportements</div>
+        <div style="flex-wrap:wrap;display:flex;gap:var(--space-1)">
+          ${species.tools.map(t => `<span class="tool-tag">⚒ ${t}</span>`).join('')}
+        </div>
+      </div>
+
+      <!-- Debate -->
+      ${species.debate ? `
+      <div class="debate-section">
+        <div class="section-title">Débats scientifiques actifs</div>
+        <div class="debate-item">❓ ${species.debate}</div>
+      </div>` : ''}
+
+      <!-- Footer attribution -->
+      <div style="padding:var(--space-4) var(--space-6);text-align:center">
+        <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer"
+           style="font-size:var(--text-xs);color:var(--color-text-faint);text-decoration:none">
+          Created with Perplexity Computer
+        </a>
+      </div>
+    </div>
+  `;
+  document.getElementById('panel-content').innerHTML = html;
+  document.getElementById('side-panel').scrollTop = 0;
+}
+
+// =====================================================================
+// TIMELINE
+// =====================================================================
+
+// Assign vertical lane index per species to avoid overlap
+// Species are grouped by era and spread across 5 vertical positions (0..4)
+const LANE_ASSIGNMENTS = {
+  'afarensis':           0,
+  'habilis':             1,
+  'erectus':             2,
+  'heidelbergensis':     3,
+  'neanderthal':         1,
+  'denisovan':           2,
+  'sapiens-africa':      3,
+  'sapiens-levant':      4,
+  'sapiens-upper-paleo': 3,
+  'sapiens-mesolithic':  3,
+  'sapiens-neolithic':   3,
+  'sapiens-bronze':      3,
+};
+const LANE_COUNT = 5;
+const LANE_H = 10; // px per lane bar
+const SPECIES_TRACK_H = 64; // total track height
+
+function getLaneTop(laneIndex) {
+  // Distribute lanes evenly within the track, leaving room for needle
+  const usable = SPECIES_TRACK_H - LANE_H;
+  return Math.round((laneIndex / (LANE_COUNT - 1)) * usable);
+}
+
+function initTimeline() {
+  const track = document.getElementById('timeline-species-track');
+  const lanesEl = document.getElementById('timeline-lanes');
+  const ticksRow = document.getElementById('timeline-ticks-row');
+
+  // --- Species lanes ---
+  SPECIES_DATA.forEach(species => {
+    const x1pct = timeToLinear(species.start) * 100;
+    const x2pct = timeToLinear(species.end) * 100;
+    const widthPct = Math.abs(x2pct - x1pct);
+    const laneIdx = LANE_ASSIGNMENTS[species.id] ?? 2;
+    const topPx = getLaneTop(laneIdx);
+
+    const lane = document.createElement('div');
+    lane.className = 'species-lane';
+    lane.id = 'lane-' + species.id;
+    lane.style.left = x1pct + '%';
+    lane.style.width = widthPct + '%';
+    lane.style.top = topPx + 'px';
+    lane.style.background = species.color;
+    lane.setAttribute('data-id', species.id);
+    lane.title = species.name + ' (' + formatTime(species.start) + ' à ' + formatTime(species.end) + ')';
+
+    // Inline label
+    const lbl = document.createElement('span');
+    lbl.className = 'species-lane-label';
+    lbl.textContent = species.name.replace('Homo sapiens — ', 'H.s. ');
+    lane.appendChild(lbl);
+
+    lane.addEventListener('click', () => {
+      const midTime = (species.start + species.end) / 2;
+      setTime(midTime);
+      selectSpecies(species);
+    });
+    lanesEl.appendChild(lane);
+  });
+
+  // --- Date ticks ---
+  const keyTimes = [
+    { t: -4100000, label: '4,1 Ma' },
+    { t: -2400000, label: '2,4 Ma' },
+    { t: -1800000, label: '1,8 Ma' },
+    { t: -700000,  label: '700 ka' },
+    { t: -400000,  label: '400 ka' },
+    { t: -315000,  label: '315 ka' },
+    { t: -100000,  label: '100 ka' },
+    { t: -45000,   label: '45 ka' },
+    { t: -14000,   label: '14 ka' },
+    { t: -10000,   label: '10 ka' },
+    { t: -5000,    label: '5 ka' },
+    { t: -2000,    label: '2 ka' },
+  ];
+  keyTimes.forEach(kt => {
+    const xpct = timeToLinear(kt.t) * 100;
+    const tick = document.createElement('div');
+    tick.className = 'tl-tick';
+    tick.style.left = xpct + '%';
+    tick.innerHTML = '<div class="tl-tick-line"></div><span class="tl-tick-text">' + kt.label + '</span>';
+    tick.style.cursor = 'pointer';
+    tick.addEventListener('click', () => setTime(kt.t));
+    ticksRow.appendChild(tick);
+  });
+
+  // --- Skin band ---
+  buildSkinBand();
+
+  // --- Events band ---
+  buildEventsBand();
+
+  // --- Needle position init ---
+  updateNeedlePosition();
+
+  // --- Drag scrubber ---
+  const scrubber = document.getElementById('timeline-scrubber');
+  let isDragging = false;
+  let startX, startLinear;
+
+  function getTrackRef() {
+    return document.getElementById('timeline-species-track');
+  }
+
+  const onMove = (e) => {
+    if (!isDragging) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const trackRect = getTrackRef().getBoundingClientRect();
+    const x = (clientX - trackRect.left) / trackRect.width;
+    setTime(linearToTime(Math.max(0, Math.min(1, x))));
+  };
+
+  scrubber.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    startLinear = timeToLinear(currentTime);
+    e.preventDefault();
+  });
+  scrubber.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    startLinear = timeToLinear(currentTime);
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('mouseup', () => { isDragging = false; });
+  document.addEventListener('touchend', () => { isDragging = false; });
+
+  // Click anywhere on track to jump
+  track.addEventListener('click', (e) => {
+    if (e.target.closest('#timeline-scrubber')) return;
+    const rect = getTrackRef().getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    setTime(linearToTime(Math.max(0, Math.min(1, x))));
+  });
+}
+
+// =====================================================================
+// SKIN TONES BAND
+// =====================================================================
+const SKIN_PERIODS = [
+  { start: -4100000, end: -2000000, color: '#c8956a', cssClass: 'fur', label: 'Fourrure dense — peau peu pigmentée (sous couverture)', tip: 'Australopithecus : corps couvert de fourrure sombre, peau claire en-dessous (comme les chimpanzés)' },
+  { start: -2000000, end: -1200000, color: '#8B5e3a', cssClass: 'partial-fur', label: 'Transition : perte progressive du pelage, peau sombre émergente', tip: 'H. habilis / H. erectus précoce : perte partielle du pelage corpo, mélanisation en cours (~MC1R)' },
+  { start: -1200000, end: -300000,  color: '#3a1800', label: 'Peau noire / très sombre (MC1R ~1,2 Ma)', tip: 'H. erectus, H. heidelbergensis : sweep génétique MC1R → peau noire confirmée ~1,2 Ma' },
+  { start: -400000,  end: -28000,   color: '#7a4020', label: 'Néandertaliens : brun-sombre (majorité)', tip: 'Néandertal : brun-sombre (majorité) + pâle/rousse ~1% (ADN MC1R R307G)' },
+  { start: -315000,  end: -45000,   color: '#2a1000', label: 'H. sapiens Afrique / Levant : très sombre', tip: 'H. sapiens précoce : peau très sombre/noire, allèles fixés (ADN africain 2025)' },
+  { start: -45000,   end: -11000,   color: '#4a2800', label: 'Paléo. sup. Eurasie : sombre (347/348 génomes)', tip: 'Chasseurs-cueilleurs eurasiens : peau sombre quasi-unanime jusqu\'à ~11 000 ans (PNAS 2025)' },
+  { start: -14000,   end: -7000,    color: '#5a3010', label: 'Mésolithique : sombre + yeux clairs', tip: 'Paradoxe : peau sombre + yeux clairs (ADN direct, ex. Cheddar Man ~9 ka)' },
+  { start: -10000,   end: -5000,    color: '#8a5030', label: 'Néolithique : transition intermédiaire', tip: 'SLC24A5 en diffusion ; Ötzi (5 300 ans) : peau sombre attestée par ADN' },
+  { start: -5000,    end: -2000,    color: '#d4a878', label: 'Bronze/Fer Europe N : peau claire généralisée', tip: 'Migration Yamna + sélection → peau claire généralisée en Europe du Nord ~3 000 ans (PNAS 2025)' },
+];
+
+function buildSkinBand() {
+  const track = document.getElementById('skin-band-track');
+  if (!track) return;
+
+  SKIN_PERIODS.forEach(seg => {
+    const x1 = timeToLinear(seg.start) * 100;
+    const x2 = timeToLinear(seg.end) * 100;
+    const w = Math.abs(x2 - x1);
+    const el = document.createElement('div');
+    el.className = 'band-segment' + (seg.cssClass ? ' ' + seg.cssClass : '');
+    el.style.left = x1 + '%';
+    el.style.width = w + '%';
+    el.style.background = seg.color;
+    el.style.border = '1px solid rgba(255,255,255,0.12)';
+    el.setAttribute('data-tip', seg.tip);
+    el.title = seg.tip;
+    // Fur icon indicator
+    if (seg.cssClass === 'fur') {
+      el.innerHTML = '<span style="font-size:9px;position:absolute;left:3px;top:50%;transform:translateY(-50%);opacity:0.7;pointer-events:none">🐒</span>';
+    } else if (seg.cssClass === 'partial-fur') {
+      el.innerHTML = '<span style="font-size:9px;position:absolute;left:3px;top:50%;transform:translateY(-50%);opacity:0.7;pointer-events:none">~🐒</span>';
+    }
+    track.appendChild(el);
+  });
+}
+
+// =====================================================================
+// EVENTS BAND (tools, fire, art, burial...)
+// =====================================================================
+function buildEventsBand() {
+  const track = document.getElementById('events-band-track');
+  if (!track) return;
+
+  EVENTS_DATA.forEach(ev => {
+    const xpct = timeToLinear(ev.time) * 100;
+    const el = document.createElement('div');
+    el.className = 'event-marker';
+    el.style.left = xpct + '%';
+    el.textContent = ev.icon;
+    el.setAttribute('data-tip', ev.label + ' : ' + ev.desc.split('.')[0]);
+    el.title = ev.label;
+    el.addEventListener('click', () => {
+      setTime(ev.time);
+    });
+    track.appendChild(el);
+  });
+}
+
+function updateNeedlePosition() {
+  const fullNeedle = document.getElementById('timeline-full-needle');
+  if (!fullNeedle) return;
+  const xpct = timeToLinear(currentTime) * 100;
+
+  // The band tracks are offset by the label column (54px).
+  // The species-track has NO label offset. To align the needle with both:
+  // we place it relative to needle-wrapper which starts at the left edge.
+  // Species track is full-width, band tracks have 54px label.
+  // We use the species track as the reference (full-width).
+  const wrapper = document.getElementById('needle-wrapper');
+  if (!wrapper) return;
+  const wrapperW = wrapper.getBoundingClientRect().width;
+  const speciesTrackEl = document.getElementById('timeline-species-track');
+  const speciesTrackRect = speciesTrackEl ? speciesTrackEl.getBoundingClientRect() : null;
+  const wrapperRect = wrapper.getBoundingClientRect();
+
+  // Use the species track width as the timeline width reference
+  const trackLeft = speciesTrackRect ? (speciesTrackRect.left - wrapperRect.left) : 0;
+  const trackWidth = speciesTrackRect ? speciesTrackRect.width : wrapperW;
+
+  const px = trackLeft + xpct / 100 * trackWidth;
+  fullNeedle.style.left = Math.max(0, Math.min(wrapperW - 1, px)) + 'px';
+}
+
+function setTime(time) {
+  currentTime = Math.max(TIMELINE_MIN, Math.min(TIMELINE_MAX, time));
+  document.getElementById('timeline-current-label').textContent = formatTime(currentTime);
+  updateNeedlePosition();
+  updateMap();
+
+  // Highlight active species lanes
+  document.querySelectorAll('.species-lane').forEach(lane => {
+    const sp = SPECIES_DATA.find(s => s.id === lane.dataset.id);
+    if (sp) {
+      const isActive = sp.start <= currentTime && sp.end >= currentTime;
+      lane.classList.toggle('active', isActive);
+      lane.style.opacity = isActive ? '1' : '0.35';
+    }
+  });
+
+  // Auto-select species if only one visible
+  const visible = getVisibleSpecies();
+  if (visible.length === 1 && (!selectedSpecies || !visible.includes(selectedSpecies))) {
+    selectSpecies(visible[0]);
+  }
+}
+
+// =====================================================================
+// LAYER TOGGLES
+// =====================================================================
+function initLayerToggles() {
+  document.querySelectorAll('.layer-btn[data-layer]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const layer = btn.dataset.layer;
+      if (layer === 'events') {
+        showEvents = !showEvents;
+        btn.classList.toggle('active', showEvents);
+        updateEvents();
+      } else {
+        layerStates[layer] = !layerStates[layer];
+        btn.classList.toggle('active', layerStates[layer]);
+        updateMap();
+      }
+    });
+  });
+}
+
+// =====================================================================
+// THEME TOGGLE
+// =====================================================================
+function initThemeToggle() {
+  const btn = document.querySelector('[data-theme-toggle]');
+  if (!btn) return;
+  const root = document.documentElement;
+  let theme = 'dark';
+
+  btn.addEventListener('click', () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', theme);
+
+    // Swap tile layer
+    const layers = [];
+    leafletMap.eachLayer(l => { if (l.options && l.options.attribution) layers.push(l); });
+
+    if (theme === 'light') {
+      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+      layers.forEach(l => leafletMap.removeLayer(l));
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20
+      }).addTo(leafletMap);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd', opacity: 0.5, maxZoom: 20
+      }).addTo(leafletMap);
+    } else {
+      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+      layers.forEach(l => leafletMap.removeLayer(l));
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20
+      }).addTo(leafletMap);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd', opacity: 0.4, maxZoom: 20
+      }).addTo(leafletMap);
+    }
+
+    document.getElementById('map').style.background = theme === 'dark' ? '#0a0e18' : '#e8e4dc';
+    updateMap();
+  });
+}
+
+
+// =====================================================================
+// CHRONOLOGICAL EVENTS DATA (Chronologie-prehistorique 2026)
+// =====================================================================
+const EVENTS_DATA = [
+  // Technologie lithique
+  { id: 'lomekwi', time: -3300000, label: 'Outils Lomékwien', icon: '🪨', color: '#8B6914',
+    desc: 'Plus anciens outils connus — Lomekwi 3, Kenya (3,3 Ma). Débat sur l\'intentionnalité.', category: 'tools',
+    lat: 3.38, lng: 35.83, source: 'Nature 521:310 (2015)' },
+  { id: 'oldowayen', time: -2600000, label: 'Oldowayen continu 2,75–2,44 Ma', icon: '⚒', color: '#A07820',
+    desc: 'Séquence Oldowayen continue sur ~300 000 ans — Namorotukunan, Koobi Fora, Kenya.', category: 'tools',
+    lat: 3.94, lng: 36.17, source: 'Nature Commun. 16 (2025)' },
+  { id: 'acheulean', time: -1760000, label: 'Premier biface (Acheuléen)', icon: '🗿', color: '#C04010',
+    desc: 'Premiers bifaces façonnés — Kokiselei 4, Turkana Ouest. Rupture cognitive majeure.', category: 'tools',
+    lat: 3.5, lng: 35.7, source: 'Nature 460:82 (2009)' },
+  // Feu
+  { id: 'fire-use', time: -1000000, label: 'Usage du feu (>1 Ma)', icon: '🔥', color: '#D05010',
+    desc: 'Traces de combustion >1 Ma — Wonderwerk Cave, Afrique du Sud. Usage ≠ fabrication intentionnelle.', category: 'fire',
+    lat: -27.85, lng: 23.55, source: 'PNAS 109:E1215 (2012)' },
+  { id: 'fire-make', time: -400000, label: 'Fabrication intentionnelle du feu', icon: '🔥', color: '#E06020',
+    desc: 'Pyrite de fer + argile cuite >750°C — Barnham, Suffolk, Angleterre. Repousse le record de 350 000 ans.', category: 'fire',
+    lat: 52.28, lng: 0.9, source: 'Nature (déc. 2025)' },
+  // Phylogénie
+  { id: 'thomas-quarry', time: -773000, label: 'Ancêtre commun Sapiens / Néandertal / Dénisovien', icon: '🦴', color: '#805090',
+    desc: 'Thomas Quarry I, Casablanca — 773 000 ans. Inversion magnétique Brunhes/Matuyama. Population à la base des 3 lignées (Nature 2026).', category: 'phylo',
+    lat: 33.59, lng: -7.62, source: 'Nature (2026)' },
+  // Comportements symboliques
+  { id: 'bruniquel', time: -176500, label: 'Structures rituelles Néandertal', icon: '🗺', color: '#2070B0',
+    desc: 'Structures en stalagmites à 336m de profondeur — Bruniquel, France. Plus ancien usage intentionnel de l\'espace souterrain.', category: 'symbolic',
+    lat: 44.17, lng: 1.66, source: 'Nature 534:111 (2016)' },
+  { id: 'beads-nassarius', time: -130000, label: 'Coquillages perforés (parures)', icon: '📿', color: '#C0A000',
+    desc: 'Nassarius perforés — Skhul (Israël) 140–100 ka ; Taforalt (Maroc) 82 ka. Premières parures symboliques.', category: 'symbolic',
+    lat: 32.67, lng: 35.07, source: 'PNAS 104:9964 (2007)' },
+  { id: 'burial-tinshemet', time: -110000, label: '1ère sépulture intentionnelle (révisé)', icon: '⚰', color: '#D07010',
+    desc: '5 individus en position fœtale + ocre + objets rituels — Tinshemet Cave, Israël. Révisé de 100 000 à 110 000 ans (Nature Human Behaviour 2025).', category: 'symbolic',
+    lat: 32.6, lng: 34.97, source: 'Nature Human Behaviour (2025)' },
+  { id: 'blombos-beads', time: -75000, label: 'Perles Blombos Cave', icon: '📿', color: '#E08020',
+    desc: '41+ perles Nassarius kraussianus — Blombos Cave, Afrique du Sud. 75 000 ans (OSL/TL).', category: 'symbolic',
+    lat: -34.42, lng: 21.22, source: 'J. Hum. Evol. 48:3 (2005)' },
+  // Art pariétal
+  { id: 'art-sulawesi-old', time: -67800, label: 'Plus ancien art rupestre mondial (≥67 800 ans)', icon: '🎨', color: '#8050C0',
+    desc: 'Empreintes de main — Liang Metanduno, île de Muna, Sulawesi. ≥67 800 ans. Dépasse de 16 600 ans le précédent record (Nature 2026).', category: 'art',
+    lat: -4.9, lng: 122.5, source: 'Nature (janv. 2026)' },
+  { id: 'art-sulawesi-fig', time: -51200, label: 'Plus ancienne scène narrative (51 200 ans)', icon: '🎨', color: '#9060D0',
+    desc: 'Figures anthropomorphes + cochon sauvage — Leang Karampuang, Sulawesi. Première scène avec interaction connue.', category: 'art',
+    lat: -4.55, lng: 119.55, source: 'Nature 631 (2024)' },
+  { id: 'aurignacian', time: -43000, label: 'Culture Aurignacienne', icon: '⚒', color: '#E08020',
+    desc: '1ère grande culture matérielle H. sapiens en Europe (43–28 ka). Deux vagues de dispersion confirmées par génomique (2024).', category: 'tools',
+    lat: 44.93, lng: 1.27, source: 'Nature Commun. (2024)' },
+  { id: 'art-chauvet', time: -36000, label: 'Grotte Chauvet (art pariétal)', icon: '🎨', color: '#A070D0',
+    desc: 'Ardèche, France — 37–33 500 ans (phase 1). Débat actif sur attribution culturelle Aurignacien vs Gravettien.', category: 'art',
+    lat: 44.38, lng: 4.42, source: 'PNAS 113:4670 (2016)' },
+  { id: 'art-altamira', time: -35000, label: 'Altamira (bisons, ~35 ka)', icon: '🎨', color: '#A070D0',
+    desc: 'Peintures rupestres bisons — Altamira, Espagne. ~35 000 ans.', category: 'art',
+    lat: 43.38, lng: -4.1, source: '' },
+  { id: 'art-lascaux', time: -17000, label: 'Lascaux (~17 000 ans)', icon: '🎨', color: '#B080E0',
+    desc: 'Chef-d\'œuvre pariétal — Lascaux, Dordogne, France. ~17 000 ans.', category: 'art',
+    lat: 45.05, lng: 1.07, source: '' },
+  // Migrations clés
+  { id: 'sapiens-europe', time: -47500, label: 'H. sapiens en Europe (47 500 ans)', icon: '🚶', color: '#E08020',
+    desc: 'Ossements + industrie LRJ — Grotte de Ranis, Thuringe, Allemagne. Légèrement révisé de 45 000 à 47 500 ans (Nature 2024).', category: 'migration',
+    lat: 50.67, lng: 11.57, source: 'Nature 626:341 (2024)' },
+  { id: 'peuplement-australie', time: -65000, label: 'Peuplement Australie (65 000 ans)', icon: '🚣', color: '#208060',
+    desc: 'OSL 65 000 ans — Madjedbebe, Territoire du Nord. Génomique (2025) : ~60 000 ans, deux routes depuis la Sonde.', category: 'migration',
+    lat: -12.55, lng: 132.97, source: 'Nature 547 (2017)' },
+  { id: 'americas', time: -16000, label: 'Peuplement des Amériques (très débattu)', icon: '🚶', color: '#E04040',
+    desc: 'Monte Verde II reclassé Holocène moyen par Surovell et al. (Science 2026). Débat pré-Clovis non résolu — l\'un des débats les plus actifs en 2026.', category: 'migration',
+    lat: -41.5, lng: -73.0, source: 'Science 391:1283 (2026)' },
+  // Néolithique
+  { id: 'domestication', time: -10400, label: 'Domestication caprins', icon: '🐑', color: '#60A040',
+    desc: 'Processus graduel sur ~1 000 ans — Aşıklı Höyük, Anatolie. Génomique 118 génomes anciens (Science 2025).', category: 'neolithic',
+    lat: 38.35, lng: 34.17, source: 'PNAS 119:e2110930119 (2022)' },
+];
+
+const CATEGORY_COLORS = {
+  tools: '#A07820', fire: '#E06020', phylo: '#805090', symbolic: '#C0A000',
+  art: '#8050C0', migration: '#208060', neolithic: '#60A040',
+};
+const CATEGORY_LABELS = {
+  tools: 'Technologie lithique', fire: 'Maîtrise du feu', phylo: 'Phylogénie',
+  symbolic: 'Comportements symboliques', art: 'Art pariétal', migration: 'Migrations', neolithic: 'Néolithique',
+};
+
+let showEvents = true;
+let eventsLayer = null;
+
+// =====================================================================
+// BOOT
+// =====================================================================
+// =====================================================================
+// PLAY / AUTOPLAY
+// =====================================================================
+let playInterval = null;
+let isPlaying = false;
+
+// Speed map: log-scale steps per tick (in "log-time" fraction of total range)
+// At speed×1 we want to traverse the full timeline in ~60 seconds at 30fps ≈ 1800 ticks
+const PLAY_FPS = 30;
+const PLAY_TOTAL_TICKS = 1800; // full sweep at speed ×1
+
+function startPlay() {
+  if (isPlaying) return;
+  isPlaying = true;
+
+  const btn = document.getElementById('play-btn');
+  const icon = document.getElementById('play-icon');
+  const lbl = document.getElementById('play-label');
+  btn.classList.add('playing');
+  icon.innerHTML = '<rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/>';
+  lbl.textContent = 'Pause';
+
+  // If at end, restart from beginning
+  if (currentTime >= TIMELINE_MAX - 1000) setTime(TIMELINE_MIN);
+
+  const speedEl = document.getElementById('play-speed');
+
+  const tick = () => {
+    const speed = parseFloat(speedEl ? speedEl.value : '1');
+    // log-scale step
+    const totalLogRange = 1; // 0..1
+    const stepPerTick = (totalLogRange / PLAY_TOTAL_TICKS) * speed;
+    const currentLinear = timeToLinear(currentTime);
+    const newLinear = currentLinear + stepPerTick;
+
+    if (newLinear >= 1) {
+      setTime(TIMELINE_MAX);
+      stopPlay();
+      return;
+    }
+    setTime(linearToTime(newLinear));
+  };
+
+  playInterval = setInterval(tick, 1000 / PLAY_FPS);
+}
+
+function stopPlay() {
+  if (!isPlaying) return;
+  isPlaying = false;
+  if (playInterval) clearInterval(playInterval);
+  playInterval = null;
+
+  const btn = document.getElementById('play-btn');
+  const icon = document.getElementById('play-icon');
+  const lbl = document.getElementById('play-label');
+  btn.classList.remove('playing');
+  icon.innerHTML = '<polygon points="3,1 13,7 3,13"/>';
+  lbl.textContent = 'Play';
+}
+
+function togglePlay() {
+  if (isPlaying) stopPlay();
+  else startPlay();
+}
+
+// =====================================================================
+// ANIMATED MIGRATION ARROWS (during play)
+// =====================================================================
+let animMigLayer = null;
+
+function getBearing(from, to) {
+  // Returns bearing angle in degrees for a CSS rotation
+  const lat1 = from[0] * Math.PI / 180;
+  const lat2 = to[0] * Math.PI / 180;
+  const dLng = (to[1] - from[1]) * Math.PI / 180;
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+function updateAnimatedMigrations() {
+  if (!animMigLayer) return;
+  animMigLayer.clearLayers();
+  if (!layerStates.migrations) return;
+
+  const visible = getVisibleSpecies();
+  visible.forEach(species => {
+    species.migrations.forEach(mig => {
+      // Animated line with moving dashes
+      const line = L.polyline([mig.from, mig.to], {
+        color: species.color,
+        weight: isPlaying ? 4 : 2,
+        opacity: isPlaying ? 0.9 : 0.55,
+        className: isPlaying ? 'migration-animated' : '',
+        dashArray: isPlaying ? null : '8 4',
+      });
+      line.bindTooltip('<span style="color:' + species.color + '">' + mig.label + '</span>', { direction: 'center' });
+      animMigLayer.addLayer(line);
+
+      // Multiple arrowheads along the path to show direction
+      const numArrows = isPlaying ? 3 : 1;
+      const bearing = getBearing(mig.from, mig.to);
+
+      for (let i = 0; i < numArrows; i++) {
+        const t = (i + 1) / (numArrows + 1);
+        const lat = mig.from[0] + (mig.to[0] - mig.from[0]) * t;
+        const lng = mig.from[1] + (mig.to[1] - mig.from[1]) * t;
+
+        const arrowSize = isPlaying ? 16 : 12;
+        const glow = isPlaying ? 'filter:drop-shadow(0 0 6px ' + species.color + ');' : '';
+
+        const arrow = L.marker([lat, lng], {
+          icon: L.divIcon({
+            className: 'mig-arrow-head',
+            html: '<div style="width:0;height:0;' +
+                  'border-left:' + (arrowSize*0.5) + 'px solid transparent;' +
+                  'border-right:' + (arrowSize*0.5) + 'px solid transparent;' +
+                  'border-bottom:' + arrowSize + 'px solid ' + species.color + ';' +
+                  'transform:rotate(' + bearing + 'deg);' +
+                  'opacity:' + (isPlaying ? '0.95' : '0.6') + ';' +
+                  glow + '"></div>',
+            iconSize: [arrowSize, arrowSize],
+            iconAnchor: [arrowSize/2, arrowSize/2],
+          }),
+          zIndexOffset: 300,
+        });
+        animMigLayer.addLayer(arrow);
+      }
+
+      // Endpoint dot
+      const dot = L.circleMarker(mig.to, {
+        radius: isPlaying ? 6 : 4,
+        color: species.color,
+        fillColor: species.color,
+        fillOpacity: 0.85,
+        weight: 1.5,
+      });
+      animMigLayer.addLayer(dot);
+    });
+  });
+}
+
+// =====================================================================
+// BOOT
+// =====================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  eventsLayer = L.layerGroup().addTo(leafletMap);
+  animMigLayer = L.layerGroup().addTo(leafletMap);
+  initTimeline();
+  initLayerToggles();
+  initThemeToggle();
+  setTime(-4100000);
+  updateMap();
+
+  // Play button
+  const playBtn = document.getElementById('play-btn');
+  if (playBtn) playBtn.addEventListener('click', () => {
+    togglePlay();
+    // Remove pulse + welcome hint on first manual interaction
+    playBtn.classList.remove('pulse');
+    const hint = document.getElementById('welcome-hint');
+    if (hint) { hint.classList.add('hidden'); setTimeout(() => hint.remove(), 700); }
+  });
+
+  // Show afarensis by default
+  setTimeout(() => { selectSpecies(SPECIES_DATA[0]); }, 400);
+
+  // UX: after 3s of idle, pulse the play button + show welcome hint
+  // (research shows ~3s is when users start wondering what to do on a new data-viz page)
+  let autoPlayTimer = setTimeout(() => {
+    const btn = document.getElementById('play-btn');
+    if (btn && !isPlaying) btn.classList.add('pulse');
+  }, 3000);
+
+  // Auto-dismiss welcome hint after 8s even if user does nothing
+  setTimeout(() => {
+    const hint = document.getElementById('welcome-hint');
+    if (hint) { hint.classList.add('hidden'); setTimeout(() => { if(hint.parentNode) hint.remove(); }, 700); }
+  }, 8000);
+
+  // Remove pulse on any map/timeline interaction
+  function dismissPulse() {
+    const btn = document.getElementById('play-btn');
+    if (btn) btn.classList.remove('pulse');
+    clearTimeout(autoPlayTimer);
+  }
+  document.getElementById('needle-wrapper').addEventListener('click', dismissPulse, { once: true });
+  document.getElementById('needle-wrapper').addEventListener('touchstart', dismissPulse, { once: true });
+});
+</script>
+
+<!-- =====================================================================
+     INTERNATIONALISATION (i18next)
+     Auto-detects browser language. Falls back to French if not available.
+     ===================================================================== -->
+<script>
+(function() {
+
+// =====================================================================
+// TRANSLATIONS
+// Add/extend keys here. Each new language just needs its own block.
+// =====================================================================
+const TRANSLATIONS = {
+  fr: {
+    translation: {
+      ui: {
+        toggleTheme: 'Basculer mode clair/sombre',
+        play: 'Play', pause: 'Pause',
+        selectSpecies: 'Sélectionnez une espèce',
+        selectSpeciesDesc: 'Cliquez sur un marqueur sur la carte ou déplacez la barre chronologique pour explorer',
+        slideTimeline: '◄ glissez ou tapez sur la timeline ►',
+        welcomeHint: '▶ Appuyez sur <strong style="color:var(--color-primary)">Play</strong> pour voir l\'\u00e9volution en direct',
+        legendTitle: 'Espèces visibles',
+        skinBand: 'Peau', eventsBand: 'Jalons',
+        layerSites: 'Sites fossiles', layerMigrations: 'Migrations',
+        layerRange: 'Zones', layerEvents: 'Jalons culturels',
+        pigmentation: 'Pigmentation', skin: 'Peau', eyes: 'Yeux', hair: 'Cheveux',
+        certaintyDna: 'ADN direct', certaintyGenetic: 'Génétique', certaintyInference: 'Inférence', certaintyDebate: 'Débat',
+        debateTitle: 'Débat scientifique',
+        logoSub: 'Évolution · Migrations · Pigmentation',
+        noSpecies: 'Aucune espèce à cette période',
+      }
+    }
+  },
+  en: {
+    translation: {
+      ui: {
+        toggleTheme: 'Toggle light/dark mode',
+        play: 'Play', pause: 'Pause',
+        selectSpecies: 'Select a species',
+        selectSpeciesDesc: 'Click a marker on the map or drag the timeline to explore',
+        slideTimeline: '◄ drag or tap the timeline ►',
+        welcomeHint: '▶ Press <strong style="color:var(--color-primary)">Play</strong> to watch evolution unfold',
+        legendTitle: 'Visible species',
+        skinBand: 'Skin', eventsBand: 'Milestones',
+        layerSites: 'Fossil sites', layerMigrations: 'Migrations',
+        layerRange: 'Ranges', layerEvents: 'Cultural milestones',
+        pigmentation: 'Pigmentation', skin: 'Skin', eyes: 'Eyes', hair: 'Hair',
+        certaintyDna: 'Direct DNA', certaintyGenetic: 'Genetic', certaintyInference: 'Inference', certaintyDebate: 'Debate',
+        debateTitle: 'Scientific debate',
+        logoSub: 'Evolution · Migrations · Pigmentation',
+        noSpecies: 'No species at this period',
+      }
+    }
+  },
+  es: {
+    translation: {
+      ui: {
+        toggleTheme: 'Cambiar modo claro/oscuro',
+        play: 'Play', pause: 'Pausa',
+        selectSpecies: 'Selecciona una especie',
+        selectSpeciesDesc: 'Haz clic en un marcador del mapa o arrastra la barra cronológica',
+        slideTimeline: '◄ desliza o toca la línea de tiempo ►',
+        welcomeHint: '▶ Pulsa <strong style="color:var(--color-primary)">Play</strong> para ver la evolución en directo',
+        legendTitle: 'Especies visibles',
+        skinBand: 'Piel', eventsBand: 'Hitos',
+        layerSites: 'Sitios fósiles', layerMigrations: 'Migraciones',
+        layerRange: 'Zonas', layerEvents: 'Hitos culturales',
+        pigmentation: 'Pigmentación', skin: 'Piel', eyes: 'Ojos', hair: 'Pelo',
+        certaintyDna: 'ADN directo', certaintyGenetic: 'Genético', certaintyInference: 'Inferencia', certaintyDebate: 'Debate',
+        debateTitle: 'Debate científico',
+        logoSub: 'Evolución · Migraciones · Pigmentación',
+        noSpecies: 'Sin especie en este período',
+      }
+    }
+  },
+  de: {
+    translation: {
+      ui: {
+        toggleTheme: 'Hell-/Dunkelmodus umschalten',
+        play: 'Play', pause: 'Pause',
+        selectSpecies: 'Art auswählen',
+        selectSpeciesDesc: 'Klicken Sie auf einen Marker oder ziehen Sie die Zeitleiste',
+        slideTimeline: '◄ Zeitleiste ziehen oder tippen ►',
+        welcomeHint: '▶ Klicke <strong style="color:var(--color-primary)">Play</strong> um die Evolution live zu sehen',
+        legendTitle: 'Sichtbare Arten',
+        skinBand: 'Haut', eventsBand: 'Meilensteine',
+        layerSites: 'Fundorte', layerMigrations: 'Migrationen',
+        layerRange: 'Verbreitung', layerEvents: 'Kulturelle Meilensteine',
+        pigmentation: 'Pigmentierung', skin: 'Haut', eyes: 'Augen', hair: 'Haare',
+        certaintyDna: 'Direkte DNA', certaintyGenetic: 'Genetisch', certaintyInference: 'Schlussfolgerung', certaintyDebate: 'Debatte',
+        debateTitle: 'Wissenschaftliche Debatte',
+        logoSub: 'Evolution · Migrationen · Pigmentierung',
+        noSpecies: 'Keine Art in diesem Zeitraum',
+      }
+    }
+  },
+  zh: {
+    translation: {
+      ui: {
+        toggleTheme: '切换亮色/暗色模式',
+        play: '播放', pause: '暂停',
+        selectSpecies: '选择物种',
+        selectSpeciesDesc: '点击地图上的标记或拖动时间轴进行探索',
+        slideTimeline: '◄ 拖动或点击时间轴 ►',
+        welcomeHint: '▶ 点击 <strong style="color:var(--color-primary)">播放</strong> 观看进化历程',
+        legendTitle: '可见物种',
+        skinBand: '肤色', eventsBand: '里程碑',
+        layerSites: '化石遗址', layerMigrations: '迁徙路线',
+        layerRange: '地理范围', layerEvents: '文化里程碑',
+        pigmentation: '色素', skin: '肤色', eyes: '眼色', hair: '发色',
+        certaintyDna: '直接DNA', certaintyGenetic: '基因', certaintyInference: '推断', certaintyDebate: '争议',
+        debateTitle: '科学争议',
+        logoSub: '进化 · 迁徙 · 色素',
+        noSpecies: '此时期无物种',
+      }
+    }
+  },
+  ar: {
+    translation: {
+      ui: {
+        toggleTheme: 'تبديل الوضع الفاتح/الداكن',
+        play: 'تشغيل', pause: 'توقف',
+        selectSpecies: 'اختر نوعًا',
+        selectSpeciesDesc: 'انقر على علامة على الخريطة أو اسحب الجدول الزمني',
+        slideTimeline: '◄ اسحب أو المس الجدول الزمني ►',
+        welcomeHint: '▶ اضغط على <strong style="color:var(--color-primary)">تشغيل</strong> لمشاهدة التطور مباشرة',
+        legendTitle: 'الأنواع الظاهرة',
+        skinBand: 'بشرة', eventsBand: 'معالم',
+        layerSites: 'مواقع الأحفور', layerMigrations: 'الهجرات',
+        layerRange: 'المناطق', layerEvents: 'معالم ثقافية',
+        pigmentation: 'التصبغ', skin: 'بشرة', eyes: 'عيون', hair: 'شعر',
+        certaintyDna: 'DNA مباشر', certaintyGenetic: 'جيني', certaintyInference: 'استنتاج', certaintyDebate: 'جدال',
+        debateTitle: 'جدال علمي',
+        logoSub: 'تطور · هجرة · تصبغ',
+        noSpecies: 'لا توجد أنواع في هذه الفترة',
+      }
+    }
+  },
+  pt: {
+    translation: {
+      ui: {
+        toggleTheme: 'Alternar modo claro/escuro',
+        play: 'Play', pause: 'Pausar',
+        selectSpecies: 'Selecione uma espécie',
+        selectSpeciesDesc: 'Clique num marcador no mapa ou arraste a linha do tempo',
+        slideTimeline: '◄ arraste ou toque na linha do tempo ►',
+        welcomeHint: '▶ Carregue em <strong style="color:var(--color-primary)">Play</strong> para ver a evolução ao vivo',
+        legendTitle: 'Espécies visíveis',
+        skinBand: 'Pele', eventsBand: 'Marcos',
+        layerSites: 'Sítios fósseis', layerMigrations: 'Migrações',
+        layerRange: 'Zonas', layerEvents: 'Marcos culturais',
+        pigmentation: 'Pigmentação', skin: 'Pele', eyes: 'Olhos', hair: 'Cabelo',
+        certaintyDna: 'ADN direto', certaintyGenetic: 'Genético', certaintyInference: 'Inferência', certaintyDebate: 'Debate',
+        debateTitle: 'Debate científico',
+        logoSub: 'Evolução · Migrações · Pigmentação',
+        noSpecies: 'Nenhuma espécie neste período',
+      }
+    }
+  },
+  it: {
+    translation: {
+      ui: {
+        toggleTheme: 'Passa modalità chiara/scura',
+        play: 'Play', pause: 'Pausa',
+        selectSpecies: 'Seleziona una specie',
+        selectSpeciesDesc: 'Clicca su un marker sulla mappa o trascina la timeline',
+        slideTimeline: '◄ trascina o tocca la timeline ►',
+        welcomeHint: '▶ Premi <strong style="color:var(--color-primary)">Play</strong> per vedere l\'evoluzione in diretta',
+        legendTitle: 'Specie visibili',
+        skinBand: 'Pelle', eventsBand: 'Tappe',
+        layerSites: 'Siti fossili', layerMigrations: 'Migrazioni',
+        layerRange: 'Zone', layerEvents: 'Tappe culturali',
+        pigmentation: 'Pigmentazione', skin: 'Pelle', eyes: 'Occhi', hair: 'Capelli',
+        certaintyDna: 'DNA diretto', certaintyGenetic: 'Genetico', certaintyInference: 'Inferenza', certaintyDebate: 'Dibattito',
+        debateTitle: 'Dibattito scientifico',
+        logoSub: 'Evoluzione · Migrazioni · Pigmentazione',
+        noSpecies: 'Nessuna specie in questo periodo',
+      }
+    }
+  },
+  ja: {
+    translation: {
+      ui: {
+        toggleTheme: 'ライト/ダーク切替',
+        play: '再生', pause: '一時停止',
+        selectSpecies: '種を選択',
+        selectSpeciesDesc: '地図のマーカーをクリック、またはタイムラインをドラッグして探索',
+        slideTimeline: '◄ タイムラインをドラッグまたはタップ ►',
+        welcomeHint: '▶ <strong style="color:var(--color-primary)">再生</strong> を押して進化の歴史を見る',
+        legendTitle: '表示種',
+        skinBand: '肌色', eventsBand: '里程標',
+        layerSites: '化石遂跡', layerMigrations: '移動ルート',
+        layerRange: '分布域', layerEvents: '文化里程標',
+        pigmentation: '色素', skin: '肌', eyes: '矢', hair: '髪',
+        certaintyDna: '直接DNA', certaintyGenetic: '遣伝', certaintyInference: '推定', certaintyDebate: '議論',
+        debateTitle: '科学議論',
+        logoSub: '進化 · 移動 · 色素',
+        noSpecies: 'この時期に種はない',
+      }
+    }
+  },
+  ko: {
+    translation: {
+      ui: {
+        toggleTheme: '라이트/다크 모드 전환',
+        play: '재생', pause: '일시정지',
+        selectSpecies: '종 선택',
+        selectSpeciesDesc: '지도의 마커를 클릭하거나 타임라인을 드래그하여 탐색',
+        slideTimeline: '◄ 타임라인 드래그 또는 탭 ►',
+        welcomeHint: '▶ <strong style="color:var(--color-primary)">재생</strong>을 눌러 진화 역사 보기',
+        legendTitle: '보이는 종',
+        skinBand: '피부', eventsBand: '이정표',
+        layerSites: '화석 유적', layerMigrations: '이동 경로',
+        layerRange: '분포 지역', layerEvents: '문화 이정표',
+        pigmentation: '색소', skin: '피부', eyes: '눈', hair: '머리카라',
+        certaintyDna: '직접 DNA', certaintyGenetic: '유전', certaintyInference: '추론', certaintyDebate: '논의',
+        debateTitle: '과학적 논의',
+        logoSub: '진화 · 이동 · 색소',
+        noSpecies: '이 시기에 종 없음',
+      }
+    }
+  },
+};
+
+// =====================================================================
+// APPLY TRANSLATIONS TO DOM
+// =====================================================================
+function applyTranslations() {
+  const t = i18next.t.bind(i18next);
+  const lng = i18next.language;
+
+  // RTL support
+  document.documentElement.dir = (lng === 'ar') ? 'rtl' : 'ltr';
+  document.documentElement.lang = lng;
+
+  // Logo subtitle
+  const logoSub = document.querySelector('.logo-sub');
+  if (logoSub) logoSub.textContent = t('ui.logoSub');
+
+  // Header buttons
+  const themeBtn = document.querySelector('[data-theme-toggle]');
+  if (themeBtn) themeBtn.title = t('ui.toggleTheme');
+
+  // Layer toggle buttons
+  const layerBtns = document.querySelectorAll('[data-layer]');
+  layerBtns.forEach(btn => {
+    const layer = btn.getAttribute('data-layer');
+    const map = { sites: 'ui.layerSites', migrations: 'ui.layerMigrations', range: 'ui.layerRange', events: 'ui.layerEvents' };
+    if (map[layer]) {
+      // Keep the SVG, update only the text node
+      const svg = btn.querySelector('svg');
+      btn.textContent = t(map[layer]);
+      if (svg) btn.prepend(svg);
+    }
+  });
+
+  // Timeline hint
+  const hint = document.querySelector('.timeline-hint');
+  if (hint) hint.textContent = t('ui.slideTimeline');
+
+  // Skin band label
+  const skinLabel = document.querySelector('#skin-band .timeline-band-label');
+  if (skinLabel) skinLabel.textContent = t('ui.skinBand');
+
+  // Events band label
+  const evtLabel = document.querySelector('#events-band .timeline-band-label');
+  if (evtLabel) evtLabel.textContent = t('ui.eventsBand');
+
+  // Legend title
+  const legTitle = document.querySelector('.map-legend-title');
+  if (legTitle) legTitle.textContent = t('ui.legendTitle');
+
+  // Play/Pause button label (only if not currently playing)
+  const playLabel = document.getElementById('play-label');
+  if (playLabel) {
+    playLabel.textContent = (typeof isPlaying !== 'undefined' && isPlaying) ? t('ui.pause') : t('ui.play');
+  }
+
+  // Welcome hint (innerHTML to allow the <strong>)
+  const wh = document.getElementById('welcome-hint');
+  if (wh && !wh.classList.contains('hidden')) {
+    wh.innerHTML = t('ui.welcomeHint');
+  }
+
+  // Empty state
+  const esTitle = document.querySelector('.empty-state-title');
+  if (esTitle) esTitle.textContent = t('ui.selectSpecies');
+  const esDesc = document.querySelector('.empty-state-desc');
+  if (esDesc) esDesc.textContent = t('ui.selectSpeciesDesc');
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+function getLangFromBrowser() {
+  const raw = (navigator.language || navigator.languages && navigator.languages[0] || 'fr');
+  return raw.split('-')[0].toLowerCase();
+}
+
+function initI18n() {
+  const supported = Object.keys(TRANSLATIONS);
+  let detected = getLangFromBrowser();
+  if (!supported.includes(detected)) detected = 'fr';
+
+  // Sync the selector
+  const sel = document.getElementById('lang-select');
+  if (sel) sel.value = detected;
+
+  i18next
+    .init({
+      lng: detected,
+      fallbackLng: 'fr',
+      resources: TRANSLATIONS,
+      interpolation: { escapeValue: false },
+    })
+    .then(() => {
+      applyTranslations();
+    });
+
+  // Language selector change handler
+  if (sel) {
+    sel.addEventListener('change', function() {
+      i18next.changeLanguage(this.value).then(applyTranslations);
+      // Update play/pause labels reactively when language changes
+      const playLabel = document.getElementById('play-label');
+      if (playLabel) {
+        playLabel.textContent = (typeof isPlaying !== 'undefined' && isPlaying)
+          ? i18next.t('ui.pause') : i18next.t('ui.play');
+      }
+    });
+  }
+}
+
+// Wait for DOM + Leaflet to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initI18n);
+} else {
+  // DOM already ready — still wait a tick so the app has initialised
+  setTimeout(initI18n, 50);
+}
+
+// Patch stopPlay / startPlay to update label language-aware
+window.addEventListener('load', function() {
+  const origStop = window.stopPlay;
+  const origStart = window.startPlay;
+  if (origStop) {
+    window.stopPlay = function() {
+      origStop();
+      const lbl = document.getElementById('play-label');
+      if (lbl && i18next.isInitialized) lbl.textContent = i18next.t('ui.play');
+    };
+  }
+  if (origStart) {
+    window.startPlay = function() {
+      origStart();
+      const lbl = document.getElementById('play-label');
+      if (lbl && i18next.isInitialized) lbl.textContent = i18next.t('ui.pause');
+    };
+  }
+});
+
+})();
+</script>
+</body>
+</html>

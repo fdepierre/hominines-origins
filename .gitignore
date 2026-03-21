@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Test artifacts (current screenshots, not reference ones)
+tests/snapshots/*-current.png
+tests/reports/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+
+# Build artifacts (none expected — this is a no-build project)
+dist/
+build/
