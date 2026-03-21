@@ -19,9 +19,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # No cache — this project has no lock file (zero npm runtime deps)
+          cache: 'npm'
 
-      - name: Install Playwright chromium
+      - name: Install dependencies (playwright package)
+        run: npm ci
+
+      - name: Install Playwright chromium browser
         run: npx playwright install chromium --with-deps
 
       - name: Run non-regression tests
