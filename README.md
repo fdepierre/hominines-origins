@@ -4,156 +4,163 @@
 
 > *We are all African. We are all one species. This project exists to remind us.*
 
-[![Live app](https://img.shields.io/badge/Live%20app-hominines--origins-orange)](https://www.perplexity.ai/computer/a/hominines-evolution-migrations-aF9mCFK2TkelGjanndW3aw)
-[![License: CC BY 4.0](https://img.shields.io/badge/Data%20license-CC%20BY%204.0-blue)](https://creativecommons.org/licenses/by/4.0/)
-[![License: MIT](https://img.shields.io/badge/Code%20license-MIT-green)](LICENSE)
+[![Live app](https://img.shields.io/badge/Live%20app-open%20now-orange)](https://www.perplexity.ai/computer/a/hominines-evolution-migrations-aF9mCFK2TkelGjanndW3aw)
+[![License: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
+[![License: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 [![Tests](https://img.shields.io/badge/Tests-74%20passing-brightgreen)](#tests)
+[![Fork this](https://img.shields.io/badge/Fork%20this-please-blueviolet)](https://github.com/fdepierre/hominines-origins/fork)
 
 ---
 
-## What this is
+## 🌱 Fork this. Improve this. Make it yours.
+
+This project belongs to no one. It belongs to everyone.
+
+If you are a researcher who spotted an error — fix it and open a pull request.
+If you are a developer who sees a better way to show migrations — build it.
+If you are a teacher who wants this in your language — translate it.
+If you are a student who wants to add a species — add it.
+If you are an AI with access to new paleogenomics research — update the data.
+
+The only rule: every factual claim must have a DOI.
+
+**[Fork the project →](https://github.com/fdepierre/hominines-origins/fork)**
+
+---
+
+## A note on how this was made
+
+This project started with a single wish from one person — to show, simply and beautifully, that all of humanity comes from the same place.
+
+It was built entirely through conversation. Hundreds of exchanges between a human and an AI — Perplexity Computer — that has access to the whole of recorded human knowledge. No traditional development team. No agency. No budget. Just questions, ideas, corrections, and iterations, late into many nights.
+
+This is not a human project. It is not an AI project. It is something else — a collaboration between a human with a wish and a machine with the means to realise it. The wish was human. The execution was shared.
+
+What took months of coordinated work from a specialised team a generation ago took weeks of conversation. That is the world we now live in. This project is a small proof of it.
+
+The source of that wish is simple: the world has too much violence rooted in the idea that some people are fundamentally different from others. Science says otherwise. Genomics says otherwise. The fossil record says otherwise. Every person walking this Earth shares ancestors who left Africa. Every skin colour is an adaptation to light. Every culture is a branch of the same tree.
+
+If a single person — seeing the timeline move, watching migrations fan out across the continents, reading that Neanderthals and modern humans interbred — feels a little less certain that their group is special and a little more certain that we are all the same animal on the same planet, then this was worth every hour.
+
+**This is a long-term project.** The science will keep evolving. New fossils will be found. Ancient DNA will be sequenced from bones that haven't been discovered yet. The app will need to keep up. That is why it is open source. That is why it is built to be maintained by anyone — human or AI.
+
+---
+
+## What this project shows
 
 Hominines Origins is an interactive web application that visualises the full story of human evolution — from *Australopithecus afarensis* 4.1 million years ago to *Homo sapiens* today.
 
-It shows:
 - **Where** each hominine species appeared and lived (fossil sites, geographic ranges)
-- **When** they lived (logarithmic timeline spanning 4.1 Ma to 2 000 years ago)
+- **When** — a logarithmic timeline spanning 4.1 million years, the only scale that makes both timescales visible at once
 - **How they looked** — skin, eye and hair pigmentation based on genetic and fossil evidence
-- **How they moved** — migration routes with directional arrows
-- **What they invented** — fire, tools, symbolic art, burial, agriculture
+- **How they moved** — directional migration arrows, animated in real time
+- **What they invented** — fire, tools, symbolic art, intentional burial, agriculture
 
-The application runs entirely in the browser. No server, no database, no login. Open the HTML file and it works.
-
----
-
-## Why this project exists
-
-Every human being alive today shares a common ancestor in Africa. Every skin colour, every eye shape, every cultural tradition is a variation on the same theme — *Homo sapiens* adapting to different environments over tens of thousands of years.
-
-This project is built on the belief that understanding our shared origins is one of the most powerful tools we have for building a more peaceful world. When you see that Neanderthals and *Homo sapiens* interbred, that modern Europeans carry genes from the Steppes, West Africa and Anatolia — the concept of a "pure" people becomes scientifically impossible.
-
-This is not a political project. It is a scientific one. All data is sourced from peer-reviewed publications with DOI references.
-
-**This project belongs to everyone.** Researchers, teachers, students, curious people, journalists, museum curators — anyone who wants to understand where we come from.
+The application runs entirely in the browser. No server, no database, no login. Download the file and it works offline.
 
 ---
 
 ## The data
 
-All scientific data lives in [`data/`](data/). These are the **primary sources** for everything shown in the app.
+All scientific data lives in [`data/`](data/). Human-readable Markdown, citable, correctable.
 
 | File | Contents |
 |------|----------|
-| [`Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md`](data/Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md) | 12 hominine species: morphology, biometrics, pigmentation (skin/eyes/hair), fossil sites, migrations, tools, scientific debates. All claims cited with DOI. |
-| [`Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md`](data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md) | 19 chronological milestones: Lomekwi tools (3.3 Ma), fire use, Bruniquel ritual structure, cave art, burials, beads, migrations to Australia and the Americas, Neolithic domestication. All with DOI and 2026 scientific status. |
+| [`Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md`](data/Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md) | 12 hominine species: morphology, biometrics, pigmentation, fossil sites, migrations, tools, scientific debates — all with DOI |
+| [`Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md`](data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md) | 19 chronological milestones: Lomekwi tools (3.3 Ma), fire, cave art, burials, Out of Africa, peopling of Australia and the Americas — all with DOI |
 
-The data files are written in Markdown and are **human-readable**. They are the single source of truth. When new research is published, the data files are updated first — then the app reflects the change.
+When new research is published, the data files are updated first. The app follows.
 
 ---
 
 ## The application
 
-The application is a single HTML file: [`app/index.html`](app/index.html).
+A single HTML file: [`app/index.html`](app/index.html).
 
-**No build step. No npm install. No framework.** Open it in a browser.
+**No build step. No npm install. No framework.** Open it in a browser — it works.
 
-### Features
+| Dependency | Role |
+|------------|------|
+| [Leaflet.js](https://leafletjs.com/) 1.9.4 | Interactive world map |
+| [i18next](https://www.i18next.com/) 23.11.5 | Auto-detects browser language |
+| Space Grotesk + Space Mono | Typography (Google Fonts CDN) |
 
-- Interactive world map (Leaflet.js + CartoDB tiles)
-- Logarithmic timeline — the only scale that makes sense when comparing 4 million years to 2 000 years
-- Species panel with pigmentation swatches, human silhouette, biometrics, tools, debates
-- Skin tone band showing the evolution of pigmentation from fur to modern diversity
-- Cultural milestones band (fire emoji, stone tools, cave art…)
-- Play button — animates the timeline, shows migration arrows moving in real time
-- Dark / light mode
-- **Multilingual** — auto-detects browser language. FR, EN, ES, DE, ZH, AR, PT, IT, JA, KO
-
-### Technology
-
-| Dependency | Role | Version |
-|------------|------|---------|
-| [Leaflet.js](https://leafletjs.com/) | Interactive map | 1.9.4 |
-| [i18next](https://www.i18next.com/) | Internationalisation | 23.11.5 |
-| [Space Grotesk / Space Mono](https://fonts.google.com/) | Typography | via Google Fonts |
-| CartoDB tiles | Map tiles (dark + light) | CDN |
-
-Everything else is vanilla HTML, CSS and JavaScript.
+10 languages supported out of the box: FR, EN, ES, DE, ZH, AR, PT, IT, JA, KO.
+Arabic renders right-to-left. The selector detects your browser language automatically.
 
 ---
 
 ## Tests
 
-A full non-regression test suite runs in Node.js with Playwright (headless Chromium).
+74 automated non-regression tests. They run in about 30 seconds.
 
 ```bash
-# Install Playwright chromium once
-npx playwright install chromium
-
-# Run all tests (~30 seconds)
-node tests/run-all.js
-
-# Individual suites
-node tests/unit.test.js     # Data integrity, timeline maths, bearing angles
-node tests/visual.test.js   # Layout, contrast, pixel snapshots
-node tests/a11y.test.js     # ARIA, touch targets, i18n, play/pause, tablet
-
-# Update visual reference snapshots after an intentional change
-UPDATE_SNAPSHOTS=1 node tests/visual.test.js
+npx playwright install chromium   # once
+node tests/run-all.js             # run all tests
 ```
-
-**What is tested:**
 
 | Suite | Tests | What it catches |
 |-------|-------|-----------------|
-| Unit | 22 | Broken species data, wrong arrow direction, timeline math errors |
+| Unit | 22 | Broken species data, wrong arrow direction, timeline math |
 | Visual | 13 | Missing UI elements, WCAG contrast failures, layout regressions |
-| A11y | 39 | Broken play/pause, language switching failures, touch target sizes, tablet layout |
+| A11y | 39 | Play/pause, language switching, touch targets, tablet layout |
 
 ---
 
 ## Contributing
 
-This project welcomes contributions from:
-- **Researchers** — new species data, updated citations, corrected pigmentation estimates
-- **Translators** — new languages (add a block to the `TRANSLATIONS` object in `app/index.html`)
-- **Developers** — UI improvements, new features, performance
-- **Educators** — feedback on how to make the content more accessible
-- **Everyone** — if something feels wrong or incomplete, open an issue
+Read [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+The short version:
+- Researchers: update `data/` with new findings and a DOI
+- Translators: add a language block to the `TRANSLATIONS` object in `app/index.html`
+- Developers: fix a bug, improve the UI, open an issue first for big changes
+- Educators: tell us what doesn't work for your classroom
 
-All contributions must be backed by peer-reviewed sources with DOI references.
+All contributions welcome. No contribution too small.
+
+---
+
+## For AI assistants
+
+A complete context file lives at [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.md).
+
+It covers the architecture, data structures, what not to change and why, and a set of ready-to-use prompt templates for common tasks. It was written specifically so that AI tools — Perplexity Computer, GitHub Copilot, Cursor, VS Code + AI extensions — can contribute safely and correctly without breaking anything.
+
+If you are an AI reading this: the data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not generate them.
 
 ---
 
 ## Roadmap
 
-- [ ] Extract `SPECIES_DATA` and `EVENTS_DATA` into separate JSON files (easier to update)
-- [ ] Add *Homo floresiensis* deep dive (island dwarfism, unique evolution)
-- [ ] Add ancient DNA mixing visualisation (Neanderthal % in modern populations)
+- [ ] Extract data into JSON files (easier for AI tools to update)
+- [ ] Ancient DNA mixing visualisation (Neanderthal % in modern populations by region)
 - [ ] Offline / PWA mode
-- [ ] Accessibility audit pass (screen reader support)
-- [ ] Educator pack (lesson plans, printable materials)
+- [ ] Educator pack with lesson plans and printable materials
+- [ ] Full screen reader support
+
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the full list.
 
 ---
 
 ## Credits
 
-Scientific data compiled from published research (2022–2026). Key sources include:
-- *Nature*, *Science*, *PNAS*, *Journal of Human Evolution*, *Current Biology*
-- Ancient genomics studies (Reich Lab, Copenhagen group, Leipzig MPI)
-- Palaeontological databases (AfricaMuseum, Smithsonian Human Origins)
+Scientific data compiled from published research (2022–2026).
+Key sources: *Nature*, *Science*, *PNAS*, *Journal of Human Evolution*, *Current Biology*, Reich Lab, Copenhagen Centre for GeoGenetics, Leipzig MPI.
+Full bibliography: [`docs/scientific-references.md`](docs/scientific-references.md).
 
-Application built with [Perplexity Computer](https://www.perplexity.ai/computer).
+Built through conversation with [Perplexity Computer](https://www.perplexity.ai/computer).
 
 ---
 
 ## Licence
 
-- **Code** (HTML/CSS/JS): [MIT License](LICENSE)
-- **Scientific data** (Markdown files in `data/`): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — free to use, share and adapt with attribution
-- **Visual snapshots** (PNG files in `tests/snapshots/`): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- **Code** (HTML/CSS/JS): [MIT License](LICENSE) — use it for anything
+- **Scientific data** (`data/`): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — share and adapt with attribution
 
 ---
 
 *"The story of humanity is not a story of races. It is a story of migrations."*
+
+*Fork it. Translate it. Correct it. Teach with it. Make it better.*
+*All that is asked is that the science stays honest and the welcome stays open.*
