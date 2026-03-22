@@ -253,6 +253,12 @@ Résultats :
 | Yeux | Clairs (élevés en N/NW Europe) ; bruns au Sud[^54] | ✅ ADN direct |
 | Cheveux | Blonds en augmentation au Nord ; sombres dominants au Sud[^56] | ✅ ADN direct |
 
+| Trait                          | Estimation                                                                                                                                          | Certitude                                  |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Peau (Homo sapiens, global)    | Spectre continu de très sombre à très claire selon les régions ; état ancestral = peau fortement pigmentée, encore majoritaire à l’échelle mondiale | ✅ Données génomiques modernes + ADN ancien |
+| Yeux (Homo sapiens, global)    | Marron restant la couleur la plus fréquente ; yeux clairs surtout en Europe et dans certaines populations d’Asie de l’Ouest / du Nord               | ✅ Données génomiques modernes              |
+| Cheveux (Homo sapiens, global) | Forte variabilité (noirs, bruns, blonds, roux ; lisses à crépus) avec architectures génétiques différentes selon les régions                        | ✅ Données génomiques modernes              |
+
 ***
 ## Tableau récapitulatif synthétique
 | Taxon | Période | Taille M/F (cm) | Poids M/F (kg) | Cerveau (cm³) | Peau | Yeux | Cheveux | Certitude |
