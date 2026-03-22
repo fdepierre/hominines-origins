@@ -828,6 +828,12 @@ a { color: var(--color-primary); }
   width: 120px;
   height: 160px;
 }
+/* Wider SVG for spectrum (3-figure) view */
+.human-figure-svg[viewBox="0 0 360 170"] {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+}
 
 /* Scrollbar */
 #side-panel::-webkit-scrollbar { width: 4px; }
@@ -1563,11 +1569,22 @@ const SPECIES_DATA = [
       { name: 'Hallstatt (Autriche)', lat: 47.56, lng: 13.65, note: 'Civilisation du Fer — ~2 800 ans' },
     ],
     pigmentation: {
-      skin: { desc: 'Claire généralisée en Europe du Nord (~3 000 ans BP) ; encore variable au Sud', color: '#d4a878', variantColor: '#f0d0b0', variant: 'split' },
-      eyes: { desc: 'Clairs (élevés en N/NW Europe) ; bruns dominants au Sud', color: '#6ea0c8', variantColor: '#5c3317', variant: 'split' },
-      hair: { desc: 'Blonds augmentant au Nord ; sombres dominants au Sud', color: '#d4b050', variantColor: '#3a1800', variant: 'split' },
+      // skin: global spectrum — dark is ancestral and still the majority worldwide
+      skin: {
+        desc: 'Spectre continu : très sombre (Afrique sub-saharienne, Mélanésie) à intermédiaire (Asie, Amériques, Afrique du Nord) à claire (Europe du Nord). La peau sombre reste l\'état ancestral et la majorité mondiale.',
+        color: '#2a1000', variantColor: '#d4a878', variant: 'spectrum',
+        spectrumColors: ['#2a1000','#5a2e10','#8a5028','#b87848','#d4a878','#f0d0b0'],
+      },
+      eyes: {
+        desc: 'Brun reste la couleur la plus fréquente à l\'échelle mondiale (~80 % des humains). Yeux clairs (bleus, verts, noisette) surtout en Europe et Asie de l\'Ouest/Nord.',
+        color: '#3a1800', variantColor: '#6ea0c8', variant: 'split',
+      },
+      hair: {
+        desc: 'Forte variabilité mondiale : noirs et bruns sombres sont majoritaires ; blonds et roux concentrés surtout en Europe du Nord. Texture : frisés/crépus à lisses selon les latitudes.',
+        color: '#0a0500', variantColor: '#d4b050', variant: 'split',
+      },
       certainty: 'dna-direct',
-      certLabel: '✅ ADN direct (Ghirotto et al. PNAS 2025)',
+      certLabel: '✅ ADN ancien + génomique moderne (PNAS 2025)',
     },
     biometrics: { heightM: '~168–175 cm', heightF: '~156–163 cm', weightM: '~65–70 kg', brain: '~1 400 cm³', dimorphism: 'Faible' },
     tools: ['Métallurgie bronze puis fer', 'Chars de combat', 'Écriture (cunéiforme, hiéroglyphes)', 'Navigation avancée', 'Commerce longue distance'],
@@ -1798,6 +1815,16 @@ function updateEvents() {
 // SIDE PANEL — species detail
 // =====================================================================
 function getSkinSwatch(pig) {
+  if (pig.variant === 'spectrum' && pig.spectrumColors) {
+    // Full gradient strip showing the human skin spectrum
+    const stops = pig.spectrumColors.map((c, i, a) => `${c} ${Math.round(i/a.length*100)}%`).join(', ');
+    return `<div class="pig-swatch" style="
+      background: linear-gradient(135deg, ${stops});
+      border-radius: var(--radius-md);
+      width: 100%; height: 20px;
+      grid-column: 1 / -1;
+    " title="Spectre mondial de pigmentation"></div>`;
+  }
   if (pig.variant === 'split') {
     return `<div class="pig-swatch" style="
       --c1:${pig.color}; --c2:${pig.variantColor};
@@ -1835,36 +1862,60 @@ function getCertaintyClass(c) {
   return map[c] || 'inference';
 }
 
-function drawHumanFigure(pigmentation) {
-  const skinColor = pigmentation.skin.color;
-  const eyeColor = pigmentation.eyes.color;
-  const hairColor = pigmentation.hair.color;
+function humanFigureSVG(skinColor, eyeColor, hairColor, cx=60) {
   return `
-    <svg class="human-figure-svg" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Silhouette morphologique">
-      <!-- Body -->
-      <ellipse cx="60" cy="110" rx="22" ry="34" fill="${skinColor}" opacity="0.85"/>
-      <!-- Head -->
-      <ellipse cx="60" cy="45" rx="22" ry="26" fill="${skinColor}" opacity="0.9"/>
-      <!-- Hair -->
-      <ellipse cx="60" cy="26" rx="22" ry="12" fill="${hairColor}"/>
-      <!-- Eyes -->
-      <ellipse cx="52" cy="44" rx="5" ry="4" fill="${eyeColor}" opacity="0.9"/>
-      <ellipse cx="68" cy="44" rx="5" ry="4" fill="${eyeColor}" opacity="0.9"/>
-      <ellipse cx="52" cy="44" rx="2" ry="2" fill="#000" opacity="0.8"/>
-      <ellipse cx="68" cy="44" rx="2" ry="2" fill="#000" opacity="0.8"/>
-      <!-- Brow ridge hint -->
-      <path d="M46 38 Q52 35 58 38" stroke="${hairColor}" stroke-width="2" stroke-linecap="round"/>
-      <path d="M62 38 Q68 35 74 38" stroke="${hairColor}" stroke-width="2" stroke-linecap="round"/>
-      <!-- Nose -->
-      <path d="M57 48 Q60 54 63 48" stroke="${skinColor}" stroke-width="1.5" fill="none" opacity="0.5"/>
-      <!-- Mouth -->
-      <path d="M54 58 Q60 62 66 58" stroke="${skinColor}" stroke-width="1.5" fill="none" opacity="0.4"/>
-      <!-- Arms -->
-      <path d="M38 90 Q28 110 32 130" stroke="${skinColor}" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.8"/>
-      <path d="M82 90 Q92 110 88 130" stroke="${skinColor}" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.8"/>
-      <!-- Legs -->
-      <path d="M50 140 Q46 155 48 158" stroke="${skinColor}" stroke-width="11" stroke-linecap="round" fill="none" opacity="0.85"/>
-      <path d="M70 140 Q74 155 72 158" stroke="${skinColor}" stroke-width="11" stroke-linecap="round" fill="none" opacity="0.85"/>
+    <ellipse cx="${cx}" cy="110" rx="22" ry="34" fill="${skinColor}" opacity="0.85"/>
+    <ellipse cx="${cx}" cy="45" rx="22" ry="26" fill="${skinColor}" opacity="0.9"/>
+    <ellipse cx="${cx}" cy="26" rx="22" ry="12" fill="${hairColor}"/>
+    <ellipse cx="${cx-8}" cy="44" rx="5" ry="4" fill="${eyeColor}" opacity="0.9"/>
+    <ellipse cx="${cx+8}" cy="44" rx="5" ry="4" fill="${eyeColor}" opacity="0.9"/>
+    <ellipse cx="${cx-8}" cy="44" rx="2" ry="2" fill="#000" opacity="0.8"/>
+    <ellipse cx="${cx+8}" cy="44" rx="2" ry="2" fill="#000" opacity="0.8"/>
+    <path d="M${cx-14} 38 Q${cx-8} 35 ${cx-2} 38" stroke="${hairColor}" stroke-width="2" stroke-linecap="round"/>
+    <path d="M${cx+2} 38 Q${cx+8} 35 ${cx+14} 38" stroke="${hairColor}" stroke-width="2" stroke-linecap="round"/>
+    <path d="M${cx-3} 48 Q${cx} 54 ${cx+3} 48" stroke="${skinColor}" stroke-width="1.5" fill="none" opacity="0.5"/>
+    <path d="M${cx-6} 58 Q${cx} 62 ${cx+6} 58" stroke="${skinColor}" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <path d="M${cx-22} 90 Q${cx-32} 110 ${cx-28} 130" stroke="${skinColor}" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.8"/>
+    <path d="M${cx+22} 90 Q${cx+32} 110 ${cx+28} 130" stroke="${skinColor}" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.8"/>
+    <path d="M${cx-10} 140 Q${cx-14} 155 ${cx-12} 158" stroke="${skinColor}" stroke-width="11" stroke-linecap="round" fill="none" opacity="0.85"/>
+    <path d="M${cx+10} 140 Q${cx+14} 155 ${cx+12} 158" stroke="${skinColor}" stroke-width="11" stroke-linecap="round" fill="none" opacity="0.85"/>
+  `;
+}
+
+function drawHumanFigure(pigmentation) {
+  const skin  = pigmentation.skin;
+  const eyeColor  = pigmentation.eyes.color;
+  const hairColor = pigmentation.hair.color;
+
+  // Spectrum: show three figures representing dark, medium and light
+  if (skin.variant === 'spectrum' && skin.spectrumColors) {
+    const sc = skin.spectrumColors;
+    const dark = sc[0], mid = sc[Math.floor(sc.length/2)], light = sc[sc.length-1];
+    // Eye variants: dark eyes for dark/mid figure, light for third
+    const eyeLight = pigmentation.eyes.variantColor || '#6ea0c8';
+    const hairLight = pigmentation.hair.variantColor || '#d4b050';
+    return `
+      <svg class="human-figure-svg" viewBox="0 0 360 170" fill="none"
+           xmlns="http://www.w3.org/2000/svg" aria-label="Diversité de l'espèce Homo sapiens">
+        <!-- figure 1: dark skin, dark eyes, dark hair -->
+        <g transform="translate(0,5)">${humanFigureSVG(dark,  '#2a1400', '#080400',  60)}</g>
+        <!-- figure 2: medium skin, brown eyes, medium hair -->
+        <g transform="translate(120,5)">${humanFigureSVG(mid,  '#5c3317', '#4a2000',  60)}</g>
+        <!-- figure 3: light skin, variable eyes, light hair -->
+        <g transform="translate(240,5)">${humanFigureSVG(light, eyeLight, hairLight, 60)}</g>
+        <!-- label: “One species” -->
+        <text x="180" y="168" text-anchor="middle"
+              font-size="10" fill="currentColor" opacity="0.5"
+              font-family="var(--font-mono)">${(typeof i18next !== 'undefined' && i18next.isInitialized) ? i18next.t('ui.oneSpecies') : 'Homo sapiens — une seule espèce'}</text>
+      </svg>
+    `;
+  }
+
+  // Default: single figure
+  return `
+    <svg class="human-figure-svg" viewBox="0 0 120 160" fill="none"
+         xmlns="http://www.w3.org/2000/svg" aria-label="Silhouette morphologique">
+      ${humanFigureSVG(skin.color, eyeColor, hairColor, 60)}
     </svg>
   `;
 }
@@ -2624,6 +2675,7 @@ const TRANSLATIONS = {
         toolsTitle: 'Technologies & Comportements',
         debateSection: 'Débats scientifiques actifs',
         periodTo: 'à',
+        oneSpecies: 'Homo sapiens — une seule espèce',
         // Tooltips UI
         playTitle: 'Lecture automatique — voir les migrations en direct',
         scrubberTitle: 'Glissez pour naviguer dans le temps',
@@ -2666,6 +2718,7 @@ const TRANSLATIONS = {
         toolsTitle: 'Technologies & Behaviours',
         debateSection: 'Active scientific debates',
         periodTo: 'to',
+        oneSpecies: 'Homo sapiens — one single species',
         // Tooltips UI
         playTitle: 'Auto-play — watch migrations in real time',
         scrubberTitle: 'Drag to navigate through time',
@@ -2708,6 +2761,7 @@ const TRANSLATIONS = {
         toolsTitle: 'Tecnologías y Comportamientos',
         debateSection: 'Debates científicos activos',
         periodTo: 'a',
+        oneSpecies: 'Homo sapiens — una sola especie',
         // Tooltips UI
         playTitle: 'Reproducción automática — ver migraciones en directo',
         scrubberTitle: 'Arrastra para navegar en el tiempo',
@@ -2750,6 +2804,7 @@ const TRANSLATIONS = {
         toolsTitle: 'Technologien & Verhaltensweisen',
         debateSection: 'Aktive wissenschaftliche Debatten',
         periodTo: 'bis',
+        oneSpecies: 'Homo sapiens — eine einzige Spezies',
         // Tooltips UI
         playTitle: 'Automatische Wiedergabe — Migrationen in Echtzeit',
         scrubberTitle: 'Ziehen zum Navigieren durch die Zeit',
@@ -2792,6 +2847,7 @@ const TRANSLATIONS = {
         toolsTitle: '技术与行为',
         debateSection: '活跃科学争议',
         periodTo: '至',
+        oneSpecies: 'Homo sapiens — 同一物种',
         // Tooltips UI
         playTitle: '自动播放 — 实时观看迁徙',
         scrubberTitle: '拖动以在时间中导航',
@@ -2834,6 +2890,7 @@ const TRANSLATIONS = {
         toolsTitle: 'التقنيات والسلوكيات',
         debateSection: 'نقاشات علمية نشطة',
         periodTo: 'إلى',
+        oneSpecies: 'Homo sapiens — نوع واحد',
         // Tooltips UI
         playTitle: 'تشغيل تلقائي — شاهد الهجرات في الوقت الفعلي',
         scrubberTitle: 'اسحب للتنقل عبر الزمن',
@@ -2876,6 +2933,7 @@ const TRANSLATIONS = {
         toolsTitle: 'Tecnologias e Comportamentos',
         debateSection: 'Debates científicos ativos',
         periodTo: 'a',
+        oneSpecies: 'Homo sapiens — uma única espécie',
         // Tooltips UI
         playTitle: 'Reprodução automática — ver migrações em direto',
         scrubberTitle: 'Arraste para navegar no tempo',
@@ -2918,6 +2976,7 @@ const TRANSLATIONS = {
         toolsTitle: 'Tecnologie e Comportamenti',
         debateSection: 'Dibattiti scientifici attivi',
         periodTo: 'a',
+        oneSpecies: 'Homo sapiens — un\'unica specie',
         // Tooltips UI
         playTitle: 'Riproduzione automatica — guarda le migrazioni in tempo reale',
         scrubberTitle: 'Trascina per navigare nel tempo',
@@ -2960,6 +3019,7 @@ const TRANSLATIONS = {
         toolsTitle: '技術と行動',
         debateSection: '現在進行中の科学的議論',
         periodTo: 'から',
+        oneSpecies: 'Homo sapiens — ひとつの種',
         // Tooltips UI
         playTitle: '自動再生 — リアルタイムで移動を見る',
         scrubberTitle: 'ドラッグして時間をナビゲート',
@@ -3002,6 +3062,7 @@ const TRANSLATIONS = {
         toolsTitle: '기술 및 행동',
         debateSection: '활발한 과학적 논쟁',
         periodTo: '까지',
+        oneSpecies: 'Homo sapiens — 하나의 종',
         // Tooltips UI
         playTitle: '자동 재생 — 실시간 이동 경로 보기',
         scrubberTitle: '드래그하여 시간 탐색',
