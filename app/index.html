@@ -1816,14 +1816,14 @@ function updateEvents() {
 // =====================================================================
 function getSkinSwatch(pig) {
   if (pig.variant === 'spectrum' && pig.spectrumColors) {
-    // Full gradient strip showing the human skin spectrum
-    const stops = pig.spectrumColors.map((c, i, a) => `${c} ${Math.round(i/a.length*100)}%`).join(', ');
-    return `<div class="pig-swatch" style="
-      background: linear-gradient(135deg, ${stops});
-      border-radius: var(--radius-md);
-      width: 100%; height: 20px;
-      grid-column: 1 / -1;
-    " title="Spectre mondial de pigmentation"></div>`;
+    const stops = pig.spectrumColors.join(', ');
+    return `<div style="
+      background: linear-gradient(to right, ${stops});
+      border-radius: var(--radius-full);
+      border: 2px solid var(--color-border);
+      width: 160px; height: 22px;
+      flex-shrink: 0;
+    " title="Spectre mondial de pigmentation humaine"></div>`;
   }
   if (pig.variant === 'split') {
     return `<div class="pig-swatch" style="
@@ -1953,6 +1953,27 @@ function renderPanel(species) {
       <div class="pigmentation-section">
         <div class="pigmentation-title">${T('pigmentationTitle','Pigmentation')}</div>
         <div class="pigmentation-grid">
+          ${pig.skin.variant === 'spectrum' ? `
+          <!-- Spectrum skin: full-width row above eyes/hair -->
+          <div class="pig-card" style="grid-column:1/-1;flex-direction:row;align-items:flex-start;gap:var(--space-3)">
+            <div style="flex-shrink:0">
+              <div class="pig-label" style="text-align:left;margin-bottom:4px">${T('skinLabel','Peau')}</div>
+              ${getSkinSwatch(pig.skin)}
+            </div>
+            <div class="pig-desc" style="text-align:left;flex:1;margin-top:20px">${pig.skin.desc}</div>
+          </div>
+          <div class="pig-card">
+            <div class="pig-label">${T('eyesLabel','Yeux')}</div>
+            ${getEyeSwatch(pig.eyes)}
+            <div class="pig-desc">${pig.eyes.desc}</div>
+          </div>
+          <div class="pig-card">
+            <div class="pig-label">${T('hairLabel','Cheveux / Pelage')}</div>
+            ${getHairSwatch(pig.hair)}
+            <div class="pig-desc">${pig.hair.desc}</div>
+          </div>
+          <div class="pig-card" style="grid-column:3"></div>
+          ` : `
           <div class="pig-card">
             <div class="pig-label">${T('skinLabel','Peau')}</div>
             ${getSkinSwatch(pig.skin)}
@@ -1968,6 +1989,7 @@ function renderPanel(species) {
             ${getHairSwatch(pig.hair)}
             <div class="pig-desc">${pig.hair.desc}</div>
           </div>
+          `}
         </div>
         <p style="font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.5">
           ${pig.variant === 'split' ? T('splitVariant', 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.') : ''}
@@ -2183,7 +2205,11 @@ const SKIN_PERIODS = [
   { start: -45000,   end: -11000,   color: '#4a2800', label: 'Paléo. sup. Eurasie : sombre (347/348 génomes)', tip: 'Chasseurs-cueilleurs eurasiens : peau sombre quasi-unanime jusqu\'à ~11 000 ans (PNAS 2025)' },
   { start: -14000,   end: -7000,    color: '#5a3010', label: 'Mésolithique : sombre + yeux clairs', tip: 'Paradoxe : peau sombre + yeux clairs (ADN direct, ex. Cheddar Man ~9 ka)' },
   { start: -10000,   end: -5000,    color: '#8a5030', label: 'Néolithique : transition intermédiaire', tip: 'SLC24A5 en diffusion ; Ötzi (5 300 ans) : peau sombre attestée par ADN' },
-  { start: -5000,    end: -2000,    color: '#d4a878', label: 'Bronze/Fer Europe N : peau claire généralisée', tip: 'Migration Yamna + sélection → peau claire généralisée en Europe du Nord ~3 000 ans (PNAS 2025)' },
+  { start: -5000, end: -2000,
+    color: '#2a1000',
+    gradientColors: ['#2a1000','#5a2e10','#8a5028','#b87848','#d4a878','#f0d0b0'],
+    label: 'H. sapiens contemporain : spectre mondial (sombre majoritaire)',
+    tip: 'Spectre complet : peau sombre = état ancestral, encore majoritaire mondialement. Peau claire = adaptation récente en Europe du Nord (~3 000 ans, PNAS 2025). La diversité est la norme.' },
 ];
 
 function buildSkinBand() {
@@ -2198,8 +2224,14 @@ function buildSkinBand() {
     el.className = 'band-segment' + (seg.cssClass ? ' ' + seg.cssClass : '');
     el.style.left = x1 + '%';
     el.style.width = w + '%';
-    el.style.background = seg.color;
     el.style.border = '1px solid rgba(255,255,255,0.12)';
+    // Gradient band for segments representing global diversity
+    if (seg.gradientColors && seg.gradientColors.length) {
+      const stops = seg.gradientColors.join(', ');
+      el.style.background = `linear-gradient(to right, ${stops})`;
+    } else {
+      el.style.background = seg.color;
+    }
     el.setAttribute('data-tip', seg.tip);
     el.title = seg.tip;
     // Fur icon indicator
