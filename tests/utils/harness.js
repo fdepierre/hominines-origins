@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
 const path  = require('path');
 const fs    = require('fs');
 
-const APP_PATH = path.resolve(__dirname, '..', '..', 'index.html');
+const APP_PATH = path.resolve(__dirname, '..', '..', 'app', 'index.html');
 const APP_URL  = `file://${APP_PATH}`;
 
 // ─── colours ─────────────────────────────────────────────────────────────────
