@@ -1878,11 +1878,14 @@ function selectSpecies(species) {
 function renderPanel(species) {
   const pig = species.pigmentation;
   const bio = species.biometrics;
+  // Use i18next if available, fallback to French strings
+  const T = (key, fb) => (typeof i18next !== 'undefined' && i18next.isInitialized)
+    ? i18next.t('ui.' + key) : fb;
 
   const html = `
     <div class="animate-in">
       <div class="side-panel-header">
-        <div class="period-label">${formatTime(species.start)} à ${formatTime(species.end)}</div>
+        <div class="period-label">${formatTime(species.start)} ${T('periodTo','à')} ${formatTime(species.end)}</div>
         <div class="species-name">${species.name}</div>
         <div class="species-name-common">${species.common}</div>
         <div style="margin-top:var(--space-2)">
@@ -1897,47 +1900,47 @@ function renderPanel(species) {
 
       <!-- Pigmentation -->
       <div class="pigmentation-section">
-        <div class="pigmentation-title">Pigmentation</div>
+        <div class="pigmentation-title">${T('pigmentationTitle','Pigmentation')}</div>
         <div class="pigmentation-grid">
           <div class="pig-card">
-            <div class="pig-label">Peau</div>
+            <div class="pig-label">${T('skinLabel','Peau')}</div>
             ${getSkinSwatch(pig.skin)}
             <div class="pig-desc">${pig.skin.desc}</div>
           </div>
           <div class="pig-card">
-            <div class="pig-label">Yeux</div>
+            <div class="pig-label">${T('eyesLabel','Yeux')}</div>
             ${getEyeSwatch(pig.eyes)}
             <div class="pig-desc">${pig.eyes.desc}</div>
           </div>
           <div class="pig-card">
-            <div class="pig-label">Cheveux / Pelage</div>
+            <div class="pig-label">${T('hairLabel','Cheveux / Pelage')}</div>
             ${getHairSwatch(pig.hair)}
             <div class="pig-desc">${pig.hair.desc}</div>
           </div>
         </div>
         <p style="font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.5">
-          ${pig.variant === 'split' ? 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.' : ''}
+          ${pig.variant === 'split' ? T('splitVariant', 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.') : ''}
         </p>
       </div>
 
       <!-- Biometrics -->
       <div class="biometrics-section">
-        <div class="section-title">Biométrie</div>
+        <div class="section-title">${T('biometricsTitle','Biométrie')}</div>
         <div class="bio-grid">
           <div class="bio-item">
-            <div class="bio-item-label">Taille (♂)</div>
+            <div class="bio-item-label">${T('heightM','Taille (♂)')}</div>
             <div class="bio-item-value">${bio.heightM}</div>
           </div>
           <div class="bio-item">
-            <div class="bio-item-label">Taille (♀)</div>
+            <div class="bio-item-label">${T('heightF','Taille (♀)')}</div>
             <div class="bio-item-value">${bio.heightF}</div>
           </div>
           <div class="bio-item">
-            <div class="bio-item-label">Poids (♂)</div>
+            <div class="bio-item-label">${T('weightM','Poids (♂)')}</div>
             <div class="bio-item-value">${bio.weightM}</div>
           </div>
           <div class="bio-item">
-            <div class="bio-item-label">Volume cérébral</div>
+            <div class="bio-item-label">${T('brainVol','Volume cérébral')}</div>
             <div class="bio-item-value">${bio.brain}</div>
           </div>
         </div>
@@ -1945,16 +1948,16 @@ function renderPanel(species) {
 
       <!-- Tools -->
       <div class="tools-section">
-        <div class="section-title">Technologies & Comportements</div>
+        <div class="section-title">${T('toolsTitle','Technologies & Comportements')}</div>
         <div style="flex-wrap:wrap;display:flex;gap:var(--space-1)">
-          ${species.tools.map(t => `<span class="tool-tag">⚒ ${t}</span>`).join('')}
+          ${species.tools.map(t => `<span class="tool-tag">⛒ ${t}</span>`).join('')}
         </div>
       </div>
 
       <!-- Debate -->
       ${species.debate ? `
       <div class="debate-section">
-        <div class="section-title">Débats scientifiques actifs</div>
+        <div class="section-title">${T('debateSection','Débats scientifiques actifs')}</div>
         <div class="debate-item">❓ ${species.debate}</div>
       </div>` : ''}
 
@@ -2601,6 +2604,16 @@ const TRANSLATIONS = {
         debateTitle: 'Débat scientifique',
         logoSub: 'Évolution · Migrations · Pigmentation',
         noSpecies: 'Aucune espèce à cette période',
+        // Panel details
+        period: 'Période', pigmentationTitle: 'Pigmentation',
+        skinLabel: 'Peau', eyesLabel: 'Yeux', hairLabel: 'Cheveux / Pelage',
+        splitVariant: 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.',
+        biometricsTitle: 'Biométrie',
+        heightM: 'Taille (♂)', heightF: 'Taille (♀)',
+        weightM: 'Poids (♂)', brainVol: 'Volume cérébral',
+        toolsTitle: 'Technologies & Comportements',
+        debateSection: 'Débats scientifiques actifs',
+        periodTo: 'à',
       }
     }
   },
@@ -2622,6 +2635,16 @@ const TRANSLATIONS = {
         debateTitle: 'Scientific debate',
         logoSub: 'Evolution · Migrations · Pigmentation',
         noSpecies: 'No species at this period',
+        // Panel details
+        period: 'Period', pigmentationTitle: 'Pigmentation',
+        skinLabel: 'Skin', eyesLabel: 'Eyes', hairLabel: 'Hair / Coat',
+        splitVariant: 'Split swatches (☯) indicate variability within the species.',
+        biometricsTitle: 'Biometrics',
+        heightM: 'Height (♂)', heightF: 'Height (♀)',
+        weightM: 'Weight (♂)', brainVol: 'Brain volume',
+        toolsTitle: 'Technologies & Behaviours',
+        debateSection: 'Active scientific debates',
+        periodTo: 'to',
       }
     }
   },
@@ -2643,6 +2666,16 @@ const TRANSLATIONS = {
         debateTitle: 'Debate científico',
         logoSub: 'Evolución · Migraciones · Pigmentación',
         noSpecies: 'Sin especie en este período',
+        // Panel details
+        period: 'Período', pigmentationTitle: 'Pigmentación',
+        skinLabel: 'Piel', eyesLabel: 'Ojos', hairLabel: 'Pelo / Pelaje',
+        splitVariant: 'Las muestras divididas (☯) indican variabilidad dentro de la especie.',
+        biometricsTitle: 'Biometría',
+        heightM: 'Altura (♂)', heightF: 'Altura (♀)',
+        weightM: 'Peso (♂)', brainVol: 'Volumen cerebral',
+        toolsTitle: 'Tecnologías y Comportamientos',
+        debateSection: 'Debates científicos activos',
+        periodTo: 'a',
       }
     }
   },
@@ -2664,6 +2697,16 @@ const TRANSLATIONS = {
         debateTitle: 'Wissenschaftliche Debatte',
         logoSub: 'Evolution · Migrationen · Pigmentierung',
         noSpecies: 'Keine Art in diesem Zeitraum',
+        // Panel details
+        period: 'Zeitraum', pigmentationTitle: 'Pigmentierung',
+        skinLabel: 'Haut', eyesLabel: 'Augen', hairLabel: 'Haar / Fell',
+        splitVariant: 'Geteilte Farbfelder (☯) zeigen Variabilität innerhalb der Art.',
+        biometricsTitle: 'Biometrie',
+        heightM: 'Größe (♂)', heightF: 'Größe (♀)',
+        weightM: 'Gewicht (♂)', brainVol: 'Hirnvolumen',
+        toolsTitle: 'Technologien & Verhaltensweisen',
+        debateSection: 'Aktive wissenschaftliche Debatten',
+        periodTo: 'bis',
       }
     }
   },
@@ -2685,6 +2728,16 @@ const TRANSLATIONS = {
         debateTitle: '科学争议',
         logoSub: '进化 · 迁徙 · 色素',
         noSpecies: '此时期无物种',
+        // Panel details
+        period: '时期', pigmentationTitle: '色素',
+        skinLabel: '肤色', eyesLabel: '眼色', hairLabel: '毛发 / 体毛',
+        splitVariant: '分色色块 (☯) 表示该物种内部存在变异。',
+        biometricsTitle: '生物测量',
+        heightM: '身高 (♂)', heightF: '身高 (♀)',
+        weightM: '体重 (♂)', brainVol: '脑容量',
+        toolsTitle: '技术与行为',
+        debateSection: '活跃科学争议',
+        periodTo: '至',
       }
     }
   },
@@ -2706,6 +2759,16 @@ const TRANSLATIONS = {
         debateTitle: 'جدال علمي',
         logoSub: 'تطور · هجرة · تصبغ',
         noSpecies: 'لا توجد أنواع في هذه الفترة',
+        // Panel details
+        period: 'الفترة', pigmentationTitle: 'التصبغ',
+        skinLabel: 'بشرة', eyesLabel: 'عيون', hairLabel: 'شعر / فراء',
+        splitVariant: 'عينات الألوان المقسمة (☯) تشير إلى تباين داخل النوع.',
+        biometricsTitle: 'القياسات الحيوية',
+        heightM: 'الطول (♂)', heightF: 'الطول (♀)',
+        weightM: 'الوزن (♂)', brainVol: 'حجم الدماغ',
+        toolsTitle: 'التقنيات والسلوكيات',
+        debateSection: 'نقاشات علمية نشطة',
+        periodTo: 'إلى',
       }
     }
   },
@@ -2727,6 +2790,16 @@ const TRANSLATIONS = {
         debateTitle: 'Debate científico',
         logoSub: 'Evolução · Migrações · Pigmentação',
         noSpecies: 'Nenhuma espécie neste período',
+        // Panel details
+        period: 'Período', pigmentationTitle: 'Pigmentação',
+        skinLabel: 'Pele', eyesLabel: 'Olhos', hairLabel: 'Cabelo / Pelagem',
+        splitVariant: 'Amostras divididas (☯) indicam variabilidade dentro da espécie.',
+        biometricsTitle: 'Biometria',
+        heightM: 'Altura (♂)', heightF: 'Altura (♀)',
+        weightM: 'Peso (♂)', brainVol: 'Volume cerebral',
+        toolsTitle: 'Tecnologias e Comportamentos',
+        debateSection: 'Debates científicos ativos',
+        periodTo: 'a',
       }
     }
   },
@@ -2748,6 +2821,16 @@ const TRANSLATIONS = {
         debateTitle: 'Dibattito scientifico',
         logoSub: 'Evoluzione · Migrazioni · Pigmentazione',
         noSpecies: 'Nessuna specie in questo periodo',
+        // Panel details
+        period: 'Periodo', pigmentationTitle: 'Pigmentazione',
+        skinLabel: 'Pelle', eyesLabel: 'Occhi', hairLabel: 'Capelli / Pelliccia',
+        splitVariant: 'I campioni divisi (☯) indicano variabilità all\'interno della specie.',
+        biometricsTitle: 'Biometria',
+        heightM: 'Altezza (♂)', heightF: 'Altezza (♀)',
+        weightM: 'Peso (♂)', brainVol: 'Volume cerebrale',
+        toolsTitle: 'Tecnologie e Comportamenti',
+        debateSection: 'Dibattiti scientifici attivi',
+        periodTo: 'a',
       }
     }
   },
@@ -2769,6 +2852,16 @@ const TRANSLATIONS = {
         debateTitle: '科学議論',
         logoSub: '進化 · 移動 · 色素',
         noSpecies: 'この時期に種はない',
+        // Panel details
+        period: '時期', pigmentationTitle: '色素',
+        skinLabel: '肌', eyesLabel: '目', hairLabel: '髪 / 体毛',
+        splitVariant: '分割スウォッチ (☯) は種内の変異を示します。',
+        biometricsTitle: '生体測定',
+        heightM: '身長 (♂)', heightF: '身長 (♀)',
+        weightM: '体重 (♂)', brainVol: '脳容量',
+        toolsTitle: '技術と行動',
+        debateSection: '現在進行中の科学的議論',
+        periodTo: 'から',
       }
     }
   },
@@ -2790,6 +2883,16 @@ const TRANSLATIONS = {
         debateTitle: '과학적 논의',
         logoSub: '진화 · 이동 · 색소',
         noSpecies: '이 시기에 종 없음',
+        // Panel details
+        period: '기간', pigmentationTitle: '색소',
+        skinLabel: '피부', eyesLabel: '눈', hairLabel: '머리카락 / 털',
+        splitVariant: '분할 견본 (☯)은 종 내의 변이를 나타냅니다.',
+        biometricsTitle: '생체 측정',
+        heightM: '키 (♂)', heightF: '키 (♀)',
+        weightM: '체중 (♂)', brainVol: '뇌 용량',
+        toolsTitle: '기술 및 행동',
+        debateSection: '활발한 과학적 논쟁',
+        periodTo: '까지',
       }
     }
   },
@@ -2860,6 +2963,11 @@ function applyTranslations() {
   if (esTitle) esTitle.textContent = t('ui.selectSpecies');
   const esDesc = document.querySelector('.empty-state-desc');
   if (esDesc) esDesc.textContent = t('ui.selectSpeciesDesc');
+
+  // Re-render open species panel so detail labels update immediately
+  if (typeof selectedSpecies !== 'undefined' && selectedSpecies) {
+    renderPanel(selectedSpecies);
+  }
 }
 
 // =====================================================================
