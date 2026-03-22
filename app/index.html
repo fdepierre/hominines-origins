@@ -1091,24 +1091,24 @@ a { color: var(--color-primary); }
 
       <!-- Layer toggles — shapes/icons to avoid color confusion with timeline -->
       <div class="layer-toggle-group" id="layer-toggles">
-        <button class="layer-btn active" data-layer="sites" title="Sites fossiles">
+        <button class="layer-btn active" data-layer="sites" title="Sites fossiles" data-i18n-title="ui.layerSitesTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
             <circle cx="7" cy="7" r="2" fill="currentColor"/>
           </svg>Sites fossiles
         </button>
-        <button class="layer-btn active" data-layer="migrations" title="Routes de migration">
+        <button class="layer-btn active" data-layer="migrations" title="Routes de migration" data-i18n-title="ui.layerMigrationsTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M2 7 Q5 3 9 7 L12 7M10 5l2 2-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 2"/>
           </svg>Migrations
         </button>
-        <button class="layer-btn active" data-layer="range" title="Zones géographiques">
+        <button class="layer-btn active" data-layer="range" title="Zones géographiques" data-i18n-title="ui.layerRangeTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
             <circle cx="7" cy="7" r="5" fill="currentColor" opacity="0.15"/>
           </svg>Zones
         </button>
-        <button class="layer-btn active" data-layer="events" title="Jalons culturels et technologiques">
+        <button class="layer-btn active" data-layer="events" title="Jalons culturels et technologiques" data-i18n-title="ui.layerEventsTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <polygon points="7,2 9,6 13,6.5 10,9.5 10.5,13 7,11 3.5,13 4,9.5 1,6.5 5,6" stroke="currentColor" stroke-width="1" fill="currentColor" opacity="0.6"/>
           </svg>Jalons culturels
@@ -1144,7 +1144,7 @@ a { color: var(--color-primary); }
 
     <!-- Row 1: play button first (top-left), then time label -->
     <div class="timeline-header-row">
-      <button id="play-btn" title="Lecture automatique — voir les migrations en direct">
+      <button id="play-btn" title="Lecture automatique — voir les migrations en direct" data-i18n-title="ui.playTitle">
         <svg id="play-icon" width="16" height="16" viewBox="0 0 14 14" fill="currentColor">
           <polygon points="3,1 13,7 3,13"/>
         </svg>
@@ -1184,7 +1184,7 @@ a { color: var(--color-primary); }
 
       <!-- THE NEEDLE — full height, round handle on top -->
       <div class="timeline-full-needle" id="timeline-full-needle">
-        <div class="timeline-needle-handle" id="timeline-scrubber" title="Glissez"></div>
+        <div class="timeline-needle-handle" id="timeline-scrubber" title="Glissez" data-i18n-title="ui.scrubberTitle"></div>
       </div>
 
     </div><!-- /needle-wrapper -->
@@ -1785,7 +1785,7 @@ function updateEvents() {
     marker.bindTooltip(`
       <div style="font-size:11px;max-width:220px">
         <strong style="color:${ev.color}">${ev.label}</strong><br>
-        <em style="color:#9a8f7a">${CATEGORY_LABELS[ev.category]}</em><br>
+        <em style="color:#9a8f7a">${getCategoryLabel(ev.category)}</em><br>
         ${ev.desc}
         ${ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + ev.source + '</span>' : ''}
       </div>
@@ -2174,7 +2174,8 @@ function buildEventsBand() {
     el.className = 'event-marker';
     el.style.left = xpct + '%';
     el.textContent = ev.icon;
-    el.setAttribute('data-tip', ev.label + ' : ' + ev.desc.split('.')[0]);
+    const catLabel = getCategoryLabel(ev.category);
+    el.setAttribute('data-tip', '[' + catLabel + '] ' + ev.label + ' : ' + ev.desc.split('.')[0]);
     el.title = ev.label;
     el.addEventListener('click', () => {
       setTime(ev.time);
@@ -2371,10 +2372,19 @@ const CATEGORY_COLORS = {
   tools: '#A07820', fire: '#E06020', phylo: '#805090', symbolic: '#C0A000',
   art: '#8050C0', migration: '#208060', neolithic: '#60A040',
 };
-const CATEGORY_LABELS = {
-  tools: 'Technologie lithique', fire: 'Maîtrise du feu', phylo: 'Phylogénie',
-  symbolic: 'Comportements symboliques', art: 'Art pariétal', migration: 'Migrations', neolithic: 'Néolithique',
-};
+// Category labels — resolved dynamically via i18next (fallback: French)
+function getCategoryLabel(cat) {
+  const map = {
+    tools: 'catTools', fire: 'catFire', phylo: 'catPhylo',
+    symbolic: 'catSymbolic', art: 'catArt', migration: 'catMigration', neolithic: 'catNeolithic',
+  };
+  const key = map[cat];
+  if (!key) return cat;
+  if (typeof i18next !== 'undefined' && i18next.isInitialized) return i18next.t('ui.' + key);
+  const fb = { catTools: 'Technologie lithique', catFire: 'Maîtrise du feu', catPhylo: 'Phylogénie',
+    catSymbolic: 'Comportements symboliques', catArt: 'Art pariétal', catMigration: 'Migrations', catNeolithic: 'Néolithique' };
+  return fb[key] || cat;
+}
 
 let showEvents = true;
 let eventsLayer = null;
@@ -2614,6 +2624,17 @@ const TRANSLATIONS = {
         toolsTitle: 'Technologies & Comportements',
         debateSection: 'Débats scientifiques actifs',
         periodTo: 'à',
+        // Tooltips UI
+        playTitle: 'Lecture automatique — voir les migrations en direct',
+        scrubberTitle: 'Glissez pour naviguer dans le temps',
+        layerSitesTitle: 'Afficher / masquer les sites fossiles',
+        layerMigrationsTitle: 'Afficher / masquer les routes de migration',
+        layerRangeTitle: 'Afficher / masquer les zones géographiques',
+        layerEventsTitle: 'Afficher / masquer les jalons culturels',
+        // Event categories (used in map tooltips)
+        catTools: 'Technologie lithique', catFire: 'Maîtrise du feu',
+        catPhylo: 'Phylogénie', catSymbolic: 'Comportements symboliques',
+        catArt: 'Art pariétal', catMigration: 'Migrations', catNeolithic: 'Néolithique',
       }
     }
   },
@@ -2645,6 +2666,17 @@ const TRANSLATIONS = {
         toolsTitle: 'Technologies & Behaviours',
         debateSection: 'Active scientific debates',
         periodTo: 'to',
+        // Tooltips UI
+        playTitle: 'Auto-play — watch migrations in real time',
+        scrubberTitle: 'Drag to navigate through time',
+        layerSitesTitle: 'Show / hide fossil sites',
+        layerMigrationsTitle: 'Show / hide migration routes',
+        layerRangeTitle: 'Show / hide geographic ranges',
+        layerEventsTitle: 'Show / hide cultural milestones',
+        // Event categories
+        catTools: 'Lithic technology', catFire: 'Fire mastery',
+        catPhylo: 'Phylogeny', catSymbolic: 'Symbolic behaviour',
+        catArt: 'Cave art', catMigration: 'Migrations', catNeolithic: 'Neolithic',
       }
     }
   },
@@ -2676,6 +2708,17 @@ const TRANSLATIONS = {
         toolsTitle: 'Tecnologías y Comportamientos',
         debateSection: 'Debates científicos activos',
         periodTo: 'a',
+        // Tooltips UI
+        playTitle: 'Reproducción automática — ver migraciones en directo',
+        scrubberTitle: 'Arrastra para navegar en el tiempo',
+        layerSitesTitle: 'Mostrar / ocultar sitios fósiles',
+        layerMigrationsTitle: 'Mostrar / ocultar rutas de migración',
+        layerRangeTitle: 'Mostrar / ocultar zonas geográficas',
+        layerEventsTitle: 'Mostrar / ocultar hitos culturales',
+        // Event categories
+        catTools: 'Tecnología lítica', catFire: 'Dominio del fuego',
+        catPhylo: 'Filogenia', catSymbolic: 'Comportamientos simbólicos',
+        catArt: 'Arte rupestre', catMigration: 'Migraciones', catNeolithic: 'Neolítico',
       }
     }
   },
@@ -2707,6 +2750,17 @@ const TRANSLATIONS = {
         toolsTitle: 'Technologien & Verhaltensweisen',
         debateSection: 'Aktive wissenschaftliche Debatten',
         periodTo: 'bis',
+        // Tooltips UI
+        playTitle: 'Automatische Wiedergabe — Migrationen in Echtzeit',
+        scrubberTitle: 'Ziehen zum Navigieren durch die Zeit',
+        layerSitesTitle: 'Fundorte ein-/ausblenden',
+        layerMigrationsTitle: 'Migrationsrouten ein-/ausblenden',
+        layerRangeTitle: 'Verbreitung ein-/ausblenden',
+        layerEventsTitle: 'Kulturelle Meilensteine ein-/ausblenden',
+        // Event categories
+        catTools: 'Steinzeittechnologie', catFire: 'Feuerbeherrschung',
+        catPhylo: 'Phylogenie', catSymbolic: 'Symbolisches Verhalten',
+        catArt: 'Höhlenmalerei', catMigration: 'Migrationen', catNeolithic: 'Neolithikum',
       }
     }
   },
@@ -2738,6 +2792,17 @@ const TRANSLATIONS = {
         toolsTitle: '技术与行为',
         debateSection: '活跃科学争议',
         periodTo: '至',
+        // Tooltips UI
+        playTitle: '自动播放 — 实时观看迁徙',
+        scrubberTitle: '拖动以在时间中导航',
+        layerSitesTitle: '显示/隐藏化石遗址',
+        layerMigrationsTitle: '显示/隐藏迁徙路线',
+        layerRangeTitle: '显示/隐藏地理范围',
+        layerEventsTitle: '显示/隐藏文化里程碑',
+        // Event categories
+        catTools: '石器技术', catFire: '火的掌握',
+        catPhylo: '系统发育', catSymbolic: '象征行为',
+        catArt: '洞穴艺术', catMigration: '迁徙', catNeolithic: '新石器时代',
       }
     }
   },
@@ -2769,6 +2834,17 @@ const TRANSLATIONS = {
         toolsTitle: 'التقنيات والسلوكيات',
         debateSection: 'نقاشات علمية نشطة',
         periodTo: 'إلى',
+        // Tooltips UI
+        playTitle: 'تشغيل تلقائي — شاهد الهجرات في الوقت الفعلي',
+        scrubberTitle: 'اسحب للتنقل عبر الزمن',
+        layerSitesTitle: 'إظهار / إخفاء مواقع الأحفور',
+        layerMigrationsTitle: 'إظهار / إخفاء مسارات الهجرة',
+        layerRangeTitle: 'إظهار / إخفاء المناطق الجغرافية',
+        layerEventsTitle: 'إظهار / إخفاء المعالم الثقافية',
+        // Event categories
+        catTools: 'التكنولوجيا الحجرية', catFire: 'إتقان النار',
+        catPhylo: 'علم الأنساب', catSymbolic: 'السلوك الرمزي',
+        catArt: 'فن الكهوف', catMigration: 'الهجرات', catNeolithic: 'العصر الحجري الحديث',
       }
     }
   },
@@ -2800,6 +2876,17 @@ const TRANSLATIONS = {
         toolsTitle: 'Tecnologias e Comportamentos',
         debateSection: 'Debates científicos ativos',
         periodTo: 'a',
+        // Tooltips UI
+        playTitle: 'Reprodução automática — ver migrações em direto',
+        scrubberTitle: 'Arraste para navegar no tempo',
+        layerSitesTitle: 'Mostrar / ocultar sítios fósseis',
+        layerMigrationsTitle: 'Mostrar / ocultar rotas de migração',
+        layerRangeTitle: 'Mostrar / ocultar zonas geográficas',
+        layerEventsTitle: 'Mostrar / ocultar marcos culturais',
+        // Event categories
+        catTools: 'Tecnologia lítica', catFire: 'Domínio do fogo',
+        catPhylo: 'Filogenia', catSymbolic: 'Comportamentos simbólicos',
+        catArt: 'Arte rupestre', catMigration: 'Migrações', catNeolithic: 'Neolítico',
       }
     }
   },
@@ -2831,6 +2918,17 @@ const TRANSLATIONS = {
         toolsTitle: 'Tecnologie e Comportamenti',
         debateSection: 'Dibattiti scientifici attivi',
         periodTo: 'a',
+        // Tooltips UI
+        playTitle: 'Riproduzione automatica — guarda le migrazioni in tempo reale',
+        scrubberTitle: 'Trascina per navigare nel tempo',
+        layerSitesTitle: 'Mostra / nascondi siti fossili',
+        layerMigrationsTitle: 'Mostra / nascondi rotte di migrazione',
+        layerRangeTitle: 'Mostra / nascondi zone geografiche',
+        layerEventsTitle: 'Mostra / nascondi tappe culturali',
+        // Event categories
+        catTools: 'Tecnologia litica', catFire: 'Padronanza del fuoco',
+        catPhylo: 'Filogenesi', catSymbolic: 'Comportamenti simbolici',
+        catArt: 'Arte rupestre', catMigration: 'Migrazioni', catNeolithic: 'Neolitico',
       }
     }
   },
@@ -2862,6 +2960,17 @@ const TRANSLATIONS = {
         toolsTitle: '技術と行動',
         debateSection: '現在進行中の科学的議論',
         periodTo: 'から',
+        // Tooltips UI
+        playTitle: '自動再生 — リアルタイムで移動を見る',
+        scrubberTitle: 'ドラッグして時間をナビゲート',
+        layerSitesTitle: '化石遺跡を表示/非表示',
+        layerMigrationsTitle: '移動ルートを表示/非表示',
+        layerRangeTitle: '分布域を表示/非表示',
+        layerEventsTitle: '文化里程標を表示/非表示',
+        // Event categories
+        catTools: '石器技術', catFire: '火の制御',
+        catPhylo: '系統発生', catSymbolic: '象徴的行動',
+        catArt: '洞窟芸術', catMigration: '移動', catNeolithic: '新石器時代',
       }
     }
   },
@@ -2893,6 +3002,17 @@ const TRANSLATIONS = {
         toolsTitle: '기술 및 행동',
         debateSection: '활발한 과학적 논쟁',
         periodTo: '까지',
+        // Tooltips UI
+        playTitle: '자동 재생 — 실시간 이동 경로 보기',
+        scrubberTitle: '드래그하여 시간 탐색',
+        layerSitesTitle: '화석 유적 표시/숨기기',
+        layerMigrationsTitle: '이동 경로 표시/숨기기',
+        layerRangeTitle: '분포 지역 표시/숨기기',
+        layerEventsTitle: '문화 이정표 표시/숨기기',
+        // Event categories
+        catTools: '석기 기술', catFire: '불의 통제',
+        catPhylo: '계통 발생', catSymbolic: '상징적 행동',
+        catArt: '동굴 예술', catMigration: '이동', catNeolithic: '신석기 시대',
       }
     }
   },
@@ -2963,6 +3083,28 @@ function applyTranslations() {
   if (esTitle) esTitle.textContent = t('ui.selectSpecies');
   const esDesc = document.querySelector('.empty-state-desc');
   if (esDesc) esDesc.textContent = t('ui.selectSpeciesDesc');
+
+  // Update all data-i18n-title elements (title= attributes)
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    el.title = t(key);
+  });
+
+  // Rebuild skin band and events band so data-tip tooltips are translated
+  if (typeof buildSkinBand === 'function') {
+    const skinTrack = document.getElementById('skin-band-track');
+    if (skinTrack) { skinTrack.innerHTML = ''; buildSkinBand(); }
+  }
+  if (typeof buildEventsBand === 'function') {
+    const evTrack = document.getElementById('events-band-track');
+    if (evTrack) { evTrack.innerHTML = ''; buildEventsBand(); }
+  }
+
+  // Rebuild map events layer so category tooltips are translated
+  if (typeof updateEvents === 'function' && typeof eventsLayer !== 'undefined' && eventsLayer) {
+    eventsLayer.clearLayers();
+    updateEvents();
+  }
 
   // Re-render open species panel so detail labels update immediately
   if (typeof selectedSpecies !== 'undefined' && selectedSpecies) {
