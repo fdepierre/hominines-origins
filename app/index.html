@@ -1084,6 +1084,138 @@ a { color: var(--color-primary); }
 #lang-select:hover { color: var(--color-text); }
 [data-theme="light"] #lang-select { color: var(--color-text-muted); }
 
+/* ==============================================================
+   PLAY OVERLAY
+   ============================================================== */
+#play-overlay {
+  position: absolute; inset: 0; z-index: 700;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.22);
+  transition: opacity 0.5s ease;
+}
+#play-overlay.dismissed { opacity: 0; pointer-events: none; }
+#play-overlay.hidden { display: none; }
+#play-overlay-inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+#play-overlay-btn {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--color-primary); border: none; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: transform 0.15s ease;
+  animation: overlayPulse 2s ease-in-out infinite;
+}
+#play-overlay-btn:hover { transform: scale(1.08); }
+@keyframes overlayPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(212,130,10,0.45); }
+  50%      { box-shadow: 0 0 0 20px rgba(212,130,10,0); }
+}
+#play-overlay-label {
+  font-size: var(--text-sm); font-family: var(--font-mono); color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+/* ==============================================================
+   HUMAN FIGURE CONTRAST
+   ============================================================== */
+.human-figure-container {
+  background: #1e1810 !important;
+  border-radius: var(--radius-lg);
+  margin: 0 var(--space-4) var(--space-2);
+  border: 1px solid var(--color-divider);
+}
+[data-theme="light"] .human-figure-container { background: #c0b8aa !important; }
+.pig-label { color: var(--color-text) !important; font-weight: 600; }
+.pig-desc  { color: var(--color-text-muted); font-size: var(--text-xs); }
+
+/* ==============================================================
+   TIMELINE — compact heights
+   ============================================================== */
+.timeline-species-track { height: 52px !important; }
+.timeline-ticks-row     { height: 14px !important; }
+.timeline-band          { height: 16px !important; }
+.events-band            { height: 20px !important; }
+.band-segment           { height: 12px !important; }
+/* Better contrast on timeline labels */
+.tl-tick-text           { color: var(--color-text-muted) !important; font-size: 8px; }
+.timeline-band-label    { color: var(--color-text-muted) !important; font-size: 8px; }
+.timeline-hint          { color: var(--color-text-muted) !important; }
+
+/* ==============================================================
+   MOBILE TAB BAR
+   ============================================================== */
+#mobile-tab-bar {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; height: 52px;
+  background: var(--color-surface); border-top: 1px solid var(--color-border);
+  z-index: 1500; grid-template-columns: 1fr 1fr; align-items: stretch;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+}
+.mobile-tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; border: none; background: none; color: var(--color-text-muted);
+  font-size: 10px; font-family: var(--font-mono); cursor: pointer;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  transition: color var(--transition-interactive);
+}
+.mobile-tab.mobile-tab-active { color: var(--color-primary); }
+.mobile-tab svg { flex-shrink: 0; }
+
+/* ==============================================================
+   DESKTOP — ensure mobile elements don't bleed in (≥769px)
+   ============================================================== */
+@media (min-width: 769px) {
+  #mobile-tab-bar { display: none !important; }
+  .map-container  { opacity: 1 !important; pointer-events: all !important; }
+  #side-panel {
+    position: static !important;
+    height: auto !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+    transform: none !important;
+  }
+}
+
+/* ==============================================================
+   MOBILE LAYOUT (≤768px)
+   ============================================================== */
+@media (max-width: 768px) {
+  #mobile-tab-bar { display: grid !important; }
+  #app { padding-bottom: 52px; }
+  #main {
+    grid-template-columns: 1fr !important;
+    height: calc(100dvh - 60px - 130px - 52px);
+    position: relative; overflow: hidden;
+  }
+  .map-container {
+    position: absolute; inset: 0; z-index: 1;
+    transition: opacity 0.3s ease;
+  }
+  #map { height: 100% !important; }
+  #side-panel {
+    position: absolute !important; inset: 0 !important; height: 100% !important;
+    z-index: 2; border: none !important; overflow-y: auto;
+    opacity: 0; pointer-events: none; transform: translateX(100%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  #main.view-map    .map-container  { opacity: 1; pointer-events: all; }
+  #main.view-map    #side-panel     { opacity: 0; pointer-events: none; transform: translateX(100%); }
+  #main.view-detail .map-container  { opacity: 0; pointer-events: none; }
+  #main.view-detail #side-panel     { opacity: 1; pointer-events: all; transform: translateX(0); }
+  .layer-toggle-group { top:auto; bottom:var(--space-3); right:auto; left:var(--space-3); flex-direction:row; flex-wrap:wrap; gap:4px; max-width:220px; }
+  .layer-btn { padding:4px 8px; font-size:10px; }
+  .layer-btn svg { display:none; }
+  .map-legend { top:var(--space-2); left:var(--space-2); bottom:auto; padding:var(--space-2) var(--space-3); min-width:120px; }
+  .timeline-needle-handle { width:32px !important; height:32px !important; }
+  #needle-wrapper { touch-action:none; cursor:ew-resize; }
+  #play-overlay-btn { width:56px; height:56px; }
+  #btn-data-viewer { display:none; }
+  .tl-tick-text { display:none !important; }
+}
+
+/* TABLET */
+@media (min-width: 769px) and (max-width: 1100px) {
+  #main { grid-template-columns: 1fr 280px; }
+}
+
 </style>
   <link rel="alternate" hreflang="fr" href="./index.html">
   <link rel="alternate" hreflang="en" href="./index.html?lang=en">
@@ -1188,6 +1320,16 @@ a { color: var(--color-primary); }
         <div class="map-legend-title">Espèces visibles</div>
         <div id="legend-content"></div>
       </div>
+
+      <!-- Play overlay lives INSIDE map-container so it only covers the map -->
+      <div id="play-overlay">
+        <div id="play-overlay-inner">
+          <button id="play-overlay-btn" aria-label="Play">
+            <svg width="32" height="32" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>
+          </button>
+          <div id="play-overlay-label">Play</div>
+        </div>
+      </div>
     </div>
 
     <!-- SIDE PANEL -->
@@ -1200,15 +1342,6 @@ a { color: var(--color-primary); }
         </div>
       </div>
     </aside>
-
-  <div id="play-overlay">
-    <div id="play-overlay-inner">
-      <button id="play-overlay-btn" aria-label="Play">
-        <svg width="32" height="32" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>
-      </button>
-      <div id="play-overlay-label">Play</div>
-    </div>
-  </div>
 
   </main>
 
