@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark" translate="yes">
+<html lang="fr" data-theme="light" translate="yes">
 <head>
 <!--
    ______                            __
@@ -62,16 +62,16 @@
 
 /* Palette inspirée de l'archéologie : terre, os, obsidienne */
 :root, [data-theme="dark"] {
-  --color-bg:             #0e0d0b;
-  --color-surface:        #161410;
-  --color-surface-2:      #1e1b16;
-  --color-surface-offset: #252018;
-  --color-divider:        #2e2820;
-  --color-border:         #3a3228;
-  --color-text:           #e8e0d0;
-  --color-text-muted:     #9a8f7a;
-  --color-text-faint:     #5a5248;
-  --color-text-inverse:   #0e0d0b;
+  --color-bg:             #141210;
+  --color-surface:        #1e1b16;
+  --color-surface-2:      #26221c;
+  --color-surface-offset: #2e2920;
+  --color-divider:        #3a3228;
+  --color-border:         #4a4038;
+  --color-text:           #ede5d4;
+  --color-text-muted:     #a89880;
+  --color-text-faint:     #8a7a68;
+  --color-text-inverse:   #141210;
 
   /* Amber / ocre = accent principal */
   --color-primary:        #d4820a;
@@ -98,8 +98,8 @@
   --color-divider:        #c8bfa8;
   --color-border:         #b0a488;
   --color-text:           #1a1208;
-  --color-text-muted:     #4a3e2c;
-  --color-text-faint:     #7a6e58;
+  --color-text-muted:     #3e3020;
+  --color-text-faint:     #5e5040;
   --color-text-inverse:   #f0ebe0;
 
   /* Primary darker for WCAG AA on light bg */
@@ -233,11 +233,11 @@ a { color: var(--color-primary); }
   width: 100%;
   height: 100%;
   z-index: 1;
-  background: #0a0e18;
+  background: #0e1220;
 }
 
 /* Leaflet overrides */
-.leaflet-container { font-family: var(--font-body); background: #0a0e18; }
+.leaflet-container { font-family: var(--font-body); background: #0e1220; }
 .leaflet-control-zoom { display: none; }
 .leaflet-attribution-flag { display: none !important; }
 .leaflet-control-attribution { 
@@ -392,10 +392,10 @@ a { color: var(--color-primary); }
   border-radius: var(--radius-full);
   font-family: var(--font-mono);
 }
-.certainty-badge.dna-direct { background: rgba(94,140,74,0.15); color: #4a8a34; border: 1px solid rgba(94,140,74,0.4); }
-.certainty-badge.genetic { background: rgba(74,122,155,0.15); color: #1a5e90; border: 1px solid rgba(74,122,155,0.4); }
-.certainty-badge.inference { background: rgba(212,130,10,0.15); color: var(--color-primary); border: 1px solid rgba(212,130,10,0.4); }
-.certainty-badge.debate { background: rgba(168,64,64,0.15); color: #902020; border: 1px solid rgba(168,64,64,0.4); }
+.certainty-badge.dna-direct { background: rgba(94,140,74,0.18); color: #72c050; border: 1px solid rgba(94,140,74,0.5); }
+.certainty-badge.genetic { background: rgba(74,122,155,0.18); color: #5aaada; border: 1px solid rgba(74,122,155,0.5); }
+.certainty-badge.inference { background: rgba(212,130,10,0.18); color: var(--color-primary); border: 1px solid rgba(212,130,10,0.5); }
+.certainty-badge.debate { background: rgba(168,64,64,0.18); color: #d06060; border: 1px solid rgba(168,64,64,0.5); }
 /* Light mode overrides for better contrast */
 [data-theme="light"] .certainty-badge.dna-direct { color: #2a6018; background: rgba(94,140,74,0.2); }
 [data-theme="light"] .certainty-badge.genetic { color: #0e3e6a; background: rgba(74,122,155,0.2); }
@@ -846,7 +846,7 @@ a { color: var(--color-primary); }
   justify-content: center;
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--color-divider);
-  background: #1e1810;
+  background: var(--color-surface-offset);
   border-radius: var(--radius-md);
   margin: 0 var(--space-4) var(--space-2);
 }
@@ -1003,12 +1003,12 @@ a { color: var(--color-primary); }
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(14,13,11,0.88);
+  background: rgba(20,18,16,0.90);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-5);
   font-size: var(--text-sm);
-  color: #e8e0d0;
+  color: #ede5d4;
   pointer-events: none;
   z-index: 600;
   white-space: nowrap;
