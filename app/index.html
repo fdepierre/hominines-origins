@@ -1963,11 +1963,27 @@ function updateNeedlePosition() {
   fullNeedle.style.left = Math.max(0, Math.min(wrapperW - 1, px)) + 'px';
 }
 
+let _lastVisibleIds = ''; // cache to avoid redundant full map rebuilds during play
+
 function setTime(time) {
   currentTime = Math.max(TIMELINE_MIN, Math.min(TIMELINE_MAX, time));
   document.getElementById('timeline-current-label').textContent = formatTime(currentTime);
   updateNeedlePosition();
-  updateMap();
+
+  // During play: only rebuild the full map when the visible species set changes.
+  // Always update animated migrations (cheap) and events (cumulative).
+  const currentVisibleIds = getVisibleSpecies().map(s => s.id).join(',');
+  const speciesChanged = currentVisibleIds !== _lastVisibleIds;
+  if (speciesChanged) {
+    _lastVisibleIds = currentVisibleIds;
+    updateMap(); // full rebuild — ranges, sites, migrations, events, arrows
+  } else if (isPlaying) {
+    // During play with no species change: only refresh the animated arrows + events
+    if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
+    updateEvents();
+  } else {
+    updateMap(); // manual scrub — always full refresh
+  }
 
   // Highlight active species lanes
   document.querySelectorAll('.species-lane').forEach(lane => {
@@ -1979,11 +1995,28 @@ function setTime(time) {
     }
   });
 
-  // Auto-select species if only one visible
+  // Panel update logic
   const visible = getVisibleSpecies();
-  if (visible.length === 1 && (!selectedSpecies || !visible.includes(selectedSpecies))) {
-    selectSpecies(visible[0]);
+
+  if (visible.length === 0) {
+    // Nothing visible — show empty state
+    if (selectedSpecies) {
+      selectedSpecies = null;
+      const panelContent = document.getElementById('panel-content');
+      if (panelContent) {
+        const T = (k, fb) => (typeof i18next !== 'undefined' && i18next.isInitialized) ? i18next.t('ui.' + k) : fb;
+        panelContent.innerHTML = `<div class="empty-state">
+          <div class="empty-state-title">${T('selectSpecies', 'Sélectionnez une espèce')}</div>
+          <div class="empty-state-desc">${T('noSpecies', 'Aucune espèce à cette période')}</div>
+        </div>`;
+      }
+    }
+  } else if (!selectedSpecies || !visible.find(s => s.id === selectedSpecies.id)) {
+    // Currently selected species is no longer visible (or nothing selected)
+    // — auto-select the most recent one (last in SPECIES_DATA order)
+    selectSpecies(visible[visible.length - 1]);
   }
+  // If selectedSpecies is still in visible → keep the panel as-is (user chose it)
 }
 
 // =====================================================================
