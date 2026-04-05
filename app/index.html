@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr" data-theme="dark" translate="yes">
 <head>
 <!--
    ______                            __
@@ -1018,6 +1018,23 @@ a { color: var(--color-primary); }
   border-color: rgba(0,0,0,0.3);
 }
 
+/* ===== DATA VIEWER DRAWER ===== */
+.data-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;opacity:0;transition:opacity 250ms ease;}
+.data-viewer-overlay.visible{opacity:1;}
+.data-viewer-drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);background:var(--color-surface);border-left:1px solid var(--color-border);z-index:2001;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 300ms cubic-bezier(.16,1,.3,1);overflow:hidden;}
+.data-viewer-drawer.open{transform:translateX(0);}
+.data-viewer-header{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-divider);flex-shrink:0;background:var(--color-surface);}
+.data-viewer-title{flex:1;font-size:var(--text-sm);color:var(--color-text);margin:0;}
+.btn-copy{display:inline-flex;align-items:center;gap:5px;padding:4px var(--space-3);font-size:var(--text-xs);border:1px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-surface-offset);color:var(--color-text-muted);cursor:pointer;transition:all var(--transition-interactive);}
+.btn-copy:hover{border-color:var(--color-primary);color:var(--color-primary);}
+.data-viewer-tabs{display:flex;gap:var(--space-1);padding:var(--space-2) var(--space-5);border-bottom:1px solid var(--color-divider);flex-shrink:0;background:var(--color-surface);}
+.dv-tab{padding:var(--space-1) var(--space-4);border-radius:var(--radius-sm);font-size:var(--text-xs);font-family:var(--font-mono);color:var(--color-text-muted);cursor:pointer;border:none;background:none;transition:all var(--transition-interactive);}
+.dv-tab:hover{color:var(--color-text);background:var(--color-surface-offset);}
+.dv-tab-active{background:var(--color-primary-highlight);color:var(--color-primary);}
+.data-viewer-body{flex:1;overflow-y:auto;padding:var(--space-4) var(--space-5);background:#1a1a2e;}
+.data-viewer-pre{margin:0;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono);font-size:12px;line-height:1.7;}
+[data-theme="light"] .data-viewer-body{background:#1e1e2e;}
+
 /* Migration arrow marker */
 .mig-arrow-head {
   pointer-events: none;
@@ -1064,6 +1081,11 @@ a { color: var(--color-primary); }
 [data-theme="light"] #lang-select { color: var(--color-text-muted); }
 
 </style>
+  <link rel="alternate" hreflang="fr" href="./index.html">
+  <link rel="alternate" hreflang="en" href="./index.html?lang=en">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -1109,6 +1131,9 @@ a { color: var(--color-primary); }
           <option value="ko">한국어</option>
         </select>
       </div>
+      <button id="btn-data-viewer" class="btn-icon" title="Données JSON" data-i18n-title="ui.dataViewerTitle" aria-label="Voir les données JSON">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+      </button>
       <button class="btn-icon" data-theme-toggle data-i18n-title="ui.toggleTheme" aria-label="Switch theme">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -1238,390 +1263,8 @@ a { color: var(--color-primary); }
 // =====================================================================
 // DATA — HOMININES
 // =====================================================================
-const SPECIES_DATA = [
-  {
-    id: 'afarensis',
-    name: 'Australopithecus afarensis',
-    common: '"Lucy" et ses contemporains',
-    start: -4100000,
-    end: -2700000,
-    color: '#8B6914',
-    regions: [
-      { name: 'Afar (Éthiopie)', lat: 11.5, lng: 41.0, radius: 700000, note: 'Hadar — "Lucy" AL 288-1, ~3,2 Ma' },
-      { name: 'Laetoli (Tanzanie)', lat: -3.5, lng: 35.5, radius: 600000, note: 'Empreintes de Laetoli, ~3,7 Ma' },
-      { name: 'Afrique de l\'Est', lat: 2.0, lng: 38.0, radius: 400000, note: 'Distribution générale' },
-    ],
-    sites: [
-      { name: 'Hadar (Éthiopie)', lat: 11.1, lng: 40.6, note: '"Lucy" AL 288-1 — 3,2 Ma' },
-      { name: 'Laetoli (Tanzanie)', lat: -3.53, lng: 35.35, note: 'Empreintes de bipédie — 3,7 Ma' },
-      { name: 'Omo (Éthiopie)', lat: 5.0, lng: 35.9, note: 'Nombreux fossiles, 2,8–3,9 Ma' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Fourrure + peau peu pigmentée (sous couverture)', color: '#c8956a', variant: null },
-      eyes: { desc: 'Bruns', color: '#5c3317' },
-      hair: { desc: 'Fourrure sombre', color: '#1a0a00' },
-      certainty: 'inference',
-      certLabel: '⚠️ Inférence évolutive',
-    },
-    biometrics: { heightM: '~150 cm', heightF: '~105 cm', weightM: '~42 kg', brain: '385–550 cm³', dimorphism: 'Très marqué (~40%)' },
-    tools: ['Aucun outil connu', 'Comportement proche des grands singes', 'Bipédie régulière'],
-    debate: 'Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées.',
-    migrations: [],
-  },
-  {
-    id: 'habilis',
-    name: 'Homo habilis',
-    common: '"L\'homme habile" — 1er genre Homo',
-    start: -2400000,
-    end: -1400000,
-    color: '#A07820',
-    regions: [
-      { name: 'Afrique de l\'Est', lat: -2.5, lng: 35.0, radius: 800000, note: 'Distribution principale' },
-    ],
-    sites: [
-      { name: 'Olduvai Gorge (Tanzanie)', lat: -2.99, lng: 35.35, note: 'Site type — Industrie Oldowayen' },
-      { name: 'Koobi Fora (Kenya)', lat: 3.94, lng: 36.17, note: 'Nombreux fossiles H. habilis' },
-      { name: 'Omo (Éthiopie)', lat: 5.0, lng: 35.9, note: 'Fossiles mixtes H. habilis / Au.' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Transition pelage → peau sombre émergente', color: '#8B4513', variant: null },
-      eyes: { desc: 'Bruns', color: '#5c3317' },
-      hair: { desc: 'Transition vers cheveux crépus sombres', color: '#2a1200' },
-      certainty: 'inference',
-      certLabel: '⚠️ Inférence évolutive',
-    },
-    biometrics: { heightM: '~130–135 cm', heightF: '~100–120 cm', weightM: '~37 kg', brain: '500–900 cm³', dimorphism: 'Marqué' },
-    tools: ['Industrie Oldowayen', 'Galets taillés (choppers)', 'Outils sur éclats'],
-    debate: 'Statut d\'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces.',
-    migrations: [],
-  },
-  {
-    id: 'erectus',
-    name: 'Homo erectus',
-    common: '"L\'homme debout" — 1er grand voyageur',
-    start: -1800000,
-    end: -250000,
-    color: '#C04010',
-    regions: [
-      { name: 'Afrique', lat: 5.0, lng: 20.0, radius: 2000000, note: 'Origine et longue présence africaine' },
-      { name: 'Asie du Sud-Est', lat: 0.0, lng: 110.0, radius: 1500000, note: 'Java, Chine — formes asiatiques robustes' },
-      { name: 'Eurasie', lat: 42.0, lng: 44.0, radius: 900000, note: 'Dmanisi (Géorgie) — ~1,8 Ma' },
-    ],
-    sites: [
-      { name: 'Turkana (Kenya)', lat: 3.9, lng: 36.1, note: '"Turkana Boy" KNM-WT 15000 — ~1,5 Ma' },
-      { name: 'Dmanisi (Géorgie)', lat: 41.33, lng: 44.1, note: 'Plus ancien hors Afrique — 1,8 Ma' },
-      { name: 'Sangiran (Java)', lat: -7.46, lng: 110.83, note: 'H. erectus asiatique — 1,5 Ma' },
-      { name: 'Zhoukoudian (Chine)', lat: 39.7, lng: 115.9, note: '"Homme de Pékin" — 780–250 ka' },
-      { name: 'Ndutu (Tanzanie)', lat: -3.2, lng: 35.5, note: 'Forme africaine tardive' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Noire ou très sombre (depuis ~1,2 Ma)', color: '#3a1800', variant: null },
-      eyes: { desc: 'Bruns', color: '#5c3317' },
-      hair: { desc: 'Noirs, probablement crépus', color: '#0a0500' },
-      certainty: 'genetic',
-      certLabel: '🔬 MC1R sweep génétique (~1,2 Ma)',
-    },
-    biometrics: { heightM: '145–185 cm', heightF: '130–160 cm', weightM: '40–68 kg', brain: '600–1 100 cm³ (moy. ~900)', dimorphism: 'Modéré' },
-    tools: ['Industrie Acheuléenne', 'Bifaces en amande', 'Usage du feu (probable)', 'Outils sur éclats Levallois (tardif)'],
-    debate: 'H. erectus sensu lato est probablement un groupement polyphylétique (Rogers et al. 2020) ; variations régionales importantes.',
-    migrations: [
-      { from: [5.0, 36.0], to: [41.33, 44.1], label: 'Sortie d\'Afrique ~1,8 Ma' },
-      { from: [41.33, 44.1], to: [-7.46, 110.83], label: 'Dispersion asiatique ~1,5 Ma' },
-      { from: [41.33, 44.1], to: [39.7, 115.9], label: 'Dispersion Chine ~0,78 Ma' },
-    ],
-  },
-  {
-    id: 'heidelbergensis',
-    name: 'Homo heidelbergensis',
-    common: 'Ancêtre probable Néandertaliens + Sapiens',
-    start: -700000,
-    end: -200000,
-    color: '#805090',
-    regions: [
-      { name: 'Afrique', lat: 8.0, lng: 20.0, radius: 1800000, note: 'Lignée vers H. sapiens' },
-      { name: 'Europe occidentale', lat: 46.0, lng: 12.0, radius: 1200000, note: 'Lignée vers Néandertaliens' },
-    ],
-    sites: [
-      { name: 'Kabwe (Zambie)', lat: -14.45, lng: 28.45, note: '"Crâne de Broken Hill" — 299 ka' },
-      { name: 'Casablanca (Maroc)', lat: 33.59, lng: -7.62, note: 'Thomas Quarry I — ~773 ka' },
-      { name: 'Mauer (Allemagne)', lat: 49.35, lng: 8.8, note: 'Site type — mâchoire 600 ka' },
-      { name: 'Bodo (Éthiopie)', lat: 10.9, lng: 40.1, note: 'Crâne africain 600 ka' },
-      { name: 'Atapuerca (Espagne)', lat: 42.36, lng: -3.52, note: 'Sima de los Huesos — ~430 ka' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Sombre (continuité africaine)', color: '#4a2200', variant: null },
-      eyes: { desc: 'Bruns', color: '#5c3317' },
-      hair: { desc: 'Sombres', color: '#1a0800' },
-      certainty: 'inference',
-      certLabel: '⚠️ Inférence évolutive (pas d\'ADN)',
-    },
-    biometrics: { heightM: '~175 cm (jusqu\'à 181)', heightF: '~157 cm', weightM: '~62 kg', brain: '1 100–1 400 cm³', dimorphism: 'Modéré' },
-    tools: ['Acheuléen avancé', 'Bifaces façonnés', 'Premières sépultures (Sima de los Huesos)', 'Débitage discoïde'],
-    debate: 'Statut d\'espèce très débattu. Certains chercheurs le séparent en H. antecessor (Europe) et gardent H. heidelbergensis pour l\'Afrique.',
-    migrations: [
-      { from: [8.0, 20.0], to: [46.0, 12.0], label: 'Dispersion vers l\'Europe ~600 ka' },
-    ],
-  },
-  {
-    id: 'neanderthal',
-    name: 'Homo neanderthalensis',
-    common: 'Les Néandertaliens — nos cousins directs',
-    start: -400000,
-    end: -28000,
-    color: '#2070B0',
-    regions: [
-      { name: 'Europe', lat: 47.0, lng: 10.0, radius: 1800000, note: 'Centre principal de dispersion' },
-      { name: 'Proche-Orient', lat: 35.0, lng: 38.0, radius: 700000, note: 'Coexistence avec H. sapiens' },
-      { name: 'Asie centrale', lat: 45.0, lng: 65.0, radius: 900000, note: 'Extension orientale' },
-    ],
-    sites: [
-      { name: 'Néander (Allemagne)', lat: 51.22, lng: 6.95, note: 'Site type — 1856, ~40 ka' },
-      { name: 'El Sidrón (Espagne)', lat: 43.38, lng: -5.38, note: 'ADN MC1R — pigmentation documentée' },
-      { name: 'Shanidar (Irak)', lat: 36.83, lng: 44.22, note: 'Sépultures + fleurs — ~65 ka' },
-      { name: 'La Chapelle (France)', lat: 45.22, lng: 1.75, note: '"Vieillard" — anatomie classique' },
-      { name: 'Vindija (Croatie)', lat: 46.34, lng: 16.07, note: 'Génomes complets séquencés — ~44 ka' },
-      { name: 'Teshik-Tash (Ouzbékistan)', lat: 38.35, lng: 66.83, note: 'Extension orientale — ~70 ka' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Variable : brun-sombre (majorité) ; pâle/rousse ~1% (MC1R R307G)', color: '#7a4020', variantColor: '#e8c090', variant: 'split' },
-      eyes: { desc: 'Bruns (majorité) ; bleus possibles minorité (haplotype OCA2)', color: '#5c3317', variantColor: '#6ea0c8', variant: 'split' },
-      hair: { desc: 'Bruns-châtain (majorité) ; roux (minorité)', color: '#5c2a00', variantColor: '#c06030', variant: 'split' },
-      certainty: 'dna-direct',
-      certLabel: '✅ ADN direct (MC1R + génomes complets)',
-    },
-    biometrics: { heightM: '~164 cm (148–177)', heightF: '~155 cm', weightM: '~65 kg', brain: '1 200–1 750 cm³', dimorphism: 'Faible' },
-    tools: ['Industrie Moustérienne', 'Débitage Levallois', 'Industrie Châtelperronienne (tardif)', 'Bijoux, ocre, sépultures rituelles'],
-    debate: 'Hawks (2023) : limites méthodologiques de l\'inférence phénotypique. Introgression de pigmentation Néandertal → H. sapiens (Iasi et al., Science 2024). Extinction : compétition avec H. sapiens vs absorption génétique.',
-    migrations: [
-      { from: [47.0, 10.0], to: [35.0, 38.0], label: 'Expansion vers Proche-Orient' },
-      { from: [47.0, 10.0], to: [45.0, 65.0], label: 'Extension orientale ~70 ka' },
-    ],
-  },
-  {
-    id: 'denisovan',
-    name: 'Dénisoviens',
-    common: '"Dragon Man" et ses cousins — mystère résolu en 2025',
-    start: -400000,
-    end: -30000,
-    color: '#208060',
-    regions: [
-      { name: 'Asie centrale/orientale', lat: 40.0, lng: 90.0, radius: 2500000, note: 'Vaste distribution en Asie' },
-      { name: 'Altaï (Sibérie)', lat: 51.4, lng: 85.7, radius: 500000, note: 'Grotte de Denisova — fossiles originaux' },
-    ],
-    sites: [
-      { name: 'Denisova (Sibérie)', lat: 51.4, lng: 84.67, note: 'Grotte de Denisova — doigt + dents, ~60 ka' },
-      { name: 'Harbin (Chine)', lat: 45.8, lng: 126.53, note: '"Dragon Man" ~146 ka — identifié Dénisovien en 2025' },
-      { name: 'Xiahe (Tibet)', lat: 35.2, lng: 102.5, note: 'Mâchoire Dénisovienne — ~160 ka, altitude 3280m' },
-      { name: 'Penghu (Taiwan)', lat: 23.57, lng: 119.57, note: 'Mâchoire de Penghu — Dénisovien probable' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Sombre', color: '#3a1800', variant: null },
-      eyes: { desc: 'Sombres', color: '#2a1800' },
-      hair: { desc: 'Sombres', color: '#0a0500' },
-      certainty: 'dna-direct',
-      certLabel: '✅ ADN ancien direct (Denisova 3)',
-    },
-    biometrics: { heightM: '> 180 cm (estimé)', heightF: 'Non documenté', weightM: '~100 kg (estimé)', brain: '≥ H. sapiens (estimé)', dimorphism: 'Inconnu' },
-    tools: ['Industrie intermédiaire (Altaï)', 'Bracelet en chloritolite (Denisova)', 'Parures et ornements'],
-    debate: 'Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (Fu Qiaomei et al., 2025). ADN nucléaire pas encore disponible — certains paléoanthropologues attendent confirmation définitive.',
-    migrations: [
-      { from: [51.4, 84.67], to: [35.2, 102.5], label: 'Présence tibétaine (altitude)' },
-      { from: [51.4, 84.67], to: [45.8, 126.53], label: 'Dragon Man ~146 ka' },
-    ],
-  },
-  {
-    id: 'sapiens-africa',
-    name: 'Homo sapiens — Afrique',
-    common: 'Les premiers "vrais" humains modernes',
-    start: -315000,
-    end: -100000,
-    color: '#C0A000',
-    regions: [
-      { name: 'Afrique', lat: 5.0, lng: 20.0, radius: 3000000, note: 'Berceau de H. sapiens' },
-    ],
-    sites: [
-      { name: 'Jebel Irhoud (Maroc)', lat: 32.12, lng: -8.27, note: 'Plus anciens H. sapiens — 315 ka' },
-      { name: 'Omo Kibish (Éthiopie)', lat: 5.15, lng: 35.87, note: 'Omo I et II — 195 ka' },
-      { name: 'Herto (Éthiopie)', lat: 10.67, lng: 40.67, note: 'Crânes modernes — 160 ka' },
-      { name: 'Florisbad (Afrique du Sud)', lat: -28.77, lng: 26.07, note: 'Fossile 259 ka — "Homo helmei"?' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Très sombre / noire (allèles fixés)', color: '#2a1000', variant: null },
-      eyes: { desc: 'Bruns foncés (fixés)', color: '#2a1400' },
-      hair: { desc: 'Noirs crépus', color: '#080400' },
-      certainty: 'dna-direct',
-      certLabel: '✅ ADN africain ancien (Nature 2025)',
-    },
-    biometrics: { heightM: '~185 cm', heightF: '~170 cm', weightM: '~70 kg', brain: '1 200–1 600 cm³', dimorphism: 'Faible' },
-    tools: ['Industrie MSA (Middle Stone Age)', 'Pointes foliacées', 'Perles en coquillage', 'Art rupestre précoce', 'Pêche, piégeage'],
-    debate: 'Débat "pan-africain" vs origine unique Est-africaine. Jebel Irhoud plaide pour une évolution sur l\'ensemble du continent.',
-    migrations: [],
-  },
-  {
-    id: 'sapiens-levant',
-    name: 'Homo sapiens — Levant',
-    common: '1ère sortie d\'Afrique documentée',
-    start: -130000,
-    end: -90000,
-    color: '#D07010',
-    regions: [
-      { name: 'Levant / Proche-Orient', lat: 32.0, lng: 35.5, radius: 600000, note: '1ère présence hors Afrique' },
-    ],
-    sites: [
-      { name: 'Skhul (Israël)', lat: 32.67, lng: 35.07, note: 'Sépultures — ~100–130 ka' },
-      { name: 'Qafzeh (Israël)', lat: 32.7, lng: 35.27, note: 'Sépultures avec parures — ~90–130 ka' },
-      { name: 'Tinshemet (Israël)', lat: 32.6, lng: 34.97, note: '5 sépultures H. sapiens — ~110 ka (2025)' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Très sombre (continuité africaine)', color: '#3a1800', variant: null },
-      eyes: { desc: 'Bruns foncés', color: '#3a1800' },
-      hair: { desc: 'Noirs', color: '#0a0500' },
-      certainty: 'inference',
-      certLabel: '⚠️ Inférence par continuité génomique',
-    },
-    biometrics: { heightM: '~185 cm', heightF: '~170 cm', weightM: '~70 kg', brain: '~1 450–1 550 cm³', dimorphism: 'Faible' },
-    tools: ['MSA / Early IUP', 'Ocre utilisée', 'Sépultures rituelles', 'Perles et parures'],
-    debate: 'Cette 1ère sortie (~130 ka) ne semble pas avoir contribué au peuplement mondial. La grande dispersion vient d\'une vague ultérieure (~60–70 ka).',
-    migrations: [
-      { from: [5.0, 20.0], to: [32.0, 35.5], label: 'Sortie d\'Afrique ~130 ka' },
-    ],
-  },
-  {
-    id: 'sapiens-upper-paleo',
-    name: 'Homo sapiens — Paléolithique sup.',
-    common: 'Les chasseurs-cueilleurs eurasiens',
-    start: -45000,
-    end: -14000,
-    color: '#E08020',
-    regions: [
-      { name: 'Eurasie', lat: 50.0, lng: 40.0, radius: 3000000, note: 'Dispersion post-sortie d\'Afrique' },
-      { name: 'Australie', lat: -25.0, lng: 133.0, radius: 1500000, note: 'Peuplement ~50 ka' },
-      { name: 'Amériques', lat: 55.0, lng: -120.0, radius: 2000000, note: 'Via Béringie ~16–20 ka' },
-    ],
-    sites: [
-      { name: 'Ust\'-Ishim (Sibérie)', lat: 57.3, lng: 69.0, note: 'Plus ancien génome H. sapiens non-africain — 45 ka' },
-      { name: 'Lascaux (France)', lat: 45.05, lng: 1.07, note: 'Peintures rupestres — ~17 ka' },
-      { name: 'Altamira (Espagne)', lat: 43.38, lng: -4.1, note: 'Peintures rupestres bisons — ~35 ka' },
-      { name: 'Dolní Věstonice (Tchéquie)', lat: 48.88, lng: 16.65, note: 'Vénus paléolithique — ~26 ka' },
-      { name: 'Sungir (Russie)', lat: 56.18, lng: 40.43, note: 'Sépulture parée de perles — ~34 ka' },
-      { name: 'Mungo (Australie)', lat: -33.73, lng: 143.05, note: 'Peuplement australien — ~42 ka' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Sombre (347/348 individus sur toute la période)', color: '#4a2800', variant: null },
-      eyes: { desc: 'Sombres (majorité) ; pic yeux clairs vers 14–4 ka', color: '#3a2000', variantColor: '#6ea0c8', variant: 'split' },
-      hair: { desc: 'Sombres (quasi-unanime)', color: '#1a0800' },
-      certainty: 'dna-direct',
-      certLabel: '✅ ADN direct — 348 génomes (PNAS 2025)',
-    },
-    biometrics: { heightM: '~170–185 cm', heightF: '~158–168 cm', weightM: '~70 kg', brain: '~1 350–1 500 cm³', dimorphism: 'Faible' },
-    tools: ['Industrie Aurignacienne', 'Industrie Gravettienne', 'Sagaies en os', 'Art pariétal (Lascaux, Altamira, Chauvet)', 'Statuettes Vénus', 'Parures élaborées'],
-    debate: 'Découplage yeux/peau : les yeux clairs précèdent la peau claire de plusieurs millénaires. Mécanisme sélectif non élucidé (sélection sexuelle ? dérive ? pléiotropie ?).',
-    migrations: [
-      { from: [5.0, 36.0], to: [57.3, 69.0], label: 'Grande sortie d\'Afrique ~60–70 ka' },
-      { from: [57.3, 69.0], to: [-33.73, 143.05], label: 'Peuplement Australie ~50 ka' },
-      { from: [57.3, 69.0], to: [55.0, -120.0], label: 'Béringie → Amériques ~16–20 ka' },
-    ],
-  },
-  {
-    id: 'sapiens-mesolithic',
-    name: 'Homo sapiens — Mésolithique',
-    common: 'Le paradoxe pigmentaire européen',
-    start: -14000,
-    end: -7000,
-    color: '#909030',
-    regions: [
-      { name: 'Europe', lat: 52.0, lng: 15.0, radius: 1800000, note: 'Chasseurs-cueilleurs WHG post-glaciaires' },
-    ],
-    sites: [
-      { name: 'Cheddar (Grande-Bretagne)', lat: 51.28, lng: -2.77, note: '"Cheddar Man" — peau sombre + yeux bleus, ~9 ka' },
-      { name: 'Skateholm (Suède)', lat: 55.5, lng: 13.57, note: 'SF12 — peau sombre + yeux clairs, ~9 ka' },
-      { name: 'Loschbour (Luxembourg)', lat: 49.78, lng: 6.28, note: 'WHG type — peau sombre + yeux bleus, ~8 ka' },
-      { name: 'La Braña (Espagne)', lat: 42.97, lng: -5.87, note: 'Individu peau sombre + yeux bleus, ~7 ka' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Sombre à intermédiaire (transition en cours)', color: '#5a3010', variantColor: '#c08050', variant: 'split' },
-      eyes: { desc: 'Pic yeux clairs : 11/35 individus (PNAS 2025)', color: '#3a2000', variantColor: '#6ea0c8', variant: 'split' },
-      hair: { desc: 'Sombres (quasi-unanime)', color: '#1a0800' },
-      certainty: 'dna-direct',
-      certLabel: '✅ ADN direct — "Paradoxe pigmentaire" documenté',
-    },
-    biometrics: { heightM: '~167–172 cm', heightF: '~155–163 cm', weightM: '~65 kg', brain: '~1 400 cm³', dimorphism: 'Faible' },
-    tools: ['Industrie Mésolithique', 'Microlithes géométriques', 'Arc et flèches perfectionnés', 'Pirogues', 'Pêche intensive'],
-    debate: 'Paradoxe peau sombre + yeux clairs : combinaison directement attestée par ADN. Le mécanisme de sélection des yeux clairs avant la peau est toujours inexpliqué.',
-    migrations: [],
-  },
-  {
-    id: 'sapiens-neolithic',
-    name: 'Homo sapiens — Néolithique',
-    common: 'L\'agriculture change tout, y compris la peau',
-    start: -10000,
-    end: -5000,
-    color: '#60A040',
-    regions: [
-      { name: 'Europe', lat: 48.0, lng: 18.0, radius: 1800000, note: 'Agriculteurs anatoliens (EEF) + WHG' },
-      { name: 'Proche-Orient (Anatolie)', lat: 39.0, lng: 33.0, radius: 800000, note: 'Berceau de l\'agriculture — 10 ka' },
-    ],
-    sites: [
-      { name: 'Ötzi (Alpes)', lat: 46.78, lng: 10.84, note: '"L\'homme des glaces" — peau sombre + cheveux noirs, ~5 300 ans' },
-      { name: 'Çatalhöyük (Turquie)', lat: 37.67, lng: 32.83, note: 'Grande ville néolithique — ~7 500 ans' },
-      { name: 'Stonehenge (GB)', lat: 51.18, lng: -1.83, note: 'Constructeurs peau intermédiaire — ~4 500 ans' },
-    ],
-    pigmentation: {
-      skin: { desc: 'Intermédiaire → claire en augmentation (SLC24A5 en diffusion) ; Ötzi : peau sombre attestée', color: '#8a5030', variantColor: '#d0a078', variant: 'split' },
-      eyes: { desc: 'Variables ; brun dominant ; clairs augmentant au nord', color: '#5c3317', variantColor: '#6ea0c8', variant: 'split' },
-      hair: { desc: 'Variables ; Ötzi : cheveux noirs (ADN direct)', color: '#2a1000', variantColor: '#7a5020', variant: 'split' },
-      certainty: 'dna-direct',
-      certLabel: '✅ ADN direct (Ötzi + nombreux génomes)',
-    },
-    biometrics: { heightM: '~163–168 cm (légère réduction)', heightF: '~152–158 cm', weightM: '~60–65 kg', brain: '~1 400 cm³', dimorphism: 'Faible' },
-    tools: ['Agriculture (blé, orge, légumineuses)', 'Élevage (bovins, ovins, porcins)', 'Poterie', 'Mégalithes (Stonehenge)', 'Polissage de la pierre', 'Tissage'],
-    debate: 'La réduction de taille est liée à la sédentarisation et aux déficiences alimentaires. Tri-hybridation WHG + EEF (agriculteurs anatoliens) + début apport Yamna.',
-    migrations: [
-      { from: [39.0, 33.0], to: [48.0, 18.0], label: 'Expansion agriculteurs anatoliens ~7 000 ans' },
-    ],
-  },
-  {
-    id: 'sapiens-bronze',
-    name: 'Homo sapiens — Bronze & Fer',
-    common: 'L\'arrivée des steppes change l\'Europe génétiquement',
-    start: -5000,
-    end: -2000,
-    color: '#A06020',
-    regions: [
-      { name: 'Europe', lat: 52.0, lng: 18.0, radius: 2000000, note: 'Peau claire généralisée en Europe du Nord' },
-      { name: 'Steppes pontiques', lat: 48.0, lng: 40.0, radius: 1200000, note: 'Yamna / Cordé — migrants des steppes' },
-    ],
-    sites: [
-      { name: 'Ötmarsum (Pays-Bas)', lat: 52.41, lng: 6.9, note: 'WHG tardif — peau claire émergente, ~3 500 ans' },
-      { name: 'Lolland (Danemark)', lat: 54.77, lng: 11.5, note: 'Bronze Age — peau claire attestée, ~3 200 ans' },
-      { name: 'Hallstatt (Autriche)', lat: 47.56, lng: 13.65, note: 'Civilisation du Fer — ~2 800 ans' },
-    ],
-    pigmentation: {
-      // skin: global spectrum — dark is ancestral and still the majority worldwide
-      skin: {
-        desc: 'Spectre continu : très sombre (Afrique sub-saharienne, Mélanésie) à intermédiaire (Asie, Amériques, Afrique du Nord) à claire (Europe du Nord). La peau sombre reste l\'état ancestral et la majorité mondiale.',
-        color: '#2a1000', variantColor: '#d4a878', variant: 'spectrum',
-        spectrumColors: ['#2a1000','#5a2e10','#8a5028','#b87848','#d4a878','#f0d0b0'],
-      },
-      eyes: {
-        desc: 'Brun reste la couleur la plus fréquente à l\'échelle mondiale (~80 % des humains). Yeux clairs (bleus, verts, noisette) surtout en Europe et Asie de l\'Ouest/Nord.',
-        color: '#3a1800', variantColor: '#6ea0c8', variant: 'split',
-      },
-      hair: {
-        desc: 'Forte variabilité mondiale : noirs et bruns sombres sont majoritaires ; blonds et roux concentrés surtout en Europe du Nord. Texture : frisés/crépus à lisses selon les latitudes.',
-        color: '#0a0500', variantColor: '#d4b050', variant: 'split',
-      },
-      certainty: 'dna-direct',
-      certLabel: '✅ ADN ancien + génomique moderne (PNAS 2025)',
-    },
-    biometrics: { heightM: '~168–175 cm', heightF: '~156–163 cm', weightM: '~65–70 kg', brain: '~1 400 cm³', dimorphism: 'Faible' },
-    tools: ['Métallurgie bronze puis fer', 'Chars de combat', 'Écriture (cunéiforme, hiéroglyphes)', 'Navigation avancée', 'Commerce longue distance'],
-    debate: 'Ghirotto et al. (PNAS 2025) et Ju & Kelleher (PNAS 2021) s\'accordent sur le caractère récent (~3 000 ans) de la peau claire mais divergent sur les rythmes de sélection vs dérive.',
-    migrations: [
-      { from: [48.0, 40.0], to: [52.0, 18.0], label: 'Migration Yamna → Europe ~5 000 ans' },
-    ],
-  },
-];
+// SPECIES_DATA — loaded from app/data/species.json via loadData()
+let SPECIES_DATA = [];
 
 // =====================================================================
 // TIMELINE SETUP
@@ -2409,75 +2052,8 @@ function initThemeToggle() {
 // =====================================================================
 // CHRONOLOGICAL EVENTS DATA (Chronologie-prehistorique 2026)
 // =====================================================================
-const EVENTS_DATA = [
-  // Technologie lithique
-  { id: 'lomekwi', time: -3300000, label: 'Outils Lomékwien', icon: '🪨', color: '#8B6914',
-    desc: 'Plus anciens outils connus — Lomekwi 3, Kenya (3,3 Ma). Débat sur l\'intentionnalité.', category: 'tools',
-    lat: 3.38, lng: 35.83, source: 'Nature 521:310 (2015)' },
-  { id: 'oldowayen', time: -2600000, label: 'Oldowayen continu 2,75–2,44 Ma', icon: '⚒', color: '#A07820',
-    desc: 'Séquence Oldowayen continue sur ~300 000 ans — Namorotukunan, Koobi Fora, Kenya.', category: 'tools',
-    lat: 3.94, lng: 36.17, source: 'Nature Commun. 16 (2025)' },
-  { id: 'acheulean', time: -1760000, label: 'Premier biface (Acheuléen)', icon: '🗿', color: '#C04010',
-    desc: 'Premiers bifaces façonnés — Kokiselei 4, Turkana Ouest. Rupture cognitive majeure.', category: 'tools',
-    lat: 3.5, lng: 35.7, source: 'Nature 460:82 (2009)' },
-  // Feu
-  { id: 'fire-use', time: -1000000, label: 'Usage du feu (>1 Ma)', icon: '🔥', color: '#D05010',
-    desc: 'Traces de combustion >1 Ma — Wonderwerk Cave, Afrique du Sud. Usage ≠ fabrication intentionnelle.', category: 'fire',
-    lat: -27.85, lng: 23.55, source: 'PNAS 109:E1215 (2012)' },
-  { id: 'fire-make', time: -400000, label: 'Fabrication intentionnelle du feu', icon: '🔥', color: '#E06020',
-    desc: 'Pyrite de fer + argile cuite >750°C — Barnham, Suffolk, Angleterre. Repousse le record de 350 000 ans.', category: 'fire',
-    lat: 52.28, lng: 0.9, source: 'Nature (déc. 2025)' },
-  // Phylogénie
-  { id: 'thomas-quarry', time: -773000, label: 'Ancêtre commun Sapiens / Néandertal / Dénisovien', icon: '🦴', color: '#805090',
-    desc: 'Thomas Quarry I, Casablanca — 773 000 ans. Inversion magnétique Brunhes/Matuyama. Population à la base des 3 lignées (Nature 2026).', category: 'phylo',
-    lat: 33.59, lng: -7.62, source: 'Nature (2026)' },
-  // Comportements symboliques
-  { id: 'bruniquel', time: -176500, label: 'Structures rituelles Néandertal', icon: '🗺', color: '#2070B0',
-    desc: 'Structures en stalagmites à 336m de profondeur — Bruniquel, France. Plus ancien usage intentionnel de l\'espace souterrain.', category: 'symbolic',
-    lat: 44.17, lng: 1.66, source: 'Nature 534:111 (2016)' },
-  { id: 'beads-nassarius', time: -130000, label: 'Coquillages perforés (parures)', icon: '📿', color: '#C0A000',
-    desc: 'Nassarius perforés — Skhul (Israël) 140–100 ka ; Taforalt (Maroc) 82 ka. Premières parures symboliques.', category: 'symbolic',
-    lat: 32.67, lng: 35.07, source: 'PNAS 104:9964 (2007)' },
-  { id: 'burial-tinshemet', time: -110000, label: '1ère sépulture intentionnelle (révisé)', icon: '⚰', color: '#D07010',
-    desc: '5 individus en position fœtale + ocre + objets rituels — Tinshemet Cave, Israël. Révisé de 100 000 à 110 000 ans (Nature Human Behaviour 2025).', category: 'symbolic',
-    lat: 32.6, lng: 34.97, source: 'Nature Human Behaviour (2025)' },
-  { id: 'blombos-beads', time: -75000, label: 'Perles Blombos Cave', icon: '📿', color: '#E08020',
-    desc: '41+ perles Nassarius kraussianus — Blombos Cave, Afrique du Sud. 75 000 ans (OSL/TL).', category: 'symbolic',
-    lat: -34.42, lng: 21.22, source: 'J. Hum. Evol. 48:3 (2005)' },
-  // Art pariétal
-  { id: 'art-sulawesi-old', time: -67800, label: 'Plus ancien art rupestre mondial (≥67 800 ans)', icon: '🎨', color: '#8050C0',
-    desc: 'Empreintes de main — Liang Metanduno, île de Muna, Sulawesi. ≥67 800 ans. Dépasse de 16 600 ans le précédent record (Nature 2026).', category: 'art',
-    lat: -4.9, lng: 122.5, source: 'Nature (janv. 2026)' },
-  { id: 'art-sulawesi-fig', time: -51200, label: 'Plus ancienne scène narrative (51 200 ans)', icon: '🎨', color: '#9060D0',
-    desc: 'Figures anthropomorphes + cochon sauvage — Leang Karampuang, Sulawesi. Première scène avec interaction connue.', category: 'art',
-    lat: -4.55, lng: 119.55, source: 'Nature 631 (2024)' },
-  { id: 'aurignacian', time: -43000, label: 'Culture Aurignacienne', icon: '⚒', color: '#E08020',
-    desc: '1ère grande culture matérielle H. sapiens en Europe (43–28 ka). Deux vagues de dispersion confirmées par génomique (2024).', category: 'tools',
-    lat: 44.93, lng: 1.27, source: 'Nature Commun. (2024)' },
-  { id: 'art-chauvet', time: -36000, label: 'Grotte Chauvet (art pariétal)', icon: '🎨', color: '#A070D0',
-    desc: 'Ardèche, France — 37–33 500 ans (phase 1). Débat actif sur attribution culturelle Aurignacien vs Gravettien.', category: 'art',
-    lat: 44.38, lng: 4.42, source: 'PNAS 113:4670 (2016)' },
-  { id: 'art-altamira', time: -35000, label: 'Altamira (bisons, ~35 ka)', icon: '🎨', color: '#A070D0',
-    desc: 'Peintures rupestres bisons — Altamira, Espagne. ~35 000 ans.', category: 'art',
-    lat: 43.38, lng: -4.1, source: '' },
-  { id: 'art-lascaux', time: -17000, label: 'Lascaux (~17 000 ans)', icon: '🎨', color: '#B080E0',
-    desc: 'Chef-d\'œuvre pariétal — Lascaux, Dordogne, France. ~17 000 ans.', category: 'art',
-    lat: 45.05, lng: 1.07, source: '' },
-  // Migrations clés
-  { id: 'sapiens-europe', time: -47500, label: 'H. sapiens en Europe (47 500 ans)', icon: '🚶', color: '#E08020',
-    desc: 'Ossements + industrie LRJ — Grotte de Ranis, Thuringe, Allemagne. Légèrement révisé de 45 000 à 47 500 ans (Nature 2024).', category: 'migration',
-    lat: 50.67, lng: 11.57, source: 'Nature 626:341 (2024)' },
-  { id: 'peuplement-australie', time: -65000, label: 'Peuplement Australie (65 000 ans)', icon: '🚣', color: '#208060',
-    desc: 'OSL 65 000 ans — Madjedbebe, Territoire du Nord. Génomique (2025) : ~60 000 ans, deux routes depuis la Sonde.', category: 'migration',
-    lat: -12.55, lng: 132.97, source: 'Nature 547 (2017)' },
-  { id: 'americas', time: -16000, label: 'Peuplement des Amériques (très débattu)', icon: '🚶', color: '#E04040',
-    desc: 'Monte Verde II reclassé Holocène moyen par Surovell et al. (Science 2026). Débat pré-Clovis non résolu — l\'un des débats les plus actifs en 2026.', category: 'migration',
-    lat: -41.5, lng: -73.0, source: 'Science 391:1283 (2026)' },
-  // Néolithique
-  { id: 'domestication', time: -10400, label: 'Domestication caprins', icon: '🐑', color: '#60A040',
-    desc: 'Processus graduel sur ~1 000 ans — Aşıklı Höyük, Anatolie. Génomique 118 génomes anciens (Science 2025).', category: 'neolithic',
-    lat: 38.35, lng: 34.17, source: 'PNAS 119:e2110930119 (2022)' },
-];
+// EVENTS_DATA — loaded from app/data/events.json via loadData()
+let EVENTS_DATA  = [];
 
 const CATEGORY_COLORS = {
   tools: '#A07820', fire: '#E06020', phylo: '#805090', symbolic: '#C0A000',
@@ -2645,10 +2221,101 @@ function updateAnimatedMigrations() {
   });
 }
 
+
+// =====================================================================
+// DATA LOADING (Évolution 1) — fetch JSON-LD from app/data/
+// =====================================================================
+async function loadData() {
+  try {
+    const [sr, er] = await Promise.all([
+      fetch('./data/species.json'),
+      fetch('./data/events.json'),
+    ]);
+    if (!sr.ok) throw new Error('species.json HTTP ' + sr.status);
+    if (!er.ok) throw new Error('events.json HTTP '  + er.status);
+    const sj = await sr.json();
+    const ej = await ej_json(er);
+    window._RAW_SPECIES_JSON = sj;
+    window._RAW_EVENTS_JSON  = ej;
+    SPECIES_DATA = sj.itemListElement.map(adaptSpecies);
+    EVENTS_DATA  = ej.itemListElement.map(adaptEvent);
+  } catch(err) {
+    console.error('[Hominines] Data load failed:', err.message);
+  }
+  bootApp();
+}
+
+// Await json() — helper to allow parallel await
+async function ej_json(r) { return r.json(); }
+
+function adaptSpecies(item) {
+  const skin = {
+    desc:  (item['hominin:skinDesc'] || {}).fr || item['hominin:skinDesc'] || '',
+    color: item['hominin:skinColor'] || '#888',
+    variant: item['hominin:skinVariant'] || null,
+  };
+  if (item['hominin:skinVariantColor'])   skin.variantColor   = item['hominin:skinVariantColor'];
+  if (item['hominin:skinSpectrumColors']) skin.spectrumColors = item['hominin:skinSpectrumColors'];
+
+  const eyes = {
+    desc:  (item['hominin:eyesDesc'] || {}).fr || item['hominin:eyesDesc'] || '',
+    color: item['hominin:eyesColor'] || '#5c3317',
+    variant: item['hominin:eyesVariant'] || null,
+  };
+  if (item['hominin:eyesVariantColor']) eyes.variantColor = item['hominin:eyesVariantColor'];
+
+  const hair = {
+    desc:  (item['hominin:hairDesc'] || {}).fr || item['hominin:hairDesc'] || '',
+    color: item['hominin:hairColor'] || '#1a0800',
+    variant: item['hominin:hairVariant'] || null,
+  };
+  if (item['hominin:hairVariantColor']) hair.variantColor = item['hominin:hairVariantColor'];
+
+  return {
+    id:     item['@id'],
+    name:   item['taxon:scientificName'],
+    common: (item.name || {}).fr || item.name || '',
+    start:  item['hominin:periodStart'],
+    end:    item['hominin:periodEnd'],
+    color:  item['hominin:color'],
+    regions:  (item['hominin:regions']    || []).map(r => ({ name:r.name, lat:r.lat, lng:r.lng, radius:r.radius, note:r.note })),
+    sites:    (item['hominin:fossilSites'] || []).map(s => ({ name:s.name, lat:s.lat, lng:s.lng, note:s.note })),
+    pigmentation: {
+      skin, eyes, hair,
+      certainty:  item['hominin:pigmentationCertainty'],
+      certLabel:  item['hominin:pigmentationCertLabel'],
+    },
+    biometrics: {
+      heightM: item['hominin:heightM'], heightF: item['hominin:heightF'],
+      weightM: item['hominin:weightM'], brain:   item['hominin:brain'],
+      dimorphism: item['hominin:dimorphism'],
+    },
+    tools:      item['hominin:tools']  || [],
+    debate:     item['hominin:debate'] || '',
+    migrations: (item['hominin:migrations'] || []).map(m => ({ from:m.from, to:m.to, label:m.label })),
+  };
+}
+
+function adaptEvent(item) {
+  const geo = (item.location && item.location.geo) || { latitude: 0, longitude: 0 };
+  return {
+    id:       item['@id'],
+    time:     item['hominin:dateYearsBP'],
+    label:    (item.name || {}).fr || item.name || '',
+    icon:     item['hominin:icon']  || '●',
+    color:    item['hominin:color'] || '#888',
+    desc:     (item.description || {}).fr || item.description || '',
+    category: item['hominin:category'] || 'tools',
+    lat:      geo.latitude  || 0,
+    lng:      geo.longitude || 0,
+    source:   item['hominin:dateReference'] || '',
+  };
+}
+
 // =====================================================================
 // BOOT
 // =====================================================================
-document.addEventListener('DOMContentLoaded', () => {
+function bootApp() {
   initMap();
   eventsLayer = L.layerGroup().addTo(leafletMap);
   animMigLayer = L.layerGroup().addTo(leafletMap);
@@ -2669,7 +2336,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Show afarensis by default
-  setTimeout(() => { selectSpecies(SPECIES_DATA[0]); }, 400);
+  setTimeout(() => { if (SPECIES_DATA.length) selectSpecies(SPECIES_DATA[0]); }, 400);
 
   // UX: after 3s of idle, pulse the play button + show welcome hint
   // (research shows ~3s is when users start wondering what to do on a new data-viz page)
@@ -2692,7 +2359,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('needle-wrapper').addEventListener('click', dismissPulse, { once: true });
   document.getElementById('needle-wrapper').addEventListener('touchstart', dismissPulse, { once: true });
-});
+}
+
+document.addEventListener('DOMContentLoaded', loadData);
 </script>
 
 <!-- =====================================================================
@@ -2736,6 +2405,8 @@ const TRANSLATIONS = {
         debateSection: 'Débats scientifiques actifs',
         periodTo: 'à',
         oneSpecies: 'Homo sapiens — une seule espèce',
+        dataViewerTitle: 'Données JSON', dataViewerHeading: 'Données brutes (JSON-LD)',
+        tabSpecies: 'Espèces', tabEvents: 'Jalons', copyJSON: 'Copier', copied: 'Copié !',
         experimentalWarning: 'Expérimental · Généré par IA · Vérifiez les sources',
         // Tooltips UI
         playTitle: 'Lecture automatique — voir les migrations en direct',
@@ -2780,6 +2451,8 @@ const TRANSLATIONS = {
         debateSection: 'Active scientific debates',
         periodTo: 'to',
         oneSpecies: 'Homo sapiens — one single species',
+        dataViewerTitle: 'JSON data', dataViewerHeading: 'Raw data (JSON-LD)',
+        tabSpecies: 'Species', tabEvents: 'Events', copyJSON: 'Copy', copied: 'Copied!',
         experimentalWarning: 'Experimental · AI-generated · Verify sources',
         // Tooltips UI
         playTitle: 'Auto-play — watch migrations in real time',
@@ -2824,6 +2497,8 @@ const TRANSLATIONS = {
         debateSection: 'Debates científicos activos',
         periodTo: 'a',
         oneSpecies: 'Homo sapiens — una sola especie',
+        dataViewerTitle: 'Datos JSON', dataViewerHeading: 'Datos brutos (JSON-LD)',
+        tabSpecies: 'Especies', tabEvents: 'Hitos', copyJSON: 'Copiar', copied: '¡Copiado!',
         experimentalWarning: 'Experimental · Generado por IA · Verifica las fuentes',
         // Tooltips UI
         playTitle: 'Reproducción automática — ver migraciones en directo',
@@ -2868,6 +2543,8 @@ const TRANSLATIONS = {
         debateSection: 'Aktive wissenschaftliche Debatten',
         periodTo: 'bis',
         oneSpecies: 'Homo sapiens — eine einzige Spezies',
+        dataViewerTitle: 'JSON-Daten', dataViewerHeading: 'Rohdaten (JSON-LD)',
+        tabSpecies: 'Arten', tabEvents: 'Meilensteine', copyJSON: 'Kopieren', copied: 'Kopiert!',
         experimentalWarning: 'Experimentell · KI-generiert · Quellen prüfen',
         // Tooltips UI
         playTitle: 'Automatische Wiedergabe — Migrationen in Echtzeit',
@@ -2912,6 +2589,8 @@ const TRANSLATIONS = {
         debateSection: '活跃科学争议',
         periodTo: '至',
         oneSpecies: 'Homo sapiens — 同一物种',
+        dataViewerTitle: 'JSON数据', dataViewerHeading: '原始数据 (JSON-LD)',
+        tabSpecies: '物种', tabEvents: '里程碑', copyJSON: '复制', copied: '已复制！',
         experimentalWarning: '实验性 · AI生成 · 请核实来源',
         // Tooltips UI
         playTitle: '自动播放 — 实时观看迁徙',
@@ -2956,6 +2635,8 @@ const TRANSLATIONS = {
         debateSection: 'نقاشات علمية نشطة',
         periodTo: 'إلى',
         oneSpecies: 'Homo sapiens — نوع واحد',
+        dataViewerTitle: 'بيانات JSON', dataViewerHeading: 'البيانات الخام (JSON-LD)',
+        tabSpecies: 'الأنواع', tabEvents: 'المعالم', copyJSON: 'نسخ', copied: 'تم النسخ!',
         experimentalWarning: 'تجريبي · توليد ذكاء اصطناعي · تحقق من المصادر',
         // Tooltips UI
         playTitle: 'تشغيل تلقائي — شاهد الهجرات في الوقت الفعلي',
@@ -3000,6 +2681,8 @@ const TRANSLATIONS = {
         debateSection: 'Debates científicos ativos',
         periodTo: 'a',
         oneSpecies: 'Homo sapiens — uma única espécie',
+        dataViewerTitle: 'Dados JSON', dataViewerHeading: 'Dados brutos (JSON-LD)',
+        tabSpecies: 'Espécies', tabEvents: 'Marcos', copyJSON: 'Copiar', copied: 'Copiado!',
         experimentalWarning: 'Experimental · Gerado por IA · Verifique as fontes',
         // Tooltips UI
         playTitle: 'Reprodução automática — ver migrações em direto',
@@ -3044,6 +2727,8 @@ const TRANSLATIONS = {
         debateSection: 'Dibattiti scientifici attivi',
         periodTo: 'a',
         oneSpecies: 'Homo sapiens — un\'unica specie',
+        dataViewerTitle: 'Dati JSON', dataViewerHeading: 'Dati grezzi (JSON-LD)',
+        tabSpecies: 'Specie', tabEvents: 'Tappe', copyJSON: 'Copia', copied: 'Copiato!',
         experimentalWarning: 'Sperimentale · Generato da IA · Verificare le fonti',
         // Tooltips UI
         playTitle: 'Riproduzione automatica — guarda le migrazioni in tempo reale',
@@ -3088,6 +2773,8 @@ const TRANSLATIONS = {
         debateSection: '現在進行中の科学的議論',
         periodTo: 'から',
         oneSpecies: 'Homo sapiens — ひとつの種',
+        dataViewerTitle: 'JSONデータ', dataViewerHeading: '生データ (JSON-LD)',
+        tabSpecies: '種', tabEvents: '里程標', copyJSON: 'コピー', copied: 'コピー済み！',
         experimentalWarning: '実験的 · AI生成 · ソースを確認',
         // Tooltips UI
         playTitle: '自動再生 — リアルタイムで移動を見る',
@@ -3132,6 +2819,8 @@ const TRANSLATIONS = {
         debateSection: '활발한 과학적 논쟁',
         periodTo: '까지',
         oneSpecies: 'Homo sapiens — 하나의 종',
+        dataViewerTitle: 'JSON 데이터', dataViewerHeading: '원시 데이터 (JSON-LD)',
+        tabSpecies: '종', tabEvents: '이정표', copyJSON: '복사', copied: '복사됨!',
         experimentalWarning: '실험적 · AI 생성 · 출처 확인 필요',
         // Tooltips UI
         playTitle: '자동 재생 — 실시간 이동 경로 보기',
@@ -3215,9 +2904,19 @@ function applyTranslations() {
   const esDesc = document.querySelector('.empty-state-desc');
   if (esDesc) esDesc.textContent = t('ui.selectSpeciesDesc');
 
-  // Update experimental warning in header
+  // Experimental warning
   const warnEl = document.querySelector('[data-i18n="ui.experimentalWarning"]');
   if (warnEl) warnEl.textContent = t('ui.experimentalWarning');
+
+  // Data viewer translations
+  const dvHead = document.getElementById('dvh');
+  if (dvHead) dvHead.textContent = t('ui.dataViewerHeading');
+  const copyLbl = document.getElementById('copy-label');
+  if (copyLbl && !copyLbl.textContent.startsWith('\u2713')) copyLbl.textContent = t('ui.copyJSON');
+  document.querySelectorAll('.dv-tab').forEach(btn => {
+    btn.textContent = btn.dataset.tab === 'species' ? t('ui.tabSpecies') : t('ui.tabEvents');
+  });
+  if (typeof _dv !== 'undefined' && _dv.open) switchDataTab(_dv.tab);
 
   // Update all data-i18n-title elements (title= attributes)
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
@@ -3275,6 +2974,11 @@ function initI18n() {
       applyTranslations();
     });
 
+  i18next.on('languageChanged', (lng) => {
+    document.documentElement.setAttribute('lang', lng);
+    document.documentElement.setAttribute('translate', lng === 'fr' ? 'yes' : 'no');
+  });
+
   // Language selector change handler
   if (sel) {
     sel.addEventListener('change', function() {
@@ -3296,6 +3000,58 @@ if (document.readyState === 'loading') {
   // DOM already ready — still wait a tick so the app has initialised
   setTimeout(initI18n, 50);
 }
+
+// =====================================================================
+// DATA VIEWER JS (Évolution 2)
+// =====================================================================
+const _dv = { open: false, tab: 'species' };
+function openDataViewer(tab) {
+  const ov = document.getElementById('data-viewer-overlay');
+  const dr = document.getElementById('data-viewer-drawer');
+  ov.hidden = false; dr.hidden = false;
+  requestAnimationFrame(() => { ov.classList.add('visible'); dr.classList.add('open'); });
+  ov.setAttribute('aria-hidden','false');
+  _dv.open = true; switchDataTab(tab||'species');
+}
+function closeDataViewer() {
+  const ov = document.getElementById('data-viewer-overlay');
+  const dr = document.getElementById('data-viewer-drawer');
+  ov.classList.remove('visible'); dr.classList.remove('open');
+  setTimeout(() => { ov.hidden=true; dr.hidden=true; ov.setAttribute('aria-hidden','true'); }, 300);
+  _dv.open = false;
+}
+function switchDataTab(tab) {
+  _dv.tab = tab;
+  document.querySelectorAll('.dv-tab').forEach(b => {
+    const a = b.dataset.tab===tab; b.classList.toggle('dv-tab-active',a); b.setAttribute('aria-selected',String(a));
+  });
+  const raw = tab==='species' ? window._RAW_SPECIES_JSON : window._RAW_EVENTS_JSON;
+  const el = document.getElementById('json-code');
+  if (!el) return;
+  if (!raw) { el.textContent='// Chargement...'; return; }
+  el.textContent = JSON.stringify(raw,null,2);
+  if (window.Prism) Prism.highlightElement(el);
+}
+function initDataViewer() {
+  const btnOpen = document.getElementById('btn-data-viewer');
+  if (!btnOpen) return;
+  btnOpen.addEventListener('click', () => openDataViewer('species'));
+  document.getElementById('btn-close-data-viewer').addEventListener('click', closeDataViewer);
+  document.getElementById('data-viewer-overlay').addEventListener('click', closeDataViewer);
+  document.querySelectorAll('.dv-tab').forEach(b => b.addEventListener('click', () => switchDataTab(b.dataset.tab)));
+  document.getElementById('btn-copy-json').addEventListener('click', () => {
+    const raw = _dv.tab==='species' ? window._RAW_SPECIES_JSON : window._RAW_EVENTS_JSON;
+    if (!raw) return;
+    navigator.clipboard.writeText(JSON.stringify(raw,null,2)).then(() => {
+      const lbl = document.getElementById('copy-label');
+      const orig = lbl.textContent;
+      lbl.textContent = '\u2713 ' + (typeof i18next!=='undefined' && i18next.isInitialized ? i18next.t('ui.copied') : 'Copi\u00e9');
+      setTimeout(() => lbl.textContent=orig, 2000);
+    });
+  });
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && _dv.open) closeDataViewer(); });
+}
+window.addEventListener('load', initDataViewer);
 
 // Patch stopPlay / startPlay to update label language-aware
 window.addEventListener('load', function() {
@@ -3319,5 +3075,18 @@ window.addEventListener('load', function() {
 
 })();
 </script>
+<div id="data-viewer-overlay" class="data-viewer-overlay" hidden aria-hidden="true"></div>
+<aside id="data-viewer-drawer" class="data-viewer-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dvh">
+  <div class="data-viewer-header">
+    <h2 id="dvh" class="data-viewer-title">Données brutes (JSON-LD)</h2>
+    <button id="btn-copy-json" class="btn-copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span id="copy-label">Copier</span></button>
+    <button id="btn-close-data-viewer" class="btn-icon" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+  </div>
+  <div class="data-viewer-tabs" role="tablist">
+    <button role="tab" aria-selected="true"  data-tab="species" class="dv-tab dv-tab-active">Espèces</button>
+    <button role="tab" aria-selected="false" data-tab="events"  class="dv-tab">Jalons</button>
+  </div>
+  <div class="data-viewer-body"><pre class="data-viewer-pre"><code class="language-json" id="json-code" translate="no"></code></pre></div>
+</aside>
 </body>
 </html>
