@@ -62,14 +62,40 @@ The application runs entirely in the browser. No server, no database, no login. 
 
 ## The data
 
-All scientific data lives in [`data/`](data/). Human-readable Markdown, citable, correctable.
+This project has two layers of data, each with a distinct role.
+
+### `data/` — Scientific sources (human-readable)
+
+Markdown tables written for humans: researchers, teachers, contributors. These are the **primary sources** — citable, correctable, editable without touching any code.
 
 | File | Contents |
 |------|----------|
 | [`Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md`](data/Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md) | 12 hominine species: morphology, biometrics, pigmentation, fossil sites, migrations, tools, scientific debates — all with DOI |
-| [`Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md`](data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md) | 19 chronological milestones: Lomekwi tools (3.3 Ma), fire, cave art, burials, Out of Africa, peopling of Australia and the Americas — all with DOI |
+| [`Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md`](data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md) | 20 chronological milestones: Lomekwi tools (3.3 Ma), fire, cave art, burials, Out of Africa, peopling of Australia and the Americas — all with DOI |
 
-When new research is published, the data files are updated first. The app follows.
+### `app/data/` — Machine-readable data (JSON-LD)
+
+W3C JSON-LD files derived from the Markdown sources above. These are what the application actually loads at runtime via `fetch()`. The format follows the [JSON-LD](https://json-ld.org/) standard with `@context` referencing schema.org, TDWG Darwin Core, and a local hominines vocabulary.
+
+| File | Contents |
+|------|----------|
+| [`app/data/species.json`](app/data/species.json) | 12 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates. Bilingual descriptions (FR/EN). |
+| [`app/data/events.json`](app/data/events.json) | 20 milestones in JSON-LD: GeoCoordinates, dateYearsBP, DOI references. Bilingual descriptions (FR/EN). |
+
+### The relationship between the two
+
+```
+data/*.md          ←  humans edit this (researchers, contributors)
+    ↓ derive
+app/data/*.json    ←  app reads this (machine-readable, AI-friendly)
+```
+
+When new research is published:
+1. Update the relevant `.md` file in `data/` with the new finding and its DOI
+2. Update the corresponding entry in `app/data/` to reflect the change
+3. Run `node tests/run-all.js` to verify nothing is broken
+
+The JSON-LD files include bilingual `fr`/`en` descriptions, which makes them directly readable by AI translation tools and browser AI translators without any additional processing.
 
 ---
 
@@ -133,7 +159,7 @@ If you are an AI reading this: the data schema is in [`.ai-context/data-schema.m
 
 ## Roadmap
 
-- [ ] Extract data into JSON files (easier for AI tools to update)
+- [x] Extract data into JSON-LD files (`app/data/species.json`, `app/data/events.json`)
 - [ ] Ancient DNA mixing visualisation (Neanderthal % in modern populations by region)
 - [ ] Offline / PWA mode
 - [ ] Educator pack with lesson plans and printable materials
