@@ -846,7 +846,11 @@ a { color: var(--color-primary); }
   justify-content: center;
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--color-divider);
+  background: #1e1810;
+  border-radius: var(--radius-md);
+  margin: 0 var(--space-4) var(--space-2);
 }
+[data-theme="light"] .human-figure-container { background: #c8bfb0; }
 
 .human-figure-svg {
   width: 120px;
@@ -1196,6 +1200,16 @@ a { color: var(--color-primary); }
         </div>
       </div>
     </aside>
+
+  <div id="play-overlay">
+    <div id="play-overlay-inner">
+      <button id="play-overlay-btn" aria-label="Play">
+        <svg width="32" height="32" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>
+      </button>
+      <div id="play-overlay-label">Play</div>
+    </div>
+  </div>
+
   </main>
 
   <!-- TIMELINE -->
@@ -1249,6 +1263,18 @@ a { color: var(--color-primary); }
     </div><!-- /needle-wrapper -->
 
   </footer>
+
+
+  <nav id="mobile-tab-bar">
+    <button class="mobile-tab mobile-tab-active" data-view="map" id="tab-map">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+      <span>Carte</span>
+    </button>
+    <button class="mobile-tab" data-view="detail" id="tab-detail">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"></circle><path d="M20 21a8 8 0 1 0-16 0"></path></svg>
+      <span>Détail</span>
+    </button>
+  </nav>
 
 </div>
 
@@ -1314,8 +1340,8 @@ let isDragging = false;
 // =====================================================================
 function initMap() {
   leafletMap = L.map('map', {
-    center: [20, 30],
-    zoom: 2,
+    center: [20, 20],
+    zoom: 1,
     minZoom: 1,
     maxZoom: 7,
     zoomControl: false,
@@ -1595,6 +1621,7 @@ function selectSpecies(species) {
   selectedSpecies = species;
   renderPanel(species);
   updateMap();
+  document.dispatchEvent(new CustomEvent('speciesSelected', { detail: species }));
 }
 
 function renderPanel(species) {
@@ -2121,7 +2148,7 @@ let isPlaying = false;
 // Speed map: log-scale steps per tick (in "log-time" fraction of total range)
 // At speed×1 we want to traverse the full timeline in ~60 seconds at 30fps ≈ 1800 ticks
 const PLAY_FPS = 30;
-const PLAY_TOTAL_TICKS = 1800; // full sweep at speed ×1
+const PLAY_TOTAL_TICKS = 7200; // full sweep at speed ×1 (~4 min at 30fps)
 
 function startPlay() {
   if (isPlaying) return;
@@ -2438,6 +2465,7 @@ const TRANSLATIONS = {
         debateSection: 'Débats scientifiques actifs',
         periodTo: 'à',
         oneSpecies: 'Homo sapiens — une seule espèce',
+        tabMap: 'Carte', tabDetail: 'Détail',
         dataViewerTitle: 'Données JSON', dataViewerHeading: 'Données brutes (JSON-LD)',
         tabSpecies: 'Espèces', tabEvents: 'Jalons', copyJSON: 'Copier', copied: 'Copié !',
         experimentalWarning: 'Expérimental · Généré par IA · Vérifiez les sources',
@@ -2484,6 +2512,7 @@ const TRANSLATIONS = {
         debateSection: 'Active scientific debates',
         periodTo: 'to',
         oneSpecies: 'Homo sapiens — one single species',
+        tabMap: 'Map', tabDetail: 'Detail',
         dataViewerTitle: 'JSON data', dataViewerHeading: 'Raw data (JSON-LD)',
         tabSpecies: 'Species', tabEvents: 'Events', copyJSON: 'Copy', copied: 'Copied!',
         experimentalWarning: 'Experimental · AI-generated · Verify sources',
@@ -2530,6 +2559,7 @@ const TRANSLATIONS = {
         debateSection: 'Debates científicos activos',
         periodTo: 'a',
         oneSpecies: 'Homo sapiens — una sola especie',
+        tabMap: 'Mapa', tabDetail: 'Detalle',
         dataViewerTitle: 'Datos JSON', dataViewerHeading: 'Datos brutos (JSON-LD)',
         tabSpecies: 'Especies', tabEvents: 'Hitos', copyJSON: 'Copiar', copied: '¡Copiado!',
         experimentalWarning: 'Experimental · Generado por IA · Verifica las fuentes',
@@ -2576,6 +2606,7 @@ const TRANSLATIONS = {
         debateSection: 'Aktive wissenschaftliche Debatten',
         periodTo: 'bis',
         oneSpecies: 'Homo sapiens — eine einzige Spezies',
+        tabMap: 'Karte', tabDetail: 'Detail',
         dataViewerTitle: 'JSON-Daten', dataViewerHeading: 'Rohdaten (JSON-LD)',
         tabSpecies: 'Arten', tabEvents: 'Meilensteine', copyJSON: 'Kopieren', copied: 'Kopiert!',
         experimentalWarning: 'Experimentell · KI-generiert · Quellen prüfen',
@@ -2622,6 +2653,7 @@ const TRANSLATIONS = {
         debateSection: '活跃科学争议',
         periodTo: '至',
         oneSpecies: 'Homo sapiens — 同一物种',
+        tabMap: '地图', tabDetail: '详情',
         dataViewerTitle: 'JSON数据', dataViewerHeading: '原始数据 (JSON-LD)',
         tabSpecies: '物种', tabEvents: '里程碑', copyJSON: '复制', copied: '已复制！',
         experimentalWarning: '实验性 · AI生成 · 请核实来源',
@@ -2668,6 +2700,7 @@ const TRANSLATIONS = {
         debateSection: 'نقاشات علمية نشطة',
         periodTo: 'إلى',
         oneSpecies: 'Homo sapiens — نوع واحد',
+        tabMap: 'خريطة', tabDetail: 'تفاصيل',
         dataViewerTitle: 'بيانات JSON', dataViewerHeading: 'البيانات الخام (JSON-LD)',
         tabSpecies: 'الأنواع', tabEvents: 'المعالم', copyJSON: 'نسخ', copied: 'تم النسخ!',
         experimentalWarning: 'تجريبي · توليد ذكاء اصطناعي · تحقق من المصادر',
@@ -2714,6 +2747,7 @@ const TRANSLATIONS = {
         debateSection: 'Debates científicos ativos',
         periodTo: 'a',
         oneSpecies: 'Homo sapiens — uma única espécie',
+        tabMap: 'Mapa', tabDetail: 'Detalhe',
         dataViewerTitle: 'Dados JSON', dataViewerHeading: 'Dados brutos (JSON-LD)',
         tabSpecies: 'Espécies', tabEvents: 'Marcos', copyJSON: 'Copiar', copied: 'Copiado!',
         experimentalWarning: 'Experimental · Gerado por IA · Verifique as fontes',
@@ -2760,6 +2794,7 @@ const TRANSLATIONS = {
         debateSection: 'Dibattiti scientifici attivi',
         periodTo: 'a',
         oneSpecies: 'Homo sapiens — un\'unica specie',
+        tabMap: 'Mappa', tabDetail: 'Dettaglio',
         dataViewerTitle: 'Dati JSON', dataViewerHeading: 'Dati grezzi (JSON-LD)',
         tabSpecies: 'Specie', tabEvents: 'Tappe', copyJSON: 'Copia', copied: 'Copiato!',
         experimentalWarning: 'Sperimentale · Generato da IA · Verificare le fonti',
@@ -2806,6 +2841,7 @@ const TRANSLATIONS = {
         debateSection: '現在進行中の科学的議論',
         periodTo: 'から',
         oneSpecies: 'Homo sapiens — ひとつの種',
+        tabMap: '地図', tabDetail: '詳細',
         dataViewerTitle: 'JSONデータ', dataViewerHeading: '生データ (JSON-LD)',
         tabSpecies: '種', tabEvents: '里程標', copyJSON: 'コピー', copied: 'コピー済み！',
         experimentalWarning: '実験的 · AI生成 · ソースを確認',
@@ -2852,6 +2888,7 @@ const TRANSLATIONS = {
         debateSection: '활발한 과학적 논쟁',
         periodTo: '까지',
         oneSpecies: 'Homo sapiens — 하나의 종',
+        tabMap: '지도', tabDetail: '상세',
         dataViewerTitle: 'JSON 데이터', dataViewerHeading: '원시 데이터 (JSON-LD)',
         tabSpecies: '종', tabEvents: '이정표', copyJSON: '복사', copied: '복사됨!',
         experimentalWarning: '실험적 · AI 생성 · 출처 확인 필요',
@@ -2940,6 +2977,12 @@ function applyTranslations() {
   // Experimental warning
   const warnEl = document.querySelector('[data-i18n="ui.experimentalWarning"]');
   if (warnEl) warnEl.textContent = t('ui.experimentalWarning');
+
+  // Mobile tab labels
+  document.querySelectorAll('.mobile-tab').forEach(function(btn) {
+    var span = btn.querySelector('span');
+    if (span) span.textContent = btn.dataset.view === 'map' ? t('ui.tabMap') : t('ui.tabDetail');
+  });
 
   // Data viewer translations
   const dvHead = document.getElementById('dvh');
@@ -3107,6 +3150,97 @@ window.addEventListener('load', function() {
 });
 
 })();
+
+// =====================================================================
+// PLAY OVERLAY (centred startup button)
+// =====================================================================
+(function() {
+  var overlay    = document.getElementById('play-overlay');
+  var overlayBtn = document.getElementById('play-overlay-btn');
+  if (!overlay || !overlayBtn) return;
+  function dismiss() {
+    overlay.classList.add('dismissed');
+    setTimeout(function(){ overlay.classList.add('hidden'); }, 500);
+  }
+  overlayBtn.addEventListener('click', function() {
+    dismiss();
+    if (typeof startPlay === 'function') startPlay();
+    else { var b = document.getElementById('play-btn'); if (b) b.click(); }
+  });
+  var nw = document.getElementById('needle-wrapper');
+  if (nw) nw.addEventListener('pointerdown', dismiss, { once: true });
+  // Update label from i18n once it's ready
+  setTimeout(function() {
+    var lbl = document.getElementById('play-overlay-label');
+    if (lbl && typeof i18next !== 'undefined' && i18next.isInitialized) lbl.textContent = i18next.t('ui.play');
+  }, 1200);
+  // Auto-dismiss after 10s
+  setTimeout(function() { if (!overlay.classList.contains('dismissed')) dismiss(); }, 10000);
+})();
+
+// =====================================================================
+// MOBILE TABS
+// =====================================================================
+(function() {
+  var main = document.getElementById('main');
+  if (!main) return;
+  main.classList.add('view-map');
+
+  document.querySelectorAll('.mobile-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var view = btn.dataset.view;
+      document.querySelectorAll('.mobile-tab').forEach(function(b) { b.classList.remove('mobile-tab-active'); });
+      btn.classList.add('mobile-tab-active');
+      main.classList.remove('view-map', 'view-detail');
+      main.classList.add('view-' + view);
+      if (view === 'detail' && typeof selectedSpecies !== 'undefined' && selectedSpecies && typeof renderPanel === 'function') {
+        renderPanel(selectedSpecies);
+      }
+      if (view === 'map' && typeof leafletMap !== 'undefined' && leafletMap) {
+        setTimeout(function() { leafletMap.invalidateSize(); }, 310);
+      }
+    });
+  });
+
+  // Auto-switch to detail on mobile when a species is selected on the map
+  document.addEventListener('speciesSelected', function() {
+    if (window.innerWidth <= 768) {
+      var tab = document.getElementById('tab-detail');
+      if (tab) tab.click();
+    }
+  });
+})();
+
+// =====================================================================
+// TOUCH DRAG ON ENTIRE NEEDLE-WRAPPER
+// =====================================================================
+(function() {
+  var wrapper = document.getElementById('needle-wrapper');
+  if (!wrapper) return;
+  var dragging = false;
+  var LABEL_W  = 54; // width of the band-label column
+
+  function fromEvent(e) {
+    var t = e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : null);
+    return t ? t.clientX : e.clientX;
+  }
+  function applyX(clientX) {
+    var r = wrapper.getBoundingClientRect();
+    var x = Math.max(0, Math.min(1, (clientX - r.left - LABEL_W) / (r.width - LABEL_W)));
+    if (typeof setTime === 'function' && typeof linearToTime === 'function') setTime(linearToTime(x));
+  }
+
+  wrapper.addEventListener('touchstart', function(e) { dragging = true; applyX(fromEvent(e)); }, { passive: true });
+  wrapper.addEventListener('touchmove',  function(e) { if (!dragging) return; e.preventDefault(); applyX(fromEvent(e)); }, { passive: false });
+  wrapper.addEventListener('touchend',   function()  { dragging = false; }, { passive: true });
+
+  // Click on bands (not on the handle) jumps to that time
+  wrapper.addEventListener('click', function(e) {
+    if (e.target === document.getElementById('timeline-scrubber')) return;
+    applyX(e.clientX);
+  });
+})();
+
 </script>
 <div id="data-viewer-overlay" class="data-viewer-overlay" hidden aria-hidden="true"></div>
 <aside id="data-viewer-drawer" class="data-viewer-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dvh">
