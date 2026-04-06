@@ -378,7 +378,7 @@ a { color: var(--color-primary); }
   background: conic-gradient(var(--c1) 0% 60%, var(--c2) 60% 100%);
 }
 .pig-desc {
-  font-size: var(--text-xs);
+  font-size: 10px;
   color: var(--color-text);
   text-align: center;
   font-weight: 500;
@@ -1285,7 +1285,7 @@ a { color: var(--color-primary); }
 }
 [data-theme="light"] .human-figure-container { background: #c0b8aa !important; }
 .pig-label { color: var(--color-text) !important; font-weight: 600; }
-.pig-desc  { color: var(--color-text-muted); font-size: var(--text-xs); }
+.pig-desc  { color: var(--color-text-muted); font-size: 10px; }
 
 /* ==============================================================
    TIMELINE — compact heights
@@ -1343,7 +1343,7 @@ a { color: var(--color-primary); }
   #app { padding-bottom: 52px; }
   #main {
     grid-template-columns: 1fr !important;
-    height: calc(100dvh - 60px - 130px - 52px);
+    height: calc(100dvh - 130px - 52px);
     position: relative; overflow: hidden;
   }
   .map-container {
@@ -2689,8 +2689,14 @@ function bootApp() {
     if (hint) { hint.classList.add('hidden'); setTimeout(() => hint.remove(), 700); }
   });
 
-  // Show afarensis by default
-  setTimeout(() => { if (SPECIES_DATA.length) selectSpecies(SPECIES_DATA[0]); }, 400);
+  // Show afarensis by default (suppress mobile tab switch on initial auto-select)
+  setTimeout(() => {
+    if (SPECIES_DATA.length) {
+      window._suppressMobileSwitch = true;
+      selectSpecies(SPECIES_DATA[0]);
+      setTimeout(() => { window._suppressMobileSwitch = false; }, 200);
+    }
+  }, 400);
 
   // UX: after 3s of idle, pulse the play button + show welcome hint
   // (research shows ~3s is when users start wondering what to do on a new data-viz page)
@@ -3530,8 +3536,9 @@ window.addEventListener('load', function() {
     });
   });
 
-  // Auto-switch to detail on mobile when a species is selected on the map
+  // Auto-switch to detail on mobile when user taps a species marker
   document.addEventListener('speciesSelected', function() {
+    if (window._suppressMobileSwitch) return;
     if (window.innerWidth <= 768) {
       var tab = document.getElementById('tab-detail');
       if (tab) tab.click();
