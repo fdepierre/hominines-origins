@@ -4,12 +4,12 @@ This is a living document. Priorities may shift based on community contributions
 
 ---
 
-## v0.2 — Data extraction
+## v0.2 — Data extraction ✓ DONE
 
-- [ ] Extract `SPECIES_DATA` from `app/index.html` into `data/species.json`
-- [ ] Extract `EVENTS_DATA` into `data/events.json`
-- [ ] The app reads these JSON files at load time
-- [ ] Benefit: data updates no longer require touching HTML/JS
+- [x] Extract `SPECIES_DATA` from `app/index.html` into `data/species.json`
+- [x] Extract `EVENTS_DATA` into `data/events.json`
+- [x] The app reads these JSON files at load time (with embedded fallback for offline/file://)
+- [x] Benefit: data updates no longer require touching HTML/JS
 
 ## v0.3 — Ancient DNA mixing
 
