@@ -476,12 +476,6 @@ a { color: var(--color-primary); }
   position: relative;
 }
 
-.timeline-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
 .timeline-current-label {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
@@ -914,8 +908,6 @@ a { color: var(--color-primary); }
 /* Layer buttons inside burger inherit existing .layer-btn styles */
 
 /* ===== TIMELINE: play button + label float at left of species track ===== */
-.timeline-header-row { display: none; }
-#tl-play-row { display: none; }
 
 /* #timeline is the positioning context */
 #timeline { position: relative; padding: var(--space-2) var(--space-3) var(--space-1); }
@@ -1078,14 +1070,6 @@ a { color: var(--color-primary); }
   }
 }
 
-/* === PLAY BUTTON — compact icon in timeline footer === */
-.timeline-header-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-2);
-  flex-wrap: wrap;
-}
 /* Compact circular play/pause button */
 #play-btn {
   order: -1;
@@ -1298,14 +1282,6 @@ a { color: var(--color-primary); }
 #play-overlay { display: none !important; }
 #welcome-hint { display: none !important; }
 
-#play-overlay-hidden-compat {
-  position: absolute; inset: 0; z-index: 700;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.22);
-  transition: opacity 0.5s ease;
-}
-#play-overlay.dismissed { opacity: 0; pointer-events: none; }
-#play-overlay.hidden { display: none; }
 #play-overlay-inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
 #play-overlay-btn {
   width: 72px; height: 72px; border-radius: 50%;

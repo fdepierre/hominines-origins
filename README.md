@@ -7,7 +7,7 @@
 [![Live app](https://img.shields.io/badge/Live%20app-open%20now-orange)](https://ho.lookingforanswers.eu/)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-blue)](https://creativecommons.org/licenses/by/4.0/)
-[![Tests](https://img.shields.io/badge/Tests-74%20passing-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/Tests-51%20passing-brightgreen)](#tests)
 [![Fork this](https://img.shields.io/badge/Fork%20this-please-blueviolet)](https://github.com/fdepierre/hominines-origins/fork)
 
 ---
@@ -118,7 +118,7 @@ Arabic renders right-to-left. The selector detects your browser language automat
 
 ## Tests
 
-74 automated non-regression tests. They run in about 30 seconds.
+51 automated non-regression tests. They run in about 30 seconds.
 
 ```bash
 npx playwright install chromium   # once
@@ -128,8 +128,8 @@ node tests/run-all.js             # run all tests
 | Suite | Tests | What it catches |
 |-------|-------|-----------------|
 | Unit | 22 | Broken species data, wrong arrow direction, timeline math |
-| Visual | 13 | Missing UI elements, WCAG contrast failures, layout regressions |
-| A11y | 39 | Play/pause, language switching, touch targets, tablet layout |
+| Visual | 9 | Missing UI elements, WCAG contrast failures, layout regressions |
+| A11y | 20 | Play/pause, language switching, touch targets, tablet layout |
 
 ---
 

@@ -19,7 +19,7 @@ An interactive single-page web application that visualises human evolution from 
 ```
 hominines-origins/
 ├── app/
-│   └── index.html              ← THE ENTIRE APPLICATION (single file, ~120 KB)
+│   └── index.html              ← THE ENTIRE APPLICATION (single file, ~185 KB / ~48 KB gzipped)
 ├── data/
 │   ├── Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md
 │   │   └── 12 species: morphology, pigmentation, sites, migrations, tools, debates
