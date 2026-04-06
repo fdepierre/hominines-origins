@@ -485,8 +485,9 @@ a { color: var(--color-primary); }
   background: var(--color-surface);
   border-top: 1px solid var(--color-divider);
   padding: var(--space-3) var(--space-5) var(--space-3);
-  z-index: 100;
-  overflow: hidden;
+  z-index: 200;
+  overflow: visible;
+  position: relative;
 }
 
 .timeline-header-row {
@@ -514,12 +515,7 @@ a { color: var(--color-primary); }
 }
 /* The rail underneath */
 .timeline-rail {
-  position: absolute;
-  left: 0; right: 0;
-  height: 3px;
-  background: var(--color-border);
-  border-radius: 2px;
-  top: 32px;
+  display: none;
 }
 /* Each species gets its own horizontal lane */
 .species-lane {
@@ -794,16 +790,7 @@ a { color: var(--color-primary); }
 
 /* ===== LEGEND ===== */
 .map-legend {
-  position: absolute;
-  bottom: var(--space-4);
-  left: var(--space-4);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  z-index: 500;
-  min-width: 180px;
-  box-shadow: var(--shadow-md);
+  display: none;
 }
 .map-legend-title {
   font-size: var(--text-xs);
@@ -977,8 +964,8 @@ a { color: var(--color-primary); }
 [data-theme="light"] .human-figure-container { background: #c8bfb0; }
 
 .human-figure-svg {
-  width: 120px;
-  height: 160px;
+  width: 72px;
+  height: 96px;
 }
 /* Wider SVG for spectrum (3-figure) view */
 .human-figure-svg[viewBox="0 0 360 170"] {
@@ -1854,9 +1841,6 @@ function renderPanel(species) {
         <div class="period-label">${formatTime(species.start)} ${T('periodTo','à')} ${formatTime(species.end)}</div>
         <div class="species-name">${species.name}</div>
         <div class="species-name-common">${species.common}</div>
-        <div style="margin-top:var(--space-2)">
-          <span class="certainty-badge ${getCertaintyClass(pig.certainty)}">${pig.certLabel}</span>
-        </div>
       </div>
 
       <!-- Human figure -->
@@ -1948,6 +1932,11 @@ function renderPanel(species) {
         <div class="section-title">${T('debateSection','Débats scientifiques actifs')}</div>
         <div class="debate-item">❓ ${species.debate}</div>
       </div>` : ''}
+
+      <!-- Certainty badge -->
+      <div style="padding:var(--space-3) var(--space-6) 0">
+        <span class="certainty-badge ${getCertaintyClass(pig.certainty)}">${pig.certLabel}</span>
+      </div>
 
       <!-- Footer attribution -->
       <div style="padding:var(--space-4) var(--space-6);text-align:center">
