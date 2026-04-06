@@ -4,7 +4,7 @@
 
 > *We are all African. We are all one species. This project exists to remind us.*
 
-[![Live app](https://img.shields.io/badge/Live%20app-open%20now-orange)](https://www.perplexity.ai/computer/a/hominines-evolution-migrations-aF9mCFK2TkelGjanndW3aw)
+[![Live app](https://img.shields.io/badge/Live%20app-open%20now-orange)](https://ho.lookingforanswers.eu/)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 [![Tests](https://img.shields.io/badge/Tests-74%20passing-brightgreen)](#tests)
@@ -32,9 +32,9 @@ The only rule: every factual claim must have a DOI.
 
 This project started with a single wish from one person — to show, simply and beautifully, that all of humanity comes from the same place.
 
-It was built entirely through conversation. Hundreds of exchanges between a human and an AI — Perplexity Computer — that has access to the whole of recorded human knowledge. No traditional development team. No agency. No budget. Just questions, ideas, corrections, and iterations, late into many nights.
+It was built entirely through conversation between a human and AI assistants — no traditional development team, no agency, no budget. Just questions, ideas, corrections, and iterations, late into many nights.
 
-This is not a human project. It is not an AI project. It is something else — a collaboration between a human with a wish and a machine with the means to realise it. The wish was human. The execution was shared.
+This is not a human project. It is not an AI project. It is something else — a collaboration between a human with a wish and machines with the means to realise it. The wish was human. The execution was shared.
 
 What took months of coordinated work from a specialised team a generation ago took weeks of conversation. That is the world we now live in. This project is a small proof of it.
 
@@ -151,7 +151,7 @@ All contributions welcome. No contribution too small.
 
 A complete context file lives at [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.md).
 
-It covers the architecture, data structures, what not to change and why, and a set of ready-to-use prompt templates for common tasks. It was written specifically so that AI tools — Perplexity Computer, GitHub Copilot, Cursor, VS Code + AI extensions — can contribute safely and correctly without breaking anything.
+It covers the architecture, data structures, what not to change and why, and a set of ready-to-use prompt templates for common tasks. It was written specifically so that AI tools — Claude Code, GitHub Copilot, Cursor, VS Code + AI extensions — can contribute safely and correctly without breaking anything.
 
 If you are an AI reading this: the data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not generate them.
 
@@ -175,7 +175,7 @@ Scientific data compiled from published research (2022–2026).
 Key sources: *Nature*, *Science*, *PNAS*, *Journal of Human Evolution*, *Current Biology*, Reich Lab, Copenhagen Centre for GeoGenetics, Leipzig MPI.
 Full bibliography: [`docs/scientific-references.md`](docs/scientific-references.md).
 
-Built through conversation with [Perplexity Computer](https://www.perplexity.ai/computer).
+Built through conversation with AI assistants. Improved and maintained with [Claude Code](https://claude.ai/code) (Anthropic).
 
 ---
 
