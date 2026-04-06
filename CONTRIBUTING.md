@@ -92,7 +92,7 @@ If you see content that violates these values, open an issue.
 
 ## AI-assisted contributions
 
-We welcome contributions made with AI tools (Perplexity Computer, GitHub Copilot, Cursor, VS Code + AI extensions). See [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.md) for the context file that helps AI assistants understand this project.
+We welcome contributions made with AI tools (Claude Code, GitHub Copilot, Cursor, VS Code + AI extensions). See [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.md) for the context file that helps AI assistants understand this project.
 
 When using AI to update scientific data, always verify the generated DOI references manually — AI systems can hallucinate citations.
 

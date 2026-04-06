@@ -1,6 +1,6 @@
 # AI Context — Hominines Origins
 
-This file gives AI assistants (Perplexity Computer, GitHub Copilot, Cursor, VS Code + AI extensions, Claude, ChatGPT, Gemini) everything they need to make useful, safe contributions to this project.
+This file gives AI assistants (Claude Code, GitHub Copilot, Cursor, VS Code + AI extensions, ChatGPT, Gemini) everything they need to make useful, safe contributions to this project.
 
 Read this file before making any changes.
 
@@ -145,10 +145,10 @@ Tests are written in plain Node.js — no test framework dependency. They run in
 
 ---
 
-## Perplexity Computer — session context
+## Key design decisions
 
-If you are working with Perplexity Computer, the full session history, design decisions and deployed URL are described in the conversation. The deployed app is at:
-`https://www.perplexity.ai/computer/a/hominines-evolution-migrations-aF9mCFK2TkelGjanndW3aw`
+The live app is at: `https://ho.lookingforanswers.eu/`
+Source code: `https://github.com/fdepierre/hominines-origins`
 
 Key design decisions:
 - Single HTML file architecture (intentional)
