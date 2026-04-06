@@ -3632,7 +3632,7 @@ window.addEventListener('load', function() {
 })();
 
 // =====================================================================
-// WELCOME MODAL — must run after DOM is parsed (HTML is after </script>)
+// WELCOME MODAL — init on DOMContentLoaded (modal HTML is at end of body)
 // =====================================================================
 document.addEventListener('DOMContentLoaded', function initWelcome() {
   var STORAGE_KEY = 'ho_welcomed_v1';
