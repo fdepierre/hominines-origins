@@ -1688,7 +1688,9 @@ function updateMap() {
         `, { direction: 'top', offset: [0, -8] });
 
         marker.on('click', () => {
+          window._userPickedSpecies = true;
           selectSpecies(species);
+          window._userPickedSpecies = false;
         });
         markersLayer.addLayer(marker);
       });
@@ -2073,7 +2075,9 @@ function initTimeline() {
     lane.addEventListener('click', () => {
       const midTime = (species.start + species.end) / 2;
       setTime(midTime);
+      window._userPickedSpecies = true;
       selectSpecies(species);
+      window._userPickedSpecies = false;
     });
     lanesEl.appendChild(lane);
   });
@@ -3536,9 +3540,10 @@ window.addEventListener('load', function() {
     });
   });
 
-  // Auto-switch to detail on mobile when user taps a species marker
+  // Auto-switch to detail on mobile only when user explicitly taps a marker or lane
   document.addEventListener('speciesSelected', function() {
     if (window._suppressMobileSwitch) return;
+    if (!window._userPickedSpecies) return;
     if (window.innerWidth <= 768) {
       var tab = document.getElementById('tab-detail');
       if (tab) tab.click();
