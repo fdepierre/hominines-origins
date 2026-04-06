@@ -847,7 +847,7 @@ a { color: var(--color-primary); }
 #burger-btn {
   position: absolute;
   top: var(--space-3);
-  right: var(--space-3);
+  left: var(--space-3);
   z-index: 600;
   width: 40px; height: 40px;
   border-radius: var(--radius-md);
@@ -872,13 +872,13 @@ a { color: var(--color-primary); }
 
 #burger-panel {
   position: fixed;
-  top: 0; right: 0; bottom: 0;
+  top: 0; left: 0; bottom: 0;
   width: min(300px, 90vw);
   background: var(--color-surface);
-  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
   z-index: 1501;
   display: flex; flex-direction: column;
-  transform: translateX(100%);
+  transform: translateX(-100%);
   transition: transform 280ms cubic-bezier(0.16,1,0.3,1);
   box-shadow: var(--shadow-lg);
 }
@@ -940,20 +940,29 @@ a { color: var(--color-primary); }
 }
 /* Layer buttons inside burger inherit existing .layer-btn styles */
 
-/* ===== TIMELINE: play button floated on species track ===== */
-/* Hide the separate header row above species track */
+/* ===== TIMELINE: play button + label float at left of species track ===== */
 .timeline-header-row { display: none; }
+#tl-play-row { display: none; }
 
-/* The timeline's needle-wrapper gets relative positioning to host play overlay */
-#needle-wrapper { position: relative; }
+/* #timeline is the positioning context */
+#timeline { position: relative; padding: var(--space-2) var(--space-3) var(--space-1); }
 
-/* Play + time label as overlay on the species track */
-#tl-play-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-2) var(--space-1);
+/* Play btn: absolute within #timeline, top-left, vertically over species track */
+#play-btn {
+  position: absolute !important;
+  left: var(--space-3);
+  top: var(--space-2);
+  z-index: 40;
 }
+/* Time label: to the right of the play btn */
+.timeline-current-label {
+  position: absolute;
+  left: calc(var(--space-3) + 42px);
+  top: calc(var(--space-2) + 7px);
+  pointer-events: none;
+  white-space: nowrap;
+}
+/* needle-wrapper starts right after timeline padding — no extra padding needed */
 
 /* ===== HUMAN FIGURE ===== */
 .human-figure-container {
@@ -1358,7 +1367,7 @@ a { color: var(--color-primary); }
     <div class="map-container">
       <div id="map"></div>
 
-      <!-- Burger menu button — top-right of map -->
+      <!-- Burger menu button — top-left of map -->
       <button id="burger-btn" aria-label="Menu" title="Menu">☰</button>
 
       <!-- Layer toggles hidden from map — shown in burger menu -->
@@ -1425,22 +1434,21 @@ a { color: var(--color-primary); }
   <!-- TIMELINE -->
   <footer id="timeline">
 
-    <!-- Play button + time label inline with timeline (no separate row) -->
-    <div id="tl-play-row">
+    <!-- hidden controls kept for JS compat -->
+    <select id="play-speed" style="display:none"><option value="1" selected>×1</option></select>
+    <span id="tl-hint-desktop" style="display:none"></span>
+
+    <!-- Needle wrapper — play btn + time label float inside as overlays -->
+    <div id="needle-wrapper" style="position:relative;">
+      <!-- Play/pause button — overlays left of species track -->
       <button id="play-btn" title="Lecture automatique — voir les migrations en direct" data-i18n-title="ui.playTitle">
         <svg id="play-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
           <polygon points="3,1 13,7 3,13"/>
         </svg>
         <span id="play-label" style="display:none"></span>
       </button>
+      <!-- Time label floats next to play btn -->
       <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
-    </div>
-
-    <!-- Needle wrapper: absolutely covers species-track + ticks + bands -->
-    <!-- hidden controls kept for JS compat -->
-    <select id="play-speed" style="display:none"><option value="1" selected>×1</option></select>
-    <span id="tl-hint-desktop" style="display:none"></span>
-    <div id="needle-wrapper" style="position:relative;">
 
       <!-- Row 2: species lanes track -->
       <div class="timeline-species-track" id="timeline-species-track">
@@ -1549,12 +1557,14 @@ let isDragging = false;
 function initMap() {
   leafletMap = L.map('map', {
     center: [20, 20],
-    zoom: 1,
-    minZoom: 1,
+    zoom: 2,
+    minZoom: 2,
     maxZoom: 7,
     zoomControl: false,
     attributionControl: true,
     worldCopyJump: false,
+    maxBounds: [[-85, -200], [85, 200]],
+    maxBoundsViscosity: 0.8,
   });
 
   // Tile layer — matches initial data-theme
@@ -1563,12 +1573,12 @@ function initMap() {
     ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
     : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 20,
+    subdomains: 'abcd', maxZoom: 20, noWrap: true,
   }).addTo(leafletMap);
   L.tileLayer(_initDark
     ? 'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png'
     : 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd', opacity: _initDark ? 0.4 : 0.5, maxZoom: 20, pane: 'overlayPane',
+    subdomains: 'abcd', opacity: _initDark ? 0.4 : 0.5, maxZoom: 20, pane: 'overlayPane', noWrap: true,
   }).addTo(leafletMap);
 
   markersLayer = L.layerGroup().addTo(leafletMap);
@@ -2292,17 +2302,17 @@ function setTheme(theme) {
     layers.forEach(l => leafletMap.removeLayer(l));
     if (theme === 'light') {
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20, noWrap: true
       }).addTo(leafletMap);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd', opacity: 0.5, maxZoom: 20
+        subdomains: 'abcd', opacity: 0.5, maxZoom: 20, noWrap: true
       }).addTo(leafletMap);
     } else {
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20, noWrap: true
       }).addTo(leafletMap);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd', opacity: 0.4, maxZoom: 20
+        subdomains: 'abcd', opacity: 0.4, maxZoom: 20, noWrap: true
       }).addTo(leafletMap);
     }
     document.getElementById('map').style.background = theme === 'dark' ? '#0e1220' : '#d4d0c8';
@@ -2648,9 +2658,9 @@ function bootApp() {
 document.addEventListener('DOMContentLoaded', loadData);
 
 // =====================================================================
-// BURGER MENU
+// BURGER MENU — init on DOMContentLoaded so panel HTML is available
 // =====================================================================
-(function() {
+document.addEventListener('DOMContentLoaded', function initBurger() {
   var btn     = document.getElementById('burger-btn');
   var panel   = document.getElementById('burger-panel');
   var overlay = document.getElementById('burger-overlay');
@@ -2672,13 +2682,13 @@ document.addEventListener('DOMContentLoaded', loadData);
   overlay.addEventListener('click', closeBurger);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeBurger(); });
 
-  // Move (not clone) layer toggle buttons into burger panel — preserves event listeners
+  // Move layer toggle buttons into burger panel (after initLayerToggles has bound them)
   var src  = document.getElementById('layer-toggles');
   var dest = document.getElementById('burger-layer-btns');
   if (src && dest) {
     while (src.firstChild) dest.appendChild(src.firstChild);
   }
-})();
+});
 
 </script>
 
