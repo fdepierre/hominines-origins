@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark" translate="yes">
+<html lang="fr" data-theme="light" translate="yes">
 <head>
 <!--
    ______                            __
@@ -62,16 +62,16 @@
 
 /* Palette inspirée de l'archéologie : terre, os, obsidienne */
 :root, [data-theme="dark"] {
-  --color-bg:             #0e0d0b;
-  --color-surface:        #161410;
-  --color-surface-2:      #1e1b16;
-  --color-surface-offset: #252018;
-  --color-divider:        #2e2820;
-  --color-border:         #3a3228;
-  --color-text:           #e8e0d0;
-  --color-text-muted:     #9a8f7a;
-  --color-text-faint:     #5a5248;
-  --color-text-inverse:   #0e0d0b;
+  --color-bg:             #141210;
+  --color-surface:        #1e1b16;
+  --color-surface-2:      #26221c;
+  --color-surface-offset: #2e2920;
+  --color-divider:        #3a3228;
+  --color-border:         #4a4038;
+  --color-text:           #ede5d4;
+  --color-text-muted:     #a89880;
+  --color-text-faint:     #8a7a68;
+  --color-text-inverse:   #141210;
 
   /* Amber / ocre = accent principal */
   --color-primary:        #d4820a;
@@ -98,8 +98,8 @@
   --color-divider:        #c8bfa8;
   --color-border:         #b0a488;
   --color-text:           #1a1208;
-  --color-text-muted:     #4a3e2c;
-  --color-text-faint:     #7a6e58;
+  --color-text-muted:     #3e3020;
+  --color-text-faint:     #5e5040;
   --color-text-inverse:   #f0ebe0;
 
   /* Primary darker for WCAG AA on light bg */
@@ -137,10 +137,12 @@ a { color: var(--color-primary); }
 /* ===== LAYOUT ===== */
 #app {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: 1fr auto;
   height: 100dvh;
   overflow: hidden;
 }
+/* Header hidden — controls moved to burger menu */
+#header { display: none; }
 
 /* ===== HEADER ===== */
 #header {
@@ -233,11 +235,11 @@ a { color: var(--color-primary); }
   width: 100%;
   height: 100%;
   z-index: 1;
-  background: #0a0e18;
+  background: #0e1220;
 }
 
 /* Leaflet overrides */
-.leaflet-container { font-family: var(--font-body); background: #0a0e18; }
+.leaflet-container { font-family: var(--font-body); background: #0e1220; }
 .leaflet-control-zoom { display: none; }
 .leaflet-attribution-flag { display: none !important; }
 .leaflet-control-attribution { 
@@ -332,7 +334,7 @@ a { color: var(--color-primary); }
 
 /* Pigmentation showcase */
 .pigmentation-section {
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-3) var(--space-6);
   border-bottom: 1px solid var(--color-divider);
 }
 .pigmentation-title {
@@ -341,13 +343,13 @@ a { color: var(--color-primary); }
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .pigmentation-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--space-3);
+  gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
 
@@ -355,16 +357,17 @@ a { color: var(--color-primary); }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  gap: 4px;
 }
 .pig-label {
-  font-size: var(--text-xs);
+  font-size: 10px;
   color: var(--color-text-muted);
   text-align: center;
+  line-height: 1.2;
 }
 .pig-swatch {
-  width: 56px;
-  height: 56px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-full);
   border: 2px solid var(--color-border);
   position: relative;
@@ -375,7 +378,7 @@ a { color: var(--color-primary); }
   background: conic-gradient(var(--c1) 0% 60%, var(--c2) 60% 100%);
 }
 .pig-desc {
-  font-size: var(--text-xs);
+  font-size: 10px;
   color: var(--color-text);
   text-align: center;
   font-weight: 500;
@@ -392,10 +395,10 @@ a { color: var(--color-primary); }
   border-radius: var(--radius-full);
   font-family: var(--font-mono);
 }
-.certainty-badge.dna-direct { background: rgba(94,140,74,0.15); color: #4a8a34; border: 1px solid rgba(94,140,74,0.4); }
-.certainty-badge.genetic { background: rgba(74,122,155,0.15); color: #1a5e90; border: 1px solid rgba(74,122,155,0.4); }
-.certainty-badge.inference { background: rgba(212,130,10,0.15); color: var(--color-primary); border: 1px solid rgba(212,130,10,0.4); }
-.certainty-badge.debate { background: rgba(168,64,64,0.15); color: #902020; border: 1px solid rgba(168,64,64,0.4); }
+.certainty-badge.dna-direct { background: rgba(94,140,74,0.18); color: #72c050; border: 1px solid rgba(94,140,74,0.5); }
+.certainty-badge.genetic { background: rgba(74,122,155,0.18); color: #5aaada; border: 1px solid rgba(74,122,155,0.5); }
+.certainty-badge.inference { background: rgba(212,130,10,0.18); color: var(--color-primary); border: 1px solid rgba(212,130,10,0.5); }
+.certainty-badge.debate { background: rgba(168,64,64,0.18); color: #d06060; border: 1px solid rgba(168,64,64,0.5); }
 /* Light mode overrides for better contrast */
 [data-theme="light"] .certainty-badge.dna-direct { color: #2a6018; background: rgba(94,140,74,0.2); }
 [data-theme="light"] .certainty-badge.genetic { color: #0e3e6a; background: rgba(74,122,155,0.2); }
@@ -483,8 +486,9 @@ a { color: var(--color-primary); }
   background: var(--color-surface);
   border-top: 1px solid var(--color-divider);
   padding: var(--space-3) var(--space-5) var(--space-3);
-  z-index: 100;
-  overflow: hidden;
+  z-index: 200;
+  overflow: visible;
+  position: relative;
 }
 
 .timeline-header-row {
@@ -512,12 +516,7 @@ a { color: var(--color-primary); }
 }
 /* The rail underneath */
 .timeline-rail {
-  position: absolute;
-  left: 0; right: 0;
-  height: 3px;
-  background: var(--color-border);
-  border-radius: 2px;
-  top: 32px;
+  display: none;
 }
 /* Each species gets its own horizontal lane */
 .species-lane {
@@ -792,16 +791,7 @@ a { color: var(--color-primary); }
 
 /* ===== LEGEND ===== */
 .map-legend {
-  position: absolute;
-  bottom: var(--space-4);
-  left: var(--space-4);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  z-index: 500;
-  min-width: 180px;
-  box-shadow: var(--shadow-md);
+  display: none;
 }
 .map-legend-title {
   font-size: var(--text-xs);
@@ -840,27 +830,187 @@ a { color: var(--color-primary); }
   transition: opacity 0.15s;
 }
 
+
+/* ===== BURGER MENU ===== */
+#burger-btn {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 600;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--color-text);
+  font-size: 18px;
+  transition: all var(--transition-interactive);
+}
+#burger-btn:hover { background: var(--color-surface-offset); }
+
+#burger-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 1500;
+}
+#burger-overlay.open { display: block; }
+
+#burger-panel {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: min(300px, 90vw);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  z-index: 1501;
+  display: flex; flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 280ms cubic-bezier(0.16,1,0.3,1);
+  box-shadow: var(--shadow-lg);
+}
+#burger-panel.open { transform: translateX(0); }
+
+#burger-panel-header {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}
+#burger-app-title {
+  flex: 1;
+  font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.02em;
+}
+#burger-app-title span { color: var(--color-primary); }
+#burger-close {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 18px; line-height: 1;
+  transition: all var(--transition-interactive);
+}
+#burger-close:hover { background: var(--color-surface-offset); color: var(--color-text); }
+
+#burger-panel-body {
+  flex: 1; overflow-y: auto;
+  padding: var(--space-4) var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-5);
+}
+
+.burger-section-title {
+  font-size: var(--text-xs); font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: var(--space-2);
+}
+.burger-row {
+  display: flex; gap: var(--space-2); flex-wrap: wrap;
+}
+.burger-lang-wrap {
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.burger-lang-wrap select {
+  flex: 1;
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  padding: 6px var(--space-3);
+}
+.burger-btn-row {
+  display: flex; gap: var(--space-2);
+}
+.burger-layer-btns {
+  display: flex; flex-direction: column; gap: var(--space-2);
+}
+/* Layer buttons inside burger inherit existing .layer-btn styles */
+
+/* ===== TIMELINE: play button + label float at left of species track ===== */
+.timeline-header-row { display: none; }
+#tl-play-row { display: none; }
+
+/* #timeline is the positioning context */
+#timeline { position: relative; padding: var(--space-2) var(--space-3) var(--space-1); }
+
+/* Play btn: absolute within #timeline, top-left, vertically over species track */
+#play-btn {
+  position: absolute !important;
+  left: var(--space-3);
+  top: 30px;
+  z-index: 40;
+}
+/* Time label: follows the needle cursor (left updated by updateNeedlePosition) */
+.timeline-current-label {
+  position: absolute;
+  left: 0; /* overridden dynamically */
+  top: 6px;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: left 0.08s linear;
+  background: var(--color-surface);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+  z-index: 45;
+}
+/* needle-wrapper starts right after timeline padding — no extra padding needed */
+
 /* ===== HUMAN FIGURE ===== */
 .human-figure-container {
   display: flex;
-  justify-content: center;
-  padding: var(--space-5) var(--space-6);
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-divider);
-  background: #1e1810;
+  background: var(--color-surface-offset);
   border-radius: var(--radius-md);
   margin: 0 var(--space-4) var(--space-2);
+}
+.figure-bio-mini {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.figure-bio-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.figure-bio-item:last-child { border-bottom: none; padding-bottom: 0; }
+.figure-bio-label {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.figure-bio-val {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: right;
 }
 [data-theme="light"] .human-figure-container { background: #c8bfb0; }
 
 .human-figure-svg {
-  width: 120px;
-  height: 160px;
+  width: 72px;
+  height: 96px;
 }
 /* Wider SVG for spectrum (3-figure) view */
 .human-figure-svg[viewBox="0 0 360 170"] {
-  width: 100%;
-  max-width: 320px;
+  width: 140px;
+  max-width: 140px;
   height: auto;
+  flex-shrink: 0;
 }
 
 /* Scrollbar */
@@ -943,7 +1093,7 @@ a { color: var(--color-primary); }
   }
 }
 
-/* === PLAY BUTTON — prominent top-left of footer === */
+/* === PLAY BUTTON — compact icon in timeline footer === */
 .timeline-header-row {
   display: flex;
   align-items: center;
@@ -951,14 +1101,22 @@ a { color: var(--color-primary); }
   margin-bottom: var(--space-2);
   flex-wrap: wrap;
 }
-/* Play first, then time label */
+/* Compact circular play/pause button */
 #play-btn {
   order: -1;
-  font-size: var(--text-sm);
-  padding: 7px 18px;
-  border-radius: var(--radius-full);
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: var(--text-xs);
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+/* Hide text label — icon only */
+#play-btn #play-label { display: none; }
 /* Pulse highlight when waiting for first interaction */
 @keyframes playPulse {
   0%   { box-shadow: 0 0 0 0 rgba(212,130,10,0.7); }
@@ -1003,12 +1161,12 @@ a { color: var(--color-primary); }
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(14,13,11,0.88);
+  background: rgba(20,18,16,0.90);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-5);
   font-size: var(--text-sm);
-  color: #e8e0d0;
+  color: #ede5d4;
   pointer-events: none;
   z-index: 600;
   white-space: nowrap;
@@ -1021,6 +1179,64 @@ a { color: var(--color-primary); }
   color: #f0ebe0;
   border-color: rgba(0,0,0,0.3);
 }
+
+/* ===== WELCOME MODAL ===== */
+#welcome-modal-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-4);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.4s ease;
+}
+#welcome-modal-overlay.hidden { display: none !important; }
+#welcome-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 480px;
+  width: 100%;
+  padding: var(--space-8) var(--space-6);
+  display: flex; flex-direction: column; gap: var(--space-5);
+  animation: fadeIn 0.35s ease forwards;
+}
+.welcome-logo {
+  font-size: var(--text-2xl); font-weight: 800;
+  letter-spacing: -0.03em; color: var(--color-text);
+}
+.welcome-logo span { color: var(--color-primary); }
+.welcome-tagline {
+  font-size: var(--text-sm); color: var(--color-text-muted);
+  font-style: italic; margin-top: -12px;
+}
+.welcome-body {
+  font-size: var(--text-sm); color: var(--color-text-muted);
+  line-height: 1.7;
+}
+.welcome-body strong { color: var(--color-text); }
+.welcome-tips {
+  display: flex; flex-direction: column; gap: var(--space-3);
+}
+.welcome-tip {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.5;
+}
+.welcome-tip-icon {
+  flex-shrink: 0; margin-top: 1px;
+  color: var(--color-primary);
+  display: flex; align-items: center;
+}
+#welcome-start-btn {
+  align-self: stretch;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none; border-radius: var(--radius-md);
+  font-size: var(--text-sm); font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+#welcome-start-btn:hover { filter: brightness(1.1); }
 
 /* ===== DATA VIEWER DRAWER ===== */
 .data-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;opacity:0;transition:opacity 250ms ease;}
@@ -1085,9 +1301,12 @@ a { color: var(--color-primary); }
 [data-theme="light"] #lang-select { color: var(--color-text-muted); }
 
 /* ==============================================================
-   PLAY OVERLAY
+   PLAY OVERLAY — hidden (single play button in timeline)
    ============================================================== */
-#play-overlay {
+#play-overlay { display: none !important; }
+#welcome-hint { display: none !important; }
+
+#play-overlay-hidden-compat {
   position: absolute; inset: 0; z-index: 700;
   display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,0.22);
@@ -1124,7 +1343,7 @@ a { color: var(--color-primary); }
 }
 [data-theme="light"] .human-figure-container { background: #c0b8aa !important; }
 .pig-label { color: var(--color-text) !important; font-weight: 600; }
-.pig-desc  { color: var(--color-text-muted); font-size: var(--text-xs); }
+.pig-desc  { color: var(--color-text-muted); font-size: 10px; }
 
 /* ==============================================================
    TIMELINE — compact heights
@@ -1182,7 +1401,7 @@ a { color: var(--color-primary); }
   #app { padding-bottom: 52px; }
   #main {
     grid-template-columns: 1fr !important;
-    height: calc(100dvh - 60px - 130px - 52px);
+    height: calc(100dvh - 130px - 52px);
     position: relative; overflow: hidden;
   }
   .map-container {
@@ -1227,56 +1446,7 @@ a { color: var(--color-primary); }
 <div id="app">
 
   <!-- HEADER -->
-  <header id="header">
-    <div class="logo">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-label="Hominines logo">
-        <!-- Skull stylisé -->
-        <circle cx="16" cy="13" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
-        <path d="M11 22 Q16 28 21 22" stroke="currentColor" stroke-width="1.5" fill="none"/>
-        <circle cx="13" cy="12" r="2" fill="currentColor" opacity="0.7"/>
-        <circle cx="19" cy="12" r="2" fill="currentColor" opacity="0.7"/>
-        <path d="M14 16 Q16 17.5 18 16" stroke="currentColor" stroke-width="1" fill="none"/>
-        <!-- Flèche migration -->
-        <path d="M4 24 Q8 20 12 22" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" fill="none" opacity="0.5"/>
-        <path d="M20 22 Q26 18 28 22" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" fill="none" opacity="0.5"/>
-      </svg>
-      <div>
-        <div class="logo-text">Hominin<span>es</span></div>
-        <div class="logo-sub" data-i18n="ui.logoSub">Évolution · Migrations · Pigmentation</div>
-        <div class="logo-warning" id="logo-warning">
-          <span class="warning-dot"></span>
-          <span data-i18n="ui.experimentalWarning">Expérimental · Généré par IA · Vérifiez les sources</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="header-controls">
-      <!-- Language selector -->
-      <div class="lang-selector" title="Language / Langue / Idioma" aria-label="Select language">
-        <span class="lang-globe">🌐</span>
-        <select id="lang-select" aria-label="Language">
-          <option value="fr">Français</option>
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="de">Deutsch</option>
-          <option value="zh">中文</option>
-          <option value="ar">العربية</option>
-          <option value="pt">Português</option>
-          <option value="it">Italiano</option>
-          <option value="ja">日本語</option>
-          <option value="ko">한국어</option>
-        </select>
-      </div>
-      <button id="btn-data-viewer" class="btn-icon" title="Données JSON" data-i18n-title="ui.dataViewerTitle" aria-label="Voir les données JSON">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-      </button>
-      <button class="btn-icon" data-theme-toggle data-i18n-title="ui.toggleTheme" aria-label="Switch theme">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
-    </div>
-  </header>
+  <!-- header removed — controls in burger menu -->
 
   <!-- MAIN -->
   <main id="main">
@@ -1284,8 +1454,11 @@ a { color: var(--color-primary); }
     <div class="map-container">
       <div id="map"></div>
 
-      <!-- Layer toggles — shapes/icons to avoid color confusion with timeline -->
-      <div class="layer-toggle-group" id="layer-toggles">
+      <!-- Burger menu button — top-left of map -->
+      <button id="burger-btn" aria-label="Menu" title="Menu">☰</button>
+
+      <!-- Layer toggles hidden from map — shown in burger menu -->
+      <div class="layer-toggle-group" id="layer-toggles" style="display:none;">
         <button class="layer-btn active" data-layer="sites" title="Sites fossiles" data-i18n-title="ui.layerSitesTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
@@ -1348,24 +1521,21 @@ a { color: var(--color-primary); }
   <!-- TIMELINE -->
   <footer id="timeline">
 
-    <!-- Row 1: play button first (top-left), then time label -->
-    <div class="timeline-header-row">
+    <!-- hidden controls kept for JS compat -->
+    <select id="play-speed" style="display:none"><option value="1" selected>×1</option></select>
+    <span id="tl-hint-desktop" style="display:none"></span>
+
+    <!-- Needle wrapper — play btn + time label float inside as overlays -->
+    <div id="needle-wrapper" style="position:relative;">
+      <!-- Play/pause button — overlays left of species track -->
       <button id="play-btn" title="Lecture automatique — voir les migrations en direct" data-i18n-title="ui.playTitle">
-        <svg id="play-icon" width="16" height="16" viewBox="0 0 14 14" fill="currentColor">
+        <svg id="play-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
           <polygon points="3,1 13,7 3,13"/>
         </svg>
-        <span id="play-label">Play</span>
+        <span id="play-label" style="display:none"></span>
       </button>
+      <!-- Time label floats next to play btn -->
       <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
-      <span class="timeline-hint" style="margin-left:auto;font-size:var(--text-xs)">◀ glissez ou tapez sur la timeline ▶</span>
-      <!-- hidden speed + hints kept for JS compat -->
-      <select id="play-speed" title="Vitesse"><option value="1" selected>×1</option><option value="2">×2</option><option value="3">×3</option></select>
-      <span id="tl-hint-desktop"></span>
-    </div>
-
-    <!-- Needle wrapper: absolutely covers species-track + ticks + bands -->
-    <!-- The label col (54px) offsets the band tracks, so needle needs left offset too -->
-    <div id="needle-wrapper" style="position:relative;">
 
       <!-- Row 2: species lanes track -->
       <div class="timeline-species-track" id="timeline-species-track">
@@ -1474,27 +1644,28 @@ let isDragging = false;
 function initMap() {
   leafletMap = L.map('map', {
     center: [20, 20],
-    zoom: 1,
-    minZoom: 1,
+    zoom: 2,
+    minZoom: 2,
     maxZoom: 7,
     zoomControl: false,
     attributionControl: true,
     worldCopyJump: false,
+    maxBounds: [[-85, -200], [85, 200]],
+    maxBoundsViscosity: 0.8,
   });
 
-  // Dark tile layer
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+  // Tile layer — matches initial data-theme
+  const _initDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  L.tileLayer(_initDark
+    ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 20,
+    subdomains: 'abcd', maxZoom: 20, noWrap: true,
   }).addTo(leafletMap);
-
-  // Light label overlay
-  const labelLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd',
-    opacity: 0.4,
-    maxZoom: 20,
-    pane: 'overlayPane',
+  L.tileLayer(_initDark
+    ? 'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd', opacity: _initDark ? 0.4 : 0.5, maxZoom: 20, pane: 'overlayPane', noWrap: true,
   }).addTo(leafletMap);
 
   markersLayer = L.layerGroup().addTo(leafletMap);
@@ -1575,7 +1746,9 @@ function updateMap() {
         `, { direction: 'top', offset: [0, -8] });
 
         marker.on('click', () => {
+          window._userPickedSpecies = true;
           selectSpecies(species);
+          window._userPickedSpecies = false;
         });
         markersLayer.addLayer(marker);
       });
@@ -1768,16 +1941,31 @@ function renderPanel(species) {
     <div class="animate-in">
       <div class="side-panel-header">
         <div class="period-label">${formatTime(species.start)} ${T('periodTo','à')} ${formatTime(species.end)}</div>
-        <div class="species-name">${species.name}</div>
+        <div class="species-name" style="color:${species.color}">${species.name}</div>
         <div class="species-name-common">${species.common}</div>
-        <div style="margin-top:var(--space-2)">
-          <span class="certainty-badge ${getCertaintyClass(pig.certainty)}">${pig.certLabel}</span>
-        </div>
       </div>
 
-      <!-- Human figure -->
+      <!-- Human figure + quick biometrics -->
       <div class="human-figure-container">
         ${drawHumanFigure(pig)}
+        <div class="figure-bio-mini">
+          <div class="figure-bio-item">
+            <span class="figure-bio-label">${T('heightM','Taille ♂')}</span>
+            <span class="figure-bio-val">${bio.heightM}</span>
+          </div>
+          <div class="figure-bio-item">
+            <span class="figure-bio-label">${T('heightF','Taille ♀')}</span>
+            <span class="figure-bio-val">${bio.heightF}</span>
+          </div>
+          <div class="figure-bio-item">
+            <span class="figure-bio-label">${T('weightM','Poids ♂')}</span>
+            <span class="figure-bio-val">${bio.weightM}</span>
+          </div>
+          <div class="figure-bio-item">
+            <span class="figure-bio-label">${T('brainVol','Cerveau')}</span>
+            <span class="figure-bio-val">${bio.brain}</span>
+          </div>
+        </div>
       </div>
 
       <!-- Pigmentation -->
@@ -1865,6 +2053,11 @@ function renderPanel(species) {
         <div class="debate-item">❓ ${species.debate}</div>
       </div>` : ''}
 
+      <!-- Certainty badge -->
+      <div style="padding:var(--space-3) var(--space-6) 0">
+        <span class="certainty-badge ${getCertaintyClass(pig.certainty)}">${pig.certLabel}</span>
+      </div>
+
       <!-- Footer attribution -->
       <div style="padding:var(--space-4) var(--space-6);text-align:center">
         <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer"
@@ -1940,7 +2133,9 @@ function initTimeline() {
     lane.addEventListener('click', () => {
       const midTime = (species.start + species.end) / 2;
       setTime(midTime);
+      window._userPickedSpecies = true;
       selectSpecies(species);
+      window._userPickedSpecies = false;
     });
     lanesEl.appendChild(lane);
   });
@@ -2120,7 +2315,18 @@ function updateNeedlePosition() {
   const trackWidth = speciesTrackRect ? speciesTrackRect.width : wrapperW;
 
   const px = trackLeft + xpct / 100 * trackWidth;
-  fullNeedle.style.left = Math.max(0, Math.min(wrapperW - 1, px)) + 'px';
+  const needlePx = Math.max(0, Math.min(wrapperW - 1, px));
+  fullNeedle.style.left = needlePx + 'px';
+
+  // Move time label: prefer right of needle, flip to left near right edge
+  const label = document.getElementById('timeline-current-label');
+  if (label) {
+    const labelW = label.offsetWidth || 80;
+    const gap = 10;
+    const rightPos = needlePx + gap;
+    const finalLeft = (rightPos + labelW < wrapperW) ? rightPos : Math.max(0, needlePx - gap - labelW);
+    label.style.left = finalLeft + 'px';
+  }
 }
 
 let _lastVisibleIds = ''; // cache to avoid redundant full map rebuilds during play
@@ -2202,42 +2408,50 @@ function initLayerToggles() {
 // =====================================================================
 // THEME TOGGLE
 // =====================================================================
-function initThemeToggle() {
-  const btn = document.querySelector('[data-theme-toggle]');
-  if (!btn) return;
+const SVG_SUN  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+const SVG_MOON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
+function setTheme(theme) {
   const root = document.documentElement;
-  let theme = 'dark';
-
-  btn.addEventListener('click', () => {
-    theme = theme === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', theme);
-
-    // Swap tile layer
+  root.setAttribute('data-theme', theme);
+  document.querySelectorAll('[data-theme-toggle]').forEach(b => {
+    b.innerHTML = theme === 'light' ? SVG_MOON : SVG_SUN;
+  });
+  // Swap map tiles
+  if (leafletMap) {
     const layers = [];
     leafletMap.eachLayer(l => { if (l.options && l.options.attribution) layers.push(l); });
-
+    layers.forEach(l => leafletMap.removeLayer(l));
     if (theme === 'light') {
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
-      layers.forEach(l => leafletMap.removeLayer(l));
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20, noWrap: true
       }).addTo(leafletMap);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd', opacity: 0.5, maxZoom: 20
+        subdomains: 'abcd', opacity: 0.5, maxZoom: 20, noWrap: true
       }).addTo(leafletMap);
     } else {
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
-      layers.forEach(l => leafletMap.removeLayer(l));
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20, noWrap: true
       }).addTo(leafletMap);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd', opacity: 0.4, maxZoom: 20
+        subdomains: 'abcd', opacity: 0.4, maxZoom: 20, noWrap: true
       }).addTo(leafletMap);
     }
-
-    document.getElementById('map').style.background = theme === 'dark' ? '#0a0e18' : '#e8e4dc';
+    document.getElementById('map').style.background = theme === 'dark' ? '#0e1220' : '#d4d0c8';
     updateMap();
+  }
+}
+
+function initThemeToggle() {
+  const root = document.documentElement;
+  let theme = root.getAttribute('data-theme') || 'light';
+  // Set correct initial icon on all toggle buttons
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.innerHTML = theme === 'light' ? SVG_MOON : SVG_SUN;
+    btn.addEventListener('click', () => {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      setTheme(theme);
+    });
   });
 }
 
@@ -2343,13 +2557,12 @@ function togglePlay() {
 let animMigLayer = null;
 
 function getBearing(from, to) {
-  // Returns bearing angle in degrees for a CSS rotation
-  const lat1 = from[0] * Math.PI / 180;
-  const lat2 = to[0] * Math.PI / 180;
-  const dLng = (to[1] - from[1]) * Math.PI / 180;
-  const y = Math.sin(dLng) * Math.cos(lat2);
-  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
-  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  // Rhumb-line bearing: matches the apparent direction of the
+  // straight polyline on a Mercator (flat) map projection.
+  // from/to are [lat, lng]. CSS rotation 0° = up (North), 90° = right (East).
+  const dLng = to[1] - from[1];
+  const dLat = to[0] - from[0];
+  return (Math.atan2(dLng, dLat) * 180 / Math.PI + 360) % 360;
 }
 
 function updateAnimatedMigrations() {
@@ -2416,9 +2629,16 @@ function updateAnimatedMigrations() {
 
 
 // =====================================================================
-// DATA LOADING (Évolution 1) — fetch JSON-LD from app/data/
+// EMBEDDED DATA FALLBACK — used when fetch() fails (file:// URLs, offline mode)
+// =====================================================================
+const _EMBEDDED_SPECIES = {"@context":{"@vocab":"https://schema.org/","taxon":"https://dwc.tdwg.org/terms/#","hominin":"https://hominines-origins.local/vocab#"},"@type":"ItemList","name":"Hominines Species Catalogue","description":"Catalogue des espèces d'hominines de -4,1 Ma à -2 000 ans, basé sur les publications paléoanthropologiques récentes (2022-2026).","itemListElement":[{"@type":"Species","@id":"afarensis","taxon:scientificName":"Australopithecus afarensis","name":{"fr":"\"Lucy\" et ses contemporains","en":"\"Lucy\" and contemporaries"},"hominin:periodStart":-4100000,"hominin:periodEnd":-2700000,"hominin:color":"#8B6914","hominin:lane":0,"hominin:heightM":"~150 cm","hominin:heightF":"~105 cm","hominin:weightM":"~42 kg","hominin:brain":"385–550 cm³","hominin:dimorphism":"Très marqué (~40%)","hominin:skinDesc":{"fr":"Fourrure + peau peu pigmentée (sous couverture)","en":"Fur + lightly pigmented skin (beneath cover)"},"hominin:skinColor":"#c8956a","hominin:skinVariant":"fur","hominin:eyesDesc":{"fr":"Bruns","en":"Brown"},"hominin:eyesColor":"#5c3317","hominin:hairDesc":{"fr":"Fourrure sombre","en":"Dark fur"},"hominin:hairColor":"#1a0a00","hominin:pigmentationCertainty":"inference","hominin:pigmentationCertLabel":"⚠️ Inférence évolutive","hominin:tools":["Aucun outil connu","Comportement proche des grands singes","Bipédie régulière"],"hominin:debate":"Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées.","hominin:regions":[{"name":"Afar (Éthiopie)","lat":11.5,"lng":41.0,"radius":700000,"note":"Hadar — \"Lucy\" AL 288-1, ~3,2 Ma"},{"name":"Laetoli (Tanzanie)","lat":-3.5,"lng":35.5,"radius":600000,"note":"Empreintes de Laetoli, ~3,7 Ma"},{"name":"Afrique de l'Est","lat":2.0,"lng":38.0,"radius":400000,"note":"Distribution générale"}],"hominin:fossilSites":[{"name":"Hadar (Éthiopie)","lat":11.1,"lng":40.6,"note":"\"Lucy\" AL 288-1 — 3,2 Ma"},{"name":"Laetoli (Tanzanie)","lat":-3.53,"lng":35.35,"note":"Empreintes de bipédie — 3,7 Ma"},{"name":"Omo (Éthiopie)","lat":5.0,"lng":35.9,"note":"Nombreux fossiles, 2,8–3,9 Ma"}],"hominin:migrations":[]},{"@type":"Species","@id":"habilis","taxon:scientificName":"Homo habilis","name":{"fr":"\"L'homme habile\" — 1er genre Homo","en":"\"Handy Man\" — first Homo genus"},"hominin:periodStart":-2400000,"hominin:periodEnd":-1400000,"hominin:color":"#A07820","hominin:lane":1,"hominin:heightM":"~130–135 cm","hominin:heightF":"~100–120 cm","hominin:weightM":"~37 kg","hominin:brain":"500–900 cm³","hominin:dimorphism":"Marqué","hominin:skinDesc":{"fr":"Transition pelage → peau sombre émergente","en":"Transition fur → emerging dark skin"},"hominin:skinColor":"#8B4513","hominin:skinVariant":"partial-fur","hominin:eyesDesc":{"fr":"Bruns","en":"Brown"},"hominin:eyesColor":"#5c3317","hominin:hairDesc":{"fr":"Transition vers cheveux crépus sombres","en":"Transition to dark coiled hair"},"hominin:hairColor":"#2a1200","hominin:pigmentationCertainty":"inference","hominin:pigmentationCertLabel":"⚠️ Inférence évolutive","hominin:tools":["Industrie Oldowayen","Galets taillés (choppers)","Outils sur éclats"],"hominin:debate":"Statut d'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces.","hominin:regions":[{"name":"Afrique de l'Est","lat":-2.5,"lng":35.0,"radius":800000,"note":"Distribution principale"}],"hominin:fossilSites":[{"name":"Olduvai Gorge (Tanzanie)","lat":-2.99,"lng":35.35,"note":"Site type — Industrie Oldowayen"},{"name":"Koobi Fora (Kenya)","lat":3.94,"lng":36.17,"note":"Nombreux fossiles H. habilis"},{"name":"Omo (Éthiopie)","lat":5.0,"lng":35.9,"note":"Fossiles mixtes H. habilis / Au."}],"hominin:migrations":[]},{"@type":"Species","@id":"erectus","taxon:scientificName":"Homo erectus","name":{"fr":"\"L'homme debout\" — 1er grand voyageur","en":"\"Upright Man\" — first great traveller"},"hominin:periodStart":-1800000,"hominin:periodEnd":-250000,"hominin:color":"#C04010","hominin:lane":2,"hominin:heightM":"145–185 cm","hominin:heightF":"130–160 cm","hominin:weightM":"40–68 kg","hominin:brain":"600–1 100 cm³ (moy. ~900)","hominin:dimorphism":"Modéré","hominin:skinDesc":{"fr":"Noire ou très sombre (depuis ~1,2 Ma)","en":"Black or very dark (since ~1.2 Ma)"},"hominin:skinColor":"#3a1800","hominin:skinVariant":null,"hominin:eyesDesc":{"fr":"Bruns","en":"Brown"},"hominin:eyesColor":"#5c3317","hominin:hairDesc":{"fr":"Noirs, probablement crépus","en":"Black, probably coiled"},"hominin:hairColor":"#0a0500","hominin:pigmentationCertainty":"genetic","hominin:pigmentationCertLabel":"🔬 MC1R sweep génétique (~1,2 Ma)","hominin:tools":["Industrie Acheuléenne","Bifaces en amande","Usage du feu (probable)","Outils sur éclats Levallois (tardif)"],"hominin:debate":"H. erectus sensu lato est probablement un groupement polyphylétique (Rogers et al. 2020) ; variations régionales importantes.","hominin:regions":[{"name":"Afrique","lat":5.0,"lng":20.0,"radius":2000000,"note":"Origine et longue présence africaine"},{"name":"Asie du Sud-Est","lat":0.0,"lng":110.0,"radius":1500000,"note":"Java, Chine — formes asiatiques robustes"},{"name":"Eurasie","lat":42.0,"lng":44.0,"radius":900000,"note":"Dmanisi (Géorgie) — ~1,8 Ma"}],"hominin:fossilSites":[{"name":"Turkana (Kenya)","lat":3.9,"lng":36.1,"note":"\"Turkana Boy\" KNM-WT 15000 — ~1,5 Ma"},{"name":"Dmanisi (Géorgie)","lat":41.33,"lng":44.1,"note":"Plus ancien hors Afrique — 1,8 Ma"},{"name":"Sangiran (Java)","lat":-7.46,"lng":110.83,"note":"H. erectus asiatique — 1,5 Ma"},{"name":"Zhoukoudian (Chine)","lat":39.7,"lng":115.9,"note":"\"Homme de Pékin\" — 780–250 ka"},{"name":"Ndutu (Tanzanie)","lat":-3.2,"lng":35.5,"note":"Forme africaine tardive"}],"hominin:migrations":[{"from":[5.0,36.0],"to":[41.33,44.1],"label":"Sortie d'Afrique ~1,8 Ma"},{"from":[41.33,44.1],"to":[-7.46,110.83],"label":"Dispersion asiatique ~1,5 Ma"},{"from":[41.33,44.1],"to":[39.7,115.9],"label":"Dispersion Chine ~0,78 Ma"}]},{"@type":"Species","@id":"heidelbergensis","taxon:scientificName":"Homo heidelbergensis","name":{"fr":"Ancêtre probable Néandertaliens + Sapiens","en":"Probable ancestor of Neanderthals + Sapiens"},"hominin:periodStart":-700000,"hominin:periodEnd":-200000,"hominin:color":"#805090","hominin:lane":3,"hominin:heightM":"~175 cm (jusqu'à 181)","hominin:heightF":"~157 cm","hominin:weightM":"~62 kg","hominin:brain":"1 100–1 400 cm³","hominin:dimorphism":"Modéré","hominin:skinDesc":{"fr":"Sombre (continuité africaine)","en":"Dark (African continuity)"},"hominin:skinColor":"#4a2200","hominin:skinVariant":null,"hominin:eyesDesc":{"fr":"Bruns","en":"Brown"},"hominin:eyesColor":"#5c3317","hominin:hairDesc":{"fr":"Sombres","en":"Dark"},"hominin:hairColor":"#1a0800","hominin:pigmentationCertainty":"inference","hominin:pigmentationCertLabel":"⚠️ Inférence évolutive (pas d'ADN)","hominin:tools":["Acheuléen avancé","Bifaces façonnés","Premières sépultures (Sima de los Huesos)","Débitage discoïde"],"hominin:debate":"Statut d'espèce très débattu. Certains chercheurs le séparent en H. antecessor (Europe) et gardent H. heidelbergensis pour l'Afrique.","hominin:regions":[{"name":"Afrique","lat":8.0,"lng":20.0,"radius":1800000,"note":"Lignée vers H. sapiens"},{"name":"Europe occidentale","lat":46.0,"lng":12.0,"radius":1200000,"note":"Lignée vers Néandertaliens"}],"hominin:fossilSites":[{"name":"Kabwe (Zambie)","lat":-14.45,"lng":28.45,"note":"\"Crâne de Broken Hill\" — 299 ka"},{"name":"Casablanca (Maroc)","lat":33.59,"lng":-7.62,"note":"Thomas Quarry I — ~773 ka"},{"name":"Mauer (Allemagne)","lat":49.35,"lng":8.8,"note":"Site type — mâchoire 600 ka"},{"name":"Bodo (Éthiopie)","lat":10.9,"lng":40.1,"note":"Crâne africain 600 ka"},{"name":"Atapuerca (Espagne)","lat":42.36,"lng":-3.52,"note":"Sima de los Huesos — ~430 ka"}],"hominin:migrations":[{"from":[8.0,20.0],"to":[46.0,12.0],"label":"Dispersion vers l'Europe ~600 ka"}]},{"@type":"Species","@id":"neanderthal","taxon:scientificName":"Homo neanderthalensis","name":{"fr":"Les Néandertaliens — nos cousins directs","en":"Neanderthals — our direct cousins"},"hominin:periodStart":-400000,"hominin:periodEnd":-28000,"hominin:color":"#2070B0","hominin:lane":3,"hominin:heightM":"~164 cm (148–177)","hominin:heightF":"~155 cm","hominin:weightM":"~65 kg","hominin:brain":"1 200–1 750 cm³","hominin:dimorphism":"Faible","hominin:skinDesc":{"fr":"Variable : brun-sombre (majorité) ; pâle/rousse ~1% (MC1R R307G)","en":"Variable: dark-brown (majority); pale/red ~1% (MC1R R307G)"},"hominin:skinColor":"#7a4020","hominin:skinVariantColor":"#e8c090","hominin:skinVariant":"split","hominin:eyesDesc":{"fr":"Bruns (majorité) ; bleus possibles minorité (haplotype OCA2)","en":"Brown (majority); blue possible minority (OCA2 haplotype)"},"hominin:eyesColor":"#5c3317","hominin:eyesVariantColor":"#6ea0c8","hominin:eyesVariant":"split","hominin:hairDesc":{"fr":"Bruns-châtain (majorité) ; roux (minorité)","en":"Brown-chestnut (majority); red (minority)"},"hominin:hairColor":"#5c2a00","hominin:hairVariantColor":"#c06030","hominin:hairVariant":"split","hominin:pigmentationCertainty":"dna-direct","hominin:pigmentationCertLabel":"✅ ADN direct (MC1R + génomes complets)","hominin:tools":["Industrie Moustérienne","Débitage Levallois","Industrie Châtelperronienne (tardif)","Bijoux, ocre, sépultures rituelles"],"hominin:debate":"Hawks (2023) : limites méthodologiques de l'inférence phénotypique. Introgression de pigmentation Néandertal → H. sapiens (Iasi et al., Science 2024). Extinction : compétition avec H. sapiens vs absorption génétique.","hominin:regions":[{"name":"Europe","lat":47.0,"lng":10.0,"radius":1800000,"note":"Centre principal de dispersion"},{"name":"Proche-Orient","lat":35.0,"lng":38.0,"radius":700000,"note":"Coexistence avec H. sapiens"},{"name":"Asie centrale","lat":45.0,"lng":65.0,"radius":900000,"note":"Extension orientale"}],"hominin:fossilSites":[{"name":"Néander (Allemagne)","lat":51.22,"lng":6.95,"note":"Site type — 1856, ~40 ka"},{"name":"El Sidrón (Espagne)","lat":43.38,"lng":-5.38,"note":"ADN MC1R — pigmentation documentée"},{"name":"Shanidar (Irak)","lat":36.83,"lng":44.22,"note":"Sépultures + fleurs — ~65 ka"},{"name":"La Chapelle (France)","lat":45.22,"lng":1.75,"note":"\"Vieillard\" — anatomie classique"},{"name":"Vindija (Croatie)","lat":46.34,"lng":16.07,"note":"Génomes complets séquencés — ~44 ka"},{"name":"Teshik-Tash (Ouzbékistan)","lat":38.35,"lng":66.83,"note":"Extension orientale — ~70 ka"}],"hominin:migrations":[{"from":[47.0,10.0],"to":[35.0,38.0],"label":"Expansion vers Proche-Orient"},{"from":[47.0,10.0],"to":[45.0,65.0],"label":"Extension orientale ~70 ka"}]},{"@type":"Species","@id":"denisovan","taxon:scientificName":"Homo denisova","name":{"fr":"\"Dragon Man\" et ses cousins — mystère résolu en 2025","en":"\"Dragon Man\" and cousins — mystery solved 2025"},"hominin:periodStart":-400000,"hominin:periodEnd":-30000,"hominin:color":"#208060","hominin:lane":3,"hominin:heightM":"> 180 cm (estimé)","hominin:heightF":"Non documenté","hominin:weightM":"~100 kg (estimé)","hominin:brain":"≥ H. sapiens (estimé)","hominin:dimorphism":"Inconnu","hominin:skinDesc":{"fr":"Sombre","en":"Dark"},"hominin:skinColor":"#3a1800","hominin:skinVariant":null,"hominin:eyesDesc":{"fr":"Sombres","en":"Dark"},"hominin:eyesColor":"#2a1800","hominin:hairDesc":{"fr":"Sombres","en":"Dark"},"hominin:hairColor":"#0a0500","hominin:pigmentationCertainty":"dna-direct","hominin:pigmentationCertLabel":"✅ ADN ancien direct (Denisova 3)","hominin:tools":["Industrie intermédiaire (Altaï)","Bracelet en chloritolite (Denisova)","Parures et ornements"],"hominin:debate":"Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (Fu Qiaomei et al., 2025). ADN nucléaire pas encore disponible — certains paléoanthropologues attendent confirmation définitive.","hominin:regions":[{"name":"Asie centrale/orientale","lat":40.0,"lng":90.0,"radius":2500000,"note":"Vaste distribution en Asie"},{"name":"Altaï (Sibérie)","lat":51.4,"lng":85.7,"radius":500000,"note":"Grotte de Denisova — fossiles originaux"}],"hominin:fossilSites":[{"name":"Denisova (Sibérie)","lat":51.4,"lng":84.67,"note":"Grotte de Denisova — doigt + dents, ~60 ka"},{"name":"Harbin (Chine)","lat":45.8,"lng":126.53,"note":"\"Dragon Man\" ~146 ka — identifié Dénisovien en 2025"},{"name":"Xiahe (Tibet)","lat":35.2,"lng":102.5,"note":"Mâchoire Dénisovienne — ~160 ka, altitude 3280m"},{"name":"Penghu (Taiwan)","lat":23.57,"lng":119.57,"note":"Mâchoire de Penghu — Dénisovien probable"}],"hominin:migrations":[{"from":[51.4,84.67],"to":[35.2,102.5],"label":"Présence tibétaine (altitude)"},{"from":[51.4,84.67],"to":[45.8,126.53],"label":"Dragon Man ~146 ka"}]},{"@type":"Species","@id":"sapiens-africa","taxon:scientificName":"Homo sapiens","name":{"fr":"Les premiers \"vrais\" humains modernes","en":"The first anatomically modern humans"},"hominin:periodStart":-315000,"hominin:periodEnd":-100000,"hominin:color":"#C0A000","hominin:lane":4,"hominin:heightM":"~185 cm","hominin:heightF":"~170 cm","hominin:weightM":"~70 kg","hominin:brain":"1 200–1 600 cm³","hominin:dimorphism":"Faible","hominin:skinDesc":{"fr":"Très sombre / noire (allèles fixés)","en":"Very dark/black (fixed alleles)"},"hominin:skinColor":"#2a1000","hominin:skinVariant":null,"hominin:eyesDesc":{"fr":"Bruns foncés (fixés)","en":"Dark brown (fixed)"},"hominin:eyesColor":"#2a1400","hominin:hairDesc":{"fr":"Noirs crépus","en":"Black coiled"},"hominin:hairColor":"#080400","hominin:pigmentationCertainty":"dna-direct","hominin:pigmentationCertLabel":"✅ ADN africain ancien (Nature 2025)","hominin:tools":["Industrie MSA (Middle Stone Age)","Pointes foliacées","Perles en coquillage","Art rupestre précoce","Pêche, piégeage"],"hominin:debate":"Débat \"pan-africain\" vs origine unique Est-africaine. Jebel Irhoud plaide pour une évolution sur l'ensemble du continent.","hominin:regions":[{"name":"Afrique","lat":5.0,"lng":20.0,"radius":3000000,"note":"Berceau de H. sapiens"}],"hominin:fossilSites":[{"name":"Jebel Irhoud (Maroc)","lat":32.12,"lng":-8.27,"note":"Plus anciens H. sapiens — 315 ka"},{"name":"Omo Kibish (Éthiopie)","lat":5.15,"lng":35.87,"note":"Omo I et II — 195 ka"},{"name":"Herto (Éthiopie)","lat":10.67,"lng":40.67,"note":"Crânes modernes — 160 ka"},{"name":"Florisbad (Afrique du Sud)","lat":-28.77,"lng":26.07,"note":"Fossile 259 ka — \"Homo helmei\"?"}],"hominin:migrations":[]},{"@type":"Species","@id":"sapiens-levant","taxon:scientificName":"Homo sapiens","name":{"fr":"1ère sortie d'Afrique documentée","en":"First documented Out-of-Africa"},"hominin:periodStart":-130000,"hominin:periodEnd":-90000,"hominin:color":"#D07010","hominin:lane":4,"hominin:heightM":"~185 cm","hominin:heightF":"~170 cm","hominin:weightM":"~70 kg","hominin:brain":"~1 450–1 550 cm³","hominin:dimorphism":"Faible","hominin:skinDesc":{"fr":"Très sombre (continuité africaine)","en":"Very dark (African continuity)"},"hominin:skinColor":"#3a1800","hominin:skinVariant":null,"hominin:eyesDesc":{"fr":"Bruns foncés","en":"Dark brown"},"hominin:eyesColor":"#3a1800","hominin:hairDesc":{"fr":"Noirs","en":"Black"},"hominin:hairColor":"#0a0500","hominin:pigmentationCertainty":"inference","hominin:pigmentationCertLabel":"⚠️ Inférence par continuité génomique","hominin:tools":["MSA / Early IUP","Ocre utilisée","Sépultures rituelles","Perles et parures"],"hominin:debate":"Cette 1ère sortie (~130 ka) ne semble pas avoir contribué au peuplement mondial. La grande dispersion vient d'une vague ultérieure (~60–70 ka).","hominin:regions":[{"name":"Levant / Proche-Orient","lat":32.0,"lng":35.5,"radius":600000,"note":"1ère présence hors Afrique"}],"hominin:fossilSites":[{"name":"Skhul (Israël)","lat":32.67,"lng":35.07,"note":"Sépultures — ~100–130 ka"},{"name":"Qafzeh (Israël)","lat":32.7,"lng":35.27,"note":"Sépultures avec parures — ~90–130 ka"},{"name":"Tinshemet (Israël)","lat":32.6,"lng":34.97,"note":"5 sépultures H. sapiens — ~110 ka (2025)"}],"hominin:migrations":[{"from":[5.0,20.0],"to":[32.0,35.5],"label":"Sortie d'Afrique ~130 ka"}]},{"@type":"Species","@id":"sapiens-upper-paleo","taxon:scientificName":"Homo sapiens","name":{"fr":"Les chasseurs-cueilleurs eurasiens","en":"Eurasian hunter-gatherers"},"hominin:periodStart":-45000,"hominin:periodEnd":-14000,"hominin:color":"#E08020","hominin:lane":4,"hominin:heightM":"~170–185 cm","hominin:heightF":"~158–168 cm","hominin:weightM":"~70 kg","hominin:brain":"~1 350–1 500 cm³","hominin:dimorphism":"Faible","hominin:skinDesc":{"fr":"Sombre (347/348 individus sur toute la période)","en":"Dark (347/348 individuals across the period)"},"hominin:skinColor":"#4a2800","hominin:skinVariant":null,"hominin:eyesDesc":{"fr":"Sombres (majorité) ; pic yeux clairs vers 14–4 ka","en":"Dark (majority); light eye peak 14–4 ka"},"hominin:eyesColor":"#3a2000","hominin:eyesVariantColor":"#6ea0c8","hominin:eyesVariant":"split","hominin:hairDesc":{"fr":"Sombres (quasi-unanime)","en":"Dark (near-unanimous)"},"hominin:hairColor":"#1a0800","hominin:pigmentationCertainty":"dna-direct","hominin:pigmentationCertLabel":"✅ ADN direct — 348 génomes (PNAS 2025)","hominin:tools":["Industrie Aurignacienne","Industrie Gravettienne","Sagaies en os","Art pariétal (Lascaux, Altamira, Chauvet)","Statuettes Vénus","Parures élaborées"],"hominin:debate":"Découplage yeux/peau : les yeux clairs précèdent la peau claire de plusieurs millénaires. Mécanisme sélectif non élucidé (sélection sexuelle ? dérive ? pléiotropie ?).","hominin:regions":[{"name":"Eurasie","lat":50.0,"lng":40.0,"radius":3000000,"note":"Dispersion post-sortie d'Afrique"},{"name":"Australie","lat":-25.0,"lng":133.0,"radius":1500000,"note":"Peuplement ~50 ka"},{"name":"Amériques","lat":55.0,"lng":-120.0,"radius":2000000,"note":"Via Béringie ~16–20 ka"}],"hominin:fossilSites":[{"name":"Ust'-Ishim (Sibérie)","lat":57.3,"lng":69.0,"note":"Plus ancien génome H. sapiens non-africain — 45 ka"},{"name":"Lascaux (France)","lat":45.05,"lng":1.07,"note":"Peintures rupestres — ~17 ka"},{"name":"Altamira (Espagne)","lat":43.38,"lng":-4.1,"note":"Peintures rupestres bisons — ~35 ka"},{"name":"Dolní Věstonice (Tchéquie)","lat":48.88,"lng":16.65,"note":"Vénus paléolithique — ~26 ka"},{"name":"Sungir (Russie)","lat":56.18,"lng":40.43,"note":"Sépulture parée de perles — ~34 ka"},{"name":"Mungo (Australie)","lat":-33.73,"lng":143.05,"note":"Peuplement australien — ~42 ka"}],"hominin:migrations":[{"from":[5.0,36.0],"to":[57.3,69.0],"label":"Grande sortie d'Afrique ~60–70 ka"},{"from":[57.3,69.0],"to":[-33.73,143.05],"label":"Peuplement Australie ~50 ka"},{"from":[57.3,69.0],"to":[55.0,-120.0],"label":"Béringie → Amériques ~16–20 ka"}]},{"@type":"Species","@id":"sapiens-mesolithic","taxon:scientificName":"Homo sapiens","name":{"fr":"Le paradoxe pigmentaire européen","en":"The European pigmentation paradox"},"hominin:periodStart":-14000,"hominin:periodEnd":-7000,"hominin:color":"#909030","hominin:lane":4,"hominin:heightM":"~167–172 cm","hominin:heightF":"~155–163 cm","hominin:weightM":"~65 kg","hominin:brain":"~1 400 cm³","hominin:dimorphism":"Faible","hominin:skinDesc":{"fr":"Sombre à intermédiaire (transition en cours)","en":"Dark to intermediate (ongoing transition)"},"hominin:skinColor":"#5a3010","hominin:skinVariantColor":"#c08050","hominin:skinVariant":"split","hominin:eyesDesc":{"fr":"Pic yeux clairs : 11/35 individus (PNAS 2025)","en":"Light eye peak: 11/35 individuals (PNAS 2025)"},"hominin:eyesColor":"#3a2000","hominin:eyesVariantColor":"#6ea0c8","hominin:eyesVariant":"split","hominin:hairDesc":{"fr":"Sombres (quasi-unanime)","en":"Dark (near-unanimous)"},"hominin:hairColor":"#1a0800","hominin:pigmentationCertainty":"dna-direct","hominin:pigmentationCertLabel":"✅ ADN direct — \"Paradoxe pigmentaire\" documenté","hominin:tools":["Industrie Mésolithique","Microlithes géométriques","Arc et flèches perfectionnés","Pirogues","Pêche intensive"],"hominin:debate":"Paradoxe peau sombre + yeux clairs : combinaison directement attestée par ADN. Le mécanisme de sélection des yeux clairs avant la peau est toujours inexpliqué.","hominin:regions":[{"name":"Europe","lat":52.0,"lng":15.0,"radius":1800000,"note":"Chasseurs-cueilleurs WHG post-glaciaires"}],"hominin:fossilSites":[{"name":"Cheddar (Grande-Bretagne)","lat":51.28,"lng":-2.77,"note":"\"Cheddar Man\" — peau sombre + yeux bleus, ~9 ka"},{"name":"Skateholm (Suède)","lat":55.5,"lng":13.57,"note":"SF12 — peau sombre + yeux clairs, ~9 ka"},{"name":"Loschbour (Luxembourg)","lat":49.78,"lng":6.28,"note":"WHG type — peau sombre + yeux bleus, ~8 ka"},{"name":"La Braña (Espagne)","lat":42.97,"lng":-5.87,"note":"Individu peau sombre + yeux bleus, ~7 ka"}],"hominin:migrations":[]},{"@type":"Species","@id":"sapiens-neolithic","taxon:scientificName":"Homo sapiens","name":{"fr":"L'agriculture change tout, y compris la peau","en":"Agriculture changes everything, including skin"},"hominin:periodStart":-10000,"hominin:periodEnd":-5000,"hominin:color":"#60A040","hominin:lane":4,"hominin:heightM":"~163–168 cm (légère réduction)","hominin:heightF":"~152–158 cm","hominin:weightM":"~60–65 kg","hominin:brain":"~1 400 cm³","hominin:dimorphism":"Faible","hominin:skinDesc":{"fr":"Intermédiaire → claire en augmentation (SLC24A5 en diffusion) ; Ötzi : peau sombre attestée","en":"Intermediate → lightening (SLC24A5 spreading); Ötzi: dark skin confirmed"},"hominin:skinColor":"#8a5030","hominin:skinVariantColor":"#d0a078","hominin:skinVariant":"split","hominin:eyesDesc":{"fr":"Variables ; brun dominant ; clairs augmentant au nord","en":"Variable; brown dominant; light increasing north"},"hominin:eyesColor":"#5c3317","hominin:eyesVariantColor":"#6ea0c8","hominin:eyesVariant":"split","hominin:hairDesc":{"fr":"Variables ; Ötzi : cheveux noirs (ADN direct)","en":"Variable; Ötzi: black hair (direct DNA)"},"hominin:hairColor":"#2a1000","hominin:hairVariantColor":"#7a5020","hominin:hairVariant":"split","hominin:pigmentationCertainty":"dna-direct","hominin:pigmentationCertLabel":"✅ ADN direct (Ötzi + nombreux génomes)","hominin:tools":["Agriculture (blé, orge, légumineuses)","Élevage (bovins, ovins, porcins)","Poterie","Mégalithes (Stonehenge)","Polissage de la pierre","Tissage"],"hominin:debate":"La réduction de taille est liée à la sédentarisation et aux déficiences alimentaires. Tri-hybridation WHG + EEF (agriculteurs anatoliens) + début apport Yamna.","hominin:regions":[{"name":"Europe","lat":48.0,"lng":18.0,"radius":1800000,"note":"Agriculteurs anatoliens (EEF) + WHG"},{"name":"Proche-Orient (Anatolie)","lat":39.0,"lng":33.0,"radius":800000,"note":"Berceau de l'agriculture — 10 ka"}],"hominin:fossilSites":[{"name":"Ötzi (Alpes)","lat":46.78,"lng":10.84,"note":"\"L'homme des glaces\" — peau sombre + cheveux noirs, ~5 300 ans"},{"name":"Çatalhöyük (Turquie)","lat":37.67,"lng":32.83,"note":"Grande ville néolithique — ~7 500 ans"},{"name":"Stonehenge (GB)","lat":51.18,"lng":-1.83,"note":"Constructeurs peau intermédiaire — ~4 500 ans"}],"hominin:migrations":[{"from":[39.0,33.0],"to":[48.0,18.0],"label":"Expansion agriculteurs anatoliens ~7 000 ans"}]},{"@type":"Species","@id":"sapiens-bronze","taxon:scientificName":"Homo sapiens","name":{"fr":"L'arrivée des steppes change l'Europe génétiquement","en":"Steppe migrants genetically reshape Europe"},"hominin:periodStart":-5000,"hominin:periodEnd":-2000,"hominin:color":"#A06020","hominin:lane":4,"hominin:heightM":"~168–175 cm","hominin:heightF":"~156–163 cm","hominin:weightM":"~65–70 kg","hominin:brain":"~1 400 cm³","hominin:dimorphism":"Faible","hominin:skinDesc":{"fr":"Spectre continu : très sombre (Afrique sub-saharienne, Mélanésie) à claire (Europe du Nord). Peau sombre = état ancestral majoritaire mondialement.","en":"Continuous spectrum: very dark (sub-Saharan Africa, Melanesia) to light (N. Europe). Dark skin = ancestral state, worldwide majority."},"hominin:skinColor":"#2a1000","hominin:skinVariantColor":"#d4a878","hominin:skinVariant":"spectrum","hominin:skinSpectrumColors":["#2a1000","#5a2e10","#8a5028","#b87848","#d4a878","#f0d0b0"],"hominin:eyesDesc":{"fr":"Brun reste la couleur la plus fréquente à l'échelle mondiale (~80 % des humains).","en":"Brown remains the most common eye colour globally (~80% of humans)."},"hominin:eyesColor":"#3a1800","hominin:eyesVariantColor":"#6ea0c8","hominin:eyesVariant":"split","hominin:hairDesc":{"fr":"Forte variabilité mondiale : noirs et bruns sombres sont majoritaires ; blonds et roux concentrés en Europe du Nord.","en":"High global variability: black and dark brown dominant; blond and red concentrated in N. Europe."},"hominin:hairColor":"#0a0500","hominin:hairVariantColor":"#d4b050","hominin:hairVariant":"split","hominin:pigmentationCertainty":"dna-direct","hominin:pigmentationCertLabel":"✅ ADN ancien + génomique moderne (PNAS 2025)","hominin:tools":["Métallurgie bronze puis fer","Chars de combat","Écriture (cunéiforme, hiéroglyphes)","Navigation avancée","Commerce longue distance"],"hominin:debate":"Ghirotto et al. (PNAS 2025) et Ju & Kelleher (PNAS 2021) s'accordent sur le caractère récent (~3 000 ans) de la peau claire mais divergent sur les rythmes de sélection vs dérive.","hominin:regions":[{"name":"Europe","lat":52.0,"lng":18.0,"radius":2000000,"note":"Peau claire généralisée en Europe du Nord"},{"name":"Steppes pontiques","lat":48.0,"lng":40.0,"radius":1200000,"note":"Yamna / Cordé — migrants des steppes"}],"hominin:fossilSites":[{"name":"Ötmarsum (Pays-Bas)","lat":52.41,"lng":6.9,"note":"WHG tardif — peau claire émergente, ~3 500 ans"},{"name":"Lolland (Danemark)","lat":54.77,"lng":11.5,"note":"Bronze Age — peau claire attestée, ~3 200 ans"},{"name":"Hallstatt (Autriche)","lat":47.56,"lng":13.65,"note":"Civilisation du Fer — ~2 800 ans"}],"hominin:migrations":[{"from":[48.0,40.0],"to":[52.0,18.0],"label":"Migration Yamna → Europe ~5 000 ans"}]}]};
+const _EMBEDDED_EVENTS  = {"@context":{"@vocab":"https://schema.org/","hominin":"https://hominines-origins.local/vocab#"},"@type":"ItemList","name":"Hominines Key Events","description":"Jalons culturels, technologiques et phylogénétiques de l'évolution des hominines, de -3,3 Ma à -10 400 ans.","itemListElement":[{"@type":"Event","@id":"lomekwi","name":{"fr":"Outils Lomékwien","en":"Lomekwian tools"},"hominin:icon":"🪨","hominin:color":"#8B6914","hominin:dateYearsBP":-3300000,"hominin:category":"tools","hominin:dateReference":"Nature 521:310 (2015)","description":{"fr":"Plus anciens outils connus — Lomekwi 3, Kenya (3,3 Ma). Débat sur l'intentionnalité.","en":"Oldest known tools — Lomekwi 3, Kenya (3.3 Ma). Intentionality debated."},"location":{"@type":"Place","name":"Lomekwi 3, Kenya","geo":{"@type":"GeoCoordinates","latitude":3.38,"longitude":35.83}}},{"@type":"Event","@id":"oldowayen","name":{"fr":"Oldowayen continu 2,75–2,44 Ma","en":"Continuous Oldowan 2.75–2.44 Ma"},"hominin:icon":"⚒","hominin:color":"#A07820","hominin:dateYearsBP":-2600000,"hominin:category":"tools","hominin:dateReference":"Nature Commun. 16 (2025)","description":{"fr":"Séquence Oldowayen continue sur ~300 000 ans — Namorotukunan, Koobi Fora, Kenya.","en":"Continuous Oldowan sequence over ~300,000 years — Namorotukunan, Koobi Fora, Kenya."},"location":{"@type":"Place","name":"Koobi Fora, Kenya","geo":{"@type":"GeoCoordinates","latitude":3.94,"longitude":36.17}}},{"@type":"Event","@id":"acheulean","name":{"fr":"Premier biface (Acheuléen)","en":"First handaxe (Acheulean)"},"hominin:icon":"🗿","hominin:color":"#C04010","hominin:dateYearsBP":-1760000,"hominin:category":"tools","hominin:dateReference":"Nature 460:82 (2009)","description":{"fr":"Premiers bifaces façonnés — Kokiselei 4, Turkana Ouest. Rupture cognitive majeure.","en":"First shaped handaxes — Kokiselei 4, West Turkana. Major cognitive shift."},"location":{"@type":"Place","name":"Kokiselei 4, West Turkana, Kenya","geo":{"@type":"GeoCoordinates","latitude":3.5,"longitude":35.7}}},{"@type":"Event","@id":"fire-use","name":{"fr":"Usage du feu (>1 Ma)","en":"Fire use (>1 Ma)"},"hominin:icon":"🔥","hominin:color":"#D05010","hominin:dateYearsBP":-1000000,"hominin:category":"fire","hominin:dateReference":"PNAS 109:E1215 (2012)","description":{"fr":"Traces de combustion >1 Ma — Wonderwerk Cave, Afrique du Sud. Usage ≠ fabrication intentionnelle.","en":"Combustion traces >1 Ma — Wonderwerk Cave, South Africa. Use ≠ intentional making."},"location":{"@type":"Place","name":"Wonderwerk Cave, South Africa","geo":{"@type":"GeoCoordinates","latitude":-27.85,"longitude":23.55}}},{"@type":"Event","@id":"fire-make","name":{"fr":"Fabrication intentionnelle du feu","en":"Intentional fire-making"},"hominin:icon":"🔥","hominin:color":"#E06020","hominin:dateYearsBP":-400000,"hominin:category":"fire","hominin:dateReference":"Nature (déc. 2025)","description":{"fr":"Pyrite de fer + argile cuite >750°C — Barnham, Suffolk, Angleterre. Repousse le record de 350 000 ans.","en":"Iron pyrite + clay fired >750°C — Barnham, Suffolk, England. Pushes record back 350,000 years."},"location":{"@type":"Place","name":"Barnham, Suffolk, England","geo":{"@type":"GeoCoordinates","latitude":52.28,"longitude":0.9}}},{"@type":"Event","@id":"thomas-quarry","name":{"fr":"Ancêtre commun Sapiens / Néandertal / Dénisovien","en":"Common ancestor Sapiens / Neanderthal / Denisovan"},"hominin:icon":"🦴","hominin:color":"#805090","hominin:dateYearsBP":-773000,"hominin:category":"phylo","hominin:dateReference":"Nature (2026)","description":{"fr":"Thomas Quarry I, Casablanca — 773 000 ans. Inversion magnétique Brunhes/Matuyama. Population à la base des 3 lignées (Nature 2026).","en":"Thomas Quarry I, Casablanca — 773,000 years. Brunhes/Matuyama magnetic reversal. Population at the base of 3 lineages (Nature 2026)."},"location":{"@type":"Place","name":"Thomas Quarry I, Casablanca, Morocco","geo":{"@type":"GeoCoordinates","latitude":33.59,"longitude":-7.62}}},{"@type":"Event","@id":"bruniquel","name":{"fr":"Structures rituelles Néandertal","en":"Neanderthal ritual structures"},"hominin:icon":"🗺","hominin:color":"#2070B0","hominin:dateYearsBP":-176500,"hominin:category":"symbolic","hominin:dateReference":"Nature 534:111 (2016)","description":{"fr":"Structures en stalagmites à 336m de profondeur — Bruniquel, France. Plus ancien usage intentionnel de l'espace souterrain.","en":"Stalagmite structures 336m deep — Bruniquel, France. Oldest known intentional use of underground space."},"location":{"@type":"Place","name":"Bruniquel Cave, France","geo":{"@type":"GeoCoordinates","latitude":44.17,"longitude":1.66}}},{"@type":"Event","@id":"beads-nassarius","name":{"fr":"Coquillages perforés (parures)","en":"Perforated shells (ornaments)"},"hominin:icon":"📿","hominin:color":"#C0A000","hominin:dateYearsBP":-130000,"hominin:category":"symbolic","hominin:dateReference":"PNAS 104:9964 (2007)","description":{"fr":"Nassarius perforés — Skhul (Israël) 140–100 ka ; Taforalt (Maroc) 82 ka. Premières parures symboliques.","en":"Perforated Nassarius — Skhul (Israel) 140–100 ka; Taforalt (Morocco) 82 ka. First symbolic ornaments."},"location":{"@type":"Place","name":"Skhul, Israel","geo":{"@type":"GeoCoordinates","latitude":32.67,"longitude":35.07}}},{"@type":"Event","@id":"burial-tinshemet","name":{"fr":"1ère sépulture intentionnelle (révisé)","en":"1st intentional burial (revised)"},"hominin:icon":"⚰","hominin:color":"#D07010","hominin:dateYearsBP":-110000,"hominin:category":"symbolic","hominin:dateReference":"Nature Human Behaviour (2025)","description":{"fr":"5 individus en position fœtale + ocre + objets rituels — Tinshemet Cave, Israël. Révisé de 100 000 à 110 000 ans (Nature Human Behaviour 2025).","en":"5 individuals in foetal position + ochre + ritual objects — Tinshemet Cave, Israel. Revised from 100,000 to 110,000 years (Nature Human Behaviour 2025)."},"location":{"@type":"Place","name":"Tinshemet Cave, Israel","geo":{"@type":"GeoCoordinates","latitude":32.6,"longitude":34.97}}},{"@type":"Event","@id":"blombos-beads","name":{"fr":"Perles Blombos Cave","en":"Blombos Cave beads"},"hominin:icon":"📿","hominin:color":"#E08020","hominin:dateYearsBP":-75000,"hominin:category":"symbolic","hominin:dateReference":"J. Hum. Evol. 48:3 (2005)","description":{"fr":"41+ perles Nassarius kraussianus — Blombos Cave, Afrique du Sud. 75 000 ans (OSL/TL).","en":"41+ Nassarius kraussianus beads — Blombos Cave, South Africa. 75,000 years (OSL/TL)."},"location":{"@type":"Place","name":"Blombos Cave, South Africa","geo":{"@type":"GeoCoordinates","latitude":-34.42,"longitude":21.22}}},{"@type":"Event","@id":"art-sulawesi-old","name":{"fr":"Plus ancien art rupestre mondial (≥67 800 ans)","en":"World's oldest rock art (≥67,800 years)"},"hominin:icon":"🎨","hominin:color":"#8050C0","hominin:dateYearsBP":-67800,"hominin:category":"art","hominin:dateReference":"Nature (janv. 2026)","description":{"fr":"Empreintes de main — Liang Metanduno, île de Muna, Sulawesi. ≥67 800 ans. Dépasse de 16 600 ans le précédent record (Nature 2026).","en":"Hand stencils — Liang Metanduno, Muna Island, Sulawesi. ≥67,800 years. Exceeds previous record by 16,600 years (Nature 2026)."},"location":{"@type":"Place","name":"Liang Metanduno, Muna Island, Sulawesi, Indonesia","geo":{"@type":"GeoCoordinates","latitude":-4.9,"longitude":122.5}}},{"@type":"Event","@id":"art-sulawesi-fig","name":{"fr":"Plus ancienne scène narrative (51 200 ans)","en":"Oldest narrative scene (51,200 years)"},"hominin:icon":"🎨","hominin:color":"#9060D0","hominin:dateYearsBP":-51200,"hominin:category":"art","hominin:dateReference":"Nature 631 (2024)","description":{"fr":"Figures anthropomorphes + cochon sauvage — Leang Karampuang, Sulawesi. Première scène avec interaction connue.","en":"Anthropomorphic figures + wild pig — Leang Karampuang, Sulawesi. First known scene with interaction."},"location":{"@type":"Place","name":"Leang Karampuang, Sulawesi, Indonesia","geo":{"@type":"GeoCoordinates","latitude":-4.55,"longitude":119.55}}},{"@type":"Event","@id":"aurignacian","name":{"fr":"Culture Aurignacienne","en":"Aurignacian culture"},"hominin:icon":"⚒","hominin:color":"#E08020","hominin:dateYearsBP":-43000,"hominin:category":"tools","hominin:dateReference":"Nature Commun. (2024)","description":{"fr":"1ère grande culture matérielle H. sapiens en Europe (43–28 ka). Deux vagues de dispersion confirmées par génomique (2024).","en":"First major H. sapiens material culture in Europe (43–28 ka). Two dispersal waves confirmed by genomics (2024)."},"location":{"@type":"Place","name":"Aurignac, France","geo":{"@type":"GeoCoordinates","latitude":44.93,"longitude":1.27}}},{"@type":"Event","@id":"art-chauvet","name":{"fr":"Grotte Chauvet (art pariétal)","en":"Chauvet Cave (cave art)"},"hominin:icon":"🎨","hominin:color":"#A070D0","hominin:dateYearsBP":-36000,"hominin:category":"art","hominin:dateReference":"PNAS 113:4670 (2016)","description":{"fr":"Ardèche, France — 37–33 500 ans (phase 1). Débat actif sur attribution culturelle Aurignacien vs Gravettien.","en":"Ardèche, France — 37–33,500 years (phase 1). Active debate on cultural attribution Aurignacian vs Gravettian."},"location":{"@type":"Place","name":"Grotte Chauvet, Ardèche, France","geo":{"@type":"GeoCoordinates","latitude":44.38,"longitude":4.42}}},{"@type":"Event","@id":"art-altamira","name":{"fr":"Altamira (bisons, ~35 ka)","en":"Altamira (bison, ~35 ka)"},"hominin:icon":"🎨","hominin:color":"#A070D0","hominin:dateYearsBP":-35000,"hominin:category":"art","hominin:dateReference":"","description":{"fr":"Peintures rupestres bisons — Altamira, Espagne. ~35 000 ans.","en":"Bison cave paintings — Altamira, Spain. ~35,000 years."},"location":{"@type":"Place","name":"Altamira, Spain","geo":{"@type":"GeoCoordinates","latitude":43.38,"longitude":-4.1}}},{"@type":"Event","@id":"art-lascaux","name":{"fr":"Lascaux (~17 000 ans)","en":"Lascaux (~17,000 years)"},"hominin:icon":"🎨","hominin:color":"#B080E0","hominin:dateYearsBP":-17000,"hominin:category":"art","hominin:dateReference":"","description":{"fr":"Chef-d'œuvre pariétal — Lascaux, Dordogne, France. ~17 000 ans.","en":"Cave painting masterpiece — Lascaux, Dordogne, France. ~17,000 years."},"location":{"@type":"Place","name":"Lascaux, Dordogne, France","geo":{"@type":"GeoCoordinates","latitude":45.05,"longitude":1.07}}},{"@type":"Event","@id":"sapiens-europe","name":{"fr":"H. sapiens en Europe (47 500 ans)","en":"H. sapiens in Europe (47,500 years)"},"hominin:icon":"🚶","hominin:color":"#E08020","hominin:dateYearsBP":-47500,"hominin:category":"migration","hominin:dateReference":"Nature 626:341 (2024)","description":{"fr":"Ossements + industrie LRJ — Grotte de Ranis, Thuringe, Allemagne. Légèrement révisé de 45 000 à 47 500 ans (Nature 2024).","en":"Bones + LRJ industry — Ranis Cave, Thuringia, Germany. Revised from 45,000 to 47,500 years (Nature 2024)."},"location":{"@type":"Place","name":"Ranis Cave, Thuringia, Germany","geo":{"@type":"GeoCoordinates","latitude":50.67,"longitude":11.57}}},{"@type":"Event","@id":"peuplement-australie","name":{"fr":"Peuplement Australie (65 000 ans)","en":"Peopling of Australia (65,000 years)"},"hominin:icon":"🚣","hominin:color":"#208060","hominin:dateYearsBP":-65000,"hominin:category":"migration","hominin:dateReference":"Nature 547 (2017)","description":{"fr":"OSL 65 000 ans — Madjedbebe, Territoire du Nord. Génomique (2025) : ~60 000 ans, deux routes depuis la Sonde.","en":"OSL 65,000 years — Madjedbebe, Northern Territory. Genomics (2025): ~60,000 years, two routes from Sundaland."},"location":{"@type":"Place","name":"Madjedbebe, Northern Territory, Australia","geo":{"@type":"GeoCoordinates","latitude":-12.55,"longitude":132.97}}},{"@type":"Event","@id":"americas","name":{"fr":"Peuplement des Amériques (très débattu)","en":"Peopling of the Americas (highly debated)"},"hominin:icon":"🚶","hominin:color":"#E04040","hominin:dateYearsBP":-16000,"hominin:category":"migration","hominin:dateReference":"Science 391:1283 (2026)","description":{"fr":"Monte Verde II reclassé Holocène moyen par Surovell et al. (Science 2026). Débat pré-Clovis non résolu — l'un des débats les plus actifs en 2026.","en":"Monte Verde II reclassified mid-Holocene by Surovell et al. (Science 2026). Pre-Clovis debate unresolved — one of the most active debates in 2026."},"location":{"@type":"Place","name":"Monte Verde, Chile","geo":{"@type":"GeoCoordinates","latitude":-41.5,"longitude":-73.0}}},{"@type":"Event","@id":"domestication","name":{"fr":"Domestication caprins","en":"Goat domestication"},"hominin:icon":"🐑","hominin:color":"#60A040","hominin:dateYearsBP":-10400,"hominin:category":"neolithic","hominin:dateReference":"PNAS 119:e2110930119 (2022)","description":{"fr":"Processus graduel sur ~1 000 ans — Aşıklı Höyük, Anatolie. Génomique 118 génomes anciens (Science 2025).","en":"Gradual process over ~1,000 years — Aşıklı Höyük, Anatolia. Genomics of 118 ancient genomes (Science 2025)."},"location":{"@type":"Place","name":"Aşıklı Höyük, Anatolia, Turkey","geo":{"@type":"GeoCoordinates","latitude":38.35,"longitude":34.17}}}]};
+
+// =====================================================================
+// DATA LOADING — fetch JSON-LD from app/data/, fallback to embedded data
 // =====================================================================
 async function loadData() {
+  let sj, ej;
   try {
     const [sr, er] = await Promise.all([
       fetch('./data/species.json'),
@@ -2426,15 +2646,17 @@ async function loadData() {
     ]);
     if (!sr.ok) throw new Error('species.json HTTP ' + sr.status);
     if (!er.ok) throw new Error('events.json HTTP '  + er.status);
-    const sj = await sr.json();
-    const ej = await ej_json(er);
-    window._RAW_SPECIES_JSON = sj;
-    window._RAW_EVENTS_JSON  = ej;
-    SPECIES_DATA = sj.itemListElement.map(adaptSpecies);
-    EVENTS_DATA  = ej.itemListElement.map(adaptEvent);
+    sj = await sr.json();
+    ej = await ej_json(er);
   } catch(err) {
-    console.error('[Hominines] Data load failed:', err.message);
+    console.warn('[Hominines] fetch failed, using embedded data:', err.message);
+    sj = _EMBEDDED_SPECIES;
+    ej = _EMBEDDED_EVENTS;
   }
+  window._RAW_SPECIES_JSON = sj;
+  window._RAW_EVENTS_JSON  = ej;
+  SPECIES_DATA = sj.itemListElement.map(adaptSpecies);
+  EVENTS_DATA  = ej.itemListElement.map(adaptEvent);
   bootApp();
 }
 
@@ -2528,8 +2750,14 @@ function bootApp() {
     if (hint) { hint.classList.add('hidden'); setTimeout(() => hint.remove(), 700); }
   });
 
-  // Show afarensis by default
-  setTimeout(() => { if (SPECIES_DATA.length) selectSpecies(SPECIES_DATA[0]); }, 400);
+  // Show afarensis by default (suppress mobile tab switch on initial auto-select)
+  setTimeout(() => {
+    if (SPECIES_DATA.length) {
+      window._suppressMobileSwitch = true;
+      selectSpecies(SPECIES_DATA[0]);
+      setTimeout(() => { window._suppressMobileSwitch = false; }, 200);
+    }
+  }, 400);
 
   // UX: after 3s of idle, pulse the play button + show welcome hint
   // (research shows ~3s is when users start wondering what to do on a new data-viz page)
@@ -2555,6 +2783,40 @@ function bootApp() {
 }
 
 document.addEventListener('DOMContentLoaded', loadData);
+
+// =====================================================================
+// BURGER MENU — init on DOMContentLoaded so panel HTML is available
+// =====================================================================
+document.addEventListener('DOMContentLoaded', function initBurger() {
+  var btn     = document.getElementById('burger-btn');
+  var panel   = document.getElementById('burger-panel');
+  var overlay = document.getElementById('burger-overlay');
+  var closeBtn= document.getElementById('burger-close');
+  if (!btn || !panel) return;
+
+  function openBurger() {
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeBurger() {
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  btn.addEventListener('click', openBurger);
+  if (closeBtn) closeBtn.addEventListener('click', closeBurger);
+  overlay.addEventListener('click', closeBurger);
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeBurger(); });
+
+  // Move layer toggle buttons into burger panel (after initLayerToggles has bound them)
+  var src  = document.getElementById('layer-toggles');
+  var dest = document.getElementById('burger-layer-btns');
+  if (src && dest) {
+    while (src.firstChild) dest.appendChild(src.firstChild);
+  }
+});
+
 </script>
 
 <!-- =====================================================================
@@ -3335,13 +3597,8 @@ window.addEventListener('load', function() {
     });
   });
 
-  // Auto-switch to detail on mobile when a species is selected on the map
-  document.addEventListener('speciesSelected', function() {
-    if (window.innerWidth <= 768) {
-      var tab = document.getElementById('tab-detail');
-      if (tab) tab.click();
-    }
-  });
+  // Mobile: user manually taps Détail tab to see species details
+  // (no automatic tab switching)
 })();
 
 // =====================================================================
@@ -3374,6 +3631,35 @@ window.addEventListener('load', function() {
   });
 })();
 
+// =====================================================================
+// WELCOME MODAL — init on DOMContentLoaded (modal HTML is at end of body)
+// =====================================================================
+document.addEventListener('DOMContentLoaded', function initWelcome() {
+  var STORAGE_KEY = 'ho_welcomed_v1';
+  var overlay = document.getElementById('welcome-modal-overlay');
+  if (!overlay) return;
+
+  // localStorage may throw in some file:// or private-browsing contexts
+  function storedGet() { try { return localStorage.getItem(STORAGE_KEY); } catch(e) { return null; } }
+  function storedSet() { try { localStorage.setItem(STORAGE_KEY, '1'); } catch(e) {} }
+
+  // Don't show if already dismissed
+  if (storedGet()) { overlay.classList.add('hidden'); return; }
+
+  function dismiss() {
+    overlay.style.display = 'none';
+    overlay.classList.add('hidden');
+    storedSet();
+  }
+
+  var btn = document.getElementById('welcome-start-btn');
+  if (btn) btn.addEventListener('click', function(e) { e.stopPropagation(); dismiss(); });
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+  document.addEventListener('keydown', function onEsc(e) {
+    if (e.key === 'Escape') { dismiss(); document.removeEventListener('keydown', onEsc); }
+  });
+});
+
 </script>
 <div id="data-viewer-overlay" class="data-viewer-overlay" hidden aria-hidden="true"></div>
 <aside id="data-viewer-drawer" class="data-viewer-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dvh">
@@ -3388,5 +3674,117 @@ window.addEventListener('load', function() {
   </div>
   <div class="data-viewer-body"><pre class="data-viewer-pre"><code class="language-json" id="json-code" translate="no"></code></pre></div>
 </aside>
+
+  <!-- ===== BURGER PANEL ===== -->
+  <div id="burger-overlay"></div>
+  <div id="burger-panel" role="dialog" aria-label="Menu">
+    <div id="burger-panel-header">
+      <div id="burger-app-title">Hominin<span>es</span></div>
+      <button id="burger-close" aria-label="Fermer">✕</button>
+    </div>
+    <div id="burger-panel-body">
+
+      <!-- Langue -->
+      <div>
+        <div class="burger-section-title" data-i18n="ui.language">Langue</div>
+        <div class="burger-lang-wrap">
+          <span>🌐</span>
+          <select id="lang-select" aria-label="Language">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+            <option value="zh">中文</option>
+            <option value="ar">العربية</option>
+            <option value="pt">Português</option>
+            <option value="it">Italiano</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Thème + Données -->
+      <div>
+        <div class="burger-section-title">Affichage</div>
+        <div class="burger-btn-row">
+          <button class="layer-btn" data-theme-toggle data-i18n-title="ui.toggleTheme" aria-label="Switch theme" style="flex:1; justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <span data-i18n="ui.toggleTheme">Mode sombre</span>
+          </button>
+          <button id="btn-data-viewer" class="layer-btn" title="Données JSON" data-i18n-title="ui.dataViewerTitle" aria-label="Données JSON" style="flex:1; justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            <span data-i18n="ui.dataViewerTitle">Données</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Couches carte -->
+      <div>
+        <div class="burger-section-title" data-i18n="ui.mapLayers">Couches carte</div>
+        <div class="burger-layer-btns" id="burger-layer-btns">
+          <!-- filled by JS from #layer-toggles -->
+        </div>
+      </div>
+
+      <!-- GitHub + Warning -->
+      <div style="margin-top:auto; padding-top: var(--space-4); border-top: 1px solid var(--color-divider); display:flex; flex-direction:column; gap:var(--space-3);">
+        <a href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer"
+           style="display:inline-flex; align-items:center; gap:var(--space-2); font-size:var(--text-xs); color:var(--color-text-muted); text-decoration:none; font-family:var(--font-mono);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          fdepierre/hominines-origins
+        </a>
+        <div style="font-size:var(--text-xs); color:var(--color-text-muted); font-family:var(--font-mono); line-height:1.6;" data-i18n="ui.experimentalWarning">
+          Expérimental · Généré par IA · Vérifiez les sources
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== WELCOME MODAL ===== -->
+  <div id="welcome-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+    <div id="welcome-modal">
+      <div>
+        <div class="welcome-logo" id="welcome-title">Hominin<span>es</span> Origins</div>
+        <div class="welcome-tagline" id="welcome-tagline">Des origines africaines à la conquête du monde</div>
+      </div>
+      <div class="welcome-body" id="welcome-body">
+        Depuis l'<strong>Afrique orientale</strong>, il y a plus de 4 millions d'années, différentes espèces d'hominines — nos ancêtres et leurs cousins — ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.
+      </div>
+      <div class="welcome-tips">
+        <div class="welcome-tip">
+          <span class="welcome-tip-icon">
+            <!-- timeline scrubber handle -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+          </span>
+          <span id="tip-cursor">Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.</span>
+        </div>
+        <div class="welcome-tip">
+          <span class="welcome-tip-icon">
+            <!-- map marker pin -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
+          <span id="tip-marker">Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d'une espèce.</span>
+        </div>
+        <div class="welcome-tip">
+          <span class="welcome-tip-icon">
+            <!-- play triangle — matches app play button -->
+            <svg width="20" height="20" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>
+          </span>
+          <span id="tip-play">Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.</span>
+        </div>
+      </div>
+      <button id="welcome-start-btn" onclick="document.getElementById('welcome-modal-overlay').style.display='none'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Commencer l'exploration
+      </button>
+    </div>
+  </div>
+
 </body>
 </html>
