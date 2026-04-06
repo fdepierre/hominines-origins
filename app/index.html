@@ -3639,20 +3639,23 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   var overlay = document.getElementById('welcome-modal-overlay');
   if (!overlay) return;
 
+  // localStorage may throw in some file:// or private-browsing contexts
+  function storedGet() { try { return localStorage.getItem(STORAGE_KEY); } catch(e) { return null; } }
+  function storedSet() { try { localStorage.setItem(STORAGE_KEY, '1'); } catch(e) {} }
+
   // Don't show if already dismissed
-  if (localStorage.getItem(STORAGE_KEY)) {
-    overlay.classList.add('hidden');
-    return;
-  }
+  if (storedGet()) { overlay.classList.add('hidden'); return; }
 
   function dismiss() {
     overlay.classList.add('hidden');
-    localStorage.setItem(STORAGE_KEY, '1');
+    storedSet();
   }
 
-  document.getElementById('welcome-start-btn').addEventListener('click', dismiss);
-  overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) dismiss();
+  var btn = document.getElementById('welcome-start-btn');
+  if (btn) btn.addEventListener('click', function(e) { e.stopPropagation(); dismiss(); });
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+  document.addEventListener('keydown', function onEsc(e) {
+    if (e.key === 'Escape') { dismiss(); document.removeEventListener('keydown', onEsc); }
   });
 });
 
