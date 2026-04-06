@@ -1180,6 +1180,62 @@ a { color: var(--color-primary); }
   border-color: rgba(0,0,0,0.3);
 }
 
+/* ===== WELCOME MODAL ===== */
+#welcome-modal-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-4);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.4s ease;
+}
+#welcome-modal-overlay.hidden { opacity: 0; pointer-events: none; }
+#welcome-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 480px;
+  width: 100%;
+  padding: var(--space-8) var(--space-6);
+  display: flex; flex-direction: column; gap: var(--space-5);
+  animation: fadeIn 0.35s ease forwards;
+}
+.welcome-logo {
+  font-size: var(--text-2xl); font-weight: 800;
+  letter-spacing: -0.03em; color: var(--color-text);
+}
+.welcome-logo span { color: var(--color-primary); }
+.welcome-tagline {
+  font-size: var(--text-sm); color: var(--color-text-muted);
+  font-style: italic; margin-top: -12px;
+}
+.welcome-body {
+  font-size: var(--text-sm); color: var(--color-text-muted);
+  line-height: 1.7;
+}
+.welcome-body strong { color: var(--color-text); }
+.welcome-tips {
+  display: flex; flex-direction: column; gap: var(--space-3);
+}
+.welcome-tip {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.5;
+}
+.welcome-tip-icon {
+  font-size: 20px; flex-shrink: 0; margin-top: 1px;
+}
+#welcome-start-btn {
+  align-self: stretch;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none; border-radius: var(--radius-md);
+  font-size: var(--text-sm); font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+#welcome-start-btn:hover { filter: brightness(1.1); }
+
 /* ===== DATA VIEWER DRAWER ===== */
 .data-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;opacity:0;transition:opacity 250ms ease;}
 .data-viewer-overlay.visible{opacity:1;}
@@ -2499,13 +2555,12 @@ function togglePlay() {
 let animMigLayer = null;
 
 function getBearing(from, to) {
-  // Returns bearing angle in degrees for a CSS rotation
-  const lat1 = from[0] * Math.PI / 180;
-  const lat2 = to[0] * Math.PI / 180;
-  const dLng = (to[1] - from[1]) * Math.PI / 180;
-  const y = Math.sin(dLng) * Math.cos(lat2);
-  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
-  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  // Rhumb-line bearing: matches the apparent direction of the
+  // straight polyline on a Mercator (flat) map projection.
+  // from/to are [lat, lng]. CSS rotation 0° = up (North), 90° = right (East).
+  const dLng = to[1] - from[1];
+  const dLat = to[0] - from[0];
+  return (Math.atan2(dLng, dLat) * 180 / Math.PI + 360) % 360;
 }
 
 function updateAnimatedMigrations() {
@@ -3540,15 +3595,8 @@ window.addEventListener('load', function() {
     });
   });
 
-  // Auto-switch to detail on mobile only when user explicitly taps a marker or lane
-  document.addEventListener('speciesSelected', function() {
-    if (window._suppressMobileSwitch) return;
-    if (!window._userPickedSpecies) return;
-    if (window.innerWidth <= 768) {
-      var tab = document.getElementById('tab-detail');
-      if (tab) tab.click();
-    }
-  });
+  // Mobile: user manually taps Détail tab to see species details
+  // (no automatic tab switching)
 })();
 
 // =====================================================================
@@ -3579,6 +3627,50 @@ window.addEventListener('load', function() {
     if (e.target === document.getElementById('timeline-scrubber')) return;
     applyX(e.clientX);
   });
+})();
+
+// =====================================================================
+// WELCOME MODAL
+// =====================================================================
+(function() {
+  var STORAGE_KEY = 'ho_welcomed_v1';
+  var overlay = document.getElementById('welcome-modal-overlay');
+  if (!overlay) return;
+
+  // Don't show if already dismissed
+  if (localStorage.getItem(STORAGE_KEY)) {
+    overlay.classList.add('hidden');
+    return;
+  }
+
+  function dismiss() {
+    overlay.classList.add('hidden');
+    localStorage.setItem(STORAGE_KEY, '1');
+  }
+
+  document.getElementById('welcome-start-btn').addEventListener('click', dismiss);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) dismiss();
+  });
+
+  // i18n: update texts once translations are ready
+  function applyWelcomeI18n() {
+    if (typeof i18next === 'undefined' || !i18next.isInitialized) return;
+    var t = function(k, fb) { return i18next.exists('ui.' + k) ? i18next.t('ui.' + k) : fb; };
+    var tagline = document.getElementById('welcome-tagline');
+    var body    = document.getElementById('welcome-body');
+    var tipCursor = document.getElementById('tip-cursor');
+    var tipMarker = document.getElementById('tip-marker');
+    var tipPlay   = document.getElementById('tip-play');
+    var startBtn  = document.getElementById('welcome-start-btn');
+    if (tagline)   tagline.textContent  = t('welcomeTagline',  tagline.textContent);
+    if (body)      body.innerHTML       = t('welcomeBody',     body.innerHTML);
+    if (tipCursor) tipCursor.innerHTML  = t('welcomeTipCursor',tipCursor.innerHTML);
+    if (tipMarker) tipMarker.innerHTML  = t('welcomeTipMarker',tipMarker.innerHTML);
+    if (tipPlay)   tipPlay.innerHTML    = t('welcomeTipPlay',  tipPlay.innerHTML);
+    if (startBtn)  startBtn.textContent = t('welcomeStartBtn', startBtn.textContent);
+  }
+  setTimeout(applyWelcomeI18n, 800);
 })();
 
 </script>
@@ -3664,6 +3756,34 @@ window.addEventListener('load', function() {
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ===== WELCOME MODAL ===== -->
+  <div id="welcome-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+    <div id="welcome-modal">
+      <div>
+        <div class="welcome-logo">Hominin<span>es</span> Origins</div>
+        <div class="welcome-tagline" id="welcome-tagline">Des origines africaines à la conquête du monde</div>
+      </div>
+      <div class="welcome-body" id="welcome-body">
+        Depuis l'<strong>Afrique orientale</strong>, il y a plus de 4 millions d'années, différentes espèces d'hominines — nos ancêtres et leurs cousins — ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.
+      </div>
+      <div class="welcome-tips">
+        <div class="welcome-tip">
+          <span class="welcome-tip-icon">⏱</span>
+          <span id="tip-cursor">Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.</span>
+        </div>
+        <div class="welcome-tip">
+          <span class="welcome-tip-icon">📍</span>
+          <span id="tip-marker">Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d'une espèce.</span>
+        </div>
+        <div class="welcome-tip">
+          <span class="welcome-tip-icon">▶</span>
+          <span id="tip-play">Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.</span>
+        </div>
+      </div>
+      <button id="welcome-start-btn">🌍 Commencer l'exploration</button>
     </div>
   </div>
 
