@@ -1223,7 +1223,9 @@ a { color: var(--color-primary); }
   font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.5;
 }
 .welcome-tip-icon {
-  font-size: 20px; flex-shrink: 0; margin-top: 1px;
+  flex-shrink: 0; margin-top: 1px;
+  color: var(--color-primary);
+  display: flex; align-items: center;
 }
 #welcome-start-btn {
   align-self: stretch;
@@ -3630,9 +3632,9 @@ window.addEventListener('load', function() {
 })();
 
 // =====================================================================
-// WELCOME MODAL
+// WELCOME MODAL — must run after DOM is parsed (HTML is after </script>)
 // =====================================================================
-(function() {
+document.addEventListener('DOMContentLoaded', function initWelcome() {
   var STORAGE_KEY = 'ho_welcomed_v1';
   var overlay = document.getElementById('welcome-modal-overlay');
   if (!overlay) return;
@@ -3652,26 +3654,7 @@ window.addEventListener('load', function() {
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay) dismiss();
   });
-
-  // i18n: update texts once translations are ready
-  function applyWelcomeI18n() {
-    if (typeof i18next === 'undefined' || !i18next.isInitialized) return;
-    var t = function(k, fb) { return i18next.exists('ui.' + k) ? i18next.t('ui.' + k) : fb; };
-    var tagline = document.getElementById('welcome-tagline');
-    var body    = document.getElementById('welcome-body');
-    var tipCursor = document.getElementById('tip-cursor');
-    var tipMarker = document.getElementById('tip-marker');
-    var tipPlay   = document.getElementById('tip-play');
-    var startBtn  = document.getElementById('welcome-start-btn');
-    if (tagline)   tagline.textContent  = t('welcomeTagline',  tagline.textContent);
-    if (body)      body.innerHTML       = t('welcomeBody',     body.innerHTML);
-    if (tipCursor) tipCursor.innerHTML  = t('welcomeTipCursor',tipCursor.innerHTML);
-    if (tipMarker) tipMarker.innerHTML  = t('welcomeTipMarker',tipMarker.innerHTML);
-    if (tipPlay)   tipPlay.innerHTML    = t('welcomeTipPlay',  tipPlay.innerHTML);
-    if (startBtn)  startBtn.textContent = t('welcomeStartBtn', startBtn.textContent);
-  }
-  setTimeout(applyWelcomeI18n, 800);
-})();
+});
 
 </script>
 <div id="data-viewer-overlay" class="data-viewer-overlay" hidden aria-hidden="true"></div>
@@ -3763,7 +3746,7 @@ window.addEventListener('load', function() {
   <div id="welcome-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
     <div id="welcome-modal">
       <div>
-        <div class="welcome-logo">Hominin<span>es</span> Origins</div>
+        <div class="welcome-logo" id="welcome-title">Hominin<span>es</span> Origins</div>
         <div class="welcome-tagline" id="welcome-tagline">Des origines africaines à la conquête du monde</div>
       </div>
       <div class="welcome-body" id="welcome-body">
@@ -3771,19 +3754,31 @@ window.addEventListener('load', function() {
       </div>
       <div class="welcome-tips">
         <div class="welcome-tip">
-          <span class="welcome-tip-icon">⏱</span>
+          <span class="welcome-tip-icon">
+            <!-- timeline scrubber handle -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+          </span>
           <span id="tip-cursor">Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.</span>
         </div>
         <div class="welcome-tip">
-          <span class="welcome-tip-icon">📍</span>
+          <span class="welcome-tip-icon">
+            <!-- map marker pin -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
           <span id="tip-marker">Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d'une espèce.</span>
         </div>
         <div class="welcome-tip">
-          <span class="welcome-tip-icon">▶</span>
+          <span class="welcome-tip-icon">
+            <!-- play triangle — matches app play button -->
+            <svg width="20" height="20" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>
+          </span>
           <span id="tip-play">Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.</span>
         </div>
       </div>
-      <button id="welcome-start-btn">🌍 Commencer l'exploration</button>
+      <button id="welcome-start-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Commencer l'exploration
+      </button>
     </div>
   </div>
 
