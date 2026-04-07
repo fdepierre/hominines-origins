@@ -490,7 +490,7 @@ a { color: var(--color-primary); }
 /* === MAIN SPECIES TRACK === */
 .timeline-species-track {
   position: relative;
-  height: 64px;
+  height: 80px; /* overridden by JS once rowCount is known */
   margin-bottom: var(--space-1);
 }
 /* The rail underneath */
@@ -1316,7 +1316,7 @@ a { color: var(--color-primary); }
 /* ==============================================================
    TIMELINE — compact heights
    ============================================================== */
-.timeline-species-track { height: 52px !important; }
+/* .timeline-species-track height is set dynamically by JS */
 .timeline-ticks-row     { height: 14px !important; }
 .timeline-band          { height: 16px !important; }
 .events-band            { height: 20px !important; }
@@ -1369,7 +1369,7 @@ a { color: var(--color-primary); }
   #app { padding-bottom: 52px; }
   #main {
     grid-template-columns: 1fr !important;
-    height: calc(100dvh - 130px - 52px);
+    height: calc(100dvh - 180px - 52px);
     position: relative; overflow: hidden;
   }
   .map-container {
@@ -2043,30 +2043,42 @@ function renderPanel(species) {
 // TIMELINE
 // =====================================================================
 
-// Assign vertical lane index per species to avoid overlap
-// Species are grouped by era and spread across 5 vertical positions (0..4)
-const LANE_ASSIGNMENTS = {
-  'afarensis':           0,
-  'habilis':             1,
-  'erectus':             2,
-  'heidelbergensis':     3,
-  'neanderthal':         1,
-  'denisovan':           2,
-  'sapiens-africa':      3,
-  'sapiens-levant':      4,
-  'sapiens-upper-paleo': 3,
-  'sapiens-mesolithic':  3,
-  'sapiens-neolithic':   3,
-  'sapiens-bronze':      3,
-};
-const LANE_COUNT = 5;
-const LANE_H = 10; // px per lane bar
-const SPECIES_TRACK_H = 64; // total track height
+// Greedy lane assignment: place each species in the lowest row
+// that has no time overlap with existing species in that row.
+const LANE_H   = 12; // bar height in px
+const LANE_GAP = 6;  // vertical gap between rows in px
+
+function computeLaneAssignments(speciesList) {
+  // Sort oldest-first so closely related species land near each other
+  const sorted = [...speciesList].sort((a, b) => b.start - a.start);
+  const rows = []; // rows[r] = array of species placed in row r
+  const assignment = {};
+
+  for (const sp of sorted) {
+    let placed = false;
+    for (let r = 0; r < rows.length; r++) {
+      // Two species overlap in time when their ranges intersect.
+      // Convention: sp.start > sp.end (start = further in past)
+      const overlaps = rows[r].some(o =>
+        sp.start >= o.end && o.start >= sp.end
+      );
+      if (!overlaps) {
+        rows[r].push(sp);
+        assignment[sp.id] = r;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      rows.push([sp]);
+      assignment[sp.id] = rows.length - 1;
+    }
+  }
+  return { assignment, rowCount: Math.max(rows.length, 1) };
+}
 
 function getLaneTop(laneIndex) {
-  // Distribute lanes evenly within the track, leaving room for needle
-  const usable = SPECIES_TRACK_H - LANE_H;
-  return Math.round((laneIndex / (LANE_COUNT - 1)) * usable);
+  return laneIndex * (LANE_H + LANE_GAP);
 }
 
 function initTimeline() {
@@ -2074,13 +2086,19 @@ function initTimeline() {
   const lanesEl = document.getElementById('timeline-lanes');
   const ticksRow = document.getElementById('timeline-ticks-row');
 
+  // --- Compute non-overlapping row assignments ---
+  const { assignment, rowCount } = computeLaneAssignments(SPECIES_DATA);
+  // Size the track to fit all rows with top padding for the needle handle
+  const trackH = LANE_GAP + rowCount * (LANE_H + LANE_GAP);
+  if (track) track.style.height = trackH + 'px';
+
   // --- Species lanes ---
   SPECIES_DATA.forEach(species => {
     const x1pct = timeToLinear(species.start) * 100;
     const x2pct = timeToLinear(species.end) * 100;
     const widthPct = Math.abs(x2pct - x1pct);
-    const laneIdx = LANE_ASSIGNMENTS[species.id] ?? 2;
-    const topPx = getLaneTop(laneIdx);
+    const laneIdx = assignment[species.id] ?? 0;
+    const topPx = LANE_GAP + getLaneTop(laneIdx);
 
     const lane = document.createElement('div');
     lane.className = 'species-lane';
