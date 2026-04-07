@@ -490,7 +490,7 @@ a { color: var(--color-primary); }
 /* === MAIN SPECIES TRACK === */
 .timeline-species-track {
   position: relative;
-  height: 80px; /* overridden by JS once rowCount is known */
+  height: 168px; /* fallback — overridden by JS (12 species × 14px) */
   margin-bottom: var(--space-1);
 }
 /* The rail underneath */
@@ -512,20 +512,23 @@ a { color: var(--color-primary); }
   filter: brightness(1.3);
   z-index: 5;
 }
-/* Lane label shown on hover */
+/* Lane label — always visible, inside the bar or just above */
 .species-lane-label {
   position: absolute;
   white-space: nowrap;
   font-size: 8px;
   font-family: var(--font-mono);
   color: var(--color-text-faint);
-  top: -12px;
-  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 4px;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 6px);
 }
-.species-lane:hover .species-lane-label { opacity: 1; }
+.species-lane:hover .species-lane-label { opacity: 1; color: var(--color-text); }
 
 /* === NEEDLE wrapper — spans ALL rows of the footer === */
 /* This is placed in a separate absolute container that covers
@@ -1369,7 +1372,7 @@ a { color: var(--color-primary); }
   #app { padding-bottom: 52px; }
   #main {
     grid-template-columns: 1fr !important;
-    height: calc(100dvh - 180px - 52px);
+    height: calc(100dvh - 260px - 52px);
     position: relative; overflow: hidden;
   }
   .map-container {
@@ -2043,42 +2046,21 @@ function renderPanel(species) {
 // TIMELINE
 // =====================================================================
 
-// Greedy lane assignment: place each species in the lowest row
-// that has no time overlap with existing species in that row.
-const LANE_H   = 12; // bar height in px
-const LANE_GAP = 6;  // vertical gap between rows in px
+/// One dedicated row per species.
+// Rows ordered oldest-at-bottom → newest-at-top.
+// rowOrder[0] = oldest (bottom row), rowOrder[N-1] = newest (top row).
+const LANE_H   = 10; // bar height in px
+const LANE_GAP = 4;  // vertical gap between rows in px
 
-function computeLaneAssignments(speciesList) {
-  // Sort oldest-first so closely related species land near each other
-  const sorted = [...speciesList].sort((a, b) => b.start - a.start);
-  const rows = []; // rows[r] = array of species placed in row r
-  const assignment = {};
-
-  for (const sp of sorted) {
-    let placed = false;
-    for (let r = 0; r < rows.length; r++) {
-      // Two species overlap in time when their ranges intersect.
-      // Convention: sp.start > sp.end (start = further in past)
-      const overlaps = rows[r].some(o =>
-        sp.start >= o.end && o.start >= sp.end
-      );
-      if (!overlaps) {
-        rows[r].push(sp);
-        assignment[sp.id] = r;
-        placed = true;
-        break;
-      }
-    }
-    if (!placed) {
-      rows.push([sp]);
-      assignment[sp.id] = rows.length - 1;
-    }
-  }
-  return { assignment, rowCount: Math.max(rows.length, 1) };
+function buildRowOrder(speciesList) {
+  // sort by start descending: oldest (largest start) first = row 0 = bottom
+  return [...speciesList].sort((a, b) => b.start - a.start);
 }
 
-function getLaneTop(laneIndex) {
-  return laneIndex * (LANE_H + LANE_GAP);
+function getLaneTop(laneIndex, totalRows) {
+  // laneIndex 0 = bottom → invert so it renders at the bottom of the track
+  const invertedIndex = (totalRows - 1) - laneIndex;
+  return invertedIndex * (LANE_H + LANE_GAP);
 }
 
 function initTimeline() {
@@ -2086,10 +2068,10 @@ function initTimeline() {
   const lanesEl = document.getElementById('timeline-lanes');
   const ticksRow = document.getElementById('timeline-ticks-row');
 
-  // --- Compute non-overlapping row assignments ---
-  const { assignment, rowCount } = computeLaneAssignments(SPECIES_DATA);
-  // Size the track to fit all rows with top padding for the needle handle
-  const trackH = LANE_GAP + rowCount * (LANE_H + LANE_GAP);
+  // --- One row per species, oldest at bottom ---
+  const rowOrder = buildRowOrder(SPECIES_DATA); // index 0 = oldest = bottom
+  const rowCount = rowOrder.length;
+  const trackH = rowCount * (LANE_H + LANE_GAP) + LANE_GAP;
   if (track) track.style.height = trackH + 'px';
 
   // --- Species lanes ---
@@ -2097,8 +2079,8 @@ function initTimeline() {
     const x1pct = timeToLinear(species.start) * 100;
     const x2pct = timeToLinear(species.end) * 100;
     const widthPct = Math.abs(x2pct - x1pct);
-    const laneIdx = assignment[species.id] ?? 0;
-    const topPx = LANE_GAP + getLaneTop(laneIdx);
+    const laneIdx = rowOrder.findIndex(s => s.id === species.id);
+    const topPx = LANE_GAP + getLaneTop(laneIdx, rowCount);
 
     const lane = document.createElement('div');
     lane.className = 'species-lane';
