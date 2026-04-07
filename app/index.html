@@ -512,23 +512,24 @@ a { color: var(--color-primary); }
   filter: brightness(1.3);
   z-index: 5;
 }
-/* Lane label — always visible, inside the bar or just above */
+/* Lane label — always visible inside the bar */
 .species-lane-label {
   position: absolute;
   white-space: nowrap;
-  font-size: 8px;
+  font-size: 9px;
   font-family: var(--font-mono);
-  color: var(--color-text-faint);
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
   top: 50%;
   transform: translateY(-50%);
-  left: 4px;
+  left: 6px;
   pointer-events: none;
-  opacity: 0.8;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc(100% - 6px);
+  max-width: calc(100% - 10px);
+  letter-spacing: 0.02em;
 }
-.species-lane:hover .species-lane-label { opacity: 1; color: var(--color-text); }
 
 /* === NEEDLE wrapper — spans ALL rows of the footer === */
 /* This is placed in a separate absolute container that covers
@@ -1986,28 +1987,6 @@ function renderPanel(species) {
         </p>
       </div>
 
-      <!-- Biometrics -->
-      <div class="biometrics-section">
-        <div class="section-title">${T('biometricsTitle','Biométrie')}</div>
-        <div class="bio-grid">
-          <div class="bio-item">
-            <div class="bio-item-label">${T('heightM','Taille (♂)')}</div>
-            <div class="bio-item-value">${bio.heightM}</div>
-          </div>
-          <div class="bio-item">
-            <div class="bio-item-label">${T('heightF','Taille (♀)')}</div>
-            <div class="bio-item-value">${bio.heightF}</div>
-          </div>
-          <div class="bio-item">
-            <div class="bio-item-label">${T('weightM','Poids (♂)')}</div>
-            <div class="bio-item-value">${bio.weightM}</div>
-          </div>
-          <div class="bio-item">
-            <div class="bio-item-label">${T('brainVol','Volume cérébral')}</div>
-            <div class="bio-item-value">${bio.brain}</div>
-          </div>
-        </div>
-      </div>
 
       <!-- Tools -->
       <div class="tools-section">
