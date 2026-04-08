@@ -1142,6 +1142,85 @@ a { color: var(--color-primary); }
   animation: playPulse 1.2s ease-out infinite;
 }
 
+/* === CINEMA BUTTON === */
+#cinema-btn {
+  position: absolute !important;
+  left: var(--space-3);
+  top: 70px;
+  z-index: 40;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--color-surface-offset);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+#cinema-btn:hover {
+  background: var(--color-primary-highlight);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+#cinema-btn.active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary-active);
+  animation: playPulse 1.6s ease-out infinite;
+}
+
+/* === CINEMATIC ELEMENTS === */
+/* Species name banner shown on map during cinematic */
+.cinematic-species-banner {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(14,12,10,0.90);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-8);
+  text-align: center;
+  pointer-events: none;
+  z-index: 900;
+  backdrop-filter: blur(10px);
+  animation: cinBannerIn 0.45s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+[data-theme="light"] .cinematic-species-banner {
+  background: rgba(245,240,230,0.94);
+}
+.cinematic-species-banner .cin-name {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.15;
+}
+.cinematic-species-banner .cin-period {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  margin-top: var(--space-2);
+}
+@keyframes cinBannerIn {
+  from { opacity: 0; transform: translate(-50%, -44%); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes cinBannerOut {
+  to   { opacity: 0; transform: translate(-50%, -56%); }
+}
+.cinematic-species-banner.out {
+  animation: cinBannerOut 0.35s ease forwards;
+}
+
+/* Walking figure — no Leaflet click zones */
+.cinematic-figure { pointer-events: none !important; }
+
 /* === FUR TEXTURE on skin band === */
 /* SVG data URI for hair strokes, repeated as pattern */
 .band-segment.fur {
@@ -1548,6 +1627,8 @@ a { color: var(--color-primary); }
         </svg>
         <span id="play-label" style="display:none"></span>
       </button>
+      <!-- Cinema button — starts cinematic walkthrough -->
+      <button id="cinema-btn" title="Mode cinématique — voir l'émergence et les migrations pas à pas">🎬</button>
       <!-- Time label floats next to play btn -->
       <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
 
@@ -2717,6 +2798,164 @@ function adaptEvent(item) {
 }
 
 // =====================================================================
+// CINEMATIC MODE — émergence et migrations animées
+// =====================================================================
+let cinematicActive  = false;
+let cinematicLayer   = null;
+let cinematicBanner  = null;
+let cinematicRAF     = null;
+let cinematicTimeout = null;
+
+function startCinematicMode() {
+  if (cinematicActive) { stopCinematicMode(); return; }
+  cinematicActive = true;
+  stopPlay();
+
+  const btn = document.getElementById('cinema-btn');
+  if (btn) btn.classList.add('active');
+
+  cinematicLayer = L.layerGroup().addTo(leafletMap);
+  leafletMap.setView([20, 20], 2); // vue mondiale
+  setTime(TIMELINE_MIN);
+
+  // Trier du plus ancien au plus récent
+  const ordered = [...SPECIES_DATA].sort((a, b) => b.start - a.start);
+  let idx = 0;
+
+  function next() {
+    if (!cinematicActive || idx >= ordered.length) { stopCinematicMode(); return; }
+    const sp = ordered[idx++];
+    setTime(sp.start);
+    selectSpecies(sp);
+    cinematicShowSpecies(sp, next);
+  }
+  next();
+}
+
+function stopCinematicMode() {
+  cinematicActive = false;
+  if (cinematicRAF)     { cancelAnimationFrame(cinematicRAF); cinematicRAF = null; }
+  if (cinematicTimeout) { clearTimeout(cinematicTimeout); cinematicTimeout = null; }
+  if (cinematicLayer)   { cinematicLayer.clearLayers(); cinematicLayer.remove(); cinematicLayer = null; }
+  if (cinematicBanner)  { if (cinematicBanner.parentNode) cinematicBanner.remove(); cinematicBanner = null; }
+  const btn = document.getElementById('cinema-btn');
+  if (btn) btn.classList.remove('active');
+}
+
+function cinematicShowSpecies(species, onDone) {
+  if (!cinematicActive) return;
+
+  // Bannière nom/période sur la carte
+  const mapEl = document.getElementById('map');
+  const banner = document.createElement('div');
+  banner.className = 'cinematic-species-banner';
+  banner.innerHTML =
+    '<div class="cin-name" style="color:' + species.color + '">' + species.name + '</div>' +
+    '<div class="cin-period">' + formatTime(species.start) + ' → ' + formatTime(species.end) + '</div>';
+  mapEl.appendChild(banner);
+  cinematicBanner = banner;
+
+  // Pause 1.8s → fade-out → walk migrations
+  cinematicTimeout = setTimeout(function() {
+    if (!cinematicActive) return;
+    banner.classList.add('out');
+    cinematicTimeout = setTimeout(function() {
+      if (banner.parentNode) banner.remove();
+      cinematicBanner = null;
+
+      const migs = species.migrations || [];
+      let mi = 0;
+      function nextMig() {
+        if (!cinematicActive || mi >= migs.length) {
+          cinematicTimeout = setTimeout(onDone, 800);
+          return;
+        }
+        cinematicWalkMigration(species, migs[mi++], nextMig);
+      }
+      if (migs.length === 0) { cinematicTimeout = setTimeout(onDone, 1200); }
+      else nextMig();
+    }, 380);
+  }, 1800);
+}
+
+function makeCinematicFigureIcon(species) {
+  const pig       = species.pigmentation || {};
+  const skinColor = (pig.skin  && pig.skin.color)  || species.color || '#8B6347';
+  const eyeColor  = (pig.eyes  && pig.eyes.color)  || '#2a1400';
+  const hairColor = (pig.hair  && pig.hair.color)  || '#1a0800';
+
+  // Parse taille : "~160–170 cm" → milieu
+  const hStr = (species.biometrics && species.biometrics.heightM || '170').replace(/[^\d.–\-]/g, '');
+  const nums = hStr.split(/[–\-]/).map(parseFloat).filter(function(n){ return !isNaN(n); });
+  const heightCm = nums.length ? nums.reduce(function(a,b){ return a+b; }, 0) / nums.length : 170;
+  const scale = Math.max(0.7, Math.min(1.3, heightCm / 170));
+  const w = Math.round(28 * scale);
+  const h = Math.round(44 * scale);
+
+  return L.divIcon({
+    className: 'cinematic-figure',
+    html: '<svg width="' + w + '" height="' + h + '" viewBox="0 0 120 160" fill="none"' +
+          ' xmlns="http://www.w3.org/2000/svg"' +
+          ' style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.75))">' +
+          humanFigureSVG(skinColor, eyeColor, hairColor, 60) +
+          '</svg>',
+    iconSize:   [w, h],
+    iconAnchor: [w / 2, h],
+  });
+}
+
+function cinematicWalkMigration(species, mig, onDone) {
+  if (!cinematicActive) return;
+
+  const from = mig.from, to = mig.to;
+
+  // Tracer la ligne d'abord
+  L.polyline([from, to], {
+    color: species.color, weight: 2, opacity: 0.45, dashArray: '6 5',
+  }).addTo(cinematicLayer);
+
+  // Créer la figurine à l'origine
+  const figMarker = L.marker(from, {
+    icon: makeCinematicFigureIcon(species),
+    zIndexOffset: 700,
+  }).addTo(cinematicLayer);
+
+  // Durée proportionnelle à la distance (deg), entre 2.5s et 7s
+  const dist = Math.sqrt(Math.pow(to[0]-from[0], 2) + Math.pow(to[1]-from[1], 2));
+  const dur   = Math.max(2500, Math.min(7000, 1200 + dist * 65));
+
+  const t0 = performance.now();
+
+  function step(now) {
+    if (!cinematicActive) { figMarker.remove(); return; }
+    const raw  = Math.min((now - t0) / dur, 1);
+    const ease = raw < 0.5 ? 2*raw*raw : -1 + (4 - 2*raw)*raw; // ease-in-out
+
+    figMarker.setLatLng([
+      from[0] + (to[0] - from[0]) * ease,
+      from[1] + (to[1] - from[1]) * ease,
+    ]);
+
+    // Avancer la timeline doucement
+    const t = species.start + (species.end - species.start) * Math.min(raw * 0.9, 0.85);
+    if (t > currentTime && t < species.end) setTime(t);
+
+    if (raw < 1) {
+      cinematicRAF = requestAnimationFrame(step);
+    } else {
+      figMarker.remove();
+      // Point d'arrivée
+      L.circleMarker(to, {
+        radius: 5, color: species.color, fillColor: species.color,
+        fillOpacity: 0.85, weight: 1,
+      }).addTo(cinematicLayer);
+      cinematicTimeout = setTimeout(onDone, 350);
+    }
+  }
+  cinematicRAF = requestAnimationFrame(step);
+}
+
+// =====================================================================
 // BOOT
 // =====================================================================
 function bootApp() {
@@ -2732,12 +2971,17 @@ function bootApp() {
   // Play button
   const playBtn = document.getElementById('play-btn');
   if (playBtn) playBtn.addEventListener('click', () => {
+    stopCinematicMode(); // arrêter cinéma si actif
     togglePlay();
     // Remove pulse + welcome hint on first manual interaction
     playBtn.classList.remove('pulse');
     const hint = document.getElementById('welcome-hint');
     if (hint) { hint.classList.add('hidden'); setTimeout(() => hint.remove(), 700); }
   });
+
+  // Cinema button
+  const cinBtn = document.getElementById('cinema-btn');
+  if (cinBtn) cinBtn.addEventListener('click', startCinematicMode);
 
   // Show afarensis by default (suppress mobile tab switch on initial auto-select)
   setTimeout(() => {
