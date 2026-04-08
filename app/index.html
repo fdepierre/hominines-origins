@@ -2549,12 +2549,12 @@ function updateAnimatedMigrations() {
       line.bindTooltip('<span style="color:' + species.color + '">' + mig.label + '</span>', { direction: 'center' });
       animMigLayer.addLayer(line);
 
-      // Multiple arrowheads along the path to show direction
-      const numArrows = isPlaying ? 3 : 1;
+      // Single arrowhead at 2/3 of the path to show direction
+      const numArrows = 1;
       const bearing = getBearing(mig.from, mig.to);
 
       for (let i = 0; i < numArrows; i++) {
-        const t = (i + 1) / (numArrows + 1);
+        const t = 0.65; // 2/3 towards destination
         const lat = mig.from[0] + (mig.to[0] - mig.from[0]) * t;
         const lng = mig.from[1] + (mig.to[1] - mig.from[1]) * t;
 
