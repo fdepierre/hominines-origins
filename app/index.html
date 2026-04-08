@@ -261,12 +261,17 @@ a { color: var(--color-primary); }
   box-shadow: var(--tooltip-shadow) !important;
   max-width: 280px;
 }
-/* Remove Leaflet's directional arrows — cleaner uniform look */
-.leaflet-tooltip::before,
-.leaflet-tooltip-top::before,
-.leaflet-tooltip-bottom::before,
-.leaflet-tooltip-left::before,
-.leaflet-tooltip-right::before { display: none !important; }
+/* Remove Leaflet's directional arrows — all selector variants for cross-browser */
+.leaflet-tooltip:before,   .leaflet-tooltip::before,
+.leaflet-tooltip-top:before,   .leaflet-tooltip-top::before,
+.leaflet-tooltip-bottom:before,.leaflet-tooltip-bottom::before,
+.leaflet-tooltip-left:before,  .leaflet-tooltip-left::before,
+.leaflet-tooltip-right:before, .leaflet-tooltip-right::before {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  width: 0 !important; height: 0 !important;
+}
 [data-theme="light"] .leaflet-tooltip-custom { color: #1a1208; }
 
 /* Custom markers */
@@ -1176,24 +1181,24 @@ a { color: var(--color-primary); }
 }
 
 /* === CINEMATIC ELEMENTS === */
-/* Species name banner shown on map during cinematic */
+/* Species name banner — fixed overlay above everything */
 .cinematic-species-banner {
-  position: absolute;
-  top: 40%;
+  position: fixed;
+  top: 30%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(14,12,10,0.90);
+  background: rgba(14,12,10,0.92);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--space-5) var(--space-8);
   text-align: center;
   pointer-events: none;
-  z-index: 900;
+  z-index: 9000;
   backdrop-filter: blur(10px);
   animation: cinBannerIn 0.45s cubic-bezier(0.16,1,0.3,1) forwards;
 }
 [data-theme="light"] .cinematic-species-banner {
-  background: rgba(245,240,230,0.94);
+  background: rgba(245,240,230,0.95);
 }
 .cinematic-species-banner .cin-name {
   font-size: var(--text-xl);
@@ -1855,22 +1860,13 @@ function updateMap() {
         const line = L.polyline([mig.from, mig.to], {
           color: species.color,
           weight: 2,
-          opacity: 0.6,
+          opacity: 0.5,
           dashArray: '8 4',
           className: 'migration-path',
         });
         line.bindTooltip(`<span style="color:${species.color}">${mig.label}</span>`, { direction: 'center' });
         migrationsLayer.addLayer(line);
-
-        // Arrow at endpoint
-        const arrow = L.circleMarker(mig.to, {
-          radius: 5,
-          color: species.color,
-          fillColor: species.color,
-          fillOpacity: 0.8,
-          weight: 1,
-        });
-        migrationsLayer.addLayer(arrow);
+        // Note: arrowhead and endpoint dot are handled by animMigLayer
       });
     }
   });
@@ -2845,14 +2841,13 @@ function stopCinematicMode() {
 function cinematicShowSpecies(species, onDone) {
   if (!cinematicActive) return;
 
-  // Bannière nom/période sur la carte
-  const mapEl = document.getElementById('map');
+  // Bannière fixe sur document.body (au-dessus de tout, y compris Leaflet overflow:hidden)
   const banner = document.createElement('div');
   banner.className = 'cinematic-species-banner';
   banner.innerHTML =
     '<div class="cin-name" style="color:' + species.color + '">' + species.name + '</div>' +
     '<div class="cin-period">' + formatTime(species.start) + ' → ' + formatTime(species.end) + '</div>';
-  mapEl.appendChild(banner);
+  document.body.appendChild(banner);
   cinematicBanner = banner;
 
   // Pause 1.8s → fade-out → walk migrations
@@ -2865,6 +2860,23 @@ function cinematicShowSpecies(species, onDone) {
 
       const migs = species.migrations || [];
       let mi = 0;
+
+      // Afficher le site d'origine (pulse) même sans migrations
+      const originSite = (species.sites && species.sites[0]) || (species.regions && species.regions[0]);
+      if (originSite && cinematicLayer) {
+        const pulse = L.circleMarker([originSite.lat, originSite.lng], {
+          radius: 14, color: species.color, weight: 2,
+          fillColor: species.color, fillOpacity: 0.15,
+          className: 'cinematic-origin-pulse',
+        }).addTo(cinematicLayer);
+        // Dot at center
+        L.circleMarker([originSite.lat, originSite.lng], {
+          radius: 5, color: species.color, fillColor: species.color, fillOpacity: 0.9, weight: 1,
+        }).addTo(cinematicLayer);
+        // Fit map to show origin
+        leafletMap.setView([originSite.lat, originSite.lng], Math.max(leafletMap.getZoom(), 3));
+      }
+
       function nextMig() {
         if (!cinematicActive || mi >= migs.length) {
           cinematicTimeout = setTimeout(onDone, 800);
@@ -2872,7 +2884,7 @@ function cinematicShowSpecies(species, onDone) {
         }
         cinematicWalkMigration(species, migs[mi++], nextMig);
       }
-      if (migs.length === 0) { cinematicTimeout = setTimeout(onDone, 1200); }
+      if (migs.length === 0) { cinematicTimeout = setTimeout(onDone, 1500); }
       else nextMig();
     }, 380);
   }, 1800);
