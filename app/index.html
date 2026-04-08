@@ -261,8 +261,12 @@ a { color: var(--color-primary); }
   box-shadow: var(--tooltip-shadow) !important;
   max-width: 280px;
 }
-/* Remove Leaflet's default arrow/tip — cleaner look */
-.leaflet-tooltip::before { display: none !important; }
+/* Remove Leaflet's directional arrows — cleaner uniform look */
+.leaflet-tooltip::before,
+.leaflet-tooltip-top::before,
+.leaflet-tooltip-bottom::before,
+.leaflet-tooltip-left::before,
+.leaflet-tooltip-right::before { display: none !important; }
 [data-theme="light"] .leaflet-tooltip-custom { color: #1a1208; }
 
 /* Custom markers */
@@ -745,8 +749,8 @@ a { color: var(--color-primary); }
   z-index: 100;
   pointer-events: none;
   box-shadow: var(--tooltip-shadow);
-  min-width: 100px;
-  text-align: center;
+  min-width: 120px;
+  text-align: left;
 }
 
 /* === EVENTS BAND (tools, fire, art, etc.) === */
@@ -795,7 +799,7 @@ a { color: var(--color-primary); }
   pointer-events: none;
   max-width: 240px;
   min-width: 120px;
-  text-align: center;
+  text-align: left;
   box-shadow: var(--tooltip-shadow);
 }
 
