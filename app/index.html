@@ -18,8 +18,8 @@
 <style>
 /* ===== DESIGN TOKENS ===== */
 :root {
-  --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
-  --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+  --text-xs:   clamp(0.8125rem, 0.75rem + 0.3vw, 0.9375rem); /* 13→15px */
+  --text-sm:   clamp(0.9375rem, 0.875rem + 0.35vw, 1.0625rem); /* 15→17px */
   --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
   --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
   --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
@@ -233,12 +233,22 @@ a { color: var(--color-primary); }
   font-size: 10px;
 }
 .leaflet-control-attribution a { color: var(--color-text-muted) !important; }
-/* Light mode: tooltip popups need dark text */
+/* Leaflet tooltips — readable size for all themes */
+.leaflet-tooltip {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1.5;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  max-width: 260px;
+}
+/* Light mode */
 [data-theme="light"] .leaflet-tooltip {
-  background: rgba(250,246,238,0.96);
+  background: rgba(250,246,238,0.97);
   color: #1a1208;
   border-color: #b0a488;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
 [data-theme="light"] .leaflet-tooltip-custom {
   color: #1a1208;
@@ -490,7 +500,7 @@ a { color: var(--color-primary); }
 /* === MAIN SPECIES TRACK === */
 .timeline-species-track {
   position: relative;
-  height: 168px; /* fallback — overridden by JS (12 species × 14px) */
+  height: 240px; /* fallback — overridden by JS (12 species × 20px) */
   margin-bottom: var(--space-1);
 }
 /* The rail underneath */
@@ -500,8 +510,8 @@ a { color: var(--color-primary); }
 /* Each species gets its own horizontal lane */
 .species-lane {
   position: absolute;
-  height: 10px;
-  border-radius: 5px;
+  height: 16px;
+  border-radius: 8px;
   cursor: pointer;
   opacity: 0.85;
   transition: opacity 0.15s, filter 0.15s;
@@ -516,18 +526,18 @@ a { color: var(--color-primary); }
 .species-lane-label {
   position: absolute;
   white-space: nowrap;
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--font-mono);
   font-weight: 600;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.85);
   top: 50%;
   transform: translateY(-50%);
-  left: 6px;
+  left: 8px;
   pointer-events: none;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc(100% - 10px);
+  max-width: calc(100% - 12px);
   letter-spacing: 0.02em;
 }
 
@@ -662,7 +672,7 @@ a { color: var(--color-primary); }
   background: var(--color-border);
 }
 .tl-tick-text {
-  font-size: 8px;
+  font-size: 11px;
   font-family: var(--font-mono);
   color: var(--color-text-faint);
   white-space: nowrap;
@@ -677,12 +687,12 @@ a { color: var(--color-primary); }
   align-items: center;
 }
 .timeline-band-label {
-  font-size: 8px;
+  font-size: 11px;
   font-family: var(--font-mono);
   color: var(--color-text-faint);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  width: 54px;
+  width: 60px;
   flex-shrink: 0;
   padding-right: 4px;
   text-align: right;
@@ -704,18 +714,22 @@ a { color: var(--color-primary); }
 .band-segment:hover::after {
   content: attr(data-tip);
   position: absolute;
-  bottom: 20px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-surface-offset);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 10px;
+  border-radius: var(--radius-md);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-family: var(--font-body);
   white-space: nowrap;
   color: var(--color-text);
   z-index: 100;
   pointer-events: none;
+  box-shadow: var(--shadow-md);
+  min-width: 100px;
+  text-align: center;
 }
 
 /* === EVENTS BAND (tools, fire, art, etc.) === */
@@ -748,20 +762,24 @@ a { color: var(--color-primary); }
 .event-marker:hover::after {
   content: attr(data-tip);
   position: absolute;
-  bottom: 18px;
+  bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-surface-offset);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 10px;
-  white-space: nowrap;
+  border-radius: var(--radius-md);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  white-space: normal;
   color: var(--color-text);
   z-index: 100;
   pointer-events: none;
-  max-width: 220px;
-  text-wrap: wrap;
+  max-width: 240px;
+  min-width: 120px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  line-height: 1.5;
 }
 
 /* Touch target enlargement on mobile */
@@ -967,7 +985,7 @@ a { color: var(--color-primary); }
 }
 .figure-bio-item:last-child { border-bottom: none; padding-bottom: 0; }
 .figure-bio-label {
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1710,7 +1728,7 @@ function updateMap() {
 
         const marker = L.marker([site.lat, site.lng], { icon });
         marker.bindTooltip(`
-          <div style="font-size:11px">
+          <div style="font-size:13px;line-height:1.5">
             <strong style="color:${species.color}">${site.name}</strong><br>
             <em style="color:#9a8f7a">${species.name}</em><br>
             ${site.note}
@@ -1775,7 +1793,7 @@ function updateEvents() {
     });
     const marker = L.marker([ev.lat, ev.lng], { icon, zIndexOffset: 200 });
     marker.bindTooltip(`
-      <div style="font-size:11px;max-width:220px">
+      <div style="font-size:13px;line-height:1.5;max-width:240px">
         <strong style="color:${ev.color}">${ev.label}</strong><br>
         <em style="color:#9a8f7a">${getCategoryLabel(ev.category)}</em><br>
         ${ev.desc}
@@ -2028,7 +2046,7 @@ function renderPanel(species) {
 /// One dedicated row per species.
 // Rows ordered oldest-at-bottom → newest-at-top.
 // rowOrder[0] = oldest (bottom row), rowOrder[N-1] = newest (top row).
-const LANE_H   = 10; // bar height in px
+const LANE_H   = 16; // bar height in px
 const LANE_GAP = 4;  // vertical gap between rows in px
 
 function buildRowOrder(speciesList) {
