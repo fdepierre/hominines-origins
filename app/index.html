@@ -233,26 +233,37 @@ a { color: var(--color-primary); }
   font-size: 10px;
 }
 .leaflet-control-attribution a { color: var(--color-text-muted) !important; }
-/* Leaflet tooltips — readable size for all themes */
+/* ===== SHARED TOOLTIP TOKEN =====
+   Tous les tooltips (CSS ::after, Leaflet, .map-tooltip) utilisent les
+   mêmes variables pour garantir un rendu homogène dans les deux thèmes. */
+:root {
+  --tooltip-bg:     var(--color-surface);
+  --tooltip-border: var(--color-border);
+  --tooltip-color:  var(--color-text);
+  --tooltip-radius: var(--radius-md);
+  --tooltip-shadow: var(--shadow-md);
+  --tooltip-font:   var(--font-body);
+  --tooltip-size:   13px;
+  --tooltip-pad:    8px 13px;
+  --tooltip-lh:     1.55;
+}
+
+/* Leaflet tooltips — both themes */
 .leaflet-tooltip {
-  font-family: var(--font-body);
-  font-size: 13px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  line-height: 1.5;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-  max-width: 260px;
+  font-family: var(--tooltip-font) !important;
+  font-size: var(--tooltip-size) !important;
+  padding: var(--tooltip-pad) !important;
+  border-radius: var(--tooltip-radius) !important;
+  line-height: var(--tooltip-lh) !important;
+  background: var(--tooltip-bg) !important;
+  color: var(--tooltip-color) !important;
+  border: 1px solid var(--tooltip-border) !important;
+  box-shadow: var(--tooltip-shadow) !important;
+  max-width: 280px;
 }
-/* Light mode */
-[data-theme="light"] .leaflet-tooltip {
-  background: rgba(250,246,238,0.97);
-  color: #1a1208;
-  border-color: #b0a488;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-[data-theme="light"] .leaflet-tooltip-custom {
-  color: #1a1208;
-}
+/* Remove Leaflet's default arrow/tip — cleaner look */
+.leaflet-tooltip::before { display: none !important; }
+[data-theme="light"] .leaflet-tooltip-custom { color: #1a1208; }
 
 /* Custom markers */
 .hominine-marker {
@@ -528,8 +539,8 @@ a { color: var(--color-primary); }
   white-space: nowrap;
   font-size: 11px;
   font-family: var(--font-mono);
-  font-weight: 600;
-  color: #fff;
+  font-weight: 700;
+  color: #fff;                          /* dark mode: blanc */
   text-shadow: 0 1px 3px rgba(0,0,0,0.85);
   top: 50%;
   transform: translateY(-50%);
@@ -539,6 +550,11 @@ a { color: var(--color-primary); }
   text-overflow: ellipsis;
   max-width: calc(100% - 12px);
   letter-spacing: 0.02em;
+}
+/* Light mode: texte noir pour contraste sur barres claires */
+[data-theme="light"] .species-lane-label {
+  color: #1a1208;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
 }
 
 /* === NEEDLE wrapper — spans ALL rows of the footer === */
@@ -717,17 +733,18 @@ a { color: var(--color-primary); }
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 7px 12px;
-  font-size: 12px;
-  font-family: var(--font-body);
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
+  border-radius: var(--tooltip-radius);
+  padding: var(--tooltip-pad);
+  font-size: var(--tooltip-size);
+  font-family: var(--tooltip-font);
+  line-height: var(--tooltip-lh);
   white-space: nowrap;
-  color: var(--color-text);
+  color: var(--tooltip-color);
   z-index: 100;
   pointer-events: none;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--tooltip-shadow);
   min-width: 100px;
   text-align: center;
 }
@@ -765,21 +782,21 @@ a { color: var(--color-primary); }
   bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 7px 12px;
-  font-size: 12px;
-  font-family: var(--font-body);
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
+  border-radius: var(--tooltip-radius);
+  padding: var(--tooltip-pad);
+  font-size: var(--tooltip-size);
+  font-family: var(--tooltip-font);
+  line-height: var(--tooltip-lh);
   white-space: normal;
-  color: var(--color-text);
+  color: var(--tooltip-color);
   z-index: 100;
   pointer-events: none;
   max-width: 240px;
   min-width: 120px;
   text-align: center;
-  box-shadow: var(--shadow-md);
-  line-height: 1.5;
+  box-shadow: var(--tooltip-shadow);
 }
 
 /* Touch target enlargement on mobile */
@@ -819,15 +836,18 @@ a { color: var(--color-primary); }
 /* ===== TOOLTIP ===== */
 .map-tooltip {
   position: absolute;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
+  border-radius: var(--tooltip-radius);
+  padding: var(--tooltip-pad);
   z-index: 1000;
   pointer-events: none;
-  font-size: var(--text-sm);
-  box-shadow: var(--shadow-md);
-  max-width: 200px;
+  font-size: var(--tooltip-size);
+  font-family: var(--tooltip-font);
+  line-height: var(--tooltip-lh);
+  color: var(--tooltip-color);
+  box-shadow: var(--tooltip-shadow);
+  max-width: 280px;
   transition: opacity 0.15s;
 }
 
