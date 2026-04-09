@@ -508,9 +508,10 @@ a { color: var(--color-primary); }
 
 .timeline-current-label {
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   color: var(--color-primary);
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 .timeline-hint {
   font-size: var(--text-xs);
@@ -546,7 +547,7 @@ a { color: var(--color-primary); }
 .species-lane-label {
   position: absolute;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 12px;
   font-family: var(--font-mono);
   font-weight: 700;
   color: #fff;                          /* dark mode: blanc */
@@ -861,13 +862,43 @@ a { color: var(--color-primary); }
 }
 
 
+/* ===== APP TITLE BAR ===== */
+#app-title-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: linear-gradient(180deg, rgba(20,18,16,0.82) 0%, rgba(20,18,16,0) 100%);
+  pointer-events: none;
+}
+[data-theme="light"] #app-title-bar {
+  background: linear-gradient(180deg, rgba(240,235,224,0.88) 0%, rgba(240,235,224,0) 100%);
+}
+#app-title-text {
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+#app-title-text span { color: var(--color-primary); }
+#app-title-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ===== BURGER MENU ===== */
 #burger-btn {
-  position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
-  z-index: 600;
-  width: 40px; height: 40px;
+  pointer-events: auto;
+  flex-shrink: 0;
+  width: 36px; height: 36px;
   border-radius: var(--radius-md);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -1121,22 +1152,21 @@ a { color: var(--color-primary); }
   }
 }
 
-/* Compact circular play/pause button */
+/* Play/pause button — icon + label */
 #play-btn {
   order: -1;
-  width: 34px;
   height: 34px;
-  min-width: 34px;
-  padding: 0;
-  border-radius: 50%;
+  min-width: 72px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
 }
-/* Hide text label — icon only */
-#play-btn #play-label { display: none; }
+#play-btn #play-label { display: inline; }
 /* Pulse highlight when waiting for first interaction */
 @keyframes playPulse {
   0%   { box-shadow: 0 0 0 0 rgba(212,130,10,0.7); }
@@ -1334,7 +1364,12 @@ a { color: var(--color-primary); }
    PLAY OVERLAY — hidden (single play button in timeline)
    ============================================================== */
 #play-overlay { display: none !important; }
-#welcome-hint { display: none !important; }
+/* welcome-hint: shown until play starts */
+#welcome-hint {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
 
 #play-overlay-inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
 #play-overlay-btn {
@@ -1476,8 +1511,12 @@ a { color: var(--color-primary); }
     <div class="map-container">
       <div id="map"></div>
 
-      <!-- Burger menu button — top-left of map -->
-      <button id="burger-btn" aria-label="Menu" title="Menu">☰</button>
+      <!-- App title banner — top of map -->
+      <div id="app-title-bar">
+        <button id="burger-btn" aria-label="Menu" title="Menu">☰</button>
+        <div id="app-title-text">Hominin<span>es</span> Origins</div>
+        <div id="app-title-sub" data-i18n="ui.appSubtitle">Voyage au cœur de l'évolution humaine</div>
+      </div>
 
       <!-- Layer toggles hidden from map — shown in burger menu -->
       <div class="layer-toggle-group" id="layer-toggles" style="display:none;">
@@ -1505,9 +1544,10 @@ a { color: var(--color-primary); }
         </button>
       </div>
 
-      <!-- Welcome hint -->
+      <!-- Play CTA hint — visible until user presses Play -->
       <div id="welcome-hint">
-        ▶ Appuyez sur <strong style="color:var(--color-primary)">Play</strong> pour voir l'évolution en direct
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor" style="flex-shrink:0"><polygon points="2,1 13,7 2,13"/></svg>
+        <span data-i18n="ui.playCta">Appuyez sur <strong>Play</strong> pour animer les migrations humaines sur 4 millions d'années</span>
       </div>
 
       <!-- Legend -->
@@ -1550,11 +1590,11 @@ a { color: var(--color-primary); }
     <!-- Needle wrapper — play btn + time label float inside as overlays -->
     <div id="needle-wrapper" style="position:relative;">
       <!-- Play/pause button — overlays left of species track -->
-      <button id="play-btn" title="Lecture automatique — voir les migrations en direct" data-i18n-title="ui.playTitle">
+      <button id="play-btn" title="Animer les migrations au fil du temps" data-i18n-title="ui.playTitle">
         <svg id="play-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
           <polygon points="3,1 13,7 3,13"/>
         </svg>
-        <span id="play-label" style="display:none"></span>
+        <span id="play-label">Play</span>
       </button>
       <!-- Time label floats next to play btn -->
       <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
@@ -2952,6 +2992,11 @@ function bootApp() {
   setTime(-4100000);
   updateMap();
 
+  // Refresh migration arrows after zoom/pan so they don't appear offset
+  leafletMap.on('zoomend moveend', function() {
+    if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
+  });
+
   // Play button
   const playBtn = document.getElementById('play-btn');
   if (playBtn) playBtn.addEventListener('click', () => {
@@ -3913,31 +3958,6 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
             <option value="ja">日本語</option>
             <option value="ko">한국어</option>
           </select>
-        </div>
-      </div>
-
-      <!-- Thème + Données -->
-      <div>
-        <div class="burger-section-title">Affichage</div>
-        <div class="burger-btn-row">
-          <button class="layer-btn" data-theme-toggle data-i18n-title="ui.toggleTheme" aria-label="Switch theme" style="flex:1; justify-content:center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
-            <span data-i18n="ui.toggleTheme">Mode sombre</span>
-          </button>
-          <button id="btn-data-viewer" class="layer-btn" title="Données JSON" data-i18n-title="ui.dataViewerTitle" aria-label="Données JSON" style="flex:1; justify-content:center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-            <span data-i18n="ui.dataViewerTitle">Données</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Couches carte -->
-      <div>
-        <div class="burger-section-title" data-i18n="ui.mapLayers">Couches carte</div>
-        <div class="burger-layer-btns" id="burger-layer-btns">
-          <!-- filled by JS from #layer-toggles -->
         </div>
       </div>
 
