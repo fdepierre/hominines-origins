@@ -18,8 +18,8 @@
 <style>
 /* ===== DESIGN TOKENS ===== */
 :root {
-  --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
-  --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+  --text-xs:   clamp(0.8125rem, 0.75rem + 0.3vw, 0.9375rem); /* 13→15px */
+  --text-sm:   clamp(0.9375rem, 0.875rem + 0.35vw, 1.0625rem); /* 15→17px */
   --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
   --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
   --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
@@ -233,16 +233,46 @@ a { color: var(--color-primary); }
   font-size: 10px;
 }
 .leaflet-control-attribution a { color: var(--color-text-muted) !important; }
-/* Light mode: tooltip popups need dark text */
-[data-theme="light"] .leaflet-tooltip {
-  background: rgba(250,246,238,0.96);
-  color: #1a1208;
-  border-color: #b0a488;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+/* ===== SHARED TOOLTIP TOKEN =====
+   Tous les tooltips (CSS ::after, Leaflet, .map-tooltip) utilisent les
+   mêmes variables pour garantir un rendu homogène dans les deux thèmes. */
+:root {
+  --tooltip-bg:     var(--color-surface);
+  --tooltip-border: var(--color-border);
+  --tooltip-color:  var(--color-text);
+  --tooltip-radius: var(--radius-md);
+  --tooltip-shadow: var(--shadow-md);
+  --tooltip-font:   var(--font-body);
+  --tooltip-size:   13px;
+  --tooltip-pad:    8px 13px;
+  --tooltip-lh:     1.55;
 }
-[data-theme="light"] .leaflet-tooltip-custom {
-  color: #1a1208;
+
+/* Leaflet tooltips — both themes */
+.leaflet-tooltip {
+  font-family: var(--tooltip-font) !important;
+  font-size: var(--tooltip-size) !important;
+  padding: var(--tooltip-pad) !important;
+  border-radius: var(--tooltip-radius) !important;
+  line-height: var(--tooltip-lh) !important;
+  background: var(--tooltip-bg) !important;
+  color: var(--tooltip-color) !important;
+  border: 1px solid var(--tooltip-border) !important;
+  box-shadow: var(--tooltip-shadow) !important;
+  max-width: 280px;
 }
+/* Remove Leaflet's directional arrows — all selector variants for cross-browser */
+.leaflet-tooltip:before,   .leaflet-tooltip::before,
+.leaflet-tooltip-top:before,   .leaflet-tooltip-top::before,
+.leaflet-tooltip-bottom:before,.leaflet-tooltip-bottom::before,
+.leaflet-tooltip-left:before,  .leaflet-tooltip-left::before,
+.leaflet-tooltip-right:before, .leaflet-tooltip-right::before {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  width: 0 !important; height: 0 !important;
+}
+[data-theme="light"] .leaflet-tooltip-custom { color: #1a1208; }
 
 /* Custom markers */
 .hominine-marker {
@@ -490,7 +520,7 @@ a { color: var(--color-primary); }
 /* === MAIN SPECIES TRACK === */
 .timeline-species-track {
   position: relative;
-  height: 64px;
+  height: 240px; /* fallback — overridden by JS (12 species × 20px) */
   margin-bottom: var(--space-1);
 }
 /* The rail underneath */
@@ -500,8 +530,8 @@ a { color: var(--color-primary); }
 /* Each species gets its own horizontal lane */
 .species-lane {
   position: absolute;
-  height: 10px;
-  border-radius: 5px;
+  height: 12px;
+  border-radius: 6px;
   cursor: pointer;
   opacity: 0.85;
   transition: opacity 0.15s, filter 0.15s;
@@ -512,20 +542,29 @@ a { color: var(--color-primary); }
   filter: brightness(1.3);
   z-index: 5;
 }
-/* Lane label shown on hover */
+/* Lane label — always visible inside the bar */
 .species-lane-label {
   position: absolute;
   white-space: nowrap;
-  font-size: 8px;
+  font-size: 11px;
   font-family: var(--font-mono);
-  color: var(--color-text-faint);
-  top: -12px;
-  left: 2px;
+  font-weight: 700;
+  color: #fff;                          /* dark mode: blanc */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.85);
+  top: 50%;
+  transform: translateY(-50%);
+  left: 8px;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 12px);
+  letter-spacing: 0.02em;
 }
-.species-lane:hover .species-lane-label { opacity: 1; }
+/* Light mode: texte noir pour contraste sur barres claires */
+[data-theme="light"] .species-lane-label {
+  color: #1a1208;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+}
 
 /* === NEEDLE wrapper — spans ALL rows of the footer === */
 /* This is placed in a separate absolute container that covers
@@ -658,7 +697,7 @@ a { color: var(--color-primary); }
   background: var(--color-border);
 }
 .tl-tick-text {
-  font-size: 8px;
+  font-size: 11px;
   font-family: var(--font-mono);
   color: var(--color-text-faint);
   white-space: nowrap;
@@ -673,12 +712,12 @@ a { color: var(--color-primary); }
   align-items: center;
 }
 .timeline-band-label {
-  font-size: 8px;
+  font-size: 11px;
   font-family: var(--font-mono);
   color: var(--color-text-faint);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  width: 54px;
+  width: 60px;
   flex-shrink: 0;
   padding-right: 4px;
   text-align: right;
@@ -700,18 +739,23 @@ a { color: var(--color-primary); }
 .band-segment:hover::after {
   content: attr(data-tip);
   position: absolute;
-  bottom: 20px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-surface-offset);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 10px;
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
+  border-radius: var(--tooltip-radius);
+  padding: var(--tooltip-pad);
+  font-size: var(--tooltip-size);
+  font-family: var(--tooltip-font);
+  line-height: var(--tooltip-lh);
   white-space: nowrap;
-  color: var(--color-text);
+  color: var(--tooltip-color);
   z-index: 100;
   pointer-events: none;
+  box-shadow: var(--tooltip-shadow);
+  min-width: 120px;
+  text-align: left;
 }
 
 /* === EVENTS BAND (tools, fire, art, etc.) === */
@@ -744,20 +788,24 @@ a { color: var(--color-primary); }
 .event-marker:hover::after {
   content: attr(data-tip);
   position: absolute;
-  bottom: 18px;
+  bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-surface-offset);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 10px;
-  white-space: nowrap;
-  color: var(--color-text);
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
+  border-radius: var(--tooltip-radius);
+  padding: var(--tooltip-pad);
+  font-size: var(--tooltip-size);
+  font-family: var(--tooltip-font);
+  line-height: var(--tooltip-lh);
+  white-space: normal;
+  color: var(--tooltip-color);
   z-index: 100;
   pointer-events: none;
-  max-width: 220px;
-  text-wrap: wrap;
+  max-width: 240px;
+  min-width: 120px;
+  text-align: left;
+  box-shadow: var(--tooltip-shadow);
 }
 
 /* Touch target enlargement on mobile */
@@ -797,15 +845,18 @@ a { color: var(--color-primary); }
 /* ===== TOOLTIP ===== */
 .map-tooltip {
   position: absolute;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
+  border-radius: var(--tooltip-radius);
+  padding: var(--tooltip-pad);
   z-index: 1000;
   pointer-events: none;
-  font-size: var(--text-sm);
-  box-shadow: var(--shadow-md);
-  max-width: 200px;
+  font-size: var(--tooltip-size);
+  font-family: var(--tooltip-font);
+  line-height: var(--tooltip-lh);
+  color: var(--tooltip-color);
+  box-shadow: var(--tooltip-shadow);
+  max-width: 280px;
   transition: opacity 0.15s;
 }
 
@@ -963,7 +1014,7 @@ a { color: var(--color-primary); }
 }
 .figure-bio-item:last-child { border-bottom: none; padding-bottom: 0; }
 .figure-bio-label {
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1095,6 +1146,9 @@ a { color: var(--color-primary); }
 #play-btn.pulse {
   animation: playPulse 1.2s ease-out infinite;
 }
+
+/* Walking figure — no Leaflet click zones */
+.walking-figure { pointer-events: none !important; }
 
 /* === FUR TEXTURE on skin band === */
 /* SVG data URI for hair strokes, repeated as pattern */
@@ -1316,7 +1370,7 @@ a { color: var(--color-primary); }
 /* ==============================================================
    TIMELINE — compact heights
    ============================================================== */
-.timeline-species-track { height: 52px !important; }
+/* .timeline-species-track height is set dynamically by JS */
 .timeline-ticks-row     { height: 14px !important; }
 .timeline-band          { height: 16px !important; }
 .events-band            { height: 20px !important; }
@@ -1369,7 +1423,7 @@ a { color: var(--color-primary); }
   #app { padding-bottom: 52px; }
   #main {
     grid-template-columns: 1fr !important;
-    height: calc(100dvh - 130px - 52px);
+    height: calc(100dvh - 260px - 52px);
     position: relative; overflow: hidden;
   }
   .map-container {
@@ -1667,7 +1721,15 @@ function updateMap() {
       </div>
     `).join('');
 
+  // Detect species appearing for the first time this play session
+  const newSpeciesIds = new Set();
+  if (isPlaying) {
+    visible.forEach(s => { if (!_prevVisibleSpeciesIds.has(s.id)) newSpeciesIds.add(s.id); });
+  }
+  _prevVisibleSpeciesIds = new Set(visible.map(s => s.id));
+
   visible.forEach(species => {
+    const isNewSpecies = newSpeciesIds.has(species.id);
     // --- RANGES ---
     if (layerStates.range) {
       species.regions.forEach(region => {
@@ -1689,6 +1751,7 @@ function updateMap() {
 
     // --- SITES (MARKERS) ---
     if (layerStates.sites) {
+      let firstSiteMarker = null;
       species.sites.forEach(site => {
         const isSelected = selectedSpecies && selectedSpecies.id === species.id;
         const size = isSelected ? 18 : 14;
@@ -1706,7 +1769,7 @@ function updateMap() {
 
         const marker = L.marker([site.lat, site.lng], { icon });
         marker.bindTooltip(`
-          <div style="font-size:11px">
+          <div style="font-size:13px;line-height:1.5">
             <strong style="color:${species.color}">${site.name}</strong><br>
             <em style="color:#9a8f7a">${species.name}</em><br>
             ${site.note}
@@ -1719,7 +1782,15 @@ function updateMap() {
           window._userPickedSpecies = false;
         });
         markersLayer.addLayer(marker);
+        if (!firstSiteMarker) firstSiteMarker = marker;
       });
+      // Flash intro tooltip on first site when a species newly appears during play
+      if (isNewSpecies && firstSiteMarker) {
+        setTimeout(function() {
+          try { firstSiteMarker.openTooltip(); } catch(e) {}
+          setTimeout(function() { try { firstSiteMarker.closeTooltip(); } catch(e) {} }, 4000);
+        }, 400);
+      }
     }
 
     // --- MIGRATIONS ---
@@ -1728,22 +1799,13 @@ function updateMap() {
         const line = L.polyline([mig.from, mig.to], {
           color: species.color,
           weight: 2,
-          opacity: 0.6,
+          opacity: 0.5,
           dashArray: '8 4',
           className: 'migration-path',
         });
         line.bindTooltip(`<span style="color:${species.color}">${mig.label}</span>`, { direction: 'center' });
         migrationsLayer.addLayer(line);
-
-        // Arrow at endpoint
-        const arrow = L.circleMarker(mig.to, {
-          radius: 5,
-          color: species.color,
-          fillColor: species.color,
-          fillOpacity: 0.8,
-          weight: 1,
-        });
-        migrationsLayer.addLayer(arrow);
+        // Note: arrowhead and endpoint dot are handled by animMigLayer
       });
     }
   });
@@ -1755,14 +1817,34 @@ function updateMap() {
   if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
 }
 
+// Persistent map of rendered event markers (eventId → Leaflet marker).
+// Avoids destroying/recreating markers every tick so intro tooltips survive.
+const _renderedEventMarkers = new Map();
+
 function updateEvents() {
   if (!eventsLayer) return;
-  eventsLayer.clearLayers();
-  if (!showEvents) return;
+
+  if (!showEvents) {
+    eventsLayer.clearLayers();
+    _renderedEventMarkers.clear();
+    return;
+  }
 
   const visible = EVENTS_DATA.filter(ev => ev.time >= TIMELINE_MIN && ev.time <= currentTime * 1.001);
+  const visibleIds = new Set(visible.map(ev => ev.id));
 
+  // Remove markers for events that scrolled back into the future (manual scrub backwards)
+  _renderedEventMarkers.forEach(function(marker, id) {
+    if (!visibleIds.has(id)) {
+      eventsLayer.removeLayer(marker);
+      _renderedEventMarkers.delete(id);
+    }
+  });
+
+  // Add markers only for newly visible events
   visible.forEach(ev => {
+    if (_renderedEventMarkers.has(ev.id)) return; // already on map
+
     const icon = L.divIcon({
       className: '',
       html: `<div style="font-size: 18px; line-height: 1; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8)); cursor: pointer;" title="${ev.label}">${ev.icon}</div>`,
@@ -1771,7 +1853,7 @@ function updateEvents() {
     });
     const marker = L.marker([ev.lat, ev.lng], { icon, zIndexOffset: 200 });
     marker.bindTooltip(`
-      <div style="font-size:11px;max-width:220px">
+      <div style="font-size:13px;line-height:1.5;max-width:240px">
         <strong style="color:${ev.color}">${ev.label}</strong><br>
         <em style="color:#9a8f7a">${getCategoryLabel(ev.category)}</em><br>
         ${ev.desc}
@@ -1779,6 +1861,17 @@ function updateEvents() {
       </div>
     `, { direction: 'top', offset: [0, -10] });
     eventsLayer.addLayer(marker);
+    _renderedEventMarkers.set(ev.id, marker);
+
+    // Flash intro tooltip the first time this event appears during play.
+    // Marker is now persistent so the reference stays valid.
+    if (isPlaying && !_seenEventIds.has(ev.id)) {
+      _seenEventIds.add(ev.id);
+      setTimeout(function() {
+        try { marker.openTooltip(); } catch(e) {}
+        setTimeout(function() { try { marker.closeTooltip(); } catch(e) {} }, 4000);
+      }, 500);
+    }
   });
 }
 
@@ -1983,28 +2076,6 @@ function renderPanel(species) {
         </p>
       </div>
 
-      <!-- Biometrics -->
-      <div class="biometrics-section">
-        <div class="section-title">${T('biometricsTitle','Biométrie')}</div>
-        <div class="bio-grid">
-          <div class="bio-item">
-            <div class="bio-item-label">${T('heightM','Taille (♂)')}</div>
-            <div class="bio-item-value">${bio.heightM}</div>
-          </div>
-          <div class="bio-item">
-            <div class="bio-item-label">${T('heightF','Taille (♀)')}</div>
-            <div class="bio-item-value">${bio.heightF}</div>
-          </div>
-          <div class="bio-item">
-            <div class="bio-item-label">${T('weightM','Poids (♂)')}</div>
-            <div class="bio-item-value">${bio.weightM}</div>
-          </div>
-          <div class="bio-item">
-            <div class="bio-item-label">${T('brainVol','Volume cérébral')}</div>
-            <div class="bio-item-value">${bio.brain}</div>
-          </div>
-        </div>
-      </div>
 
       <!-- Tools -->
       <div class="tools-section">
@@ -2043,30 +2114,21 @@ function renderPanel(species) {
 // TIMELINE
 // =====================================================================
 
-// Assign vertical lane index per species to avoid overlap
-// Species are grouped by era and spread across 5 vertical positions (0..4)
-const LANE_ASSIGNMENTS = {
-  'afarensis':           0,
-  'habilis':             1,
-  'erectus':             2,
-  'heidelbergensis':     3,
-  'neanderthal':         1,
-  'denisovan':           2,
-  'sapiens-africa':      3,
-  'sapiens-levant':      4,
-  'sapiens-upper-paleo': 3,
-  'sapiens-mesolithic':  3,
-  'sapiens-neolithic':   3,
-  'sapiens-bronze':      3,
-};
-const LANE_COUNT = 5;
-const LANE_H = 10; // px per lane bar
-const SPECIES_TRACK_H = 64; // total track height
+/// One dedicated row per species.
+// Rows ordered oldest-at-bottom → newest-at-top.
+// rowOrder[0] = oldest (bottom row), rowOrder[N-1] = newest (top row).
+const LANE_H   = 12; // bar height in px
+const LANE_GAP = 3;  // vertical gap between rows in px
 
-function getLaneTop(laneIndex) {
-  // Distribute lanes evenly within the track, leaving room for needle
-  const usable = SPECIES_TRACK_H - LANE_H;
-  return Math.round((laneIndex / (LANE_COUNT - 1)) * usable);
+function buildRowOrder(speciesList) {
+  // sort by start descending: oldest (largest start) first = row 0 = bottom
+  return [...speciesList].sort((a, b) => b.start - a.start);
+}
+
+function getLaneTop(laneIndex, totalRows) {
+  // laneIndex 0 = bottom → invert so it renders at the bottom of the track
+  const invertedIndex = (totalRows - 1) - laneIndex;
+  return invertedIndex * (LANE_H + LANE_GAP);
 }
 
 function initTimeline() {
@@ -2074,13 +2136,19 @@ function initTimeline() {
   const lanesEl = document.getElementById('timeline-lanes');
   const ticksRow = document.getElementById('timeline-ticks-row');
 
+  // --- One row per species, oldest at bottom ---
+  const rowOrder = buildRowOrder(SPECIES_DATA); // index 0 = oldest = bottom
+  const rowCount = rowOrder.length;
+  const trackH = rowCount * (LANE_H + LANE_GAP) + LANE_GAP;
+  if (track) track.style.height = trackH + 'px';
+
   // --- Species lanes ---
   SPECIES_DATA.forEach(species => {
     const x1pct = timeToLinear(species.start) * 100;
     const x2pct = timeToLinear(species.end) * 100;
     const widthPct = Math.abs(x2pct - x1pct);
-    const laneIdx = LANE_ASSIGNMENTS[species.id] ?? 2;
-    const topPx = getLaneTop(laneIdx);
+    const laneIdx = rowOrder.findIndex(s => s.id === species.id);
+    const topPx = LANE_GAP + getLaneTop(laneIdx, rowCount);
 
     const lane = document.createElement('div');
     lane.className = 'species-lane';
@@ -2298,11 +2366,34 @@ function updateNeedlePosition() {
 }
 
 let _lastVisibleIds = ''; // cache to avoid redundant full map rebuilds during play
+let _autoFitTimer  = null; // debounce handle for auto-fit
+let _prevVisibleSpeciesIds = new Set(); // for tooltip-on-appear
+const _seenEventIds = new Set();        // events whose intro tooltip was already shown
+
+// Smoothly pan+zoom map to encompass all sites/regions of visible species.
+// Debounced so rapid species changes don't create camera jitter.
+function autoFitMap() {
+  if (_autoFitTimer) clearTimeout(_autoFitTimer);
+  _autoFitTimer = setTimeout(function() {
+    _autoFitTimer = null;
+    const visible = getVisibleSpecies();
+    if (!visible.length || !leafletMap) return;
+    const latlngs = [];
+    visible.forEach(function(s) {
+      s.sites.forEach(function(p)   { latlngs.push([p.lat, p.lng]); });
+      s.regions.forEach(function(p) { latlngs.push([p.lat, p.lng]); });
+    });
+    if (!latlngs.length) return;
+    const bounds = L.latLngBounds(latlngs);
+    leafletMap.flyToBounds(bounds, { padding: [60, 60], maxZoom: 5, duration: 1.2, noMoveStart: true });
+  }, 600);
+}
 
 function setTime(time) {
   currentTime = Math.max(TIMELINE_MIN, Math.min(TIMELINE_MAX, time));
   document.getElementById('timeline-current-label').textContent = formatTime(currentTime);
   updateNeedlePosition();
+  if (typeof syncFigureVisibility === 'function') syncFigureVisibility();
 
   // During play: only rebuild the full map when the visible species set changes.
   // Always update animated migrations (cheap) and events (cumulative).
@@ -2311,6 +2402,7 @@ function setTime(time) {
   if (speciesChanged) {
     _lastVisibleIds = currentVisibleIds;
     updateMap(); // full rebuild — ranges, sites, migrations, events, arrows
+    if (isPlaying) autoFitMap(); // smoothly reframe map on new species locations
   } else if (isPlaying) {
     // During play with no species change: only refresh the animated arrows + events
     if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
@@ -2476,15 +2568,34 @@ function startPlay() {
   icon.innerHTML = '<rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/>';
   lbl.textContent = 'Pause';
 
-  // If at end, restart from beginning
-  if (currentTime >= TIMELINE_MAX - 1000) setTime(TIMELINE_MIN);
+  // If at end, restart from beginning and clear all figures + seen-state
+  const freshStart = currentTime >= TIMELINE_MAX - 1000;
+  if (freshStart) {
+    // Remove all existing figures
+    Object.keys(speciesFigures).forEach(function(id) {
+      const e = speciesFigures[id];
+      if (e.raf) cancelAnimationFrame(e.raf);
+      if (e.marker) e.marker.remove();
+      delete speciesFigures[id];
+    });
+    // Reset tooltip / fit tracking
+    _prevVisibleSpeciesIds = new Set();
+    _seenEventIds.clear();
+    _renderedEventMarkers.forEach(function(m) { try { eventsLayer.removeLayer(m); } catch(e){} });
+    _renderedEventMarkers.clear();
+    _lastVisibleIds = '';
+    setTime(TIMELINE_MIN);
+  }
+
+  // Init figure layer; resume any paused walks (no-op on fresh start)
+  if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
+  resumeAllFigureWalks();
 
   const speedEl = document.getElementById('play-speed');
 
   const tick = () => {
     const speed = parseFloat(speedEl ? speedEl.value : '1');
-    // log-scale step
-    const totalLogRange = 1; // 0..1
+    const totalLogRange = 1;
     const stepPerTick = (totalLogRange / PLAY_TOTAL_TICKS) * speed;
     const currentLinear = timeToLinear(currentTime);
     const newLinear = currentLinear + stepPerTick;
@@ -2495,6 +2606,7 @@ function startPlay() {
       return;
     }
     setTime(linearToTime(newLinear));
+    checkAndSpawnFigures(); // spawn figures for newly visible species
   };
 
   playInterval = setInterval(tick, 1000 / PLAY_FPS);
@@ -2505,6 +2617,11 @@ function stopPlay() {
   isPlaying = false;
   if (playInterval) clearInterval(playInterval);
   playInterval = null;
+  // Cancel rAF loops but leave markers visible (pause — figures stay in place)
+  Object.keys(speciesFigures).forEach(function(id) {
+    const e = speciesFigures[id];
+    if (e && e.raf) { cancelAnimationFrame(e.raf); e.raf = null; }
+  });
 
   const btn = document.getElementById('play-btn');
   const icon = document.getElementById('play-icon');
@@ -2552,12 +2669,12 @@ function updateAnimatedMigrations() {
       line.bindTooltip('<span style="color:' + species.color + '">' + mig.label + '</span>', { direction: 'center' });
       animMigLayer.addLayer(line);
 
-      // Multiple arrowheads along the path to show direction
-      const numArrows = isPlaying ? 3 : 1;
+      // Single arrowhead at 2/3 of the path to show direction
+      const numArrows = 1;
       const bearing = getBearing(mig.from, mig.to);
 
       for (let i = 0; i < numArrows; i++) {
-        const t = (i + 1) / (numArrows + 1);
+        const t = 0.65; // 2/3 towards destination
         const lat = mig.from[0] + (mig.to[0] - mig.from[0]) * t;
         const lng = mig.from[1] + (mig.to[1] - mig.from[1]) * t;
 
@@ -2693,6 +2810,133 @@ function adaptEvent(item) {
     lng:      geo.longitude || 0,
     source:   item['hominin:dateReference'] || '',
   };
+}
+
+// =====================================================================
+// FIGURE ANIMATION — intégrée au play normal
+// =====================================================================
+// =====================================================================
+// FIGURE ANIMATION — persistent per-species markers
+// Lifecycle: appear at origin → walk migrations → stay → vanish at extinction
+// Pause freezes figures in place; Play resumes walks from exact position
+// =====================================================================
+let figureLayer = null;
+// speciesFigures[id] = { marker, migQueue, walkState, raf }
+// walkState = { mig, from, to, dur, t0, pausedAt } | null
+const speciesFigures = {};
+
+function makeFigureIcon(species) {
+  const pig       = species.pigmentation || {};
+  const skinColor = (pig.skin  && pig.skin.color)  || species.color || '#8B6347';
+  const eyeColor  = (pig.eyes  && pig.eyes.color)  || '#2a1400';
+  const hairColor = (pig.hair  && pig.hair.color)  || '#1a0800';
+  const hStr  = (species.biometrics && species.biometrics.heightM || '170').replace(/[^\d.\u2013-]/g, '');
+  const nums  = hStr.split(/[\u2013-]/).map(parseFloat).filter(function(n){ return !isNaN(n); });
+  const cm    = nums.length ? nums.reduce(function(a,b){ return a+b; }, 0) / nums.length : 170;
+  const scale = Math.max(0.7, Math.min(1.3, cm / 170));
+  const w = Math.round(24 * scale), h = Math.round(38 * scale);
+  return L.divIcon({
+    className: 'walking-figure',
+    html: '<svg width="' + w + '" height="' + h + '" viewBox="0 0 120 160" fill="none"' +
+          ' xmlns="http://www.w3.org/2000/svg"' +
+          ' style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.75))">' +
+          humanFigureSVG(skinColor, eyeColor, hairColor, 60) + '</svg>',
+    iconSize: [w, h], iconAnchor: [w/2, h],
+  });
+}
+
+// Remove figures for species that are no longer in the visible time window
+function syncFigureVisibility() {
+  if (!figureLayer) return;
+  const visibleIds = new Set(getVisibleSpecies().map(function(s){ return s.id; }));
+  Object.keys(speciesFigures).forEach(function(id) {
+    if (!visibleIds.has(id)) {
+      const e = speciesFigures[id];
+      if (e.raf) cancelAnimationFrame(e.raf);
+      if (e.marker) e.marker.remove();
+      delete speciesFigures[id];
+    }
+  });
+}
+
+// Spawn a figure for a newly visible species and queue its migrations
+function spawnFigure(species) {
+  if (speciesFigures[species.id]) return;
+  if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
+  const origin = (species.sites && species.sites[0]) || (species.regions && species.regions[0]);
+  const latlng = origin ? [origin.lat, origin.lng] : null;
+  const marker = latlng
+    ? L.marker(latlng, { icon: makeFigureIcon(species), zIndexOffset: 700 }).addTo(figureLayer)
+    : null;
+  speciesFigures[species.id] = {
+    marker   : marker,
+    migQueue : (species.migrations || []).slice(),
+    walkState: null,
+    raf      : null,
+  };
+  if (marker) setTimeout(function(){ advanceFigure(species.id); }, 600);
+}
+
+// Start the next queued migration walk for a species
+function advanceFigure(id) {
+  const e = speciesFigures[id];
+  if (!e || !e.marker || !e.migQueue.length || !isPlaying) return;
+  startWalkFigure(id, e.migQueue.shift(), 0);
+}
+
+// Animate the figure along mig; resumeElapsed allows resuming after pause
+function startWalkFigure(id, mig, resumeElapsed) {
+  const e = speciesFigures[id];
+  if (!e || !e.marker) return;
+  const from = mig.from, to = mig.to;
+  const dist = Math.sqrt(Math.pow(to[0]-from[0],2)+Math.pow(to[1]-from[1],2));
+  const dur  = Math.max(3000, Math.min(8000, 1500 + dist * 70));
+  const t0   = performance.now() - resumeElapsed;
+  e.walkState = { mig, from, to, dur, t0 };
+
+  function step(now) {
+    const entry = speciesFigures[id];
+    if (!entry || !entry.marker) return; // extinct
+    if (!isPlaying) {
+      // Pause: store elapsed so we can resume exactly
+      entry.walkState.pausedAt = now - t0;
+      entry.raf = null;
+      return;
+    }
+    const raw  = Math.min((now - t0) / dur, 1);
+    const ease = raw < 0.5 ? 2*raw*raw : -1 + (4-2*raw)*raw;
+    entry.marker.setLatLng([from[0]+(to[0]-from[0])*ease, from[1]+(to[1]-from[1])*ease]);
+    if (raw < 1) {
+      entry.raf = requestAnimationFrame(step);
+    } else {
+      entry.marker.setLatLng(to);  // stay at destination
+      entry.raf       = null;
+      entry.walkState = null;
+      setTimeout(function(){ advanceFigure(id); }, 600); // next migration
+    }
+  }
+  e.raf = requestAnimationFrame(step);
+}
+
+// Resume walks that were paused (called by startPlay when figures exist)
+function resumeAllFigureWalks() {
+  Object.keys(speciesFigures).forEach(function(id) {
+    const e = speciesFigures[id];
+    if (!e || !e.marker) return;
+    if (e.walkState && !e.raf) {
+      startWalkFigure(id, e.walkState.mig, e.walkState.pausedAt || 0);
+    } else if (!e.walkState && !e.raf && e.migQueue.length) {
+      advanceFigure(id); // pending migrations not yet started
+    }
+  });
+}
+
+// Called every play tick: spawn figures for newly visible species
+function checkAndSpawnFigures() {
+  if (!isPlaying) return;
+  getVisibleSpecies().forEach(function(species) {
+    spawnFigure(species);
+  });
 }
 
 // =====================================================================
@@ -3603,7 +3847,7 @@ window.addEventListener('load', function() {
 // WELCOME MODAL — init on DOMContentLoaded (modal HTML is at end of body)
 // =====================================================================
 document.addEventListener('DOMContentLoaded', function initWelcome() {
-  var STORAGE_KEY = 'ho_welcomed_v1';
+  var STORAGE_KEY = 'ho_welcomed_v3';
   var overlay = document.getElementById('welcome-modal-overlay');
   if (!overlay) return;
 
