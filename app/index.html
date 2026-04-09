@@ -1817,14 +1817,34 @@ function updateMap() {
   if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
 }
 
+// Persistent map of rendered event markers (eventId → Leaflet marker).
+// Avoids destroying/recreating markers every tick so intro tooltips survive.
+const _renderedEventMarkers = new Map();
+
 function updateEvents() {
   if (!eventsLayer) return;
-  eventsLayer.clearLayers();
-  if (!showEvents) return;
+
+  if (!showEvents) {
+    eventsLayer.clearLayers();
+    _renderedEventMarkers.clear();
+    return;
+  }
 
   const visible = EVENTS_DATA.filter(ev => ev.time >= TIMELINE_MIN && ev.time <= currentTime * 1.001);
+  const visibleIds = new Set(visible.map(ev => ev.id));
 
+  // Remove markers for events that scrolled back into the future (manual scrub backwards)
+  _renderedEventMarkers.forEach(function(marker, id) {
+    if (!visibleIds.has(id)) {
+      eventsLayer.removeLayer(marker);
+      _renderedEventMarkers.delete(id);
+    }
+  });
+
+  // Add markers only for newly visible events
   visible.forEach(ev => {
+    if (_renderedEventMarkers.has(ev.id)) return; // already on map
+
     const icon = L.divIcon({
       className: '',
       html: `<div style="font-size: 18px; line-height: 1; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8)); cursor: pointer;" title="${ev.label}">${ev.icon}</div>`,
@@ -1841,13 +1861,16 @@ function updateEvents() {
       </div>
     `, { direction: 'top', offset: [0, -10] });
     eventsLayer.addLayer(marker);
-    // Flash intro tooltip the first time this event appears during play
+    _renderedEventMarkers.set(ev.id, marker);
+
+    // Flash intro tooltip the first time this event appears during play.
+    // Marker is now persistent so the reference stays valid.
     if (isPlaying && !_seenEventIds.has(ev.id)) {
       _seenEventIds.add(ev.id);
       setTimeout(function() {
         try { marker.openTooltip(); } catch(e) {}
         setTimeout(function() { try { marker.closeTooltip(); } catch(e) {} }, 4000);
-      }, 700);
+      }, 500);
     }
   });
 }
@@ -2558,6 +2581,8 @@ function startPlay() {
     // Reset tooltip / fit tracking
     _prevVisibleSpeciesIds = new Set();
     _seenEventIds.clear();
+    _renderedEventMarkers.forEach(function(m) { try { eventsLayer.removeLayer(m); } catch(e){} });
+    _renderedEventMarkers.clear();
     _lastVisibleIds = '';
     setTime(TIMELINE_MIN);
   }
