@@ -530,8 +530,8 @@ a { color: var(--color-primary); }
 /* Each species gets its own horizontal lane */
 .species-lane {
   position: absolute;
-  height: 16px;
-  border-radius: 8px;
+  height: 12px;
+  border-radius: 6px;
   cursor: pointer;
   opacity: 0.85;
   transition: opacity 0.15s, filter 0.15s;
@@ -1721,7 +1721,15 @@ function updateMap() {
       </div>
     `).join('');
 
+  // Detect species appearing for the first time this play session
+  const newSpeciesIds = new Set();
+  if (isPlaying) {
+    visible.forEach(s => { if (!_prevVisibleSpeciesIds.has(s.id)) newSpeciesIds.add(s.id); });
+  }
+  _prevVisibleSpeciesIds = new Set(visible.map(s => s.id));
+
   visible.forEach(species => {
+    const isNewSpecies = newSpeciesIds.has(species.id);
     // --- RANGES ---
     if (layerStates.range) {
       species.regions.forEach(region => {
@@ -1743,6 +1751,7 @@ function updateMap() {
 
     // --- SITES (MARKERS) ---
     if (layerStates.sites) {
+      let firstSiteMarker = null;
       species.sites.forEach(site => {
         const isSelected = selectedSpecies && selectedSpecies.id === species.id;
         const size = isSelected ? 18 : 14;
@@ -1773,7 +1782,15 @@ function updateMap() {
           window._userPickedSpecies = false;
         });
         markersLayer.addLayer(marker);
+        if (!firstSiteMarker) firstSiteMarker = marker;
       });
+      // Flash intro tooltip on first site when a species newly appears during play
+      if (isNewSpecies && firstSiteMarker) {
+        setTimeout(function() {
+          try { firstSiteMarker.openTooltip(); } catch(e) {}
+          setTimeout(function() { try { firstSiteMarker.closeTooltip(); } catch(e) {} }, 4000);
+        }, 400);
+      }
     }
 
     // --- MIGRATIONS ---
@@ -1824,6 +1841,14 @@ function updateEvents() {
       </div>
     `, { direction: 'top', offset: [0, -10] });
     eventsLayer.addLayer(marker);
+    // Flash intro tooltip the first time this event appears during play
+    if (isPlaying && !_seenEventIds.has(ev.id)) {
+      _seenEventIds.add(ev.id);
+      setTimeout(function() {
+        try { marker.openTooltip(); } catch(e) {}
+        setTimeout(function() { try { marker.closeTooltip(); } catch(e) {} }, 4000);
+      }, 700);
+    }
   });
 }
 
@@ -2069,8 +2094,8 @@ function renderPanel(species) {
 /// One dedicated row per species.
 // Rows ordered oldest-at-bottom → newest-at-top.
 // rowOrder[0] = oldest (bottom row), rowOrder[N-1] = newest (top row).
-const LANE_H   = 16; // bar height in px
-const LANE_GAP = 4;  // vertical gap between rows in px
+const LANE_H   = 12; // bar height in px
+const LANE_GAP = 3;  // vertical gap between rows in px
 
 function buildRowOrder(speciesList) {
   // sort by start descending: oldest (largest start) first = row 0 = bottom
@@ -2318,6 +2343,28 @@ function updateNeedlePosition() {
 }
 
 let _lastVisibleIds = ''; // cache to avoid redundant full map rebuilds during play
+let _autoFitTimer  = null; // debounce handle for auto-fit
+let _prevVisibleSpeciesIds = new Set(); // for tooltip-on-appear
+const _seenEventIds = new Set();        // events whose intro tooltip was already shown
+
+// Smoothly pan+zoom map to encompass all sites/regions of visible species.
+// Debounced so rapid species changes don't create camera jitter.
+function autoFitMap() {
+  if (_autoFitTimer) clearTimeout(_autoFitTimer);
+  _autoFitTimer = setTimeout(function() {
+    _autoFitTimer = null;
+    const visible = getVisibleSpecies();
+    if (!visible.length || !leafletMap) return;
+    const latlngs = [];
+    visible.forEach(function(s) {
+      s.sites.forEach(function(p)   { latlngs.push([p.lat, p.lng]); });
+      s.regions.forEach(function(p) { latlngs.push([p.lat, p.lng]); });
+    });
+    if (!latlngs.length) return;
+    const bounds = L.latLngBounds(latlngs);
+    leafletMap.flyToBounds(bounds, { padding: [60, 60], maxZoom: 5, duration: 1.2, noMoveStart: true });
+  }, 600);
+}
 
 function setTime(time) {
   currentTime = Math.max(TIMELINE_MIN, Math.min(TIMELINE_MAX, time));
@@ -2332,6 +2379,7 @@ function setTime(time) {
   if (speciesChanged) {
     _lastVisibleIds = currentVisibleIds;
     updateMap(); // full rebuild — ranges, sites, migrations, events, arrows
+    if (isPlaying) autoFitMap(); // smoothly reframe map on new species locations
   } else if (isPlaying) {
     // During play with no species change: only refresh the animated arrows + events
     if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
@@ -2497,7 +2545,7 @@ function startPlay() {
   icon.innerHTML = '<rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/>';
   lbl.textContent = 'Pause';
 
-  // If at end, restart from beginning and clear all figures
+  // If at end, restart from beginning and clear all figures + seen-state
   const freshStart = currentTime >= TIMELINE_MAX - 1000;
   if (freshStart) {
     // Remove all existing figures
@@ -2507,6 +2555,10 @@ function startPlay() {
       if (e.marker) e.marker.remove();
       delete speciesFigures[id];
     });
+    // Reset tooltip / fit tracking
+    _prevVisibleSpeciesIds = new Set();
+    _seenEventIds.clear();
+    _lastVisibleIds = '';
     setTime(TIMELINE_MIN);
   }
 
