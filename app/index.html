@@ -508,9 +508,10 @@ a { color: var(--color-primary); }
 
 .timeline-current-label {
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   color: var(--color-primary);
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 .timeline-hint {
   font-size: var(--text-xs);
@@ -546,24 +547,24 @@ a { color: var(--color-primary); }
 .species-lane-label {
   position: absolute;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 12px;
   font-family: var(--font-mono);
   font-weight: 700;
   color: #fff;                          /* dark mode: blanc */
   text-shadow: 0 1px 3px rgba(0,0,0,0.85);
   top: 50%;
   transform: translateY(-50%);
-  left: 8px;
+  left: 6px;
   pointer-events: none;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc(100% - 12px);
-  letter-spacing: 0.02em;
+  max-width: calc(100% - 10px);
+  letter-spacing: 0.01em;
 }
 /* Light mode: texte noir pour contraste sur barres claires */
 [data-theme="light"] .species-lane-label {
   color: #1a1208;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+  text-shadow: 0 1px 2px rgba(255,255,255,0.6);
 }
 
 /* === NEEDLE wrapper — spans ALL rows of the footer === */
@@ -961,15 +962,46 @@ a { color: var(--color-primary); }
 /* ===== TIMELINE: play button + label float at left of species track ===== */
 
 /* #timeline is the positioning context */
-#timeline { position: relative; padding: var(--space-2) var(--space-3) var(--space-1); }
+#timeline { position: relative; padding: var(--space-1) var(--space-3) var(--space-1); }
+
+/* App title strip — small permanent header row */
+#tl-title-strip {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: 2px 0 4px;
+  border-bottom: 1px solid var(--color-divider);
+  margin-bottom: var(--space-1);
+}
+#tl-app-name {
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+#tl-app-name em {
+  color: var(--color-primary);
+  font-style: normal;
+}
+#tl-app-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* Play btn: absolute within #timeline, top-left, vertically over species track */
 #play-btn {
   position: absolute !important;
   left: var(--space-3);
-  top: 30px;
+  top: 44px;   /* shifted down to clear the new title strip */
   z-index: 40;
 }
+/* Show the Play/Pause label alongside the icon */
+#play-btn #play-label { display: inline !important; }
 /* Time label: follows the needle cursor (left updated by updateNeedlePosition) */
 .timeline-current-label {
   position: absolute;
@@ -1121,22 +1153,20 @@ a { color: var(--color-primary); }
   }
 }
 
-/* Compact circular play/pause button */
+/* Play/pause button with label */
 #play-btn {
   order: -1;
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  padding: 0;
-  border-radius: 50%;
+  height: 32px;
+  min-width: 70px;
+  padding: 0 10px;
+  border-radius: var(--radius-full);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 5px;
 }
-/* Hide text label — icon only */
-#play-btn #play-label { display: none; }
 /* Pulse highlight when waiting for first interaction */
 @keyframes playPulse {
   0%   { box-shadow: 0 0 0 0 rgba(212,130,10,0.7); }
@@ -1547,14 +1577,22 @@ a { color: var(--color-primary); }
     <select id="play-speed" style="display:none"><option value="1" selected>×1</option></select>
     <span id="tl-hint-desktop" style="display:none"></span>
 
+    <!-- App title strip — always visible above timeline -->
+    <div id="tl-title-strip">
+      <span id="tl-app-name">Hominin<em>es</em> Origins</span>
+      <span id="tl-app-desc" data-i18n="ui.appSubtitle">Explorez 4 millions d'années de migrations humaines</span>
+    </div>
+
     <!-- Needle wrapper — play btn + time label float inside as overlays -->
     <div id="needle-wrapper" style="position:relative;">
       <!-- Play/pause button — overlays left of species track -->
-      <button id="play-btn" title="Lecture automatique — voir les migrations en direct" data-i18n-title="ui.playTitle">
-        <svg id="play-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+      <button id="play-btn"
+              title="Lancez l'animation pour voir les migrations humaines se dérouler au fil du temps"
+              data-i18n-title="ui.playTitle">
+        <svg id="play-icon" width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
           <polygon points="3,1 13,7 3,13"/>
         </svg>
-        <span id="play-label" style="display:none"></span>
+        <span id="play-label">Play</span>
       </button>
       <!-- Time label floats next to play btn -->
       <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
@@ -2370,23 +2408,20 @@ let _autoFitTimer  = null; // debounce handle for auto-fit
 let _prevVisibleSpeciesIds = new Set(); // for tooltip-on-appear
 const _seenEventIds = new Set();        // events whose intro tooltip was already shown
 
-// Smoothly pan+zoom map to encompass all sites/regions of visible species.
-// Debounced so rapid species changes don't create camera jitter.
+// Instantly fit map to encompass all sites/regions of visible species.
+// Only called once at play-start so it doesn't interrupt the experience.
 function autoFitMap() {
-  if (_autoFitTimer) clearTimeout(_autoFitTimer);
-  _autoFitTimer = setTimeout(function() {
-    _autoFitTimer = null;
-    const visible = getVisibleSpecies();
-    if (!visible.length || !leafletMap) return;
-    const latlngs = [];
-    visible.forEach(function(s) {
-      s.sites.forEach(function(p)   { latlngs.push([p.lat, p.lng]); });
-      s.regions.forEach(function(p) { latlngs.push([p.lat, p.lng]); });
-    });
-    if (!latlngs.length) return;
-    const bounds = L.latLngBounds(latlngs);
-    leafletMap.flyToBounds(bounds, { padding: [60, 60], maxZoom: 5, duration: 1.2, noMoveStart: true });
-  }, 600);
+  const visible = getVisibleSpecies();
+  if (!visible.length || !leafletMap) return;
+  const latlngs = [];
+  visible.forEach(function(s) {
+    s.sites.forEach(function(p)   { latlngs.push([p.lat, p.lng]); });
+    s.regions.forEach(function(p) { latlngs.push([p.lat, p.lng]); });
+  });
+  if (!latlngs.length) return;
+  const bounds = L.latLngBounds(latlngs);
+  // Use fitBounds (instant) — animated flyToBounds causes arrow drift artifacts
+  leafletMap.fitBounds(bounds, { padding: [60, 60], maxZoom: 5 });
 }
 
 function setTime(time) {
@@ -2402,7 +2437,6 @@ function setTime(time) {
   if (speciesChanged) {
     _lastVisibleIds = currentVisibleIds;
     updateMap(); // full rebuild — ranges, sites, migrations, events, arrows
-    if (isPlaying) autoFitMap(); // smoothly reframe map on new species locations
   } else if (isPlaying) {
     // During play with no species change: only refresh the animated arrows + events
     if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
@@ -2590,6 +2624,9 @@ function startPlay() {
   // Init figure layer; resume any paused walks (no-op on fresh start)
   if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
   resumeAllFigureWalks();
+
+  // Fit map once at play start so all initial species are visible
+  if (freshStart) autoFitMap();
 
   const speedEl = document.getElementById('play-speed');
 
