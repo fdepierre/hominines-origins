@@ -259,7 +259,10 @@ a { color: var(--color-primary); }
   color: var(--tooltip-color) !important;
   border: 1px solid var(--tooltip-border) !important;
   box-shadow: var(--tooltip-shadow) !important;
-  max-width: 280px;
+  max-width: 260px !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
 }
 /* Remove Leaflet's directional arrows — all selector variants for cross-browser */
 .leaflet-tooltip:before,   .leaflet-tooltip::before,
@@ -804,6 +807,9 @@ a { color: var(--color-primary); }
   pointer-events: none;
   max-width: 260px;
   min-width: 140px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Touch target enlargement on mobile */
@@ -1778,7 +1784,7 @@ function updateMap() {
           dashArray: '4 4',
         });
         circle.bindTooltip(`<strong>${species.name}</strong><br>${region.note}`, {
-          permanent: false, direction: 'top', className: 'leaflet-tooltip-custom'
+          permanent: false, direction: 'auto', className: 'leaflet-tooltip-custom'
         });
         rangesLayer.addLayer(circle);
       });
@@ -1809,7 +1815,7 @@ function updateMap() {
             <em style="color:#9a8f7a">${species.name}</em><br>
             ${site.note}
           </div>
-        `, { direction: 'top', offset: [0, -8] });
+        `, { direction: 'auto', offset: [0, -8] });
 
         marker.on('click', () => {
           window._userPickedSpecies = true;
@@ -1894,7 +1900,7 @@ function updateEvents() {
         ${ev.desc}
         ${ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + ev.source + '</span>' : ''}
       </div>
-    `, { direction: 'top', offset: [0, -10] });
+    `, { direction: 'auto', offset: [0, -10] });
     eventsLayer.addLayer(marker);
     _renderedEventMarkers.set(ev.id, marker);
 
@@ -2357,20 +2363,21 @@ function buildEventsBand() {
   const track = document.getElementById('events-band-track');
   if (!track) return;
 
-  // Shared JS tooltip (avoids CSS ::after limitations — no HTML, can't match Leaflet style)
+  // Shared JS tooltip — viewport-aware positioning, measured after render
   const tip = document.getElementById('band-tooltip');
-  document.addEventListener('mousemove', function(e) {
-    if (tip.style.display === 'block') {
-      // Keep tooltip near cursor but inside viewport
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const tw = tip.offsetWidth || 200, th = tip.offsetHeight || 60;
-      let x = e.clientX + 14, y = e.clientY - th - 10;
-      if (x + tw > vw) x = e.clientX - tw - 14;
-      if (y < 4) y = e.clientY + 14;
-      tip.style.left = x + 'px';
-      tip.style.top  = y + 'px';
-    }
-  });
+  function positionTip(cx, cy) {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const tw = tip.offsetWidth,  th = tip.offsetHeight;
+    // Prefer above-right of cursor; flip as needed to stay inside viewport
+    let x = cx + 14;
+    let y = cy - th - 10;
+    if (x + tw > vw - 4) x = cx - tw - 14;   // flip left
+    if (x < 4)            x = 4;              // clamp left
+    if (y < 4)            y = cy + 20;        // flip below
+    if (y + th > vh - 4)  y = vh - th - 4;   // clamp bottom
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+  }
 
   EVENTS_DATA.forEach(ev => {
     const xpct = timeToLinear(ev.time) * 100;
@@ -2404,8 +2411,15 @@ function buildEventsBand() {
       '<em style="color:var(--color-text-muted)">' + catLabel + '</em><br>' +
       ev.desc + srcHtml;
 
-    el.addEventListener('mouseenter', function() {
-      if (tip) { tip.innerHTML = tipHtml; tip.style.display = 'block'; }
+    el.addEventListener('mouseenter', function(e) {
+      if (!tip) return;
+      tip.innerHTML = tipHtml;
+      tip.style.display = 'block';
+      // Measure after browser renders the content
+      requestAnimationFrame(function() { positionTip(e.clientX, e.clientY); });
+    });
+    el.addEventListener('mousemove', function(e) {
+      if (tip && tip.style.display === 'block') positionTip(e.clientX, e.clientY);
     });
     el.addEventListener('mouseleave', function() {
       if (tip) tip.style.display = 'none';
