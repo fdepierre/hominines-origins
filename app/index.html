@@ -786,12 +786,12 @@ a { color: var(--color-primary); }
   transform: translate(-50%, -50%) scale(1.4);
   z-index: 10;
 }
-.event-marker:hover::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: 22px;
-  left: 50%;
-  transform: translateX(-50%);
+
+/* Shared JS-driven tooltip for events band — mirrors Leaflet tooltip style */
+#band-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 9999;
   background: var(--tooltip-bg);
   border: 1px solid var(--tooltip-border);
   border-radius: var(--tooltip-radius);
@@ -799,14 +799,11 @@ a { color: var(--color-primary); }
   font-size: var(--tooltip-size);
   font-family: var(--tooltip-font);
   line-height: var(--tooltip-lh);
-  white-space: normal;
   color: var(--tooltip-color);
-  z-index: 100;
-  pointer-events: none;
-  max-width: 240px;
-  min-width: 120px;
-  text-align: left;
   box-shadow: var(--tooltip-shadow);
+  pointer-events: none;
+  max-width: 260px;
+  min-width: 140px;
 }
 
 /* Touch target enlargement on mobile */
@@ -2347,22 +2344,73 @@ function buildSkinBand() {
 // =====================================================================
 // EVENTS BAND (tools, fire, art, burial...)
 // =====================================================================
+// Icons that are human figures — replaced with skin-accurate SVG
+const HUMAN_FIGURE_ICONS = new Set(['🚶', '🚣', '🚶‍♂️', '🚣‍♂️', '🏃', '🧑', '👤']);
+
+function getSpeciesAtTime(time) {
+  return SPECIES_DATA
+    .filter(s => s.start <= time && s.end >= time)
+    .sort((a, b) => b.start - a.start); // most recent = first
+}
+
 function buildEventsBand() {
   const track = document.getElementById('events-band-track');
   if (!track) return;
+
+  // Shared JS tooltip (avoids CSS ::after limitations — no HTML, can't match Leaflet style)
+  const tip = document.getElementById('band-tooltip');
+  document.addEventListener('mousemove', function(e) {
+    if (tip.style.display === 'block') {
+      // Keep tooltip near cursor but inside viewport
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const tw = tip.offsetWidth || 200, th = tip.offsetHeight || 60;
+      let x = e.clientX + 14, y = e.clientY - th - 10;
+      if (x + tw > vw) x = e.clientX - tw - 14;
+      if (y < 4) y = e.clientY + 14;
+      tip.style.left = x + 'px';
+      tip.style.top  = y + 'px';
+    }
+  });
 
   EVENTS_DATA.forEach(ev => {
     const xpct = timeToLinear(ev.time) * 100;
     const el = document.createElement('div');
     el.className = 'event-marker';
     el.style.left = xpct + '%';
-    el.textContent = ev.icon;
+
+    // Render icon: human figures → skin-accurate SVG; others → colored emoji
+    if (HUMAN_FIGURE_ICONS.has(ev.icon)) {
+      const active = getSpeciesAtTime(ev.time);
+      const pig    = active.length ? (active[0].pigmentation || {}) : {};
+      const skin   = (pig.skin  && pig.skin.color)  || '#8B6347';
+      const eye    = (pig.eyes  && pig.eyes.color)  || '#2a1400';
+      const hair   = (pig.hair  && pig.hair.color)  || '#1a0800';
+      el.innerHTML =
+        '<svg width="12" height="19" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg"' +
+        ' style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.7))">' +
+        humanFigureSVG(skin, eye, hair, 60) + '</svg>';
+    } else {
+      el.textContent = ev.icon;
+      el.style.color = ev.color; // tint emoji with category color where platform supports it
+    }
+
+    // JS-driven tooltip matching Leaflet tooltip HTML style
     const catLabel = getCategoryLabel(ev.category);
-    el.setAttribute('data-tip', '[' + catLabel + '] ' + ev.label + ' : ' + ev.desc.split('.')[0]);
-    el.title = ev.label;
-    el.addEventListener('click', () => {
-      setTime(ev.time);
+    const srcHtml  = ev.source
+      ? '<br><span style="color:var(--color-text-faint);font-style:italic">' + ev.source + '</span>'
+      : '';
+    const tipHtml =
+      '<strong style="color:' + ev.color + '">' + ev.label + '</strong><br>' +
+      '<em style="color:var(--color-text-muted)">' + catLabel + '</em><br>' +
+      ev.desc + srcHtml;
+
+    el.addEventListener('mouseenter', function() {
+      if (tip) { tip.innerHTML = tipHtml; tip.style.display = 'block'; }
     });
+    el.addEventListener('mouseleave', function() {
+      if (tip) tip.style.display = 'none';
+    });
+    el.addEventListener('click', () => { setTime(ev.time); });
     track.appendChild(el);
   });
 }
@@ -4034,6 +4082,9 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
       </button>
     </div>
   </div>
+
+  <!-- Shared tooltip for events band (JS-driven, matches Leaflet tooltip style) -->
+  <div id="band-tooltip"></div>
 
 </body>
 </html>
