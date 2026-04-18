@@ -123,6 +123,30 @@
     },
     {
       "@type": "Event",
+      "@id": "naledi-burial",
+      "name": {
+        "fr": "Revendication de pratiques funéraires — H. naledi",
+        "en": "Claimed funerary practices — H. naledi"
+      },
+      "hominin:icon": "⚠️",
+      "hominin:color": "#B04070",
+      "hominin:dateYearsBP": -280000,
+      "hominin:category": "symbolic",
+      "hominin:debateLevel": "EN_DEBAT_ACTIF",
+      "hominin:evidenceType": "DONNEES_INDIRECTES",
+      "hominin:dateReference": "eLife reviewed preprints (2025) ; J. Hum. Evol. (2024)",
+      "description": {
+        "fr": "Squelettes d'H. naledi dans les chambres profondes de Rising Star (Afrique du Sud). Berger et al. proposent des dépôts intentionnels de corps, foyers et gravures symboliques chez un hominine à cerveau réduit (~465–610 cm³). Contesté vigoureusement sur les plans taphonomique et stratigraphique — pas de consensus sur les sépultures intentionnelles (Martinón-Torres et al. 2024, J. Hum. Evol.).",
+        "en": "H. naledi skeletons in deep chambers of Rising Star cave system (South Africa). Berger et al. propose intentional body deposits, hearths and symbolic engravings by a small-brained hominin (~465–610 cm³). Vigorously contested on taphonomic and stratigraphic grounds — no consensus on intentional burial (Martinón-Torres et al. 2024, J. Hum. Evol.)."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Rising Star Cave System, Dinaledi Chamber, South Africa",
+        "geo": { "@type": "GeoCoordinates", "latitude": -26.02, "longitude": 27.71 }
+      }
+    },
+    {
+      "@type": "Event",
       "@id": "bruniquel",
       "name": { "fr": "Structures rituelles Néandertal", "en": "Neanderthal ritual structures" },
       "hominin:icon": "🗺",
@@ -347,6 +371,30 @@
         "@type": "Place",
         "name": "Madjedbebe, Northern Territory, Australia",
         "geo": { "@type": "GeoCoordinates", "latitude": -12.55, "longitude": 132.97 }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "floresiensis-endemic",
+      "name": {
+        "fr": "Hominines nains endémiques de Flores",
+        "en": "Endemic dwarf hominins of Flores"
+      },
+      "hominin:icon": "🏝️",
+      "hominin:color": "#307090",
+      "hominin:dateYearsBP": -120000,
+      "hominin:category": "migration",
+      "hominin:debateLevel": "CONSENSUS_FORT",
+      "hominin:evidenceType": "DONNEES_DIRECTES",
+      "hominin:dateReference": "PNAS 105(4):1342–1347 (2008) ; Proc. R. Soc. B 284:20171065 (2017)",
+      "description": {
+        "fr": "Série de restes graciles (LB1 et associés) — Liang Bua, île de Flores, Indonésie. Stature ~1 m, volume cérébral ~426 cm³. Nanisme insulaire sur un Homo archaïque, disparu vers ~50 ka. Les hypothèses pathologiques (microcéphalie, crétinisme endémique) ont été largement réfutées par analyses morphométriques comparatives. Débat résiduel sur l'ancêtre exact (H. erectus insulaire vs lignée plus basale) et sur les modalités d'extinction.",
+        "en": "Series of gracile remains (LB1 and associated) — Liang Bua, Flores Island, Indonesia. Stature ~1 m, brain volume ~426 cm³. Insular dwarfism on an archaic Homo lineage, extinct ~50 ka. Pathological hypotheses (microcephaly, endemic cretinism) largely refuted by comparative morphometric analyses. Residual debate on exact ancestor (insular H. erectus vs more basal lineage) and mode of extinction."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Liang Bua, Flores Island, Indonesia",
+        "geo": { "@type": "GeoCoordinates", "latitude": -8.53, "longitude": 120.44 }
       }
     },
     {
