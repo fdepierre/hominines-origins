@@ -2232,8 +2232,8 @@ function updateEvents() {
 
     const icon = L.divIcon({
       className: '',
-      html: '<div class="event-map-marker-inner" style="font-size:18px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));cursor:pointer" title="' +
-        escapeHtmlAttr(ev.label) + '">' + ev.icon + '</div>',
+      html: '<div class="event-map-marker-inner" style="display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;min-width:22px;min-height:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));cursor:pointer" title="' +
+        escapeHtmlAttr(ev.label) + '">' + eventMapMarkerInnerContent(ev) + '</div>',
       iconSize: [24, 24],
       iconAnchor: [12, 12],
     });
@@ -2849,12 +2849,32 @@ function buildSkinBand() {
 // EVENTS BAND (tools, fire, art, burial...)
 // =====================================================================
 // Icons that are human figures — replaced with skin-accurate SVG
-const HUMAN_FIGURE_ICONS = new Set(['🚶', '🚣', '🚶‍♂️', '🚣‍♂️', '🏃', '🧑', '👤']);
+const HUMAN_FIGURE_ICONS = new Set([
+  '🚶', '🚶‍♂️', '🚶‍♀️', '🚣', '🚣‍♂️', '🚣‍♀️', '🏃', '🏃‍♂️', '🏃‍♀️',
+  '🧑', '👤', '👨', '👩', '🧍', '🧍‍♂️', '🧍‍♀️',
+]);
 
 function getSpeciesAtTime(time) {
   return SPECIES_DATA
     .filter(s => s.start <= time && s.end >= time)
     .sort((a, b) => b.start - a.start); // most recent = first
+}
+
+/** Marqueurs carte : SVG pigmentation (comme la bande jalons), pas les emojis « personne » des OS (souvent clairs). */
+function eventMapMarkerInnerContent(ev) {
+  if (HUMAN_FIGURE_ICONS.has(ev.icon)) {
+    const active = getSpeciesAtTime(ev.time);
+    const pig    = active.length ? (active[0].pigmentation || {}) : {};
+    const skin   = (pig.skin  && pig.skin.color)  || '#8B6347';
+    const eye    = (pig.eyes  && pig.eyes.color)  || '#2a1400';
+    const hair   = (pig.hair  && pig.hair.color)  || '#1a0800';
+    return (
+      '<svg width="14" height="22" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg"' +
+      ' style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.75))">' +
+      humanFigureSVG(skin, eye, hair, 60) + '</svg>'
+    );
+  }
+  return ev.icon;
 }
 
 function buildEventsBand() {
