@@ -2149,6 +2149,11 @@ function updateMap() {
 // Avoids destroying/recreating markers every tick so intro tooltips survive.
 const _renderedEventMarkers = new Map();
 
+/** Borne haute pour jalons cumulatifs sur la carte. `currentTime * 1.001` est incorrect si currentTime < 0 (exclut le jalon pile à la date du curseur). */
+function eventCumulativeTimeMax() {
+  return currentTime + Math.max(1e-6, Math.abs(currentTime) * 1e-12);
+}
+
 function switchMobileTabToMap() {
   try {
     if (typeof window.matchMedia === 'undefined' || !window.matchMedia('(max-width: 768px)').matches) return;
@@ -2166,9 +2171,17 @@ function switchMobileTabToMap() {
 }
 
 function queueEventMapFocus(eventId) {
+  function kick() {
+    focusEventOnMap(eventId);
+  }
   requestAnimationFrame(function () {
     requestAnimationFrame(function () {
-      focusEventOnMap(eventId);
+      kick();
+      var mq = typeof window.matchMedia !== 'undefined' && window.matchMedia('(max-width: 768px)');
+      if (mq && mq.matches) {
+        setTimeout(kick, 220);
+        setTimeout(kick, 480);
+      }
     });
   });
 }
@@ -2202,7 +2215,7 @@ function updateEvents() {
     return;
   }
 
-  const visible = EVENTS_DATA.filter(ev => ev.time >= TIMELINE_MIN && ev.time <= currentTime * 1.001);
+  const visible = EVENTS_DATA.filter(ev => ev.time >= TIMELINE_MIN && ev.time <= eventCumulativeTimeMax());
   const visibleIds = new Set(visible.map(ev => ev.id));
 
   // Remove markers for events that scrolled back into the future (manual scrub backwards)
@@ -2240,6 +2253,7 @@ function updateEvents() {
         scheduleTimelineBandSync();
         requestAnimationFrame(function () { scheduleTimelineBandSync(); });
       }
+      if (typeof queueEventMapFocus === 'function') queueEventMapFocus(ev.id);
     });
     eventsLayer.addLayer(marker);
     _renderedEventMarkers.set(ev.id, marker);
