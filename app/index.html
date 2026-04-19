@@ -2848,11 +2848,41 @@ function buildSkinBand() {
 // =====================================================================
 // EVENTS BAND (tools, fire, art, burial...)
 // =====================================================================
-// Icons that are human figures — replaced with skin-accurate SVG
-const HUMAN_FIGURE_ICONS = new Set([
+/** NFC + strip VS16 so JSON / éditeurs / OS matchent le même glyphe (ex. 🚶 vs 🚶‍♂️). */
+function normalizeGlyphKey(s) {
+  if (typeof s !== 'string') return '';
+  try {
+    return s.replace(/\uFE0F/g, '').normalize('NFC').trim();
+  } catch (e) {
+    return String(s).replace(/\uFE0F/g, '').trim();
+  }
+}
+
+const _HUMAN_FIGURE_BASE = [
   '🚶', '🚶‍♂️', '🚶‍♀️', '🚣', '🚣‍♂️', '🚣‍♀️', '🏃', '🏃‍♂️', '🏃‍♀️',
   '🧑', '👤', '👨', '👩', '🧍', '🧍‍♂️', '🧍‍♀️',
+];
+const _HUMAN_FIGURE_KEYS = new Set();
+_HUMAN_FIGURE_BASE.forEach(function (g) { _HUMAN_FIGURE_KEYS.add(normalizeGlyphKey(g)); });
+
+/** Jalons migration : icône = hominines à cette date (données), pas emoji système — sauf symboles non figuratifs. */
+const _MIGRATION_KEEP_RAW_EMOJI = new Set([
+  normalizeGlyphKey('🏝️'),
+  normalizeGlyphKey('🏝'),
+  normalizeGlyphKey('🌊'),
+  normalizeGlyphKey('⛵'),
 ]);
+
+function isHumanFigureGlyph(icon) {
+  const k = normalizeGlyphKey(icon);
+  if (!k) return false;
+  if (_HUMAN_FIGURE_KEYS.has(k)) return true;
+  const cp = k.codePointAt(0);
+  if (cp === 0x1F6B6) return true; // piéton / marche
+  if (cp === 0x1F6A3) return true; // canoë (souvent rendu « personne » par défaut)
+  if (cp === 0x1F3C3) return true; // course
+  return false;
+}
 
 function getSpeciesAtTime(time) {
   return SPECIES_DATA
@@ -2860,21 +2890,34 @@ function getSpeciesAtTime(time) {
     .sort((a, b) => b.start - a.start); // most recent = first
 }
 
-/** Marqueurs carte : SVG pigmentation (comme la bande jalons), pas les emojis « personne » des OS (souvent clairs). */
-function eventMapMarkerInnerContent(ev) {
-  if (HUMAN_FIGURE_ICONS.has(ev.icon)) {
-    const active = getSpeciesAtTime(ev.time);
-    const pig    = active.length ? (active[0].pigmentation || {}) : {};
-    const skin   = (pig.skin  && pig.skin.color)  || '#8B6347';
-    const eye    = (pig.eyes  && pig.eyes.color)  || '#2a1400';
-    const hair   = (pig.hair  && pig.hair.color)  || '#1a0800';
-    return (
-      '<svg width="14" height="22" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg"' +
-      ' style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.75))">' +
-      humanFigureSVG(skin, eye, hair, 60) + '</svg>'
-    );
+function eventUsesPigmentedHumanSvg(ev) {
+  if (!ev || typeof ev.icon !== 'string') return false;
+  if (isHumanFigureGlyph(ev.icon)) return true;
+  if (ev.category === 'migration' && !_MIGRATION_KEEP_RAW_EMOJI.has(normalizeGlyphKey(ev.icon))) {
+    return true;
   }
-  return ev.icon;
+  return false;
+}
+
+function eventFigurePigmentation(ev) {
+  const active = getSpeciesAtTime(ev.time);
+  const pig    = active.length ? (active[0].pigmentation || {}) : {};
+  return {
+    skin: (pig.skin  && pig.skin.color)  || '#8B6347',
+    eye:  (pig.eyes  && pig.eyes.color)  || '#2a1400',
+    hair: (pig.hair  && pig.hair.color)  || '#1a0800',
+  };
+}
+
+/** Marqueurs carte : même logique que la bande jalons (SVG + espèce à la date du jalon). */
+function eventMapMarkerInnerContent(ev) {
+  if (!eventUsesPigmentedHumanSvg(ev)) return ev.icon;
+  const c = eventFigurePigmentation(ev);
+  return (
+    '<svg width="14" height="22" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg"' +
+    ' style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.75))">' +
+    humanFigureSVG(c.skin, c.eye, c.hair, 60) + '</svg>'
+  );
 }
 
 function buildEventsBand() {
@@ -2906,17 +2949,13 @@ function buildEventsBand() {
     el.setAttribute('data-t-linear', String(tLin));
     el.style.left = '0px';
 
-    // Render icon: human figures → skin-accurate SVG; others → colored emoji
-    if (HUMAN_FIGURE_ICONS.has(ev.icon)) {
-      const active = getSpeciesAtTime(ev.time);
-      const pig    = active.length ? (active[0].pigmentation || {}) : {};
-      const skin   = (pig.skin  && pig.skin.color)  || '#8B6347';
-      const eye    = (pig.eyes  && pig.eyes.color)  || '#2a1400';
-      const hair   = (pig.hair  && pig.hair.color)  || '#1a0800';
+    // Icônes « personne » / jalons migration → SVG pigmentation (données espèce à ev.time), pas emoji OS
+    if (eventUsesPigmentedHumanSvg(ev)) {
+      const c = eventFigurePigmentation(ev);
       el.innerHTML =
         '<svg width="12" height="19" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg"' +
         ' style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.7))">' +
-        humanFigureSVG(skin, eye, hair, 60) + '</svg>';
+        humanFigureSVG(c.skin, c.eye, c.hair, 60) + '</svg>';
     } else {
       el.textContent = ev.icon;
       el.style.color = ev.color; // tint emoji with category color where platform supports it
