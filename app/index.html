@@ -4689,7 +4689,8 @@ function initI18n() {
 
   i18next.on('languageChanged', (lng) => {
     document.documentElement.setAttribute('lang', lng);
-    document.documentElement.setAttribute('translate', lng === 'fr' ? 'yes' : 'no');
+    // Always allow browser page translation (educational reach); JSON viewer keeps translate=no on <code>.
+    document.documentElement.setAttribute('translate', 'yes');
   });
 
   // Language selector change handler
