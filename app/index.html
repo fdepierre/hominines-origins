@@ -316,6 +316,11 @@ a { color: var(--color-primary); }
   height: 44px;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
+.certainty-tri-wedge {
+  stroke: var(--color-surface);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+}
 .certainty-tri-pop {
   position: absolute;
   top: calc(100% + 6px);
@@ -1831,23 +1836,38 @@ const HOMININ_CERTAINTY_KEYS = [
   'hominin:pigmentationEvidenceType',
 ];
 
+/** Mirror of app/data/species-certainty.json — used when fetch() fails (file://, missing deploy, offline). */
+const _EMBEDDED_CERTAINTY = [{"id":"afarensis","hominin:taxonomyDebateLevel":"CONSENSUS_MODERE","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"EN_DEBAT_ACTIF","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"EN_DEBAT_ACTIF","hominin:pigmentationEvidenceType":"INFERENCE_EVOLUTIVE"},{"id":"habilis","hominin:taxonomyDebateLevel":"EN_DEBAT_ACTIF","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"EN_DEBAT_ACTIF","hominin:pigmentationEvidenceType":"INFERENCE_EVOLUTIVE"},{"id":"erectus","hominin:taxonomyDebateLevel":"EN_DEBAT_ACTIF","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"EN_DEBAT_ACTIF","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_MODERE","hominin:pigmentationEvidenceType":"DONNEES_INDIRECTES"},{"id":"heidelbergensis","hominin:taxonomyDebateLevel":"EN_DEBAT_ACTIF","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_MODERE","hominin:pigmentationEvidenceType":"INFERENCE_EVOLUTIVE"},{"id":"neanderthal","hominin:taxonomyDebateLevel":"CONSENSUS_FORT","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_FORT","hominin:pigmentationEvidenceType":"DONNEES_DIRECTES"},{"id":"denisovan","hominin:taxonomyDebateLevel":"CONSENSUS_MODERE","hominin:taxonomyEvidenceType":"DONNEES_DIRECTES","hominin:behaviorDebateLevel":"EN_DEBAT_ACTIF","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_MODERE","hominin:pigmentationEvidenceType":"DONNEES_DIRECTES"},{"id":"sapiens-africa","hominin:taxonomyDebateLevel":"CONSENSUS_FORT","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_FORT","hominin:pigmentationEvidenceType":"DONNEES_DIRECTES"},{"id":"sapiens-levant","hominin:taxonomyDebateLevel":"CONSENSUS_FORT","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_MODERE","hominin:pigmentationEvidenceType":"INFERENCE_EVOLUTIVE"},{"id":"sapiens-upper-paleo","hominin:taxonomyDebateLevel":"CONSENSUS_FORT","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_FORT","hominin:pigmentationEvidenceType":"DONNEES_DIRECTES"},{"id":"sapiens-mesolithic","hominin:taxonomyDebateLevel":"CONSENSUS_FORT","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_FORT","hominin:pigmentationEvidenceType":"DONNEES_DIRECTES"},{"id":"sapiens-neolithic","hominin:taxonomyDebateLevel":"CONSENSUS_FORT","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_FORT","hominin:pigmentationEvidenceType":"DONNEES_DIRECTES"},{"id":"sapiens-bronze","hominin:taxonomyDebateLevel":"CONSENSUS_FORT","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_MODERE","hominin:pigmentationEvidenceType":"DONNEES_DIRECTES"},{"id":"naledi","hominin:taxonomyDebateLevel":"CONSENSUS_MODERE","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"EN_DEBAT_ACTIF","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"EN_DEBAT_ACTIF","hominin:pigmentationEvidenceType":"INFERENCE_EVOLUTIVE"},{"id":"floresiensis","hominin:taxonomyDebateLevel":"EN_DEBAT_ACTIF","hominin:taxonomyEvidenceType":"DONNEES_INDIRECTES","hominin:behaviorDebateLevel":"CONSENSUS_MODERE","hominin:behaviorEvidenceType":"DONNEES_INDIRECTES","hominin:pigmentationDebateLevel":"CONSENSUS_MODERE","hominin:pigmentationEvidenceType":"INFERENCE_EVOLUTIVE"}];
+
+function applyHomininCertaintyRows(rows) {
+  if (!Array.isArray(rows) || !rows.length) return;
+  const byId = {};
+  rows.forEach((r) => { if (r && r.id) byId[r.id] = r; });
+  SPECIES_DATA.forEach((sp) => {
+    const row = byId[sp.id];
+    if (!row) return;
+    HOMININ_CERTAINTY_KEYS.forEach((k) => {
+      if (row[k] !== undefined && row[k] !== null) sp[k] = row[k];
+    });
+  });
+}
+
 async function mergeHomininCertainty() {
   window.__HOMININ_CERTAINTY_READY = false;
+  let rows = null;
   try {
     const res = await fetch('./data/species-certainty.json', { cache: 'no-store' });
     if (!res.ok) throw new Error('species-certainty.json HTTP ' + res.status);
-    const rows = await res.json();
-    const byId = {};
-    rows.forEach((r) => { if (r && r.id) byId[r.id] = r; });
-    SPECIES_DATA.forEach((sp) => {
-      const row = byId[sp.id];
-      if (!row) return;
-      HOMININ_CERTAINTY_KEYS.forEach((k) => {
-        if (row[k] !== undefined && row[k] !== null) sp[k] = row[k];
-      });
-    });
+    rows = await res.json();
+    if (!Array.isArray(rows)) throw new Error('species-certainty.json: expected JSON array');
   } catch (err) {
-    console.warn('[Hominines] data/species-certainty.json:', err);
+    console.warn('[Hominines] data/species-certainty.json:', err.message || err);
+    rows = _EMBEDDED_CERTAINTY;
+  }
+  try {
+    applyHomininCertaintyRows(rows);
+  } catch (e) {
+    console.warn('[Hominines] certainty merge failed:', e);
   }
   window.__HOMININ_CERTAINTY_READY = true;
 }
@@ -2275,13 +2295,12 @@ function renderCertaintyTriIcon(species, T) {
   const cx = 24;
   const cy = 24;
   const r = 20;
-  const stroke = 'var(--color-surface)';
   const paths = domains.map(function (d, i) {
     const dl = species['hominin:' + d.key + 'DebateLevel'];
     const w = getDebateMeterPct(dl);
     const a = Math.min(1, Math.max(0.28, 0.28 + 0.72 * (w / 100)));
     const fill = homininHexToRgba(species.color, a);
-    return '<path d="' + certaintyTriSectorPath(cx, cy, r, i) + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.25" stroke-linejoin="round"/>';
+    return '<path class="certainty-tri-wedge" d="' + certaintyTriSectorPath(cx, cy, r, i) + '" fill="' + fill + '"/>';
   }).join('');
   const popRows = domains.map(function (d) {
     const dl = species['hominin:' + d.key + 'DebateLevel'];
