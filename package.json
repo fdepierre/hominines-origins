@@ -4,6 +4,9 @@
   "description": "Interactive map of human evolution — open source, for everyone",
   "scripts": {
     "test": "node tests/run-all.js",
+    "test:smoke": "node tests/run-smoke.js",
+    "test:headed": "node -e \"const r=require('child_process').spawnSync('node',['tests/run-smoke.js'],{stdio:'inherit',env:{...process.env,HEADED:'1'}});process.exit(r.status===null?1:r.status);\"",
+    "test:headed:full": "node -e \"const r=require('child_process').spawnSync('node',['tests/run-all.js'],{stdio:'inherit',env:{...process.env,HEADED:'1'}});process.exit(r.status===null?1:r.status);\"",
     "test:unit": "node tests/unit.test.js",
     "test:visual": "node tests/visual.test.js",
     "test:a11y": "node tests/a11y.test.js",

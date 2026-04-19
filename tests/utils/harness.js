@@ -5,14 +5,71 @@
  *   const { launch, loadApp, setTime, getComputedStyle } = require('./utils/harness');
  *   const { browser, page } = await launch();
  *   await loadApp(page);
+ *
+ * Stable UI hooks live on `data-testid` in app/index.html (see tests/visual.test.js).
+ * Fast pre-check: `npm run test:smoke` (no PNG snapshots, no tablet pass).
+ *
+ * Visible browser (debug): set HEADED=1 (e.g. `npm run test:headed`) so Chromium
+ * opens with headless: false. Optional PLAYWRIGHT_SLOWMO=250 slows actions (ms).
  */
 
 const { chromium } = require('playwright');
 const path  = require('path');
 const fs    = require('fs');
+const http  = require('http');
+const urlp  = require('url');
 
-const APP_PATH = path.resolve(__dirname, '..', '..', 'app', 'index.html');
+const APP_DIR  = path.resolve(__dirname, '..', '..', 'app');
+const APP_PATH = path.join(APP_DIR, 'index.html');
+/** @deprecated Use getAppHttpUrl() after loadApp — file:// cannot fetch ./data/species.json */
 const APP_URL  = `file://${APP_PATH}`;
+
+let _appHttpServer = null;
+let _appHttpBase = null;
+
+function startAppHttpServer() {
+  if (_appHttpBase) return Promise.resolve(_appHttpBase);
+  const root = APP_DIR;
+  const server = http.createServer((req, res) => {
+    const parsed = urlp.parse(req.url || '/');
+    let pathname = decodeURIComponent(parsed.pathname || '/');
+    if (pathname === '/') pathname = '/index.html';
+    const rel = path.normalize(pathname.replace(/^\//, '')).replace(/^(\.\.(\/|\\|$))+/, '');
+    const filePath = path.resolve(path.join(root, rel));
+    const relCheck = path.relative(root, filePath);
+    if (relCheck.startsWith('..') || path.isAbsolute(relCheck)) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404);
+        return res.end('Not found');
+      }
+      const ext = path.extname(filePath).toLowerCase();
+      const types = {
+        '.html': 'text/html; charset=utf-8',
+        '.json': 'application/json; charset=utf-8',
+        '.js': 'application/javascript; charset=utf-8',
+        '.css': 'text/css; charset=utf-8',
+        '.ico': 'image/x-icon',
+        '.png': 'image/png',
+        '.svg': 'image/svg+xml',
+      };
+      res.setHeader('Content-Type', types[ext] || 'application/octet-stream');
+      res.end(data);
+    });
+  });
+  return new Promise((resolve, reject) => {
+    server.listen(0, '127.0.0.1', () => {
+      const addr = server.address();
+      _appHttpServer = server;
+      _appHttpBase = `http://127.0.0.1:${addr.port}`;
+      resolve(_appHttpBase);
+    });
+    server.on('error', reject);
+  });
+}
 
 // ─── colours ─────────────────────────────────────────────────────────────────
 const RED   = '\x1b[31m';
@@ -54,10 +111,13 @@ function resetStats() { _pass = 0; _fail = 0; _warn = 0; }
 async function launch({ width = 1440, height = 900, mobile = false } = {}) {
   // Let Playwright find the browser automatically.
   // The env var override is kept for unusual local setups only.
+  const headed = process.env.HEADED === '1' || process.env.PLAYWRIGHT_HEADED === '1';
+  const slowMo = parseInt(process.env.PLAYWRIGHT_SLOWMO || '0', 10) || undefined;
   const launchOpts = {
-    headless: true,
+    headless: !headed,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   };
+  if (slowMo) launchOpts.slowMo = slowMo;
   if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
     launchOpts.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
   }
@@ -78,17 +138,31 @@ async function launch({ width = 1440, height = 900, mobile = false } = {}) {
 }
 
 async function loadApp(page, { lang = null, theme = null } = {}) {
-  let url = APP_URL;
+  const base = await startAppHttpServer();
+  const url = `${base}/index.html`;
   await page.goto(url, { waitUntil: 'domcontentloaded' });
 
   // Wait for Leaflet map to be ready
   await page.waitForFunction(() => typeof L !== 'undefined' && document.getElementById('map') !== null, { timeout: 10000 });
   // Wait for app JS data to be defined (SPECIES_DATA is declared after Leaflet loads)
   await page.waitForFunction(() => typeof SPECIES_DATA !== 'undefined' && typeof EVENTS_DATA !== 'undefined', { timeout: 10000 });
+  // Hominin certainty fields merged from ./data/species.json (skipped on failure but flag still set)
+  await page.waitForFunction(() => window.__HOMININ_CERTAINTY_READY === true, { timeout: 10000 });
   // Wait for timeline to be rendered
   await page.waitForSelector('#timeline-lanes', { state: 'attached', timeout: 8000 });
   // Small extra tick for everything to settle
   await page.waitForTimeout(300);
+
+  // Dismiss welcome modal so Play/theme clicks are not intercepted (tests use fresh storage)
+  await page.evaluate(() => {
+    const overlay = document.getElementById('welcome-modal-overlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.classList.add('hidden');
+      try { localStorage.setItem('ho_welcomed_v3', '1'); } catch (e) { /* ignore */ }
+    }
+  });
+  await page.waitForTimeout(100);
 
   // Override language if requested
   if (lang) {
@@ -166,7 +240,7 @@ async function pixelDiff(pathA, pathB) {
 }
 
 module.exports = {
-  APP_URL, APP_PATH,
+  APP_URL, APP_PATH, APP_DIR, startAppHttpServer,
   RED, GREEN, YELLOW, CYAN, RESET, BOLD,
   assert, assertSoft, getStats, resetStats,
   launch, loadApp, setTime, screenshot, pixelDiff,

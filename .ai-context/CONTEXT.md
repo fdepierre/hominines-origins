@@ -50,6 +50,10 @@ hominines-origins/
 
 **Do not split it** into separate files without discussion — the single-file architecture is intentional: it means anyone can download one file and run the app offline.
 
+**Species catalogue:** [`app/data/species.json`](../app/data/species.json) is JSON-LD (`ItemList` of species); the app maps it to runtime `SPECIES_DATA`.
+
+**Certainty sidecar:** [`app/data/species-certainty.json`](../app/data/species-certainty.json) holds the six `hominin:*` certainty fields per `id`. It is fetched after the catalogue loads and merged into each species object. **`file://`** may block fetches; use a local static server or the Playwright harness (serves `app/` over **http://127.0.0.1**).
+
 ### Data structures inside app/index.html
 
 The app contains these JavaScript constants (declared with `const`, NOT attached to `window`):

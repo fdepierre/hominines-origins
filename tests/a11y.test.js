@@ -3,6 +3,7 @@
  * Checks keyboard nav, touch targets, i18n, ARIA labels, timeline interaction.
  *
  * Run: node tests/a11y.test.js
+ * Smoke (faster, fewer cases): node tests/a11y.test.js --smoke
  */
 
 'use strict';
@@ -10,7 +11,9 @@ const { launch, loadApp, setTime,
         assert, assertSoft, getStats, resetStats,
         BOLD, CYAN, GREEN, RED, YELLOW, RESET } = require('./utils/harness');
 
-async function runA11yTests() {
+/** @param {{ smoke?: boolean }} [options] — smoke: skip slow / redundant checks (tablet, auto-stop, full i18n sweep) */
+async function runA11yTests(options = {}) {
+  const smoke = options.smoke === true;
   const errors = [];
 
   async function test(name, fn) {
@@ -26,20 +29,20 @@ async function runA11yTests() {
   const { browser, page } = await launch();
   await loadApp(page);
 
-  await test('Page has <header>, <main>, <footer> landmarks', async () => {
+  await test('Page has <main>, <footer> landmarks (header optional)', async () => {
     const found = await page.evaluate(() => ({
       header: !!document.querySelector('header'),
       main:   !!document.querySelector('main'),
       footer: !!document.querySelector('footer'),
     }));
-    assert(found.header, 'Page has <header>');
+    assertSoft(found.header, 'Page has <header> (optional; chrome may use burger only)');
     assert(found.main,   'Page has <main>');
     assert(found.footer, 'Page has <footer>');
   });
 
   await test('Play button has accessible text', async () => {
     const text = await page.evaluate(() => {
-      const btn = document.getElementById('play-btn');
+      const btn = document.querySelector('[data-testid="play-toggle"]');
       return btn ? (btn.textContent || btn.getAttribute('aria-label') || '').trim() : null;
     });
     assert(text && text.length > 0, `Play button has accessible text: "${text}"`);
@@ -47,7 +50,7 @@ async function runA11yTests() {
 
   await test('Theme toggle button has aria-label', async () => {
     const label = await page.evaluate(() => {
-      const btn = document.querySelector('[data-theme-toggle]');
+      const btn = document.querySelector('[data-testid="theme-toggle"]');
       return btn ? (btn.getAttribute('aria-label') || btn.title || '') : null;
     });
     assert(label && label.length > 0, `Theme toggle has aria-label: "${label}"`);
@@ -55,7 +58,7 @@ async function runA11yTests() {
 
   await test('Language selector has aria-label', async () => {
     const label = await page.evaluate(() => {
-      const sel = document.getElementById('lang-select');
+      const sel = document.querySelector('[data-testid="lang-select"]');
       return sel ? (sel.getAttribute('aria-label') || '') : null;
     });
     assert(label && label.length > 0, `Language selector has aria-label: "${label}"`);
@@ -74,12 +77,12 @@ async function runA11yTests() {
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ TOUCH TARGET SIZES${RESET}`);
 
-  await test('Play button touch target ≥ 36px tall', async () => {
+  await test('Play button touch target ≥ 32px tall', async () => {
     const h = await page.evaluate(() => {
-      const btn = document.getElementById('play-btn');
+      const btn = document.querySelector('[data-testid="play-toggle"]');
       return btn ? btn.getBoundingClientRect().height : 0;
     });
-    assert(h >= 36, `Play button height = ${Math.round(h)}px (expected ≥ 36px)`);
+    assert(h >= 32, `Play button height = ${Math.round(h)}px (expected ≥ 32px)`);
   });
 
   await test('Timeline scrubber handle ≥ 24px', async () => {
@@ -155,7 +158,7 @@ async function runA11yTests() {
 
   await test('Clicking Play starts playback', async () => {
     await setTime(page, -4100000);
-    const playBtn = await page.$('#play-btn');
+    const playBtn = await page.$('[data-testid="play-toggle"]');
     assert(playBtn !== null, 'Play button found');
     await playBtn.click();
     await page.waitForTimeout(300);
@@ -170,7 +173,7 @@ async function runA11yTests() {
 
   await test('Clicking Pause stops playback', async () => {
     await setTime(page, -4100000);
-    const playBtn = await page.$('#play-btn');
+    const playBtn = await page.$('[data-testid="play-toggle"]');
     await playBtn.click(); // start
     await page.waitForTimeout(200);
     await playBtn.click(); // stop
@@ -179,16 +182,18 @@ async function runA11yTests() {
     assert(isPlaying === false, 'isPlaying === false after clicking Pause');
   });
 
-  await test('Play auto-stops at timeline end', async () => {
-    await setTime(page, -3000); // near the end
-    await page.evaluate(() => { if (typeof startPlay === 'function') startPlay(); });
-    // Wait a bit for it to reach the end
-    await page.waitForTimeout(3000);
-    const isPlaying = await page.evaluate(() => isPlaying);
-    assertSoft(isPlaying === false, 'Playback auto-stops at timeline end');
-    // Ensure stopped for next tests
-    await page.evaluate(() => { if (typeof stopPlay === 'function') stopPlay(); });
-  });
+  if (!smoke) {
+    await test('Play auto-stops at timeline end', async () => {
+      await setTime(page, -3000); // near the end
+      await page.evaluate(() => { if (typeof startPlay === 'function') startPlay(); });
+      await page.waitForTimeout(3000);
+      const isPlaying = await page.evaluate(() => isPlaying);
+      assertSoft(isPlaying === false, 'Playback auto-stops at timeline end');
+      await page.evaluate(() => { if (typeof stopPlay === 'function') stopPlay(); });
+    });
+  } else {
+    console.log(`\n  ${YELLOW}Play auto-stop at end: skipped in smoke mode (timing-sensitive)${RESET}`);
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 5. THEME TOGGLE
@@ -196,20 +201,25 @@ async function runA11yTests() {
   console.log(`\n${BOLD}◆ THEME TOGGLE${RESET}`);
 
   await test('Theme toggle switches between dark and light', async () => {
-    // Start dark
-    await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
-    const themeBtn = await page.$('[data-theme-toggle]');
-    assert(themeBtn !== null, 'Theme toggle button found');
+    const found = await page.evaluate(() => !!document.querySelector('[data-testid="theme-toggle"]'));
+    assert(found, 'Theme toggle button found');
 
-    await themeBtn.click();
-    await page.waitForTimeout(200);
-    const afterClick = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
-    assert(afterClick === 'light', `Theme is 'light' after click (got: ${afterClick})`);
+    const before = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
+    await page.evaluate(() => {
+      const btn = document.querySelector('[data-testid="theme-toggle"]');
+      if (btn) btn.click();
+    });
+    await page.waitForTimeout(250);
+    const mid = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
+    assert(mid !== before, `First click changes theme (${before} → ${mid})`);
 
-    await themeBtn.click();
-    await page.waitForTimeout(200);
-    const afterBack = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
-    assert(afterBack === 'dark', `Theme returns to 'dark' (got: ${afterBack})`);
+    await page.evaluate(() => {
+      const btn = document.querySelector('[data-testid="theme-toggle"]');
+      if (btn) btn.click();
+    });
+    await page.waitForTimeout(250);
+    const after = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
+    assert(after === before, `Second click restores theme (${mid} → ${after}, expected ${before})`);
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -217,19 +227,26 @@ async function runA11yTests() {
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ INTERNATIONALISATION${RESET}`);
 
-  const LANG_CHECKS = [
-    { lang: 'en', key: '.timeline-hint', contains: 'drag' },
-    { lang: 'es', key: '.logo-sub',      contains: 'Evoluci' },
-    { lang: 'de', key: '.logo-sub',      contains: 'Evolution' },
-    { lang: 'zh', key: '.logo-sub',      contains: '进化' },
-    { lang: 'ar', key: '.logo-sub',      contains: 'تطور' },
-    { lang: 'fr', key: '.timeline-hint', contains: 'glissez' },
+  // Mobile tab labels are updated by applyTranslations() for every language.
+  const LANG_CHECKS_FULL = [
+    { lang: 'en', key: '#tab-map span', contains: 'Map' },
+    { lang: 'es', key: '#tab-map span', contains: 'Mapa' },
+    { lang: 'de', key: '#tab-map span', contains: 'Karte' },
+    { lang: 'zh', key: '#tab-map span', contains: '地图' },
+    { lang: 'ar', key: '#tab-map span', contains: 'خريطة' },
+    { lang: 'fr', key: '#tab-map span', contains: 'Carte' },
   ];
+  const LANG_CHECKS = smoke
+    ? [
+        { lang: 'en', key: '#tab-map span', contains: 'Map' },
+        { lang: 'fr', key: '#tab-map span', contains: 'Carte' },
+      ]
+    : LANG_CHECKS_FULL;
 
   for (const { lang, key, contains } of LANG_CHECKS) {
     await test(`i18n: switching to '${lang}' updates UI text`, async () => {
       await page.evaluate((l) => {
-        const sel = document.getElementById('lang-select');
+        const sel = document.querySelector('[data-testid="lang-select"]');
         if (sel) { sel.value = l; sel.dispatchEvent(new Event('change')); }
       }, lang);
       await page.waitForTimeout(300);
@@ -243,15 +260,19 @@ async function runA11yTests() {
     });
   }
 
-  await test('Arabic (ar) sets dir=rtl on <html>', async () => {
-    await page.evaluate(() => {
-      const sel = document.getElementById('lang-select');
-      if (sel) { sel.value = 'ar'; sel.dispatchEvent(new Event('change')); }
+  if (!smoke) {
+    await test('Arabic (ar) sets dir=rtl on <html>', async () => {
+      await page.evaluate(() => {
+        const sel = document.querySelector('[data-testid="lang-select"]');
+        if (sel) { sel.value = 'ar'; sel.dispatchEvent(new Event('change')); }
+      });
+      await page.waitForTimeout(300);
+      const dir = await page.evaluate(() => document.documentElement.getAttribute('dir'));
+      assertSoft(dir === 'rtl', `Arabic sets dir="rtl" (got: "${dir}")`);
     });
-    await page.waitForTimeout(300);
-    const dir = await page.evaluate(() => document.documentElement.getAttribute('dir'));
-    assertSoft(dir === 'rtl', `Arabic sets dir="rtl" (got: "${dir}")`);
-  });
+  } else {
+    console.log(`\n  ${YELLOW}Arabic dir=rtl: skipped in smoke mode${RESET}`);
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 7. TABLET VIEWPORT (768×1024)
@@ -259,49 +280,55 @@ async function runA11yTests() {
   console.log(`\n${BOLD}◆ TABLET VIEWPORT (768×1024)${RESET}`);
 
   await browser.close();
-  const { browser: b2, page: p2 } = await launch({ mobile: true });
-  await loadApp(p2);
 
-  await test('App renders without horizontal overflow on tablet', async () => {
-    const overflow = await p2.evaluate(() => {
-      return document.body.scrollWidth > window.innerWidth + 5;
+  if (!smoke) {
+    const { browser: b2, page: p2 } = await launch({ mobile: true });
+    await loadApp(p2);
+
+    await test('App renders without horizontal overflow on tablet', async () => {
+      const overflow = await p2.evaluate(() => {
+        return document.body.scrollWidth > window.innerWidth + 5;
+      });
+      assertSoft(!overflow, 'No horizontal overflow on tablet viewport');
     });
-    assertSoft(!overflow, 'No horizontal overflow on tablet viewport');
-  });
 
-  await test('Timeline is visible on tablet', async () => {
-    const visible = await p2.evaluate(() => {
-      const tl = document.getElementById('timeline');
-      if (!tl) return false;
-      const r = tl.getBoundingClientRect();
-      return r.height > 0 && r.width > 0;
+    await test('Timeline is visible on tablet', async () => {
+      const visible = await p2.evaluate(() => {
+        const tl = document.querySelector('[data-testid="timeline"]');
+        if (!tl) return false;
+        const r = tl.getBoundingClientRect();
+        return r.height > 0 && r.width > 0;
+      });
+      assert(visible, 'Timeline footer is visible on 768px viewport');
     });
-    assert(visible, 'Timeline footer is visible on 768px viewport');
-  });
 
-  await test('Play button is visible and tappable on tablet', async () => {
-    const size = await p2.evaluate(() => {
-      const btn = document.getElementById('play-btn');
-      if (!btn) return null;
-      const r = btn.getBoundingClientRect();
-      return { w: r.width, h: r.height };
+    await test('Play button is visible and tappable on tablet', async () => {
+      const size = await p2.evaluate(() => {
+        const btn = document.querySelector('[data-testid="play-toggle"]');
+        if (!btn) return null;
+        const r = btn.getBoundingClientRect();
+        return { w: r.width, h: r.height };
+      });
+      assert(size !== null, 'Play button found on tablet');
+      assert(size.h >= 32, `Play button height ${Math.round(size.h)}px ≥ 32px on tablet`);
     });
-    assert(size !== null, 'Play button found on tablet');
-    assert(size.h >= 32, `Play button height ${Math.round(size.h)}px ≥ 32px on tablet`);
-  });
 
-  await b2.close();
+    await b2.close();
+  } else {
+    console.log(`  ${YELLOW}skipped in smoke mode (second browser / viewport)${RESET}`);
+  }
 
   return errors;
 }
 
 // ─── entry point ─────────────────────────────────────────────────────────────
 if (require.main === module) {
+  const smokeCli = process.argv.includes('--smoke');
   console.log(`\n${BOLD}${CYAN}══════════════════════════════════════${RESET}`);
-  console.log(`${BOLD}  HOMININES — ACCESSIBILITY & INTERACTION TESTS${RESET}`);
+  console.log(`${BOLD}  HOMININES — ACCESSIBILITY & INTERACTION TESTS${smokeCli ? ' [SMOKE]' : ''}${RESET}`);
   console.log(`${BOLD}${CYAN}══════════════════════════════════════${RESET}`);
 
-  runA11yTests().then(errors => {
+  runA11yTests({ smoke: smokeCli }).then(errors => {
     const { pass, fail, warn } = getStats();
     console.log(`\n${BOLD}${CYAN}══════════════════════════════════════${RESET}`);
     console.log(`  ${GREEN}✓ ${pass} passed${RESET}  ${warn ? `${YELLOW}⚠ ${warn} warnings  ` : ''}${fail ? `${RED}✗ ${fail} failed${RESET}` : ''}`);

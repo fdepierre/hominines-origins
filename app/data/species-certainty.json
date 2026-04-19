@@ -1,0 +1,128 @@
+[
+  {
+    "id": "afarensis",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_MODERE",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+  },
+  {
+    "id": "habilis",
+    "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+  },
+  {
+    "id": "erectus",
+    "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
+    "hominin:pigmentationEvidenceType": "DONNEES_INDIRECTES"
+  },
+  {
+    "id": "heidelbergensis",
+    "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
+    "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+  },
+  {
+    "id": "neanderthal",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
+    "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+  },
+  {
+    "id": "denisovan",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_MODERE",
+    "hominin:taxonomyEvidenceType": "DONNEES_DIRECTES",
+    "hominin:behaviorDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
+    "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+  },
+  {
+    "id": "sapiens-africa",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
+    "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+  },
+  {
+    "id": "sapiens-levant",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
+    "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+  },
+  {
+    "id": "sapiens-upper-paleo",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
+    "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+  },
+  {
+    "id": "sapiens-mesolithic",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
+    "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+  },
+  {
+    "id": "sapiens-neolithic",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
+    "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+  },
+  {
+    "id": "sapiens-bronze",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
+    "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+  },
+  {
+    "id": "naledi",
+    "hominin:taxonomyDebateLevel": "CONSENSUS_MODERE",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+  },
+  {
+    "id": "floresiensis",
+    "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
+    "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
+    "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
+    "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
+    "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+  }
+]
