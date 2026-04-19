@@ -274,7 +274,8 @@ Résultats :
 | *H. sapiens* Paléo. sup. | 45–14 ka | ~170–185 / ~158–168 | ~70 / ~57 | ~1400 | **Sombre** (347/348)[^54][^55] | Sombres ; pic clairs ~14–4 ka[^54] | Sombres | ✅ 348 génomes[^56] |
 | *H. sapiens* Mésolithique | 14–7 ka | ~167–172 / ~155–163 | ~65 / ~55 | ~1400 | Sombre–intermédiaire[^55] | **Pic yeux clairs** 11/35[^54] | Sombres | ✅ ADN direct |
 | *H. sapiens* Néolithique | 10–5 ka | ~163–168 / ~152–158 | ~60–65 / ~50–55 | ~1400 | Intermédiaire → claire[^21] | Variables | Ötzi : noirs[^58] | ✅ ADN direct |
-| *H. sapiens* Bronze/Fer | 5–2 ka | ~168–175 / ~156–163 | ~65–70 / ~55–60 | ~1400 | **Claire généralisée** N. Europe[^56] | Clairs N/NW ; bruns S[^54] | Variables | ✅ ADN direct |
+| *H. sapiens* Bronze/Fer | 5–2 ka | ~168–175 / ~156–163 | ~65–70 / ~55–60 | ~1400 | **Claire généralisée en Europe, majorité sombre en Sombre en Afrique** N. Europe[^56] | Clairs N/NW ; bruns S[^54] | Variables | ✅ ADN direct |
+| H. sapiens Présent (global) | 0–0 ka | Très variable selon les populations (≈155–185 / ≈145–175) | Très variable (≈50–90 / ≈40–80) | ~1200–1500 | Spectre continu du très sombre au très clair ; état ancestral = peau très pigmentée. Peau sombre restant majoritaire à l’échelle mondiale, peaux claires = adaptations régionales récentes (Europe, une partie de l’Asie de l’Ouest et du Sud)[^58] | Bruns majoritaires au niveau global ; yeux clairs fréquents surtout en Europe et dans certaines populations d’Asie occidentale[^58] | Couleurs et textures très variées (noirs, bruns, blonds, roux ; raides à crépus), architecture génétique polygénique[^59] | ✅ Génomique moderne + ADN ancien multi‑régions |
 
 ***
 ## Principaux conflits scientifiques actifs (2026)

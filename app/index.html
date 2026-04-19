@@ -207,6 +207,149 @@ a { color: var(--color-primary); }
   color: var(--color-text);
 }
 
+/* Info drawer (menu) */
+.info-drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1100;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.info-drawer-backdrop.open {
+  display: block;
+  opacity: 1;
+}
+.info-drawer-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(420px, 94vw);
+  height: 100dvh;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-divider);
+  z-index: 1101;
+  transform: translateX(-105%);
+  transition: transform 0.28s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 6px 0 32px rgba(0,0,0,0.2);
+}
+.info-drawer-panel.open {
+  transform: translateX(0);
+}
+.info-drawer-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-divider);
+}
+.info-drawer-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-6) var(--space-8);
+}
+.info-drawer-scroll h2 {
+  font-size: var(--text-md);
+  font-weight: 700;
+  margin: 0 0 var(--space-4);
+  line-height: 1.25;
+}
+.info-drawer-scroll h3 {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: var(--space-5) 0 var(--space-2);
+  color: var(--color-text);
+}
+.info-drawer-scroll p,
+.info-drawer-scroll li {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  margin: 0 0 var(--space-3);
+}
+.info-drawer-scroll ul {
+  padding-left: 1.15em;
+  margin: 0 0 var(--space-4);
+}
+
+/* Panel — scientific certainty by domain */
+.certainty-domains {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-divider);
+}
+.certainty-domains-title {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
+}
+.certainty-domain-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  outline: none;
+}
+.certainty-domain-row:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+.certainty-domain-label {
+  flex: 0 0 100px;
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+}
+.certainty-meter {
+  flex: 1;
+  height: 3px;
+  background: var(--color-border);
+  border-radius: 2px;
+  overflow: hidden;
+  max-width: 120px;
+}
+.certainty-meter-fill {
+  height: 100%;
+  border-radius: 2px;
+  opacity: 0.75;
+  transition: width 0.2s ease;
+}
+.certainty-tip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 2px);
+  margin-top: 2px;
+  padding: var(--space-3);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 30;
+  transition: opacity 0.15s ease, visibility 0.15s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.certainty-tip-line { margin: 0 0 var(--space-2); }
+.certainty-tip-line:last-child { margin-bottom: 0; }
+.certainty-domain-row:hover .certainty-tip,
+.certainty-domain-row:focus-within .certainty-tip {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* ===== MAIN CONTENT ===== */
 #main {
   display: grid;
@@ -1507,10 +1650,10 @@ a { color: var(--color-primary); }
   <main id="main">
     <!-- MAP -->
     <div class="map-container">
-      <div id="map"></div>
+      <div id="map" data-testid="map"></div>
 
       <!-- Burger menu button — top-left of map -->
-      <button id="burger-btn" aria-label="Menu" title="Menu">☰</button>
+      <button id="burger-btn" type="button" data-testid="burger-menu-button" aria-label="Menu" title="Menu">☰</button>
 
       <!-- Layer toggles hidden from map — shown in burger menu -->
       <div class="layer-toggle-group" id="layer-toggles" style="display:none;">
@@ -1561,7 +1704,7 @@ a { color: var(--color-primary); }
     </div>
 
     <!-- SIDE PANEL -->
-    <aside id="side-panel">
+    <aside id="side-panel" data-testid="side-panel">
       <div id="panel-content">
         <div class="empty-state">
           <div class="empty-state-icon">🦴</div>
@@ -1574,7 +1717,7 @@ a { color: var(--color-primary); }
   </main>
 
   <!-- TIMELINE -->
-  <footer id="timeline">
+  <footer id="timeline" data-testid="timeline">
 
     <!-- hidden controls kept for JS compat -->
     <select id="play-speed" style="display:none"><option value="1" selected>×1</option></select>
@@ -1587,9 +1730,9 @@ a { color: var(--color-primary); }
     </div>
 
     <!-- Needle wrapper — play btn + time label float inside as overlays -->
-    <div id="needle-wrapper" style="position:relative;">
+    <div id="needle-wrapper" data-testid="timeline-needle-row" style="position:relative;">
       <!-- Play/pause button — overlays left of species track -->
-      <button id="play-btn"
+      <button id="play-btn" type="button" data-testid="play-toggle"
               title="Lancez l'animation pour voir les migrations humaines se dérouler au fil du temps"
               data-i18n-title="ui.playTitle">
         <svg id="play-icon" width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
@@ -1657,6 +1800,37 @@ a { color: var(--color-primary); }
 // =====================================================================
 // SPECIES_DATA — loaded from app/data/species.json via loadData()
 let SPECIES_DATA = [];
+
+// Per-species scientific certainty (merged from ./data/species-certainty.json after JSON-LD load)
+const HOMININ_CERTAINTY_KEYS = [
+  'hominin:taxonomyDebateLevel',
+  'hominin:taxonomyEvidenceType',
+  'hominin:behaviorDebateLevel',
+  'hominin:behaviorEvidenceType',
+  'hominin:pigmentationDebateLevel',
+  'hominin:pigmentationEvidenceType',
+];
+
+async function mergeHomininCertainty() {
+  window.__HOMININ_CERTAINTY_READY = false;
+  try {
+    const res = await fetch('./data/species-certainty.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('species-certainty.json HTTP ' + res.status);
+    const rows = await res.json();
+    const byId = {};
+    rows.forEach((r) => { if (r && r.id) byId[r.id] = r; });
+    SPECIES_DATA.forEach((sp) => {
+      const row = byId[sp.id];
+      if (!row) return;
+      HOMININ_CERTAINTY_KEYS.forEach((k) => {
+        if (row[k] !== undefined && row[k] !== null) sp[k] = row[k];
+      });
+    });
+  } catch (err) {
+    console.warn('[Hominines] data/species-certainty.json:', err);
+  }
+  window.__HOMININ_CERTAINTY_READY = true;
+}
 
 // =====================================================================
 // TIMELINE SETUP
@@ -2032,12 +2206,51 @@ function selectSpecies(species) {
   document.dispatchEvent(new CustomEvent('speciesSelected', { detail: species }));
 }
 
+function getDebateMeterPct(level) {
+  const map = {
+    CONSENSUS_FORT: 100,
+    CONSENSUS_MODERE: 72,
+    EN_DEBAT_ACTIF: 44,
+    HYPOTHESE_SPECULATIVE: 18,
+  };
+  return map[level] != null ? map[level] : 40;
+}
+
+function renderHomininCertaintySection(species, T) {
+  if (!species['hominin:taxonomyDebateLevel']) return '';
+  const domains = [
+    { key: 'taxonomy', label: T('certaintyDomainTax', 'Taxonomie') },
+    { key: 'behavior', label: T('certaintyDomainBehavior', 'Comportement') },
+    { key: 'pigmentation', label: T('certaintyDomainPig', 'Pigmentation') },
+  ];
+  const rows = domains.map((d) => {
+    const dl = species['hominin:' + d.key + 'DebateLevel'];
+    const et = species['hominin:' + d.key + 'EvidenceType'];
+    const w = getDebateMeterPct(dl);
+    const line1 = T('uncertaintyDebate_' + dl, '');
+    const line2 = T('uncertaintyEvid_' + et, '');
+    return `
+      <div class="certainty-domain-row" tabindex="0">
+        <span class="certainty-domain-label">${d.label}</span>
+        <div class="certainty-meter" aria-hidden="true"><div class="certainty-meter-fill" style="width:${w}%;background:${species.color}"></div></div>
+        <div class="certainty-tip" role="tooltip">
+          <p class="certainty-tip-line">${line1}</p>
+          <p class="certainty-tip-line">${line2}</p>
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="certainty-domains">
+      <div class="certainty-domains-title">${T('certaintyPanelTitle', 'Niveau de certitude par thème')}</div>
+      ${rows}
+    </div>`;
+}
+
 function renderPanel(species) {
   const pig = species.pigmentation;
   const bio = species.biometrics;
-  // Use i18next if available, fallback to French strings
   const T = (key, fb) => (typeof i18next !== 'undefined' && i18next.isInitialized)
-    ? i18next.t('ui.' + key) : fb;
+    ? i18next.t('ui.' + key, { defaultValue: fb }) : fb;
 
   const html = `
     <div class="animate-in">
@@ -2046,6 +2259,7 @@ function renderPanel(species) {
         <div class="species-name" style="color:${species.color}">${species.name}</div>
         <div class="species-name-common">${species.common}</div>
       </div>
+      ${renderHomininCertaintySection(species, T)}
 
       <!-- Human figure + quick biometrics -->
       <div class="human-figure-container">
@@ -2600,17 +2814,20 @@ function setTheme(theme) {
 
 function initThemeToggle() {
   const root = document.documentElement;
-  let theme = root.getAttribute('data-theme') || 'light';
-  // Set correct initial icon on all toggle buttons
+  function readTheme() {
+    return root.getAttribute('data-theme') || 'light';
+  }
+  // Always derive next theme from the DOM so external setAttribute / setTheme stay in sync with clicks
   document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
-    btn.innerHTML = theme === 'light' ? SVG_MOON : SVG_SUN;
+    const t = readTheme();
+    btn.innerHTML = t === 'light' ? SVG_MOON : SVG_SUN;
     btn.addEventListener('click', () => {
-      theme = theme === 'dark' ? 'light' : 'dark';
-      setTheme(theme);
+      const cur = readTheme();
+      const next = cur === 'dark' ? 'light' : 'dark';
+      setTheme(next);
     });
   });
 }
-
 
 // =====================================================================
 // CHRONOLOGICAL EVENTS DATA (Chronologie-prehistorique 2026)
@@ -2639,9 +2856,6 @@ function getCategoryLabel(cat) {
 let showEvents = true;
 let eventsLayer = null;
 
-// =====================================================================
-// BOOT
-// =====================================================================
 // =====================================================================
 // PLAY / AUTOPLAY
 // =====================================================================
@@ -2841,6 +3055,7 @@ async function loadData() {
   window._RAW_EVENTS_JSON  = ej;
   SPECIES_DATA = sj.itemListElement.map(adaptSpecies);
   EVENTS_DATA  = ej.itemListElement.map(adaptEvent);
+  await mergeHomininCertainty();
   bootApp();
 }
 
@@ -3071,13 +3286,11 @@ function bootApp() {
   }, 400);
 
   // UX: after 3s of idle, pulse the play button + show welcome hint
-  // (research shows ~3s is when users start wondering what to do on a new data-viz page)
   let autoPlayTimer = setTimeout(() => {
     const btn = document.getElementById('play-btn');
     if (btn && !isPlaying) btn.classList.add('pulse');
   }, 3000);
 
-  // Auto-dismiss welcome hint after 8s even if user does nothing
   setTimeout(() => {
     const hint = document.getElementById('welcome-hint');
     if (hint) { hint.classList.add('hidden'); setTimeout(() => { if(hint.parentNode) hint.remove(); }, 700); }
@@ -3186,6 +3399,39 @@ const TRANSLATIONS = {
         catTools: 'Technologie lithique', catFire: 'Maîtrise du feu',
         catPhylo: 'Phylogénie', catSymbolic: 'Comportements symboliques',
         catArt: 'Art pariétal', catMigration: 'Migrations', catNeolithic: 'Néolithique',
+        infoMenuTitle: 'Contexte du projet et certitude scientifique',
+        infoDrawerTitle: 'Informations',
+        infoDrawerClose: 'Fermer le panneau',
+        infoAboutBody: 'Hominines présente l\'évolution humaine à partir de travaux publiés (fossiles, génomique, archéologie). Les cartes et silhouettes sont des synthèses : elles évoluent lorsque de nouvelles preuves apparaissent.',
+        uncertaintySectionTitle: 'Comprendre les niveaux de certitude',
+        uncertaintyIntro: 'Pour chaque espèce, trois thèmes sont évalués : la taxonomie (comment les spécialistes classent le groupe), les comportements déduits des traces matérielles, et la pigmentation. Deux axes complètent l\'image : à quel point la communauté est alignée, et quel type de preuve soutient l\'affichage.',
+        uncertaintyAxis1Title: '1. Degré d\'accord entre scientifiques',
+        uncertaintyAxis1Body: 'Va d\'un consensus fort (cadre largement partagé) à une hypothèse encore spéculative, en passant par un débat actif lorsque plusieurs interprétations sérieuses coexistent.',
+        uncertaintyAxis2Title: '2. Nature des preuves',
+        uncertaintyAxis2Body: 'Les données directes (restes, ADN ancien ciblé) pèsent plus lourd que les inférences comparatives. Les récits médiatiques, s\'ils anticipent ou simplifient la recherche, sont signalés à part.',
+        uncertaintyDebateIntro: 'Niveaux d\'accord possibles :',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Consensus fort — la majorité des chercheurs partage le même cadre.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Consensus modéré — large accord avec des nuances ou débats de détail.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Débat actif — plusieurs thèses publiées coexistent.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Hypothèse spéculative — pistes plausibles encore peu testées.',
+        uncertaintyEvidIntro: 'Types de preuves possibles :',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Données directes — observation directe sur restes ou molécules anciennes.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Données indirectes — fossiles, contextes archéologiques ou indices sans lecture moléculaire directe du trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Inférence évolutive — raisonnement à partir de parentés, d\'écologie ou de modèles comparés.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Récit médiatique — relais souvent simplifié ou anticipé par rapport aux publications spécialisées.',
+        uncertaintyWhy: 'Une même teinte sur la carte peut donc coexister avec des incertitudes différentes : la couleur résume une hypothèse prudente, tandis que ces niveaux indiquent où la science est solide ou encore ouverte.',
+        certaintyPanelTitle: 'Certitude par thème',
+        certaintyDomainTax: 'Taxonomie',
+        certaintyDomainBehavior: 'Comportement',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Large accord entre chercheurs sur ce point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Bon accord général, avec des nuances actives.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Plusieurs positions défendues dans la littérature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Piste encore fragile ou peu testée.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Preuve directe (ex. ADN ancien ou restes très informatifs).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Preuves solides mais indirectes pour ce trait précis.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Déduit par comparaison évolutive ou modélisation.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Surtout relais médiatique, peu ancré dans les sources primaires.',
       }
     }
   },
@@ -3233,6 +3479,39 @@ const TRANSLATIONS = {
         catTools: 'Lithic technology', catFire: 'Fire mastery',
         catPhylo: 'Phylogeny', catSymbolic: 'Symbolic behaviour',
         catArt: 'Cave art', catMigration: 'Migrations', catNeolithic: 'Neolithic',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3280,6 +3559,39 @@ const TRANSLATIONS = {
         catTools: 'Tecnología lítica', catFire: 'Dominio del fuego',
         catPhylo: 'Filogenia', catSymbolic: 'Comportamientos simbólicos',
         catArt: 'Arte rupestre', catMigration: 'Migraciones', catNeolithic: 'Neolítico',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3327,6 +3639,39 @@ const TRANSLATIONS = {
         catTools: 'Steinzeittechnologie', catFire: 'Feuerbeherrschung',
         catPhylo: 'Phylogenie', catSymbolic: 'Symbolisches Verhalten',
         catArt: 'Höhlenmalerei', catMigration: 'Migrationen', catNeolithic: 'Neolithikum',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3374,6 +3719,39 @@ const TRANSLATIONS = {
         catTools: '石器技术', catFire: '火的掌握',
         catPhylo: '系统发育', catSymbolic: '象征行为',
         catArt: '洞穴艺术', catMigration: '迁徙', catNeolithic: '新石器时代',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3421,6 +3799,39 @@ const TRANSLATIONS = {
         catTools: 'التكنولوجيا الحجرية', catFire: 'إتقان النار',
         catPhylo: 'علم الأنساب', catSymbolic: 'السلوك الرمزي',
         catArt: 'فن الكهوف', catMigration: 'الهجرات', catNeolithic: 'العصر الحجري الحديث',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3468,6 +3879,39 @@ const TRANSLATIONS = {
         catTools: 'Tecnologia lítica', catFire: 'Domínio do fogo',
         catPhylo: 'Filogenia', catSymbolic: 'Comportamentos simbólicos',
         catArt: 'Arte rupestre', catMigration: 'Migrações', catNeolithic: 'Neolítico',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3515,6 +3959,39 @@ const TRANSLATIONS = {
         catTools: 'Tecnologia litica', catFire: 'Padronanza del fuoco',
         catPhylo: 'Filogenesi', catSymbolic: 'Comportamenti simbolici',
         catArt: 'Arte rupestre', catMigration: 'Migrazioni', catNeolithic: 'Neolitico',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3562,6 +4039,39 @@ const TRANSLATIONS = {
         catTools: '石器技術', catFire: '火の制御',
         catPhylo: '系統発生', catSymbolic: '象徴的行動',
         catArt: '洞窟芸術', catMigration: '移動', catNeolithic: '新石器時代',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3609,6 +4119,39 @@ const TRANSLATIONS = {
         catTools: '석기 기술', catFire: '불의 통제',
         catPhylo: '계통 발생', catSymbolic: '상징적 행동',
         catArt: '동굴 예술', catMigration: '이동', catNeolithic: '신석기 시대',
+        infoMenuTitle: 'Project context and scientific certainty',
+        infoDrawerTitle: 'Information',
+        infoDrawerClose: 'Close panel',
+        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
+        uncertaintySectionTitle: 'How to read certainty here',
+        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
+        uncertaintyAxis1Title: '1. How much scientists agree',
+        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
+        uncertaintyAxis2Title: '2. What kind of evidence it is',
+        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
+        uncertaintyDebateIntro: 'Agreement levels you may see:',
+        uncertaintyDebateList_CONSENSUS_FORT: 'Strong consensus — most of the field shares the same framing.',
+        uncertaintyDebateList_CONSENSUS_MODERE: 'Moderate consensus — broad agreement with active nuance on details.',
+        uncertaintyDebateList_EN_DEBAT_ACTIF: 'Active debate — several published interpretations coexist.',
+        uncertaintyDebateList_HYPOTHESE_SPECULATIVE: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyEvidIntro: 'Evidence types you may see:',
+        uncertaintyEvidList_DONNEES_DIRECTES: 'Direct data — direct observation on remains or ancient molecules.',
+        uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
+        uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
+        uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        certaintyPanelTitle: 'Certainty by topic',
+        certaintyDomainTax: 'Taxonomy',
+        certaintyDomainBehavior: 'Behaviour',
+        certaintyDomainPig: 'Pigmentation',
+        uncertaintyDebate_CONSENSUS_FORT: 'Broad researcher agreement on this point.',
+        uncertaintyDebate_CONSENSUS_MODERE: 'Generally aligned, with meaningful nuance still discussed.',
+        uncertaintyDebate_EN_DEBAT_ACTIF: 'Multiple defended positions in the literature.',
+        uncertaintyDebate_HYPOTHESE_SPECULATIVE: 'Still a fragile or lightly tested lead.',
+        uncertaintyEvid_DONNEES_DIRECTES: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
+        uncertaintyEvid_DONNEES_INDIRECTES: 'Strong but indirect evidence for this specific trait.',
+        uncertaintyEvid_INFERENCE_EVOLUTIVE: 'Inferred via evolutionary comparison or modelling.',
+        uncertaintyEvid_NARRATIF_MEDIATIQUE: 'Mostly media relay, weakly anchored in primary sources.',
       }
     }
   },
@@ -3700,10 +4243,15 @@ function applyTranslations() {
   });
   if (typeof _dv !== 'undefined' && _dv.open) switchDataTab(_dv.tab);
 
+  document.querySelectorAll('[data-i18n-text]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-text');
+    if (key) el.textContent = t('ui.' + key);
+  });
+
   // Update all data-i18n-title elements (title= attributes)
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const key = el.getAttribute('data-i18n-title');
-    el.title = t(key);
+    el.title = t('ui.' + key);
   });
 
   // Rebuild skin band and events band so data-tip tooltips are translated
@@ -4000,7 +4548,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
         <div class="burger-section-title" data-i18n="ui.language">Langue</div>
         <div class="burger-lang-wrap">
           <span>🌐</span>
-          <select id="lang-select" aria-label="Language">
+          <select id="lang-select" data-testid="lang-select" aria-label="Language">
             <option value="fr">Français</option>
             <option value="en">English</option>
             <option value="es">Español</option>
@@ -4019,7 +4567,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
       <div>
         <div class="burger-section-title">Affichage</div>
         <div class="burger-btn-row">
-          <button class="layer-btn" data-theme-toggle data-i18n-title="ui.toggleTheme" aria-label="Switch theme" style="flex:1; justify-content:center;">
+          <button type="button" class="layer-btn" data-testid="theme-toggle" data-theme-toggle data-i18n-title="ui.toggleTheme" aria-label="Switch theme" style="flex:1; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
@@ -4038,6 +4586,32 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
         <div class="burger-layer-btns" id="burger-layer-btns">
           <!-- filled by JS from #layer-toggles -->
         </div>
+      </div>
+
+      <!-- Scientific uncertainty (plain language) -->
+      <div class="burger-uncertainty-block" style="margin-top:var(--space-4); padding-top:var(--space-4); border-top:1px solid var(--color-divider); max-height:42vh; overflow-y:auto;">
+        <div class="burger-section-title" data-i18n-text="uncertaintySectionTitle"></div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.55;margin:0 0 var(--space-3);" data-i18n-text="infoAboutBody"></p>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.55;margin:0 0 var(--space-2);" data-i18n-text="uncertaintyIntro"></p>
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin:var(--space-3) 0 var(--space-1);" data-i18n-text="uncertaintyAxis1Title"></div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0 0 var(--space-2);" data-i18n-text="uncertaintyAxis1Body"></p>
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin:var(--space-2) 0 var(--space-1);" data-i18n-text="uncertaintyAxis2Title"></div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0 0 var(--space-2);" data-i18n-text="uncertaintyAxis2Body"></p>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);" data-i18n-text="uncertaintyDebateIntro"></p>
+        <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-2);padding-left:1.1em;line-height:1.45;">
+          <li data-i18n-text="uncertaintyDebateList_CONSENSUS_FORT"></li>
+          <li data-i18n-text="uncertaintyDebateList_CONSENSUS_MODERE"></li>
+          <li data-i18n-text="uncertaintyDebateList_EN_DEBAT_ACTIF"></li>
+          <li data-i18n-text="uncertaintyDebateList_HYPOTHESE_SPECULATIVE"></li>
+        </ul>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);" data-i18n-text="uncertaintyEvidIntro"></p>
+        <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-2);padding-left:1.1em;line-height:1.45;">
+          <li data-i18n-text="uncertaintyEvidList_DONNEES_DIRECTES"></li>
+          <li data-i18n-text="uncertaintyEvidList_DONNEES_INDIRECTES"></li>
+          <li data-i18n-text="uncertaintyEvidList_INFERENCE_EVOLUTIVE"></li>
+          <li data-i18n-text="uncertaintyEvidList_NARRATIF_MEDIATIQUE"></li>
+        </ul>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0;" data-i18n-text="uncertaintyWhy"></p>
       </div>
 
       <!-- GitHub + Warning -->

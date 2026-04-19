@@ -30,9 +30,17 @@ async function runUnitTests() {
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ DATA INTEGRITY${RESET}`);
 
-  await test('SPECIES_DATA has exactly 12 species', async () => {
+  await test('SPECIES_DATA has exactly 14 species', async () => {
     const count = await page.evaluate(() => SPECIES_DATA?.length);
-    assert(count === 12, `SPECIES_DATA.length === 12 (got ${count})`);
+    assert(count === 14, `SPECIES_DATA.length === 14 (got ${count})`);
+  });
+
+  await test('Stable data-testid hooks exist for automation', async () => {
+    const testids = ['map', 'burger-menu-button', 'side-panel', 'timeline', 'play-toggle',
+      'theme-toggle', 'lang-select', 'timeline-needle-row'];
+    const missing = await page.evaluate((ids) =>
+      ids.filter((t) => !document.querySelector(`[data-testid="${t}"]`)), testids);
+    assert(missing.length === 0, `data-testid hooks present (missing: ${missing.join(', ') || 'none'})`);
   });
 
   await test('Every species has required fields', async () => {
@@ -65,6 +73,37 @@ async function runUnitTests() {
       SPECIES_DATA.filter(sp => !sp.sites || sp.sites.length === 0).map(sp => sp.id)
     );
     assertSoft(bad.length === 0, `All species have at least one site (missing: ${bad.join(', ') || 'none'})`);
+  });
+
+  await test('Every species has hominin certainty fields (merged from species-certainty.json)', async () => {
+    const keys = [
+      'hominin:taxonomyDebateLevel',
+      'hominin:taxonomyEvidenceType',
+      'hominin:behaviorDebateLevel',
+      'hominin:behaviorEvidenceType',
+      'hominin:pigmentationDebateLevel',
+      'hominin:pigmentationEvidenceType',
+    ];
+    const debateLevels = new Set(['CONSENSUS_FORT', 'CONSENSUS_MODERE', 'EN_DEBAT_ACTIF', 'HYPOTHESE_SPECULATIVE']);
+    const evidenceTypes = new Set(['DONNEES_DIRECTES', 'DONNEES_INDIRECTES', 'INFERENCE_EVOLUTIVE', 'NARRATIF_MEDIATIQUE']);
+    const issues = await page.evaluate(({ keys: k, debateLevels: dl, evidenceTypes: et }) => {
+      const bad = [];
+      const dset = new Set(dl);
+      const eset = new Set(et);
+      (SPECIES_DATA || []).forEach((sp) => {
+        k.forEach((key) => {
+          if (sp[key] === undefined || sp[key] === null) bad.push(`${sp.id} missing ${key}`);
+        });
+        if (!dset.has(sp['hominin:taxonomyDebateLevel'])) bad.push(`${sp.id} bad taxonomyDebateLevel`);
+        if (!dset.has(sp['hominin:behaviorDebateLevel'])) bad.push(`${sp.id} bad behaviorDebateLevel`);
+        if (!dset.has(sp['hominin:pigmentationDebateLevel'])) bad.push(`${sp.id} bad pigmentationDebateLevel`);
+        if (!eset.has(sp['hominin:taxonomyEvidenceType'])) bad.push(`${sp.id} bad taxonomyEvidenceType`);
+        if (!eset.has(sp['hominin:behaviorEvidenceType'])) bad.push(`${sp.id} bad behaviorEvidenceType`);
+        if (!eset.has(sp['hominin:pigmentationEvidenceType'])) bad.push(`${sp.id} bad pigmentationEvidenceType`);
+      });
+      return bad;
+    }, { keys, debateLevels: [...debateLevels], evidenceTypes: [...evidenceTypes] });
+    assert(issues.length === 0, `Hominin certainty fields valid (issues: ${issues.join('; ') || 'none'})`);
   });
 
   await test('Migration paths: from/to are valid [lat,lng] pairs', async () => {
@@ -211,25 +250,16 @@ async function runUnitTests() {
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 6. LANE ASSIGNMENTS
+  // 6. TIMELINE LANES (dynamic row order, no LANE_ASSIGNMENTS table)
   // ═══════════════════════════════════════════════════════════════════════════
-  console.log(`\n${BOLD}◆ LANE ASSIGNMENTS${RESET}`);
+  console.log(`\n${BOLD}◆ TIMELINE LANES${RESET}`);
 
-  await test('LANE_ASSIGNMENTS covers all species IDs', async () => {
-    const missing = await page.evaluate(() => {
-      const assigned = Object.keys(LANE_ASSIGNMENTS || {});
-      return (SPECIES_DATA || []).map(sp => sp.id).filter(id => !assigned.includes(id));
-    });
-    assert(missing.length === 0, `All species have lane assignments (missing: ${missing.join(', ') || 'none'})`);
-  });
-
-  await test('LANE_ASSIGNMENTS values are integers 0–4', async () => {
-    const bad = await page.evaluate(() =>
-      Object.entries(LANE_ASSIGNMENTS || {})
-        .filter(([,v]) => !Number.isInteger(v) || v < 0 || v > 4)
-        .map(([k,v]) => `${k}=${v}`)
-    );
-    assert(bad.length === 0, `All lane values are integers 0–4 (bad: ${bad.join(', ') || 'none'})`);
+  await test('Rendered species lane count matches SPECIES_DATA', async () => {
+    const { nLanes, nSpecies } = await page.evaluate(() => ({
+      nLanes: document.querySelectorAll('#timeline-lanes .species-lane').length,
+      nSpecies: (SPECIES_DATA || []).length,
+    }));
+    assert(nLanes === nSpecies, `Lane count ${nLanes} === SPECIES_DATA.length ${nSpecies}`);
   });
 
   // ─── close ────────────────────────────────────────────────────────────────

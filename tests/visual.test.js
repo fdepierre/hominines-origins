@@ -4,6 +4,7 @@
  * Generates reference snapshots on first run; compares on subsequent runs.
  *
  * Run: node tests/visual.test.js
+ * Smoke (no snapshots / lighter): node tests/visual.test.js --smoke
  * Update snapshots: UPDATE_SNAPSHOTS=1 node tests/visual.test.js
  */
 
@@ -33,7 +34,9 @@ const SNAPSHOT_SCENARIOS = [
 // Max pixel diff ratio before visual test fails (1% = 0.01)
 const DIFF_THRESHOLD = 0.015;
 
-async function runVisualTests() {
+/** @param {{ smoke?: boolean }} [options] — smoke: structure + contrast only, no PNG snapshots */
+async function runVisualTests(options = {}) {
+  const smoke = options.smoke === true;
   if (!fs.existsSync(SNAPSHOT_DIR)) fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
   const errors = [];
 
@@ -51,15 +54,20 @@ async function runVisualTests() {
     catch (e) { errors.push({ name, error: e.message }); }
   }
 
-  // Required DOM elements present
-  await test('All critical DOM elements exist', async () => {
-    const ids = ['header', 'map', 'side-panel', 'timeline', 'play-btn',
+  // Required DOM + stable test hooks (data-testid) for automation
+  await test('All critical DOM elements and data-testid hooks exist', async () => {
+    const ids = ['main', 'burger-btn', 'map', 'side-panel', 'timeline', 'play-btn',
                   'timeline-full-needle', 'timeline-scrubber',
                   'skin-band', 'events-band', 'timeline-lanes',
                   'legend-content', 'welcome-hint', 'lang-select'];
-    const missing = await page.evaluate((ids) =>
-      ids.filter(id => !document.getElementById(id)), ids);
-    assert(missing.length === 0, `All critical IDs exist (missing: ${missing.join(', ') || 'none'})`);
+    const testids = ['map', 'burger-menu-button', 'side-panel', 'timeline', 'play-toggle',
+      'theme-toggle', 'lang-select', 'timeline-needle-row'];
+    const { missingId, missingTid } = await page.evaluate(({ ids, testids }) => ({
+      missingId: ids.filter((id) => !document.getElementById(id)),
+      missingTid: testids.filter((t) => !document.querySelector(`[data-testid="${t}"]`)),
+    }), { ids, testids });
+    assert(missingId.length === 0, `All critical IDs exist (missing: ${missingId.join(', ') || 'none'})`);
+    assert(missingTid.length === 0, `All data-testid hooks exist (missing: ${missingTid.join(', ') || 'none'})`);
   });
 
   // Timeline needle is visible
@@ -73,37 +81,32 @@ async function runVisualTests() {
     assert(visible, 'Timeline needle (#timeline-full-needle) is visible');
   });
 
-  // Play button is visible and in correct position (top-left of timeline footer)
-  await test('Play button is top-left of timeline footer', async () => {
+  // Play button sits in the needle row (below the title strip inside #timeline)
+  await test('Play button is top-left of timeline needle row', async () => {
     const pos = await page.evaluate(() => {
-      const btn   = document.getElementById('play-btn');
-      const footer = document.getElementById('timeline');
-      if (!btn || !footer) return null;
-      const bBtn    = btn.getBoundingClientRect();
-      const bFooter = footer.getBoundingClientRect();
+      const btn = document.querySelector('[data-testid="play-toggle"]');
+      const row = document.querySelector('[data-testid="timeline-needle-row"]');
+      if (!btn || !row) return null;
+      const bBtn = btn.getBoundingClientRect();
+      const bRow = row.getBoundingClientRect();
       return {
-        btnLeft:    bBtn.left,
-        footerLeft: bFooter.left,
-        btnTop:     bBtn.top,
-        footerTop:  bFooter.top,
-        isLeftAligned: (bBtn.left - bFooter.left) < 50,
-        isTopOfFooter: (bBtn.top - bFooter.top) < 60,
+        btnLeft: bBtn.left,
+        rowLeft: bRow.left,
+        btnTop: bBtn.top,
+        rowTop: bRow.top,
+        isLeftAligned: (bBtn.left - bRow.left) < 50,
+        isTopOfRow: (bBtn.top - bRow.top) < 80,
       };
     });
-    assert(pos !== null, 'Play button and timeline footer found');
-    assert(pos.isLeftAligned, `Play button is left-aligned in footer (left offset: ${Math.round(pos.btnLeft - pos.footerLeft)}px)`);
-    assert(pos.isTopOfFooter, `Play button is in top row of footer (top offset: ${Math.round(pos.btnTop - pos.footerTop)}px)`);
+    assert(pos !== null, 'Play button and timeline needle row ([data-testid]) found');
+    assert(pos.isLeftAligned, `Play button is left-aligned in needle row (left offset: ${Math.round(pos.btnLeft - pos.rowLeft)}px)`);
+    assert(pos.isTopOfRow, `Play button is in upper part of needle row (top offset: ${Math.round(pos.btnTop - pos.rowTop)}px)`);
   });
 
   // Language selector is visible
-  await test('Language selector is visible in header', async () => {
-    const visible = await page.evaluate(() => {
-      const sel = document.getElementById('lang-select');
-      if (!sel) return false;
-      const s = window.getComputedStyle(sel);
-      return s.display !== 'none' && s.visibility !== 'hidden';
-    });
-    assert(visible, 'Language selector is visible');
+  await test('Language selector exists (burger menu)', async () => {
+    const ok = await page.evaluate(() => !!document.querySelector('[data-testid="lang-select"]'));
+    assert(ok, 'Language selector [data-testid="lang-select"] is in the DOM');
   });
 
   // Skin band has segments rendered
@@ -121,10 +124,11 @@ async function runVisualTests() {
   });
 
   // Species lanes rendered
-  await test('Timeline lanes has at least 8 species lanes', async () => {
+  await test('Timeline lanes has one row per species', async () => {
     const count = await page.evaluate(() =>
       document.querySelectorAll('#timeline-lanes .species-lane').length);
-    assert(count >= 8, `Timeline has ${count} species lanes (expected ≥ 8)`);
+    const n = await page.evaluate(() => (SPECIES_DATA || []).length);
+    assert(count >= n, `Timeline has ${count} species lanes (expected ≥ ${n})`);
   });
 
   // ─── CONTRAST checks in dark mode ─────────────────────────────────────────
@@ -157,42 +161,53 @@ async function runVisualTests() {
       `WCAG AA contrast body text ≥ 4.5:1 (got ${result.contrast}:1)`);
   });
 
-  // ─── LIGHT MODE contrast ──────────────────────────────────────────────────
-  console.log(`\n${BOLD}◆ COLOUR CONTRAST (light mode)${RESET}`);
+  if (!smoke) {
+    // ─── LIGHT MODE contrast ──────────────────────────────────────────────────
+    console.log(`\n${BOLD}◆ COLOUR CONTRAST (light mode)${RESET}`);
 
-  await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
-  await page.waitForTimeout(200);
+    await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
+    await page.waitForTimeout(200);
 
-  await test('Primary text colour is dark enough on light background', async () => {
-    const result = await page.evaluate(() => {
-      function luminance(r, g, b) {
-        return [r, g, b].map(v => {
-          v /= 255;
-          return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-        }).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
-      }
-      function parseRGB(s) {
-        const m = s.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-        return m ? [+m[1], +m[2], +m[3]] : null;
-      }
-      const bodyStyle = window.getComputedStyle(document.body);
-      const bgRGB   = parseRGB(bodyStyle.backgroundColor);
-      const textRGB = parseRGB(bodyStyle.color);
-      if (!bgRGB || !textRGB) return null;
-      const lumBg   = luminance(...bgRGB);
-      const lumText = luminance(...textRGB);
-      const contrast = (Math.max(lumBg, lumText) + 0.05) / (Math.min(lumBg, lumText) + 0.05);
-      return { contrast: Math.round(contrast * 10) / 10 };
+    await test('Primary text colour is dark enough on light background', async () => {
+      const result = await page.evaluate(() => {
+        function luminance(r, g, b) {
+          return [r, g, b].map(v => {
+            v /= 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+          }).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+        }
+        function parseRGB(s) {
+          const m = s.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+          return m ? [+m[1], +m[2], +m[3]] : null;
+        }
+        const bodyStyle = window.getComputedStyle(document.body);
+        const bgRGB   = parseRGB(bodyStyle.backgroundColor);
+        const textRGB = parseRGB(bodyStyle.color);
+        if (!bgRGB || !textRGB) return null;
+        const lumBg   = luminance(...bgRGB);
+        const lumText = luminance(...textRGB);
+        const contrast = (Math.max(lumBg, lumText) + 0.05) / (Math.min(lumBg, lumText) + 0.05);
+        return { contrast: Math.round(contrast * 10) / 10 };
+      });
+      assert(result !== null, 'Could parse body colours in light mode');
+      assertSoft(result.contrast >= 4.5, `WCAG AA contrast light mode ≥ 4.5:1 (got ${result.contrast}:1)`);
     });
-    assert(result !== null, 'Could parse body colours in light mode');
-    assertSoft(result.contrast >= 4.5, `WCAG AA contrast light mode ≥ 4.5:1 (got ${result.contrast}:1)`);
-  });
+  } else {
+    console.log(`\n${BOLD}◆ COLOUR CONTRAST (light mode)${RESET}`);
+    console.log(`  ${YELLOW}skipped in smoke mode${RESET}`);
+  }
 
   await browser.close();
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 2. SNAPSHOT TESTS (visual regression)
   // ═══════════════════════════════════════════════════════════════════════════
+  if (smoke) {
+    console.log(`\n${BOLD}◆ SNAPSHOT REGRESSION TESTS${RESET}`);
+    console.log(`  ${YELLOW}skipped in smoke mode (run full visual suite for PNG regression)${RESET}`);
+    return errors;
+  }
+
   console.log(`\n${BOLD}◆ SNAPSHOT REGRESSION TESTS${RESET}`);
 
   if (UPDATE_MODE) {
@@ -246,11 +261,12 @@ async function runVisualTests() {
 
 // ─── entry point ─────────────────────────────────────────────────────────────
 if (require.main === module) {
+  const smokeCli = process.argv.includes('--smoke');
   console.log(`\n${BOLD}${CYAN}══════════════════════════════════════${RESET}`);
-  console.log(`${BOLD}  HOMININES — VISUAL TESTS${UPDATE_MODE ? ' [UPDATE MODE]' : ''}${RESET}`);
+  console.log(`${BOLD}  HOMININES — VISUAL TESTS${UPDATE_MODE ? ' [UPDATE MODE]' : ''}${smokeCli ? ' [SMOKE]' : ''}${RESET}`);
   console.log(`${BOLD}${CYAN}══════════════════════════════════════${RESET}`);
 
-  runVisualTests().then(errors => {
+  runVisualTests({ smoke: smokeCli }).then(errors => {
     const stats = getStats();
     console.log(`\n${BOLD}${CYAN}══════════════════════════════════════${RESET}`);
     console.log(`  ${GREEN}✓ ${stats.pass} passed${RESET}  ${stats.warn ? `${YELLOW}⚠ ${stats.warn} warnings  ` : ''}${stats.fail ? `${RED}✗ ${stats.fail} failed${RESET}` : ''}`);

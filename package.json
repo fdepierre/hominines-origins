@@ -4,6 +4,7 @@
   "description": "Interactive map of human evolution — open source, for everyone",
   "scripts": {
     "test": "node tests/run-all.js",
+    "test:smoke": "node tests/run-smoke.js",
     "test:unit": "node tests/unit.test.js",
     "test:visual": "node tests/visual.test.js",
     "test:a11y": "node tests/a11y.test.js",

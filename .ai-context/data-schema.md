@@ -59,9 +59,37 @@ Use this as a reference when adding or editing data.
     from:  [Number, Number],  // [lat, lng] — departure point
     to:    [Number, Number],  // [lat, lng] — arrival point
     label: String             // Human-readable description with approximate date
-  }]
+  }],
+
+  // Optional on inline SPECIES_DATA until merge — stored in app/data/species.json and merged at runtime by species id:
+  "hominin:taxonomyDebateLevel":       String,  // CONSENSUS_FORT | CONSENSUS_MODERE | EN_DEBAT_ACTIF | HYPOTHESE_SPECULATIVE
+  "hominin:taxonomyEvidenceType":      String,  // DONNEES_DIRECTES | DONNEES_INDIRECTES | INFERENCE_EVOLUTIVE | NARRATIF_MEDIATIQUE
+  "hominin:behaviorDebateLevel":      String,
+  "hominin:behaviorEvidenceType":     String,
+  "hominin:pigmentationDebateLevel":  String,
+  "hominin:pigmentationEvidenceType": String
 }
 ```
+
+Use bracket notation in JavaScript: `species['hominin:taxonomyDebateLevel']` (colons in keys).
+
+### Hominin certainty enums
+
+| `*DebateLevel` | Meaning (short) |
+|----------------|-----------------|
+| `CONSENSUS_FORT` | Strong community agreement on framing |
+| `CONSENSUS_MODERE` | Broad agreement with nuance on details |
+| `EN_DEBAT_ACTIF` | Several serious interpretations coexist |
+| `HYPOTHESE_SPECULATIVE` | Plausible but thinly tested |
+
+| `*EvidenceType` | Meaning (short) |
+|-----------------|-------------------|
+| `DONNEES_DIRECTES` | Direct observation (e.g. ancient DNA, tightly informative remains) |
+| `DONNEES_INDIRECTES` | Solid indirect fossil / archaeological context |
+| `INFERENCE_EVOLUTIVE` | Comparative or model-based evolutionary inference |
+| `NARRATIF_MEDIATIQUE` | Media-led narrative, weakly tied to primary literature |
+
+Canonical per-species certainty rows live in [`app/data/species-certainty.json`](../app/data/species-certainty.json) and are merged onto `SPECIES_DATA` after the JSON-LD catalogue is loaded (`mergeHomininCertainty()`). Tests serve `app/` over HTTP so `fetch` works.
 
 ### Certainty levels for pigmentation
 
