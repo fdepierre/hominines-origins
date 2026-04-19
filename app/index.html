@@ -2992,8 +2992,7 @@ let _autoFitTimer  = null; // debounce handle for auto-fit
 let _prevVisibleSpeciesIds = new Set(); // for tooltip-on-appear
 const _seenEventIds = new Set();        // events whose intro tooltip was already shown
 
-// Instantly fit map to encompass all sites/regions of visible species.
-// Only called once at play-start so it doesn't interrupt the experience.
+// Instantly fit map to encompass all sites/regions of visible species (optionnel / debug).
 function autoFitMap() {
   const visible = getVisibleSpecies();
   if (!visible.length || !leafletMap) return;
@@ -3006,6 +3005,14 @@ function autoFitMap() {
   const bounds = L.latLngBounds(latlngs);
   // Use fitBounds (instant) — animated flyToBounds causes arrow drift artifacts
   leafletMap.fitBounds(bounds, { padding: [60, 60], maxZoom: 5 });
+}
+
+/** Même vue large qu’au chargement (zoom min) — pour voir les migrations après un zoom sur un jalon. */
+function resetMapToWorldView() {
+  if (!leafletMap) return;
+  try {
+    leafletMap.setView([20, 20], 2, { animate: true, duration: 0.4 });
+  } catch (e) { /* ignore */ }
 }
 
 function setTime(time) {
@@ -3212,8 +3219,8 @@ function startPlay() {
   if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
   resumeAllFigureWalks();
 
-  // Fit map once at play start so all initial species are visible
-  if (freshStart) autoFitMap();
+  // À chaque lecture : revenir à la vue monde (dézoom après un flyTo sur un jalon, etc.)
+  resetMapToWorldView();
 
   const speedEl = document.getElementById('play-speed');
 
