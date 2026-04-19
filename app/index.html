@@ -70,6 +70,13 @@
   --color-purple:         #7a5e9b;
   --color-error:          #a84040;
 
+  /* Tri-icon certitude : même sémantique pour toutes les espèces (pas la couleur de la ligne) */
+  --certainty-consensus-fort:   #4ecf9a;
+  --certainty-consensus-modere: #e8b84d;
+  --certainty-debat-actif:      #e87860;
+  --certainty-hypothese:        #a884c8;
+  --certainty-unknown:          #6a6258;
+
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
   --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
@@ -97,6 +104,12 @@
   --color-blue:           #1a4e7a;
   --color-purple:         #4a2e7a;
   --color-error:          #7a1a1a;
+
+  --certainty-consensus-fort:   #1d7a4a;
+  --certainty-consensus-modere: #b8860b;
+  --certainty-debat-actif:      #c44a32;
+  --certainty-hypothese:        #5c3d7a;
+  --certainty-unknown:          #8a8278;
 
   --shadow-sm: 0 1px 4px rgba(0,0,0,0.18);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
@@ -321,6 +334,49 @@ a { color: var(--color-primary); }
   stroke-width: 1.25;
   stroke-linejoin: round;
 }
+.certainty-tri-wedge--fort { fill: var(--certainty-consensus-fort); }
+.certainty-tri-wedge--modere { fill: var(--certainty-consensus-modere); }
+.certainty-tri-wedge--debat { fill: var(--certainty-debat-actif); }
+.certainty-tri-wedge--hypo { fill: var(--certainty-hypothese); }
+.certainty-tri-wedge--unknown { fill: var(--certainty-unknown); }
+.certainty-tri-pop-legend {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--color-text-faint);
+  letter-spacing: 0.02em;
+  margin: calc(-1 * var(--space-1)) 0 var(--space-2);
+  line-height: 1.35;
+}
+
+/* Même code couleurs que l’icône tri (menu info → niveaux d’accord) */
+ul.uncertainty-level-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 var(--space-2);
+}
+.uncertainty-level-list > li {
+  position: relative;
+  padding-left: 1.1em;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  margin-bottom: 0.35em;
+}
+.uncertainty-level-list > li:last-child { margin-bottom: 0; }
+.uncertainty-level-list > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 2px;
+  background: var(--certainty-swatch, var(--certainty-unknown));
+}
+.uncertainty-level-li--fort { --certainty-swatch: var(--certainty-consensus-fort); }
+.uncertainty-level-li--modere { --certainty-swatch: var(--certainty-consensus-modere); }
+.uncertainty-level-li--debat { --certainty-swatch: var(--certainty-debat-actif); }
+.uncertainty-level-li--hypo { --certainty-swatch: var(--certainty-hypothese); }
 .certainty-tri-pop {
   position: absolute;
   top: calc(100% + 6px);
@@ -2246,21 +2302,15 @@ function selectSpecies(species) {
   document.dispatchEvent(new CustomEvent('speciesSelected', { detail: species }));
 }
 
-function getDebateMeterPct(level) {
-  const map = {
-    CONSENSUS_FORT: 100,
-    CONSENSUS_MODERE: 72,
-    EN_DEBAT_ACTIF: 44,
-    HYPOTHESE_SPECULATIVE: 18,
-  };
-  return map[level] != null ? map[level] : 40;
-}
-
-/** RGBA from #RRGGBB and alpha (for tri-wedge fill from species accent + consensus strength). */
-function homininHexToRgba(hex, alpha) {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
-  if (!m) return 'rgba(120,100,80,' + alpha + ')';
-  return 'rgba(' + parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) + ',' + alpha + ')';
+/** Classe CSS du secteur : palette globale (identique pour toutes les espèces). */
+function certaintyDebateLevelWedgeClass(level) {
+  switch (level) {
+    case 'CONSENSUS_FORT': return 'certainty-tri-wedge certainty-tri-wedge--fort';
+    case 'CONSENSUS_MODERE': return 'certainty-tri-wedge certainty-tri-wedge--modere';
+    case 'EN_DEBAT_ACTIF': return 'certainty-tri-wedge certainty-tri-wedge--debat';
+    case 'HYPOTHESE_SPECULATIVE': return 'certainty-tri-wedge certainty-tri-wedge--hypo';
+    default: return 'certainty-tri-wedge certainty-tri-wedge--unknown';
+  }
 }
 
 /** One 120° pie sector path, i = 0..2 from top (-90°), clockwise. */
@@ -2282,8 +2332,8 @@ function escapeHtmlAttr(s) {
 }
 
 /**
- * Compact header icon: circle split in 3 wedges (taxonomy, behaviour, pigmentation).
- * Opacity follows the same consensus scale as the former bars (species colour); hover/focus shows detail.
+ * Compact header icon: 3 wedges (taxonomy, behaviour, pigmentation).
+ * Couleurs = échelle sémantique globale (--certainty-*), pas la couleur de la ligne espèce.
  */
 function renderCertaintyTriIcon(species, T) {
   if (!species['hominin:taxonomyDebateLevel']) return '';
@@ -2297,10 +2347,8 @@ function renderCertaintyTriIcon(species, T) {
   const r = 20;
   const paths = domains.map(function (d, i) {
     const dl = species['hominin:' + d.key + 'DebateLevel'];
-    const w = getDebateMeterPct(dl);
-    const a = Math.min(1, Math.max(0.28, 0.28 + 0.72 * (w / 100)));
-    const fill = homininHexToRgba(species.color, a);
-    return '<path class="certainty-tri-wedge" d="' + certaintyTriSectorPath(cx, cy, r, i) + '" fill="' + fill + '"/>';
+    const cls = certaintyDebateLevelWedgeClass(dl);
+    return '<path class="' + cls + '" d="' + certaintyTriSectorPath(cx, cy, r, i) + '"/>';
   }).join('');
   const popRows = domains.map(function (d) {
     const dl = species['hominin:' + d.key + 'DebateLevel'];
@@ -2319,6 +2367,7 @@ function renderCertaintyTriIcon(species, T) {
     '</svg></button>' +
     '<div class="certainty-tri-pop" role="tooltip">' +
     '<div class="certainty-tri-pop-title">' + T('certaintyPanelTitle', 'Certitude par thème') + '</div>' +
+    '<div class="certainty-tri-pop-legend">' + T('certaintyTriLegend', 'Même code couleurs pour toutes les espèces : vert = consensus fort · ambre = modéré · corail = débat actif · violet = hypothèse spéculative.') + '</div>' +
     popRows +
     '</div></div>'
   );
@@ -3536,9 +3585,10 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Données indirectes — fossiles, contextes archéologiques ou indices sans lecture moléculaire directe du trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Inférence évolutive — raisonnement à partir de parentés, d\'écologie ou de modèles comparés.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Récit médiatique — relais souvent simplifié ou anticipé par rapport aux publications spécialisées.',
-        uncertaintyWhy: 'Une même teinte sur la carte peut donc coexister avec des incertitudes différentes : la couleur résume une hypothèse prudente, tandis que ces niveaux indiquent où la science est solide ou encore ouverte.',
+        uncertaintyWhy: 'L’icône à trois secteurs du panneau reprend les mêmes couleurs que la liste ci‑dessous, pour toute espèce. La teinte sur la carte et sur la frise chronologique identifie le groupe taxonomique ; elle ne remplace pas ces niveaux d’accord.',
         certaintyPanelTitle: 'Certitude par thème',
         certaintyTriAria: 'Certitude par thème : secteur supérieur taxonomie, puis comportement, puis pigmentation (sens horaire). Survolez ou activez pour le détail.',
+        certaintyTriLegend: 'Même code couleurs pour toutes les espèces : vert = consensus fort · ambre = modéré · corail = débat actif · violet = hypothèse spéculative.',
         certaintyDomainTax: 'Taxonomie',
         certaintyDomainBehavior: 'Comportement',
         certaintyDomainPig: 'Pigmentation',
@@ -3617,9 +3667,10 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyTriAria: 'Certainty by topic: top sector taxonomy, then behaviour, then pigmentation (clockwise). Hover or focus the icon for full detail.',
+        certaintyTriLegend: 'Same colour key for every species: green = strong consensus · amber = moderate · coral = active debate · violet = speculative hypothesis.',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
         certaintyDomainPig: 'Pigmentation',
@@ -3698,7 +3749,7 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
@@ -3778,7 +3829,7 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
@@ -3858,7 +3909,7 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
@@ -3938,7 +3989,7 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
@@ -4018,7 +4069,7 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
@@ -4098,7 +4149,7 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
@@ -4178,7 +4229,7 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
@@ -4258,7 +4309,7 @@ const TRANSLATIONS = {
         uncertaintyEvidList_DONNEES_INDIRECTES: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_INFERENCE_EVOLUTIVE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_NARRATIF_MEDIATIQUE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyWhy: 'Two species can show similar colours with different certainty: the palette reflects a prudent synthesis, while these levels show where science is solid versus still open.',
+        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
@@ -4717,11 +4768,11 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin:var(--space-2) 0 var(--space-1);" data-i18n-text="uncertaintyAxis2Title"></div>
         <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0 0 var(--space-2);" data-i18n-text="uncertaintyAxis2Body"></p>
         <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);" data-i18n-text="uncertaintyDebateIntro"></p>
-        <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-2);padding-left:1.1em;line-height:1.45;">
-          <li data-i18n-text="uncertaintyDebateList_CONSENSUS_FORT"></li>
-          <li data-i18n-text="uncertaintyDebateList_CONSENSUS_MODERE"></li>
-          <li data-i18n-text="uncertaintyDebateList_EN_DEBAT_ACTIF"></li>
-          <li data-i18n-text="uncertaintyDebateList_HYPOTHESE_SPECULATIVE"></li>
+        <ul class="uncertainty-level-list">
+          <li class="uncertainty-level-li--fort" data-i18n-text="uncertaintyDebateList_CONSENSUS_FORT"></li>
+          <li class="uncertainty-level-li--modere" data-i18n-text="uncertaintyDebateList_CONSENSUS_MODERE"></li>
+          <li class="uncertainty-level-li--debat" data-i18n-text="uncertaintyDebateList_EN_DEBAT_ACTIF"></li>
+          <li class="uncertainty-level-li--hypo" data-i18n-text="uncertaintyDebateList_HYPOTHESE_SPECULATIVE"></li>
         </ul>
         <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);" data-i18n-text="uncertaintyEvidIntro"></p>
         <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-2);padding-left:1.1em;line-height:1.45;">
