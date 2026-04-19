@@ -43,6 +43,9 @@
 
   --font-body: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'Space Mono', monospace;
+
+  /* Aligner bandes « Peau » / « Jalons » sur la même échelle que la piste espèces (60px + 4px padding) */
+  --timeline-band-label-w: 64px;
 }
 
 /* Palette inspirée de l'archéologie : terre, os, obsidienne */
@@ -1011,6 +1014,18 @@ ul.uncertainty-level-list {
 .event-marker:hover {
   transform: translate(-50%, -50%) scale(1.4);
   z-index: 10;
+}
+
+@keyframes eventMapMarkerPulse {
+  0%, 100% { transform: scale(1); }
+  20% { transform: scale(1.45); }
+  40% { transform: scale(1.1); }
+  60% { transform: scale(1.45); }
+  80% { transform: scale(1.15); }
+}
+.event-map-marker-inner.event-map-marker-pulse {
+  animation: eventMapMarkerPulse 1.1s ease-in-out 2;
+  filter: drop-shadow(0 0 10px rgba(212, 130, 10, 0.95)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85)) !important;
 }
 
 /* Shared JS-driven tooltip for events band — mirrors Leaflet tooltip style */
@@ -2132,6 +2147,50 @@ function updateMap() {
 // Avoids destroying/recreating markers every tick so intro tooltips survive.
 const _renderedEventMarkers = new Map();
 
+function switchMobileTabToMap() {
+  try {
+    if (typeof window.matchMedia === 'undefined' || !window.matchMedia('(max-width: 768px)').matches) return;
+    const main = document.getElementById('main');
+    if (!main) return;
+    main.classList.remove('view-detail');
+    main.classList.add('view-map');
+    document.querySelectorAll('.mobile-tab').forEach(function (b) {
+      b.classList.toggle('mobile-tab-active', b.dataset.view === 'map');
+    });
+    if (typeof leafletMap !== 'undefined' && leafletMap) {
+      setTimeout(function () { leafletMap.invalidateSize(); }, 350);
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function queueEventMapFocus(eventId) {
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      focusEventOnMap(eventId);
+    });
+  });
+}
+
+function focusEventOnMap(eventId) {
+  if (typeof leafletMap === 'undefined' || !leafletMap) return;
+  const m = _renderedEventMarkers.get(eventId);
+  if (!m) return;
+  try {
+    const ll = m.getLatLng();
+    const z = Math.max(leafletMap.getZoom(), 4);
+    leafletMap.flyTo(ll, z, { duration: 0.55, easeLinearity: 0.35 });
+  } catch (e) { /* ignore */ }
+  try {
+    const el = m.getElement();
+    if (!el) return;
+    const inner = el.querySelector('.event-map-marker-inner') || el;
+    inner.classList.remove('event-map-marker-pulse');
+    void inner.offsetWidth;
+    inner.classList.add('event-map-marker-pulse');
+    setTimeout(function () { inner.classList.remove('event-map-marker-pulse'); }, 2600);
+  } catch (e2) { /* ignore */ }
+}
+
 function updateEvents() {
   if (!eventsLayer) return;
 
@@ -2158,7 +2217,8 @@ function updateEvents() {
 
     const icon = L.divIcon({
       className: '',
-      html: `<div style="font-size: 18px; line-height: 1; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8)); cursor: pointer;" title="${ev.label}">${ev.icon}</div>`,
+      html: '<div class="event-map-marker-inner" style="font-size:18px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));cursor:pointer" title="' +
+        escapeHtmlAttr(ev.label) + '">' + ev.icon + '</div>',
       iconSize: [24, 24],
       iconAnchor: [12, 12],
     });
@@ -2692,8 +2752,10 @@ const SKIN_PERIODS = [
 ];
 
 function buildSkinBand() {
+  const band = document.getElementById('skin-band');
   const track = document.getElementById('skin-band-track');
-  if (!track) return;
+  if (!band || !track) return;
+  band.querySelectorAll('.band-segment').forEach(function (n) { n.remove(); });
 
   SKIN_PERIODS.forEach(seg => {
     const x1 = timeToLinear(seg.start) * 100;
@@ -2701,8 +2763,8 @@ function buildSkinBand() {
     const w = Math.abs(x2 - x1);
     const el = document.createElement('div');
     el.className = 'band-segment' + (seg.cssClass ? ' ' + seg.cssClass : '');
-    el.style.left = x1 + '%';
-    el.style.width = w + '%';
+    el.style.left = 'calc(var(--timeline-band-label-w) + (100% - var(--timeline-band-label-w)) * ' + (x1 / 100) + ')';
+    el.style.width = 'calc((100% - var(--timeline-band-label-w)) * ' + (w / 100) + ')';
     el.style.border = '1px solid rgba(255,255,255,0.12)';
     // Gradient band for segments representing global diversity
     if (seg.gradientColors && seg.gradientColors.length) {
@@ -2719,7 +2781,7 @@ function buildSkinBand() {
     } else if (seg.cssClass === 'partial-fur') {
       el.innerHTML = '<span style="font-size:9px;position:absolute;left:3px;top:50%;transform:translateY(-50%);opacity:0.7;pointer-events:none">~🐒</span>';
     }
-    track.appendChild(el);
+    band.appendChild(el);
   });
 }
 
@@ -2736,8 +2798,10 @@ function getSpeciesAtTime(time) {
 }
 
 function buildEventsBand() {
+  const band = document.getElementById('events-band');
   const track = document.getElementById('events-band-track');
-  if (!track) return;
+  if (!band || !track) return;
+  band.querySelectorAll('.event-marker').forEach(function (n) { n.remove(); });
 
   // Shared JS tooltip — viewport-aware positioning, measured after render
   const tip = document.getElementById('band-tooltip');
@@ -2756,10 +2820,10 @@ function buildEventsBand() {
   }
 
   EVENTS_DATA.forEach(ev => {
-    const xpct = timeToLinear(ev.time) * 100;
+    const tLin = timeToLinear(ev.time);
     const el = document.createElement('div');
     el.className = 'event-marker';
-    el.style.left = xpct + '%';
+    el.style.left = 'calc(var(--timeline-band-label-w) + (100% - var(--timeline-band-label-w)) * ' + tLin + ')';
 
     // Render icon: human figures → skin-accurate SVG; others → colored emoji
     if (HUMAN_FIGURE_ICONS.has(ev.icon)) {
@@ -2800,8 +2864,19 @@ function buildEventsBand() {
     el.addEventListener('mouseleave', function() {
       if (tip) tip.style.display = 'none';
     });
-    el.addEventListener('click', () => { setTime(ev.time); });
-    track.appendChild(el);
+    el.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (typeof showEvents !== 'undefined' && !showEvents) {
+        showEvents = true;
+        document.querySelectorAll('.layer-btn[data-layer="events"]').forEach(function (btn) {
+          btn.classList.add('active');
+        });
+      }
+      setTime(ev.time);
+      if (typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
+      if (typeof queueEventMapFocus === 'function') queueEventMapFocus(ev.id);
+    });
+    band.appendChild(el);
   });
 }
 
@@ -2810,11 +2885,8 @@ function updateNeedlePosition() {
   if (!fullNeedle) return;
   const xpct = timeToLinear(currentTime) * 100;
 
-  // The band tracks are offset by the label column (54px).
-  // The species-track has NO label offset. To align the needle with both:
-  // we place it relative to needle-wrapper which starts at the left edge.
-  // Species track is full-width, band tracks have 54px label.
-  // We use the species track as the reference (full-width).
+  // Aiguille alignée sur la piste espèces (pleine largeur du wrapper). Les bandes
+  // « Peau » / « Jalons » utilisent la même échelle horizontale via --timeline-band-label-w.
   const wrapper = document.getElementById('needle-wrapper');
   if (!wrapper) return;
   const wrapperW = wrapper.getBoundingClientRect().width;
@@ -4426,12 +4498,18 @@ function applyTranslations() {
 
   // Rebuild skin band and events band so data-tip tooltips are translated
   if (typeof buildSkinBand === 'function') {
-    const skinTrack = document.getElementById('skin-band-track');
-    if (skinTrack) { skinTrack.innerHTML = ''; buildSkinBand(); }
+    const skinBand = document.getElementById('skin-band');
+    if (skinBand) {
+      skinBand.querySelectorAll('.band-segment').forEach(function (n) { n.remove(); });
+      buildSkinBand();
+    }
   }
   if (typeof buildEventsBand === 'function') {
-    const evTrack = document.getElementById('events-band-track');
-    if (evTrack) { evTrack.innerHTML = ''; buildEventsBand(); }
+    const eventsBand = document.getElementById('events-band');
+    if (eventsBand) {
+      eventsBand.querySelectorAll('.event-marker').forEach(function (n) { n.remove(); });
+      buildEventsBand();
+    }
   }
 
   // Rebuild map events layer so category tooltips are translated
@@ -4637,16 +4715,18 @@ window.addEventListener('load', function() {
   var wrapper = document.getElementById('needle-wrapper');
   if (!wrapper) return;
   var dragging = false;
-  var LABEL_W  = 54; // width of the band-label column
 
   function fromEvent(e) {
     var t = e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : null);
     return t ? t.clientX : e.clientX;
   }
   function applyX(clientX) {
-    var r = wrapper.getBoundingClientRect();
-    var x = Math.max(0, Math.min(1, (clientX - r.left - LABEL_W) / (r.width - LABEL_W)));
-    if (typeof setTime === 'function' && typeof linearToTime === 'function') setTime(linearToTime(x));
+    var speciesTrackEl = document.getElementById('timeline-species-track');
+    if (!speciesTrackEl || typeof setTime !== 'function' || typeof linearToTime !== 'function') return;
+    var tr = speciesTrackEl.getBoundingClientRect();
+    if (tr.width < 8) return;
+    var x = Math.max(0, Math.min(1, (clientX - tr.left) / tr.width));
+    setTime(linearToTime(x));
   }
 
   wrapper.addEventListener('touchstart', function(e) { dragging = true; applyX(fromEvent(e)); }, { passive: true });
