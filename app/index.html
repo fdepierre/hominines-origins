@@ -807,6 +807,8 @@ ul.uncertainty-level-list {
   opacity: 0.9;
   pointer-events: none;
   z-index: 30;
+  /* left = abscisse du temps (JS) ; centrage comme les jalons (translate -50%) */
+  transform: translateX(-50%);
 }
 /* The round handle at the TOP of the needle */
 .timeline-needle-handle {
@@ -2589,6 +2591,7 @@ function updateMobileTimelineReserve() {
     var reserve = Math.max(h + 20, 300);
     document.documentElement.style.setProperty('--mobile-timeline-reserve', reserve + 'px');
   } catch (e) { /* ignore */ }
+  if (typeof scheduleTimelineBandSync === 'function') scheduleTimelineBandSync();
 }
 
 var _mobileReserveResizeTimer;
@@ -2685,7 +2688,10 @@ function initTimeline() {
 
   // After lanes + bands exist, sync mobile CSS reserve so #main does not cover the footer (all species visible)
   requestAnimationFrame(function () {
-    requestAnimationFrame(updateMobileTimelineReserve);
+    requestAnimationFrame(function () {
+      updateMobileTimelineReserve();
+      syncTimelineBandsToSpeciesTrack();
+    });
   });
 
   // --- Drag scrubber ---
@@ -2751,6 +2757,44 @@ const SKIN_PERIODS = [
     tip: 'Spectre complet : peau sombre = état ancestral, encore majoritaire mondialement. Peau claire = adaptation récente en Europe du Nord (~3 000 ans, PNAS 2025). La diversité est la norme.' },
 ];
 
+let _timelineBandSyncTimer = null;
+/** Aligne bande Peau + jalons sur la même abscisse que #timeline-species-track (getBoundingClientRect). */
+function syncTimelineBandsToSpeciesTrack() {
+  const speciesTrack = document.getElementById('timeline-species-track');
+  if (!speciesTrack) return;
+  const tr = speciesTrack.getBoundingClientRect();
+  if (tr.width < 4) return;
+
+  const evBand = document.getElementById('events-band');
+  if (evBand) {
+    const br = evBand.getBoundingClientRect();
+    evBand.querySelectorAll('.event-marker').forEach(function (el) {
+      const tLin = parseFloat(el.getAttribute('data-t-linear'));
+      if (isNaN(tLin)) return;
+      const xAbs = tr.left + tLin * tr.width;
+      el.style.left = (xAbs - br.left) + 'px';
+    });
+  }
+
+  const skinBand = document.getElementById('skin-band');
+  if (skinBand) {
+    const br = skinBand.getBoundingClientRect();
+    skinBand.querySelectorAll('.band-segment').forEach(function (el) {
+      const x1 = parseFloat(el.getAttribute('data-x1-linear'));
+      const w = parseFloat(el.getAttribute('data-w-linear'));
+      if (isNaN(x1) || isNaN(w)) return;
+      const xAbs = tr.left + x1 * tr.width;
+      el.style.left = (xAbs - br.left) + 'px';
+      el.style.width = Math.max(0, w * tr.width) + 'px';
+    });
+  }
+}
+
+function scheduleTimelineBandSync() {
+  clearTimeout(_timelineBandSyncTimer);
+  _timelineBandSyncTimer = setTimeout(syncTimelineBandsToSpeciesTrack, 40);
+}
+
 function buildSkinBand() {
   const band = document.getElementById('skin-band');
   const track = document.getElementById('skin-band-track');
@@ -2758,13 +2802,16 @@ function buildSkinBand() {
   band.querySelectorAll('.band-segment').forEach(function (n) { n.remove(); });
 
   SKIN_PERIODS.forEach(seg => {
-    const x1 = timeToLinear(seg.start) * 100;
-    const x2 = timeToLinear(seg.end) * 100;
-    const w = Math.abs(x2 - x1);
+    const tA = timeToLinear(seg.start);
+    const tB = timeToLinear(seg.end);
+    const x1lin = Math.min(tA, tB);
+    const wlin = Math.abs(tB - tA);
     const el = document.createElement('div');
     el.className = 'band-segment' + (seg.cssClass ? ' ' + seg.cssClass : '');
-    el.style.left = 'calc(var(--timeline-band-label-w) + (100% - var(--timeline-band-label-w)) * ' + (x1 / 100) + ')';
-    el.style.width = 'calc((100% - var(--timeline-band-label-w)) * ' + (w / 100) + ')';
+    el.setAttribute('data-x1-linear', String(x1lin));
+    el.setAttribute('data-w-linear', String(wlin));
+    el.style.left = '0px';
+    el.style.width = '0px';
     el.style.border = '1px solid rgba(255,255,255,0.12)';
     // Gradient band for segments representing global diversity
     if (seg.gradientColors && seg.gradientColors.length) {
@@ -2783,6 +2830,7 @@ function buildSkinBand() {
     }
     band.appendChild(el);
   });
+  syncTimelineBandsToSpeciesTrack();
 }
 
 // =====================================================================
@@ -2823,7 +2871,8 @@ function buildEventsBand() {
     const tLin = timeToLinear(ev.time);
     const el = document.createElement('div');
     el.className = 'event-marker';
-    el.style.left = 'calc(var(--timeline-band-label-w) + (100% - var(--timeline-band-label-w)) * ' + tLin + ')';
+    el.setAttribute('data-t-linear', String(tLin));
+    el.style.left = '0px';
 
     // Render icon: human figures → skin-accurate SVG; others → colored emoji
     if (HUMAN_FIGURE_ICONS.has(ev.icon)) {
@@ -2875,9 +2924,12 @@ function buildEventsBand() {
       setTime(ev.time);
       if (typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
       if (typeof queueEventMapFocus === 'function') queueEventMapFocus(ev.id);
+      scheduleTimelineBandSync();
+      requestAnimationFrame(function () { scheduleTimelineBandSync(); });
     });
     band.appendChild(el);
   });
+  syncTimelineBandsToSpeciesTrack();
 }
 
 function updateNeedlePosition() {
@@ -2898,17 +2950,17 @@ function updateNeedlePosition() {
   const trackLeft = speciesTrackRect ? (speciesTrackRect.left - wrapperRect.left) : 0;
   const trackWidth = speciesTrackRect ? speciesTrackRect.width : wrapperW;
 
-  const px = trackLeft + xpct / 100 * trackWidth;
-  const needlePx = Math.max(0, Math.min(wrapperW - 1, px));
-  fullNeedle.style.left = needlePx + 'px';
+  const cx = trackLeft + (xpct / 100) * trackWidth;
+  const needleCx = Math.max(0, Math.min(wrapperW, cx));
+  fullNeedle.style.left = needleCx + 'px';
 
   // Move time label: prefer right of needle, flip to left near right edge
   const label = document.getElementById('timeline-current-label');
   if (label) {
     const labelW = label.offsetWidth || 80;
     const gap = 10;
-    const rightPos = needlePx + gap;
-    const finalLeft = (rightPos + labelW < wrapperW) ? rightPos : Math.max(0, needlePx - gap - labelW);
+    const rightPos = needleCx + gap;
+    const finalLeft = (rightPos + labelW < wrapperW) ? rightPos : Math.max(0, needleCx - gap - labelW);
     label.style.left = finalLeft + 'px';
   }
 }
@@ -3044,6 +3096,9 @@ function setTheme(theme) {
     document.getElementById('map').style.background = theme === 'dark' ? '#0e1220' : '#d4d0c8';
     updateMap();
   }
+  requestAnimationFrame(function () {
+    syncTimelineBandsToSpeciesTrack();
+  });
 }
 
 function initThemeToggle() {
@@ -3495,13 +3550,19 @@ function bootApp() {
   eventsLayer = L.layerGroup().addTo(leafletMap);
   animMigLayer = L.layerGroup().addTo(leafletMap);
   initTimeline();
-  window.addEventListener('resize', scheduleMobileTimelineReserve);
+  window.addEventListener('resize', function () {
+    scheduleMobileTimelineReserve();
+    scheduleTimelineBandSync();
+  });
   initLayerToggles();
   initThemeToggle();
   setTime(-4100000);
   updateMap();
   requestAnimationFrame(function () {
-    requestAnimationFrame(updateMobileTimelineReserve);
+    requestAnimationFrame(function () {
+      updateMobileTimelineReserve();
+      syncTimelineBandsToSpeciesTrack();
+    });
   });
 
   // Play button
