@@ -2257,16 +2257,6 @@ function updateEvents() {
     });
     eventsLayer.addLayer(marker);
     _renderedEventMarkers.set(ev.id, marker);
-
-    // Flash intro tooltip the first time this event appears during play.
-    // Marker is now persistent so the reference stays valid.
-    if (isPlaying && !_seenEventIds.has(ev.id)) {
-      _seenEventIds.add(ev.id);
-      setTimeout(function() {
-        try { marker.openTooltip(); } catch(e) {}
-        setTimeout(function() { try { marker.closeTooltip(); } catch(e) {} }, 4000);
-      }, 500);
-    }
   });
 }
 
@@ -2989,8 +2979,7 @@ function updateNeedlePosition() {
 
 let _lastVisibleIds = ''; // cache to avoid redundant full map rebuilds during play
 let _autoFitTimer  = null; // debounce handle for auto-fit
-let _prevVisibleSpeciesIds = new Set(); // for tooltip-on-appear
-const _seenEventIds = new Set();        // events whose intro tooltip was already shown
+let _prevVisibleSpeciesIds = new Set(); // for species intro tooltip on first appearance during play
 
 // Instantly fit map to encompass all sites/regions of visible species (optionnel / debug).
 function autoFitMap() {
@@ -3207,7 +3196,6 @@ function startPlay() {
       delete speciesFigures[id];
     });
     _prevVisibleSpeciesIds = new Set();
-    _seenEventIds.clear();
     _renderedEventMarkers.forEach(function(m) { try { eventsLayer.removeLayer(m); } catch(e){} });
     _renderedEventMarkers.clear();
     _lastVisibleIds = '';
