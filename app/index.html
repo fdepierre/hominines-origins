@@ -3196,23 +3196,21 @@ function startPlay() {
   icon.innerHTML = '<rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/>';
   lbl.textContent = 'Pause';
 
-  // If at end, restart from beginning and clear all figures + seen-state
+  // Near end of timeline: clear figures + event markers so they can respawn cleanly,
+  // but keep the needle where it is — Play always continues from the current time.
   const freshStart = currentTime >= TIMELINE_MAX - 1000;
   if (freshStart) {
-    // Remove all existing figures
     Object.keys(speciesFigures).forEach(function(id) {
       const e = speciesFigures[id];
       if (e.raf) cancelAnimationFrame(e.raf);
       if (e.marker) e.marker.remove();
       delete speciesFigures[id];
     });
-    // Reset tooltip / fit tracking
     _prevVisibleSpeciesIds = new Set();
     _seenEventIds.clear();
     _renderedEventMarkers.forEach(function(m) { try { eventsLayer.removeLayer(m); } catch(e){} });
     _renderedEventMarkers.clear();
     _lastVisibleIds = '';
-    setTime(TIMELINE_MIN);
   }
 
   // Init figure layer; resume any paused walks (no-op on fresh start)
@@ -4819,13 +4817,18 @@ window.addEventListener('load', function() {
     setTime(linearToTime(x));
   }
 
-  wrapper.addEventListener('touchstart', function(e) { dragging = true; applyX(fromEvent(e)); }, { passive: true });
+  wrapper.addEventListener('touchstart', function(e) {
+    if (e.target && e.target.closest && e.target.closest('#play-btn')) return;
+    dragging = true;
+    applyX(fromEvent(e));
+  }, { passive: true });
   wrapper.addEventListener('touchmove',  function(e) { if (!dragging) return; e.preventDefault(); applyX(fromEvent(e)); }, { passive: false });
   wrapper.addEventListener('touchend',   function()  { dragging = false; }, { passive: true });
 
-  // Click on bands (not on the handle) jumps to that time
+  // Click on bands (not on the handle) jumps to that time — ignore Play (inside this wrapper)
   wrapper.addEventListener('click', function(e) {
     if (e.target === document.getElementById('timeline-scrubber')) return;
+    if (e.target.closest && e.target.closest('#play-btn')) return;
     applyX(e.clientX);
   });
 })();
