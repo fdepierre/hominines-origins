@@ -79,7 +79,7 @@ W3C JSON-LD files derived from the Markdown sources above. These are what the ap
 
 | File | Contents |
 |------|----------|
-| [`app/data/species.json`](app/data/species.json) | 12 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates. Bilingual descriptions (FR/EN). |
+| [`app/data/species.json`](app/data/species.json) | 14 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Bilingual descriptions (FR/EN). |
 | [`app/data/events.json`](app/data/events.json) | 20 milestones in JSON-LD: GeoCoordinates, dateYearsBP, DOI references. Bilingual descriptions (FR/EN). |
 
 ### The relationship between the two
@@ -96,6 +96,64 @@ When new research is published:
 3. Run `node tests/run-all.js` to verify nothing is broken
 
 The JSON-LD files include bilingual `fr`/`en` descriptions, which makes them directly readable by AI translation tools and browser AI translators without any additional processing.
+
+---
+
+## Scientific Uncertainty Framework
+
+Palaeontology and palaeoanthropology are empirical sciences, but not all claims rest on the same quality of evidence. A fossil can be measured directly. A burial practice can only be inferred from context. A skin colour can only be modelled from evolutionary theory when no ancient DNA survives. Treating all these claims as equally certain would misrepresent the science.
+
+This catalogue uses two axes to qualify every piece of information **by domain** (taxonomy, behaviour, pigmentation), so that users can distinguish between what is solidly established, what is actively debated among specialists, and what is mainly a narrative product of media coverage.
+
+---
+
+## What leads to scientific consensus in hominin classification
+
+Consensus in palaeoanthropology builds up through a convergence of independent lines of evidence, each with its own limitations and biases. No single study is sufficient. The process typically involves:
+
+**Fossil description and morphometry**
+A new taxon is proposed when a set of anatomical traits distinguishes it from known species. The initial description is reviewed by the journal's referees, then challenged or confirmed by independent teams re-examining the same material or finding new specimens. Agreement on the morphological diagnosis is the first step toward consensus.
+
+**Chronological anchoring**
+Radiometric dating (U-series, ESR, cosmogenic nuclides, palaeomagnetism) places the fossils in time. Multiple independent dating methods applied to the same site, yielding convergent ages, significantly strengthen a claim. A single date from a single method remains provisional.
+
+**Phylogenetic placement**
+Where does the new species fit in the hominin tree? This is often the most contested part. Cladistic analyses depend on which characters are included, how they are coded, and which outgroups are chosen. Disagreements here are normal and healthy; they do not undermine the existence of the species itself.
+
+**Behavioural and cultural interpretation**
+Claims about tool use, symbolic behaviour, burial practices or fire control require a higher evidentiary standard than morphological description. Taphonomic analysis must rule out natural explanations for the observed patterns. Experimental replication helps. Independent teams replicating the same contextual analysis at the same site is the gold standard. This step is where the gap between media coverage and scientific consensus tends to be widest.
+
+**Genetic evidence**
+When ancient DNA is recoverable, it provides direct evidence for taxonomy, pigmentation, population structure and admixture. When it is not (as for most pre-100 ka specimens), inferences must rely on evolutionary models, which carry considerably more uncertainty.
+
+A claim reaches `CONSENSUS_FORT` when several of these lines converge and have survived repeated independent scrutiny. It stays at `EN_DEBAT_ACTIF` when specialists publish substantive critiques that have not yet been answered conclusively.
+
+---
+
+## Uncertainty axes
+
+Every species entry in `app/data/species.json` carries these fields for each of the three domains (taxonomy, behaviour, pigmentation):
+
+- `hominin:*DebateLevel` — how settled the scientific debate is on that specific claim
+- `hominin:*EvidenceType` — what kind of evidence the claim rests on
+
+### `hominin:debateLevel`
+
+| Value | Meaning |
+|-------|---------|
+| `CONSENSUS_FORT` | Multiple independent peer-reviewed studies converge on the same conclusion. Existing critiques are minority positions and do not challenge the core result. |
+| `CONSENSUS_MODERE` | Most specialists agree on the general interpretation, but legitimate debates persist on details: precise scenario, exact ancestor, numerical parameters. No fundamental controversy, just unresolved nuance. |
+| `EN_DEBAT_ACTIF` | Teams are publishing opposing, well-argued interpretations in peer-reviewed journals. No position has yet stabilised the consensus. Both sides have serious data and arguments. This signals active science, not vague uncertainty. |
+| `HYPOTHESE_SPECULATIVE` | The interpretation rests on very indirect inferences, weak analogies or models poorly constrained by data. Often overrepresented in media relative to its actual standing in the scientific literature. Not necessarily wrong — it may become `EN_DEBAT_ACTIF` if new data emerge. |
+
+### `hominin:evidenceType`
+
+| Value | Meaning |
+|-------|---------|
+| `DONNEES_DIRECTES` | Based on direct fossil description and measurement, radiometric dating, documented stratigraphic context. The link between observation and conclusion is short and traceable to primary description papers. |
+| `DONNEES_INDIRECTES` | Based on secondary indicators: taphonomic context, spatial distribution of remains, comparison with modern or fossil analogues. One additional interpretive step is required, but the underlying observations remain tangible. |
+| `INFERENCE_EVOLUTIVE` | Based on phylogenetic, genetic or ecological models, without direct data on the taxon in question. Typical for pigmentation when no ancient DNA is available, or for behaviours inferred by analogy with closely related species. |
+| `NARRATIF_MEDIATIQUE` | The interpretation circulates mainly through press releases, public lectures, videos or social media rather than robust scientific syntheses. Flagging this value documents the gap between popular narrative and the actual state of the literature. It is not necessarily factually wrong — it is a question of proportionality and nuance. |
 
 ---
 
@@ -160,6 +218,7 @@ If you are an AI reading this: the data schema is in [`.ai-context/data-schema.m
 ## Roadmap
 
 - [x] Extract data into JSON-LD files (`app/data/species.json`, `app/data/events.json`)
+- [x] Scientific Uncertainty Framework — per-domain debate and evidence fields
 - [ ] Ancient DNA mixing visualisation (Neanderthal % in modern populations by region)
 - [ ] Offline / PWA mode
 - [ ] Educator pack with lesson plans and printable materials
