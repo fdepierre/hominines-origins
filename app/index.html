@@ -70,12 +70,12 @@
   --color-purple:         #7a5e9b;
   --color-error:          #a84040;
 
-  /* Tri-icon certitude : même sémantique pour toutes les espèces (pas la couleur de la ligne) */
-  --certainty-consensus-fort:   #4ecf9a;
-  --certainty-consensus-modere: #e8b84d;
-  --certainty-debat-actif:      #e87860;
-  --certainty-hypothese:        #a884c8;
-  --certainty-unknown:          #6a6258;
+  /* Tri-icon certitude : vert / orange / rouge (lisible, identique pour toutes les espèces) */
+  --certainty-consensus-fort:   #4ade80;
+  --certainty-consensus-modere: #fb923c;
+  --certainty-debat-actif:      #f87171;
+  --certainty-hypothese:        #f87171;
+  --certainty-unknown:          #78716a;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
@@ -105,11 +105,11 @@
   --color-purple:         #4a2e7a;
   --color-error:          #7a1a1a;
 
-  --certainty-consensus-fort:   #1d7a4a;
-  --certainty-consensus-modere: #b8860b;
-  --certainty-debat-actif:      #c44a32;
-  --certainty-hypothese:        #5c3d7a;
-  --certainty-unknown:          #8a8278;
+  --certainty-consensus-fort:   #15803d;
+  --certainty-consensus-modere: #c2410c;
+  --certainty-debat-actif:      #b91c1c;
+  --certainty-hypothese:        #b91c1c;
+  --certainty-unknown:          #78716a;
 
   --shadow-sm: 0 1px 4px rgba(0,0,0,0.18);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
@@ -2367,7 +2367,7 @@ function renderCertaintyTriIcon(species, T) {
     '</svg></button>' +
     '<div class="certainty-tri-pop" role="tooltip">' +
     '<div class="certainty-tri-pop-title">' + T('certaintyPanelTitle', 'Certitude par thème') + '</div>' +
-    '<div class="certainty-tri-pop-legend">' + T('certaintyTriLegend', 'Même code couleurs pour toutes les espèces : vert = consensus fort · ambre = modéré · corail = débat actif · violet = hypothèse spéculative.') + '</div>' +
+    '<div class="certainty-tri-pop-legend">' + T('certaintyTriLegend', 'Même code pour toutes les espèces : vert = fort consensus · orange = modéré · rouge = débat ou hypothèse fragile.') + '</div>' +
     popRows +
     '</div></div>'
   );
@@ -3588,7 +3588,7 @@ const TRANSLATIONS = {
         uncertaintyWhy: 'L’icône à trois secteurs du panneau reprend les mêmes couleurs que la liste ci‑dessous, pour toute espèce. La teinte sur la carte et sur la frise chronologique identifie le groupe taxonomique ; elle ne remplace pas ces niveaux d’accord.',
         certaintyPanelTitle: 'Certitude par thème',
         certaintyTriAria: 'Certitude par thème : secteur supérieur taxonomie, puis comportement, puis pigmentation (sens horaire). Survolez ou activez pour le détail.',
-        certaintyTriLegend: 'Même code couleurs pour toutes les espèces : vert = consensus fort · ambre = modéré · corail = débat actif · violet = hypothèse spéculative.',
+        certaintyTriLegend: 'Même code pour toutes les espèces : vert = fort consensus · orange = modéré · rouge = débat actif ou hypothèse fragile.',
         certaintyDomainTax: 'Taxonomie',
         certaintyDomainBehavior: 'Comportement',
         certaintyDomainPig: 'Pigmentation',
@@ -3670,7 +3670,7 @@ const TRANSLATIONS = {
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyTriAria: 'Certainty by topic: top sector taxonomy, then behaviour, then pigmentation (clockwise). Hover or focus the icon for full detail.',
-        certaintyTriLegend: 'Same colour key for every species: green = strong consensus · amber = moderate · coral = active debate · violet = speculative hypothesis.',
+        certaintyTriLegend: 'Same key for every species: green = strong consensus · orange = moderate · red = active debate or fragile hypothesis.',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
         certaintyDomainPig: 'Pigmentation',
