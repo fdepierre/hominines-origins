@@ -495,6 +495,74 @@
       "hominin:migrations": [
         { "from": [48.0, 40.0], "to": [52.0, 18.0], "label": "Migration Yamna → Europe ~5 000 ans" }
       ]
+    },
+    {
+      "@type": "Species",
+      "@id": "naledi",
+      "taxon:scientificName": "Homo naledi",
+      "name": { "fr": "Une mosaïque anatomique tardive d'Afrique australe", "en": "A late anatomical mosaic from southern Africa" },
+      "hominin:periodStart": -335000,
+      "hominin:periodEnd": -236000,
+      "hominin:color": "#8C5A2B",
+      "hominin:lane": 3,
+      "hominin:heightM": "~145 cm",
+      "hominin:heightF": "~140 cm",
+      "hominin:weightM": "~45 kg",
+      "hominin:brain": "465–610 cm³",
+      "hominin:dimorphism": "Faible à modéré",
+      "hominin:skinDesc": { "fr": "Sombre, inférée par continuité évolutive africaine", "en": "Dark, inferred from African evolutionary continuity" },
+      "hominin:skinColor": "#4a2200",
+      "hominin:skinVariant": null,
+      "hominin:eyesDesc": { "fr": "Bruns", "en": "Brown" },
+      "hominin:eyesColor": "#4b2e19",
+      "hominin:hairDesc": { "fr": "Sombres, probablement crépus", "en": "Dark, probably coiled" },
+      "hominin:hairColor": "#120800",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": "⚠️ Inférence évolutive (pas d'ADN)",
+      "hominin:tools": ["Outils non attribués avec certitude", "Mains adaptées à la préhension fine", "Bipédie efficace avec capacités grimpeuses"],
+      "hominin:debate": "Débat fort sur le statut comportemental et phylogénétique : pratique funéraire, usage du feu et position dans Homo restent contestés ; plusieurs affirmations récentes ont été critiquées comme prématurées.",
+      "hominin:regions": [
+        { "name": "Afrique australe", "lat": -25.9, "lng": 27.8, "radius": 300000, "note": "Rising Star Cave et environs" }
+      ],
+      "hominin:fossilSites": [
+        { "name": "Rising Star Cave (Afrique du Sud)", "lat": -25.92, "lng": 27.73, "note": "Dinaledi Chamber — espèce décrite en 2015, datée ~335–236 ka" },
+        { "name": "Lesedi Chamber (Afrique du Sud)", "lat": -25.92, "lng": 27.73, "note": "Matériel supplémentaire attribué à H. naledi" }
+      ],
+      "hominin:migrations": []
+    },
+    {
+      "@type": "Species",
+      "@id": "floresiensis",
+      "taxon:scientificName": "Homo floresiensis",
+      "name": { "fr": "\"Le Hobbit\" de Flores", "en": "The Flores \"Hobbit\"" },
+      "hominin:periodStart": -100000,
+      "hominin:periodEnd": -50000,
+      "hominin:color": "#B46A3A",
+      "hominin:lane": 2,
+      "hominin:heightM": "~106 cm",
+      "hominin:heightF": "~100 cm",
+      "hominin:weightM": "~30 kg",
+      "hominin:brain": "~380–430 cm³",
+      "hominin:dimorphism": "Faible",
+      "hominin:skinDesc": { "fr": "Sombre, inférée pour un hominine tropical insulaire", "en": "Dark, inferred for a tropical island hominin" },
+      "hominin:skinColor": "#5a3010",
+      "hominin:skinVariant": null,
+      "hominin:eyesDesc": { "fr": "Bruns", "en": "Brown" },
+      "hominin:eyesColor": "#4b2a18",
+      "hominin:hairDesc": { "fr": "Sombres", "en": "Dark" },
+      "hominin:hairColor": "#140a00",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": "⚠️ Inférence évolutive (pas d'ADN)",
+      "hominin:tools": ["Outils lithiques simples", "Faune insulaire chassée ou charognée", "Adaptation probable au nanisme insulaire"],
+      "hominin:debate": "Le débat a opposé espèce distincte et pathologie de H. sapiens, mais l'interprétation comme espèce distincte domine aujourd'hui ; l'ascendance exacte (H. erectus insulaire ou lignée plus ancienne) reste discutée.",
+      "hominin:regions": [
+        { "name": "Île de Flores (Indonésie)", "lat": -8.5, "lng": 121.0, "radius": 180000, "note": "Distribution connue limitée à Flores" }
+      ],
+      "hominin:fossilSites": [
+        { "name": "Liang Bua (Flores, Indonésie)", "lat": -8.53, "lng": 120.45, "note": "LB1 et autres fossiles — ~100 à 50 ka" },
+        { "name": "Mata Menge (Flores, Indonésie)", "lat": -8.68, "lng": 121.08, "note": "Restes plus anciens attribués à des ancêtres de H. floresiensis — ~700 ka" }
+      ],
+      "hominin:migrations": []
     }
   ]
 }
