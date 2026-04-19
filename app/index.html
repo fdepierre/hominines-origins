@@ -122,9 +122,11 @@ a { color: var(--color-primary); }
 /* ===== LAYOUT ===== */
 #app {
   display: grid;
-  grid-template-rows: 1fr auto;
+  /* minmax(0,1fr) lets #main shrink so #timeline is not clipped when the footer is tall (many species) */
+  grid-template-rows: minmax(0, 1fr) auto;
   height: 100dvh;
   overflow: hidden;
+  min-height: 0;
 }
 /* Header hidden — controls moved to burger menu */
 #header { display: none; }
@@ -356,6 +358,7 @@ a { color: var(--color-primary); }
   grid-template-columns: 1fr 380px;
   overflow: hidden;
   position: relative;
+  min-height: 0;
 }
 
 /* ===== MAP ===== */
@@ -667,7 +670,7 @@ a { color: var(--color-primary); }
 /* === MAIN SPECIES TRACK === */
 .timeline-species-track {
   position: relative;
-  height: 240px; /* fallback — overridden by JS (12 species × 20px) */
+  height: 240px; /* fallback — overridden by JS (one row per species) */
   margin-bottom: var(--space-1);
 }
 /* The rail underneath */
@@ -1599,7 +1602,8 @@ a { color: var(--color-primary); }
   #app { padding-bottom: 52px; }
   #main {
     grid-template-columns: 1fr !important;
-    height: calc(100dvh - 260px - 52px);
+    /* Reserve space for the real #timeline height (set via --mobile-timeline-reserve after layout; fallback for first paint) */
+    height: calc(100dvh - var(--mobile-timeline-reserve, 360px) - 52px);
     position: relative; overflow: hidden;
   }
   .map-container {
@@ -2386,10 +2390,33 @@ function getLaneTop(laneIndex, totalRows) {
   return invertedIndex * (LANE_H + LANE_GAP);
 }
 
+/** Mobile: #main used a fixed vertical guess; measure real #timeline height so all species rows stay in view. */
+function updateMobileTimelineReserve() {
+  try {
+    if (typeof window.matchMedia === 'undefined' || !window.matchMedia('(max-width: 768px)').matches) {
+      document.documentElement.style.removeProperty('--mobile-timeline-reserve');
+      return;
+    }
+    var tl = document.getElementById('timeline');
+    if (!tl) return;
+    var h = Math.ceil(tl.getBoundingClientRect().height);
+    var reserve = Math.max(h + 20, 300);
+    document.documentElement.style.setProperty('--mobile-timeline-reserve', reserve + 'px');
+  } catch (e) { /* ignore */ }
+}
+
+var _mobileReserveResizeTimer;
+function scheduleMobileTimelineReserve() {
+  clearTimeout(_mobileReserveResizeTimer);
+  _mobileReserveResizeTimer = setTimeout(updateMobileTimelineReserve, 120);
+}
+
 function initTimeline() {
   const track = document.getElementById('timeline-species-track');
   const lanesEl = document.getElementById('timeline-lanes');
   const ticksRow = document.getElementById('timeline-ticks-row');
+  if (lanesEl) lanesEl.innerHTML = '';
+  if (ticksRow) ticksRow.innerHTML = '';
 
   // --- One row per species, oldest at bottom ---
   const rowOrder = buildRowOrder(SPECIES_DATA); // index 0 = oldest = bottom
@@ -2397,12 +2424,16 @@ function initTimeline() {
   const trackH = rowCount * (LANE_H + LANE_GAP) + LANE_GAP;
   if (track) track.style.height = trackH + 'px';
 
-  // --- Species lanes ---
+  // --- Species lanes (every entry in SPECIES_DATA gets one row) ---
   SPECIES_DATA.forEach(species => {
     const x1pct = timeToLinear(species.start) * 100;
     const x2pct = timeToLinear(species.end) * 100;
     const widthPct = Math.abs(x2pct - x1pct);
     const laneIdx = rowOrder.findIndex(s => s.id === species.id);
+    if (laneIdx < 0) {
+      console.warn('[Hominines timeline] No row slot for species id:', species && species.id);
+      return;
+    }
     const topPx = LANE_GAP + getLaneTop(laneIdx, rowCount);
 
     const lane = document.createElement('div');
@@ -2465,6 +2496,11 @@ function initTimeline() {
 
   // --- Needle position init ---
   updateNeedlePosition();
+
+  // After lanes + bands exist, sync mobile CSS reserve so #main does not cover the footer (all species visible)
+  requestAnimationFrame(function () {
+    requestAnimationFrame(updateMobileTimelineReserve);
+  });
 
   // --- Drag scrubber ---
   const scrubber = document.getElementById('timeline-scrubber');
@@ -3261,10 +3297,14 @@ function bootApp() {
   eventsLayer = L.layerGroup().addTo(leafletMap);
   animMigLayer = L.layerGroup().addTo(leafletMap);
   initTimeline();
+  window.addEventListener('resize', scheduleMobileTimelineReserve);
   initLayerToggles();
   initThemeToggle();
   setTime(-4100000);
   updateMap();
+  requestAnimationFrame(function () {
+    requestAnimationFrame(updateMobileTimelineReserve);
+  });
 
   // Play button
   const playBtn = document.getElementById('play-btn');

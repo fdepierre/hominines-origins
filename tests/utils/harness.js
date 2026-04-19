@@ -8,6 +8,9 @@
  *
  * Stable UI hooks live on `data-testid` in app/index.html (see tests/visual.test.js).
  * Fast pre-check: `npm run test:smoke` (no PNG snapshots, no tablet pass).
+ *
+ * Visible browser (debug): set HEADED=1 (e.g. `npm run test:headed`) so Chromium
+ * opens with headless: false. Optional PLAYWRIGHT_SLOWMO=250 slows actions (ms).
  */
 
 const { chromium } = require('playwright');
@@ -108,10 +111,13 @@ function resetStats() { _pass = 0; _fail = 0; _warn = 0; }
 async function launch({ width = 1440, height = 900, mobile = false } = {}) {
   // Let Playwright find the browser automatically.
   // The env var override is kept for unusual local setups only.
+  const headed = process.env.HEADED === '1' || process.env.PLAYWRIGHT_HEADED === '1';
+  const slowMo = parseInt(process.env.PLAYWRIGHT_SLOWMO || '0', 10) || undefined;
   const launchOpts = {
-    headless: true,
+    headless: !headed,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   };
+  if (slowMo) launchOpts.slowMo = slowMo;
   if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
     launchOpts.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
   }
