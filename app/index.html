@@ -2233,6 +2233,14 @@ function updateEvents() {
         ${ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + ev.source + '</span>' : ''}
       </div>
     `, { direction: 'auto', offset: [0, -10] });
+    marker.on('click', function (e) {
+      if (e && e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
+      setTime(ev.time);
+      if (typeof scheduleTimelineBandSync === 'function') {
+        scheduleTimelineBandSync();
+        requestAnimationFrame(function () { scheduleTimelineBandSync(); });
+      }
+    });
     eventsLayer.addLayer(marker);
     _renderedEventMarkers.set(ev.id, marker);
 
