@@ -435,7 +435,9 @@ ul.uncertainty-level-list {
 #main {
   display: grid;
   grid-template-columns: 1fr 380px;
-  overflow: hidden;
+  /* x: clip wide panes; y: visible so map tooltips can extend slightly above the map without being cut off */
+  overflow-x: hidden;
+  overflow-y: visible;
   position: relative;
   min-height: 0;
 }
@@ -979,28 +981,7 @@ ul.uncertainty-level-list {
   transform: translateY(-50%);
   height: 16px;
   border-radius: 3px;
-  cursor: default;
-}
-.band-segment:hover::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--tooltip-bg);
-  border: 1px solid var(--tooltip-border);
-  border-radius: var(--tooltip-radius);
-  padding: var(--tooltip-pad);
-  font-size: var(--tooltip-size);
-  font-family: var(--tooltip-font);
-  line-height: var(--tooltip-lh);
-  white-space: nowrap;
-  color: var(--tooltip-color);
-  z-index: 100;
-  pointer-events: none;
-  box-shadow: var(--tooltip-shadow);
-  min-width: 120px;
-  text-align: left;
+  cursor: pointer;
 }
 
 /* === EVENTS BAND (tools, fire, art, etc.) === */
@@ -1063,6 +1044,19 @@ ul.uncertainty-level-list {
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+/* Peau + espèces : colonne étroite, texte replié (homogène thème clair/sombre, pas tooltip OS noir) */
+#band-tooltip.band-tooltip--skin,
+#band-tooltip.band-tooltip--species {
+  min-width: 0;
+  max-width: min(240px, 90vw);
+  max-height: min(48vh, 380px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: auto;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: left;
 }
 
 /* Touch target enlargement on mobile */
@@ -1373,10 +1367,13 @@ ul.uncertainty-level-list {
   flex-shrink: 0;
 }
 
-/* Map container relative position */
+/* Map container relative position — overflow visible so Leaflet tooltips are not clipped at top/sides */
 .map-container {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+}
+.map-container .leaflet-container {
+  overflow: visible;
 }
 
 /* Section title shared */
@@ -1717,7 +1714,9 @@ ul.uncertainty-level-list {
     grid-template-columns: 1fr !important;
     /* Reserve space for the real #timeline height (set via --mobile-timeline-reserve after layout; fallback for first paint) */
     height: calc(100dvh - var(--mobile-timeline-reserve, 360px) - var(--mobile-tab-bar-h) - env(safe-area-inset-bottom, 0px));
-    position: relative; overflow: hidden;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
   .map-container {
     position: absolute; inset: 0; z-index: 1;
@@ -1770,6 +1769,11 @@ ul.uncertainty-level-list {
     line-height: 1.35;
     -webkit-overflow-scrolling: touch;
     pointer-events: auto;
+  }
+  #band-tooltip.band-tooltip--skin,
+  #band-tooltip.band-tooltip--species {
+    max-width: min(240px, calc(100vw - 16px)) !important;
+    max-height: min(44vh, 300px) !important;
   }
 }
 
@@ -2122,7 +2126,7 @@ function updateMap() {
           dashArray: '4 4',
         });
         circle.bindTooltip(`<strong>${species.name}</strong><br>${region.note}`, {
-          permanent: false, direction: 'top', offset: [0, -8], className: 'leaflet-tooltip-custom ho-map-rich-tip',
+          permanent: false, direction: 'auto', offset: [0, -6], className: 'leaflet-tooltip-custom ho-map-rich-tip',
         });
         rangesLayer.addLayer(circle);
       });
@@ -2153,7 +2157,7 @@ function updateMap() {
             <em style="color:#9a8f7a">${species.name}</em><br>
             ${site.note}
           </div>
-        `, { direction: 'top', offset: [0, -12], className: 'leaflet-tooltip-custom ho-map-rich-tip' });
+        `, { direction: 'auto', offset: [0, -8], className: 'leaflet-tooltip-custom ho-map-rich-tip' });
 
         marker.on('click', () => {
           window._userPickedSpecies = true;
@@ -2300,7 +2304,7 @@ function updateEvents() {
         ${ev.desc}
         ${ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + ev.source + '</span>' : ''}
       </div>
-    `, { direction: 'top', offset: [0, -16], className: 'ho-map-rich-tip' });
+    `, { direction: 'auto', offset: [0, -10], className: 'ho-map-rich-tip' });
     marker.on('click', function (e) {
       if (e && e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
       suppressMobileNarrativeFit(2000);
@@ -2720,7 +2724,7 @@ function initTimeline() {
     lane.style.borderRadius = laneRadius;
     lane.style.background = species.color;
     lane.setAttribute('data-id', species.id);
-    lane.title = species.name + ' (' + formatTime(species.start) + ' à ' + formatTime(species.end) + ')';
+    lane.setAttribute('aria-label', species.name + ' (' + formatTime(species.start) + ' à ' + formatTime(species.end) + ')');
 
     // Inline label
     const lbl = document.createElement('span');
@@ -2728,7 +2732,36 @@ function initTimeline() {
     lbl.textContent = species.name.replace('Homo sapiens — ', 'H.s. ');
     lane.appendChild(lbl);
 
+    lane.addEventListener('mouseenter', function () {
+      if (isMobileViewport()) return;
+      const tipEl = document.getElementById('band-tooltip');
+      if (!tipEl) return;
+      tipEl.classList.remove('band-tooltip--skin');
+      tipEl.classList.add('band-tooltip--species');
+      tipEl.innerHTML = speciesLaneTooltipHtml(species);
+      tipEl.style.display = 'block';
+      requestAnimationFrame(function () { positionBandTipNearIcon(lane); });
+    });
+    lane.addEventListener('mouseleave', function () {
+      if (isMobileViewport()) return;
+      const tipEl = document.getElementById('band-tooltip');
+      if (tipEl) tipEl.style.display = 'none';
+    });
+
     lane.addEventListener('click', () => {
+      if (isMobileViewport()) {
+        const tipEl = document.getElementById('band-tooltip');
+        if (tipEl) {
+          tipEl.classList.remove('band-tooltip--skin');
+          tipEl.classList.add('band-tooltip--species');
+          tipEl.innerHTML = speciesLaneTooltipHtml(species);
+          tipEl.style.display = 'block';
+          _bandTipPinKey = 'species:' + species.id;
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () { positionBandTipNearIcon(lane); });
+          });
+        }
+      }
       const midTime = (species.start + species.end) / 2;
       setTime(midTime);
       window._userPickedSpecies = true;
@@ -2882,13 +2915,40 @@ function scheduleTimelineBandSync() {
   _timelineBandSyncTimer = setTimeout(syncTimelineBandsToSpeciesTrack, 40);
 }
 
+function bandTipEscapeHtml(s) {
+  if (s == null || s === '') return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function skinBandTooltipHtml(seg) {
+  return (
+    '<strong style="color:var(--color-primary)">' + bandTipEscapeHtml(seg.label) + '</strong><br>' +
+    '<span style="color:var(--color-text-muted);font-size:11px;font-family:var(--font-mono)">' +
+    bandTipEscapeHtml(formatTime(seg.start)) + ' → ' + bandTipEscapeHtml(formatTime(seg.end)) + '</span><br>' +
+    '<span style="color:var(--color-text)">' + bandTipEscapeHtml(seg.tip) + '</span>'
+  );
+}
+
+function speciesLaneTooltipHtml(species) {
+  return (
+    '<strong style="color:' + bandTipEscapeHtml(species.color) + '">' + bandTipEscapeHtml(species.name) + '</strong><br>' +
+    '<span style="color:var(--color-text-muted);font-size:11px;font-family:var(--font-mono)">' +
+    bandTipEscapeHtml(formatTime(species.start)) + ' → ' + bandTipEscapeHtml(formatTime(species.end)) + '</span>'
+  );
+}
+
 function buildSkinBand() {
   const band = document.getElementById('skin-band');
   const track = document.getElementById('skin-band-track');
   if (!band || !track) return;
   band.querySelectorAll('.band-segment').forEach(function (n) { n.remove(); });
 
-  SKIN_PERIODS.forEach(seg => {
+  const tip = document.getElementById('band-tooltip');
+  SKIN_PERIODS.forEach(function (seg, idx) {
     const tA = timeToLinear(seg.start);
     const tB = timeToLinear(seg.end);
     const x1lin = Math.min(tA, tB);
@@ -2900,23 +2960,52 @@ function buildSkinBand() {
     el.style.left = '0px';
     el.style.width = '0px';
     el.style.border = '1px solid rgba(255,255,255,0.12)';
-    // Gradient band for segments representing global diversity
     if (seg.gradientColors && seg.gradientColors.length) {
       const stops = seg.gradientColors.join(', ');
       el.style.background = `linear-gradient(to right, ${stops})`;
     } else {
       el.style.background = seg.color;
     }
-    el.setAttribute('data-tip', seg.tip);
-    el.title = seg.tip;
-    // Fur icon indicator
+    el.setAttribute('aria-label', seg.label + ' — ' + seg.tip);
     if (seg.cssClass === 'fur') {
       el.innerHTML = '<span style="font-size:9px;position:absolute;left:3px;top:50%;transform:translateY(-50%);opacity:0.7;pointer-events:none">🐒</span>';
     } else if (seg.cssClass === 'partial-fur') {
       el.innerHTML = '<span style="font-size:9px;position:absolute;left:3px;top:50%;transform:translateY(-50%);opacity:0.7;pointer-events:none">~🐒</span>';
     }
+
+    el.addEventListener('mouseenter', function () {
+      if (isMobileViewport() || !tip) return;
+      tip.classList.remove('band-tooltip--species');
+      tip.classList.add('band-tooltip--skin');
+      tip.innerHTML = skinBandTooltipHtml(seg);
+      tip.style.display = 'block';
+      requestAnimationFrame(function () { positionBandTipNearIcon(el); });
+    });
+    el.addEventListener('mouseleave', function () {
+      if (isMobileViewport() || !tip) return;
+      tip.style.display = 'none';
+    });
+    el.addEventListener('click', function (e) {
+      if (!isMobileViewport() || !tip) return;
+      e.stopPropagation();
+      const myKey = 'skin:' + idx;
+      if (_bandTipPinKey === myKey) {
+        closeMobileBandTooltip();
+        return;
+      }
+      tip.classList.remove('band-tooltip--species');
+      tip.classList.add('band-tooltip--skin');
+      tip.innerHTML = skinBandTooltipHtml(seg);
+      tip.style.display = 'block';
+      _bandTipPinKey = myKey;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { positionBandTipNearIcon(el); });
+      });
+    });
+
     track.appendChild(el);
   });
+  installBandTooltipGlobalCloserIfNeeded();
   syncTimelineBandsToSpeciesTrack();
 }
 
@@ -2995,12 +3084,16 @@ function eventMapMarkerInnerContent(ev) {
   );
 }
 
-let _bandTipPinnedEvId = null;
+/** Pinned #band-tooltip on mobile: 'event:id' | 'skin:idx' | 'species:id' */
+let _bandTipPinKey = null;
 
 function closeMobileBandTooltip() {
   const tip = document.getElementById('band-tooltip');
-  if (tip) tip.style.display = 'none';
-  _bandTipPinnedEvId = null;
+  if (tip) {
+    tip.style.display = 'none';
+    tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
+  }
+  _bandTipPinKey = null;
 }
 
 /** Pin #band-tooltip near the jalons icon (mobile) so it does not cover the map centre. */
@@ -3029,11 +3122,13 @@ function installBandTooltipGlobalCloserIfNeeded() {
   if (window._hoBandTipCloserInstalled) return;
   window._hoBandTipCloserInstalled = true;
   document.addEventListener('pointerdown', function (e) {
-    if (!isMobileViewport() || !_bandTipPinnedEvId) return;
+    if (!isMobileViewport() || !_bandTipPinKey) return;
     const tip = document.getElementById('band-tooltip');
     if (!tip || tip.style.display !== 'block') return;
     if (tip.contains(e.target)) return;
     if (e.target.closest && e.target.closest('.event-marker')) return;
+    if (e.target.closest && e.target.closest('.band-segment')) return;
+    if (e.target.closest && e.target.closest('.species-lane')) return;
     closeMobileBandTooltip();
   }, false);
 }
@@ -3092,6 +3187,7 @@ function buildEventsBand() {
     el.addEventListener('mouseenter', function(e) {
       if (isMobileViewport()) return;
       if (!tip) return;
+      tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
       tip.innerHTML = tipHtml;
       tip.style.display = 'block';
       requestAnimationFrame(function() { positionTip(e.clientX, e.clientY); });
@@ -3108,11 +3204,13 @@ function buildEventsBand() {
       e.stopPropagation();
       suppressMobileNarrativeFit(2000);
       if (isMobileViewport() && tip) {
-        if (_bandTipPinnedEvId === ev.id) {
+        const pinKey = 'event:' + ev.id;
+        if (_bandTipPinKey === pinKey) {
           closeMobileBandTooltip();
           return;
         }
-        _bandTipPinnedEvId = ev.id;
+        tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
+        _bandTipPinKey = pinKey;
         tip.innerHTML = tipHtml;
         tip.style.display = 'block';
         requestAnimationFrame(function () {
