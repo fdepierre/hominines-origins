@@ -1791,9 +1791,11 @@ ul.uncertainty-level-list {
    ============================================================== */
 @media (min-width: 769px) {
   #mobile-tab-bar { display: none !important; }
-  .map-container  { opacity: 1 !important; pointer-events: all !important; }
+  /* Map vs panel: two grid columns; keep panel above the map so Leaflet layers never paint over it after flyTo/invalidateSize. */
+  .map-container  { opacity: 1 !important; pointer-events: all !important; z-index: 1 !important; }
   #side-panel {
-    position: static !important;
+    position: relative !important;
+    z-index: 2 !important;
     height: auto !important;
     opacity: 1 !important;
     pointer-events: all !important;
@@ -3309,7 +3311,7 @@ function buildEventsBand() {
         });
       }
       setTime(ev.time);
-      if (typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
+      if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
       if (typeof queueEventMapFocus === 'function') queueEventMapFocus(ev.id);
       scheduleTimelineBandSync();
       requestAnimationFrame(function () { scheduleTimelineBandSync(); });
