@@ -4,7 +4,8 @@
  *
  * Run: node tests/a11y.test.js
  * Smoke (faster, fewer cases): node tests/a11y.test.js --smoke — skips tablet,
- * Play auto-stop-at-end, dir=ltr sweep, and Playwright welcome-locale checks.
+ * Play auto-stop-at-end, dir=ltr sweep, Playwright welcome-locale, and
+ * close-button / layer-title i18n checks.
  */
 
 'use strict';
@@ -12,7 +13,7 @@ const { launch, loadApp, setTime,
         assert, assertSoft, getStats, resetStats,
         BOLD, CYAN, GREEN, RED, YELLOW, RESET } = require('./utils/harness');
 
-/** @param {{ smoke?: boolean }} [options] — smoke: skip tablet, timing-sensitive play test, dir=ltr, welcome-locale */
+/** @param {{ smoke?: boolean }} [options] — smoke: skip tablet, timing-sensitive play test, dir=ltr, welcome-locale, close-button i18n */
 async function runA11yTests(options = {}) {
   const smoke = options.smoke === true;
   const errors = [];
@@ -363,6 +364,68 @@ async function runA11yTests(options = {}) {
     });
   } else {
     console.log(`\n  ${YELLOW}Welcome locale (Playwright): skipped in smoke mode${RESET}`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 6c. CLOSE BUTTONS (sr-only) + LAYER TITLE I18N (regression for ui.ui.*)
+  // ═══════════════════════════════════════════════════════════════════════════
+  if (!smoke) {
+    console.log(`\n${BOLD}◆ CLOSE BUTTONS & I18N TITLES${RESET}`);
+
+    await test('Burger + JSON drawer close: sr-only label follows en/fr', async () => {
+      await page.evaluate(() => {
+        const sel = document.getElementById('lang-select');
+        if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      await page.waitForTimeout(450);
+      await page.click('[data-testid="burger-menu-button"]');
+      await page.waitForSelector('#burger-panel.open', { timeout: 4000 });
+      const enClose = await page.evaluate(() => {
+        const sr = document.querySelector('#burger-close .sr-only');
+        return sr ? sr.textContent.trim() : '';
+      });
+      assert(enClose === 'Close', `Burger close sr-only (en): "${enClose}"`);
+
+      await page.click('[data-testid="burger-close"]');
+      await page.waitForTimeout(200);
+
+      await page.evaluate(() => {
+        const sel = document.getElementById('lang-select');
+        if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      await page.waitForTimeout(450);
+      await page.click('[data-testid="burger-menu-button"]');
+      await page.waitForSelector('#burger-panel.open', { timeout: 4000 });
+      const frBurger = await page.evaluate(() => {
+        const sr = document.querySelector('#burger-close .sr-only');
+        return sr ? sr.textContent.trim() : '';
+      });
+      assert(frBurger === 'Fermer', `Burger close sr-only (fr): "${frBurger}"`);
+
+      await page.click('#btn-data-viewer');
+      await page.waitForSelector('.data-viewer-drawer.open', { timeout: 4000 });
+      const frJson = await page.evaluate(() => {
+        const sr = document.querySelector('#btn-close-data-viewer .sr-only');
+        return sr ? sr.textContent.trim() : '';
+      });
+      assert(frJson === 'Fermer', `JSON drawer close sr-only (fr): "${frJson}"`);
+      await page.click('[data-testid="close-data-viewer"]');
+      await page.waitForTimeout(200);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
+    });
+
+    await test('Map layer button titles are localized (no broken ui.ui.* key)', async () => {
+      const sitesTitle = await page.evaluate(() => {
+        const el = document.querySelector('.layer-btn[data-layer="sites"]');
+        return el ? el.title : '';
+      });
+      assert(sitesTitle && !sitesTitle.includes('ui.ui.'), `Sites layer title: "${sitesTitle}"`);
+      assert(/fossil|site|fósil|Afficher|Mostrar|masquer|ocultar/i.test(sitesTitle),
+        `Sites layer title looks localized: "${sitesTitle}"`);
+    });
+  } else {
+    console.log(`\n  ${YELLOW}Close-button / layer-title checks: skipped in smoke mode${RESET}`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
