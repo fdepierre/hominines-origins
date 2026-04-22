@@ -90,11 +90,15 @@ Functions: `linearToTime(t)` and `timeToLinear(time)` — do not change these wi
 
 ### Internationalisation
 
-The i18next library (CDN) handles language switching. The `TRANSLATIONS` object near the bottom of `app/index.html` contains all UI strings for 10 languages. The `applyTranslations()` function updates the DOM when the language changes.
+**Goal:** any visitor should be able to read the app in **their** language. Two mechanisms work together:
 
-Scientific narrative loaded from JSON is **French-first** in the live UI (many entries also include `en` in the file). Do **not** set `translate="no"` on `<html>` when i18next switches language: `languageChanged` must keep `document.documentElement` at `translate="yes"` so Chrome / Edge / Safari page translation can run on the rest of the document. The raw JSON viewer uses `<code id="json-code" translate="no">` so machine-readable output is not mangled by translators.
+1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for languages **outside** the bundled list. Keep `<html translate="yes">` (re-applied after `i18next` init and on `languageChanged`). Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands only (e.g. `#json-code`, and the `#lang-select` block so option labels are not double-translated).
 
-To add a language: copy the `fr` block in `TRANSLATIONS`, translate every string, add an `<option>` in `#lang-select`.
+2. **i18next** — instant UI for **10** bundled locales without an online translator round-trip; `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]`, and rebuilds bands/map when needed. Scientific narrative from JSON remains **French-first** in the DOM (many JSON entries also carry `en`).
+
+The `TRANSLATIONS` object near the bottom of `app/index.html` holds the bundled strings.
+
+To add a bundled language: copy the `fr` block in `TRANSLATIONS`, translate every string, add an `<option>` in `#lang-select`, and keep `translate="no"` on the selector wrapper if you want stable language names when the page is machine-translated.
 
 ### Theme
 
