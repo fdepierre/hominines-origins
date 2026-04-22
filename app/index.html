@@ -1658,20 +1658,22 @@ ul.uncertainty-level-list {
    ============================================================== */
 #mobile-tab-bar {
   display: none;
-  position: fixed; bottom: 0; left: 0; right: 0; height: 52px;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--mobile-tab-bar-h, 44px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: content-box;
   background: var(--color-surface); border-top: 1px solid var(--color-border);
   z-index: 1500; grid-template-columns: 1fr 1fr; align-items: stretch;
   box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
 }
 .mobile-tab {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; border: none; background: none; color: var(--color-text-muted);
-  font-size: 10px; font-family: var(--font-mono); cursor: pointer;
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  gap: 2px; border: none; background: none; color: var(--color-text-muted);
+  font-size: 9px; font-family: var(--font-mono); cursor: pointer;
   transition: color var(--transition-interactive);
 }
+.mobile-tab svg { width: 18px; height: 18px; flex-shrink: 0; }
 .mobile-tab.mobile-tab-active { color: var(--color-primary); }
-.mobile-tab svg { flex-shrink: 0; }
 
 /* ==============================================================
    DESKTOP — ensure mobile elements don't bleed in (≥769px)
@@ -1692,12 +1694,16 @@ ul.uncertainty-level-list {
    MOBILE LAYOUT (≤768px)
    ============================================================== */
 @media (max-width: 768px) {
+  :root {
+    --mobile-tab-bar-h: 44px;
+    --timeline-band-label-w: 44px;
+  }
   #mobile-tab-bar { display: grid !important; }
-  #app { padding-bottom: 52px; }
+  #app { padding-bottom: calc(var(--mobile-tab-bar-h) + env(safe-area-inset-bottom, 0px)); }
   #main {
     grid-template-columns: 1fr !important;
     /* Reserve space for the real #timeline height (set via --mobile-timeline-reserve after layout; fallback for first paint) */
-    height: calc(100dvh - var(--mobile-timeline-reserve, 360px) - 52px);
+    height: calc(100dvh - var(--mobile-timeline-reserve, 360px) - var(--mobile-tab-bar-h) - env(safe-area-inset-bottom, 0px));
     position: relative; overflow: hidden;
   }
   .map-container {
@@ -1724,6 +1730,18 @@ ul.uncertainty-level-list {
   #play-overlay-btn { width:56px; height:56px; }
   #btn-data-viewer { display:none; }
   .tl-tick-text { display:none !important; }
+  /* More map: compact footer + narrative (species / story) stays readable */
+  #tl-app-desc { display: none; }
+  #tl-title-strip { padding: 0 0 2px; margin-bottom: 2px; }
+  #play-btn { top: 34px !important; padding: 4px 10px; min-height: 0; }
+  .timeline-current-label { font-size: 11px; top: 2px; padding: 0 4px; }
+  #timeline { padding: var(--space-1) var(--space-2) var(--space-1); }
+  .timeline-ticks-row { height: 11px !important; margin-bottom: 1px; }
+  .timeline-band { height: 14px !important; margin-bottom: 2px; }
+  .events-band { height: 17px !important; }
+  .timeline-band-label { width: 44px !important; font-size: 8px !important; padding-right: 2px; }
+  .band-segment { height: 12px !important; }
+  .species-lane-label { font-size: 10px; left: 4px; max-width: calc(100% - 8px); }
 }
 
 /* TABLET */
@@ -2165,7 +2183,10 @@ function switchMobileTabToMap() {
       b.classList.toggle('mobile-tab-active', b.dataset.view === 'map');
     });
     if (typeof leafletMap !== 'undefined' && leafletMap) {
-      setTimeout(function () { leafletMap.invalidateSize(); }, 350);
+      setTimeout(function () {
+        try { leafletMap.invalidateSize(); } catch (e) { /* ignore */ }
+        if (typeof scheduleFitMapToVisibleNarrative === 'function') scheduleFitMapToVisibleNarrative();
+      }, 350);
     }
   } catch (e) { /* ignore */ }
 }
@@ -2576,18 +2597,26 @@ function renderPanel(species) {
 /// One dedicated row per species.
 // Rows ordered oldest-at-bottom → newest-at-top.
 // rowOrder[0] = oldest (bottom row), rowOrder[N-1] = newest (top row).
-const LANE_H   = 12; // bar height in px
-const LANE_GAP = 3;  // vertical gap between rows in px
+function isMobileViewport() {
+  return typeof window.matchMedia !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+}
+/** Tighter lanes on phone → shorter species track → more vertical room for the map. */
+function getLaneMetrics() {
+  return isMobileViewport()
+    ? { h: 9, gap: 2 }
+    : { h: 12, gap: 3 };
+}
 
 function buildRowOrder(speciesList) {
   // sort by start descending: oldest (largest start) first = row 0 = bottom
   return [...speciesList].sort((a, b) => b.start - a.start);
 }
 
-function getLaneTop(laneIndex, totalRows) {
+function getLaneTop(laneIndex, totalRows, lm) {
+  lm = lm || getLaneMetrics();
   // laneIndex 0 = bottom → invert so it renders at the bottom of the track
   const invertedIndex = (totalRows - 1) - laneIndex;
-  return invertedIndex * (LANE_H + LANE_GAP);
+  return invertedIndex * (lm.h + lm.gap);
 }
 
 /** Mobile: #main used a fixed vertical guess; measure real #timeline height so all species rows stay in view. */
@@ -2600,10 +2629,17 @@ function updateMobileTimelineReserve() {
     var tl = document.getElementById('timeline');
     if (!tl) return;
     var h = Math.ceil(tl.getBoundingClientRect().height);
-    var reserve = Math.max(h + 20, 300);
+    /* Match measured footer height (+ small gap); avoid a high floor that steals map space on short phones */
+    var reserve = Math.max(h + 16, 220);
     document.documentElement.style.setProperty('--mobile-timeline-reserve', reserve + 'px');
   } catch (e) { /* ignore */ }
   if (typeof scheduleTimelineBandSync === 'function') scheduleTimelineBandSync();
+  if (typeof leafletMap !== 'undefined' && leafletMap) {
+    requestAnimationFrame(function () {
+      try { leafletMap.invalidateSize(); } catch (e1) { /* ignore */ }
+      if (typeof scheduleFitMapToVisibleNarrative === 'function') scheduleFitMapToVisibleNarrative();
+    });
+  }
 }
 
 var _mobileReserveResizeTimer;
@@ -2622,7 +2658,8 @@ function initTimeline() {
   // --- One row per species, oldest at bottom ---
   const rowOrder = buildRowOrder(SPECIES_DATA); // index 0 = oldest = bottom
   const rowCount = rowOrder.length;
-  const trackH = rowCount * (LANE_H + LANE_GAP) + LANE_GAP;
+  const lm = getLaneMetrics();
+  const trackH = rowCount * (lm.h + lm.gap) + lm.gap;
   if (track) track.style.height = trackH + 'px';
 
   // --- Species lanes (every entry in SPECIES_DATA gets one row) ---
@@ -2635,7 +2672,8 @@ function initTimeline() {
       console.warn('[Hominines timeline] No row slot for species id:', species && species.id);
       return;
     }
-    const topPx = LANE_GAP + getLaneTop(laneIdx, rowCount);
+    const topPx = lm.gap + getLaneTop(laneIdx, rowCount, lm);
+    const laneRadius = Math.max(4, Math.round(lm.h / 2)) + 'px';
 
     const lane = document.createElement('div');
     lane.className = 'species-lane';
@@ -2643,6 +2681,8 @@ function initTimeline() {
     lane.style.left = x1pct + '%';
     lane.style.width = widthPct + '%';
     lane.style.top = topPx + 'px';
+    lane.style.height = lm.h + 'px';
+    lane.style.borderRadius = laneRadius;
     lane.style.background = species.color;
     lane.setAttribute('data-id', species.id);
     lane.title = species.name + ' (' + formatTime(species.start) + ' à ' + formatTime(species.end) + ')';
@@ -3037,22 +3077,63 @@ function updateNeedlePosition() {
 }
 
 let _lastVisibleIds = ''; // cache to avoid redundant full map rebuilds during play
-let _autoFitTimer  = null; // debounce handle for auto-fit
+let _fitNarrativeTimer = null; // debounce mobile fitBounds when visible species change
 let _prevVisibleSpeciesIds = new Set(); // for species intro tooltip on first appearance during play
 
-// Instantly fit map to encompass all sites/regions of visible species (optionnel / debug).
+/** Sites, regions, and migration endpoints for the current visible species — used to frame the story on the map. */
+function collectNarrativeLatLngs(visible) {
+  const latlngs = [];
+  visible.forEach(function (s) {
+    (s.sites || []).forEach(function (p) { latlngs.push([p.lat, p.lng]); });
+    (s.regions || []).forEach(function (p) { latlngs.push([p.lat, p.lng]); });
+    (s.migrations || []).forEach(function (m) {
+      if (m.from && m.from.length === 2) latlngs.push(m.from);
+      if (m.to && m.to.length === 2) latlngs.push(m.to);
+    });
+  });
+  return latlngs;
+}
+
+// Instantly fit map to encompass all sites/regions/migration endpoints of visible species (optionnel / debug).
 function autoFitMap() {
   const visible = getVisibleSpecies();
   if (!visible.length || !leafletMap) return;
-  const latlngs = [];
-  visible.forEach(function(s) {
-    s.sites.forEach(function(p)   { latlngs.push([p.lat, p.lng]); });
-    s.regions.forEach(function(p) { latlngs.push([p.lat, p.lng]); });
-  });
+  const latlngs = collectNarrativeLatLngs(visible);
   if (!latlngs.length) return;
   const bounds = L.latLngBounds(latlngs);
-  // Use fitBounds (instant) — animated flyToBounds causes arrow drift artifacts
   leafletMap.fitBounds(bounds, { padding: [60, 60], maxZoom: 5 });
+}
+
+/** Mobile: keep the map centred on geography that matters for the species visible at the needle (debounced). */
+function scheduleFitMapToVisibleNarrative() {
+  if (!isMobileViewport()) return;
+  clearTimeout(_fitNarrativeTimer);
+  _fitNarrativeTimer = setTimeout(function () {
+    _fitNarrativeTimer = null;
+    fitMapToVisibleNarrative({ animate: false });
+  }, 160);
+}
+
+function fitMapToVisibleNarrative(opts) {
+  if (!leafletMap) return;
+  const visible = getVisibleSpecies();
+  if (!visible.length) {
+    resetMapToWorldView();
+    return;
+  }
+  const latlngs = collectNarrativeLatLngs(visible);
+  if (!latlngs.length) return;
+  try {
+    const bounds = L.latLngBounds(latlngs);
+    const mobile = isMobileViewport();
+    const pad = mobile ? 12 : 52;
+    const maxZ = mobile ? 6 : 5;
+    leafletMap.fitBounds(bounds, {
+      padding: [pad, pad],
+      maxZoom: maxZ,
+      animate: !!(opts && opts.animate),
+    });
+  } catch (e) { /* ignore */ }
 }
 
 /** Même vue large qu’au chargement (zoom min) — pour voir les migrations après un zoom sur un jalon. */
@@ -3076,6 +3157,7 @@ function setTime(time) {
   if (speciesChanged) {
     _lastVisibleIds = currentVisibleIds;
     updateMap(); // full rebuild — ranges, sites, migrations, events, arrows
+    scheduleFitMapToVisibleNarrative();
   } else if (isPlaying) {
     // During play with no species change: only refresh the animated arrows + events
     if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
@@ -3264,8 +3346,14 @@ function startPlay() {
   if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
   resumeAllFigureWalks();
 
-  // À chaque lecture : revenir à la vue monde (dézoom après un flyTo sur un jalon, etc.)
-  resetMapToWorldView();
+  // Desktop: vue monde pour les migrations globales. Mobile: cadrer sites + migrations des espèces visibles.
+  if (isMobileViewport()) {
+    requestAnimationFrame(function () {
+      fitMapToVisibleNarrative({ animate: true });
+    });
+  } else {
+    resetMapToWorldView();
+  }
 
   const speedEl = document.getElementById('play-speed');
 
