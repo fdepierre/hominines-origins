@@ -79,8 +79,8 @@ W3C JSON-LD files derived from the Markdown sources above. These are what the ap
 
 | File | Contents |
 |------|----------|
-| [`app/data/species.json`](app/data/species.json) | 14 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Bilingual descriptions (FR/EN). |
-| [`app/data/events.json`](app/data/events.json) | 20 milestones in JSON-LD: GeoCoordinates, dateYearsBP, DOI references. Bilingual descriptions (FR/EN). |
+| [`app/data/species.json`](app/data/species.json) | 14 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Narrative fields use `fr` as the canonical language in the running app (parallel `en` is often present in the file for reuse and tooling). |
+| [`app/data/events.json`](app/data/events.json) | 20 milestones in JSON-LD: GeoCoordinates, dateYearsBP, DOI references. Same pattern: French-first in the UI, optional `en` in the data. |
 
 ### The relationship between the two
 
@@ -95,7 +95,7 @@ When new research is published:
 2. Update the corresponding entry in `app/data/` to reflect the change
 3. Run `node tests/run-all.js` to verify nothing is broken
 
-The JSON-LD files include bilingual `fr`/`en` descriptions, which makes them directly readable by AI translation tools and browser AI translators without any additional processing.
+Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** still switches chrome UI strings across ten languages; for languages outside that set, or for translating French narrative wholesale, use the browser’s page translator. Coverage of SVG labels and Leaflet map chrome varies by browser.
 
 ---
 
@@ -166,11 +166,11 @@ A single HTML file: [`app/index.html`](app/index.html).
 | Dependency | Role |
 |------------|------|
 | [Leaflet.js](https://leafletjs.com/) 1.9.4 | Interactive world map |
-| [i18next](https://www.i18next.com/) 23.11.5 | Auto-detects browser language |
+| [i18next](https://www.i18next.com/) 23.11.5 | UI chrome in ~10 languages; does not replace browser page translation for all scientific copy |
 | Space Grotesk + Space Mono | Typography (Google Fonts CDN) |
 
-10 languages supported out of the box: FR, EN, ES, DE, ZH, AR, PT, IT, JA, KO.
-Arabic renders right-to-left. The selector detects your browser language automatically.
+10 languages supported out of the box for **interface strings**: FR, EN, ES, DE, ZH, AR, PT, IT, JA, KO.
+Arabic renders right-to-left. The selector detects your browser language automatically. Long scientific text shown in French can still be passed through the browser’s translate feature because the document is not marked `translate="no"` at the root.
 
 ---
 

@@ -83,6 +83,8 @@ Functions: `linearToTime(t)` and `timeToLinear(time)` — do not change these wi
 
 The i18next library (CDN) handles language switching. The `TRANSLATIONS` object at the bottom of `app/index.html` contains all UI strings for 10 languages. The `applyTranslations()` function updates the DOM when the language changes.
 
+Scientific narrative loaded from JSON is **French-first** in the live UI (many entries also include `en` in the file). Do **not** set `translate="no"` on `<html>` when i18next switches language: `languageChanged` must keep `document.documentElement` at `translate="yes"` so Chrome / Edge / Safari page translation can run on the rest of the document. The raw JSON viewer uses `<code id="json-code" translate="no">` so machine-readable output is not mangled by translators.
+
 To add a language: copy the `fr` block in `TRANSLATIONS`, translate every string, add an `<option>` in `#lang-select`.
 
 ### Theme

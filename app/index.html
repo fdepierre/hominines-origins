@@ -2777,10 +2777,10 @@ function syncTimelineBandsToSpeciesTrack() {
   const tr = speciesTrack.getBoundingClientRect();
   if (tr.width < 4) return;
 
-  const evBand = document.getElementById('events-band');
-  if (evBand) {
-    const br = evBand.getBoundingClientRect();
-    evBand.querySelectorAll('.event-marker').forEach(function (el) {
+  const evTrack = document.getElementById('events-band-track');
+  if (evTrack) {
+    const br = evTrack.getBoundingClientRect();
+    evTrack.querySelectorAll('.event-marker').forEach(function (el) {
       const tLin = parseFloat(el.getAttribute('data-t-linear'));
       if (isNaN(tLin)) return;
       const xAbs = tr.left + tLin * tr.width;
@@ -2788,10 +2788,10 @@ function syncTimelineBandsToSpeciesTrack() {
     });
   }
 
-  const skinBand = document.getElementById('skin-band');
-  if (skinBand) {
-    const br = skinBand.getBoundingClientRect();
-    skinBand.querySelectorAll('.band-segment').forEach(function (el) {
+  const skinTrack = document.getElementById('skin-band-track');
+  if (skinTrack) {
+    const br = skinTrack.getBoundingClientRect();
+    skinTrack.querySelectorAll('.band-segment').forEach(function (el) {
       const x1 = parseFloat(el.getAttribute('data-x1-linear'));
       const w = parseFloat(el.getAttribute('data-w-linear'));
       if (isNaN(x1) || isNaN(w)) return;
@@ -2840,7 +2840,7 @@ function buildSkinBand() {
     } else if (seg.cssClass === 'partial-fur') {
       el.innerHTML = '<span style="font-size:9px;position:absolute;left:3px;top:50%;transform:translateY(-50%);opacity:0.7;pointer-events:none">~🐒</span>';
     }
-    band.appendChild(el);
+    track.appendChild(el);
   });
   syncTimelineBandsToSpeciesTrack();
 }
@@ -2998,7 +2998,7 @@ function buildEventsBand() {
       scheduleTimelineBandSync();
       requestAnimationFrame(function () { scheduleTimelineBandSync(); });
     });
-    band.appendChild(el);
+    track.appendChild(el);
   });
   syncTimelineBandsToSpeciesTrack();
 }
