@@ -6,10 +6,10 @@ This is a living document. Priorities may shift based on community contributions
 
 ## v0.2 — Data extraction ✓ DONE
 
-- [x] Extract `SPECIES_DATA` from `app/index.html` into `data/species.json`
-- [x] Extract `EVENTS_DATA` into `data/events.json`
-- [x] The app reads these JSON files at load time (with embedded fallback for offline/file://)
-- [x] Benefit: data updates no longer require touching HTML/JS
+- [x] Extract `SPECIES_DATA` from `app/index.html` into [`app/data/species.json`](../app/data/species.json)
+- [x] Extract `EVENTS_DATA` into [`app/data/events.json`](../app/data/events.json)
+- [x] The app `fetch`es these files at load time from `./data/` (with `_EMBEDDED_SPECIES` / `_EMBEDDED_EVENTS` fallbacks when `fetch` fails)
+- [x] Benefit: HTTP deployments can update catalogue data by editing JSON only; contributors who care about **`file://`** or strict offline parity still sync the embedded blobs in [`app/index.html`](../app/index.html)
 
 ## v0.3 — Ancient DNA mixing
 

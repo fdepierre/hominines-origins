@@ -28,7 +28,7 @@ assignees: ''
 
 1. Open `app/index.html`
 2. Find the `TRANSLATIONS` object near the bottom
-3. Copy the `en` block and translate every string
+3. Copy the `fr` block and translate every string (French is the canonical UI baseline for scientific copy)
 4. Add `<option value="XX">Language name</option>` to `#lang-select`
 5. Test in browser
 6. Submit a pull request

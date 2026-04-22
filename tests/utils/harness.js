@@ -146,7 +146,7 @@ async function loadApp(page, { lang = null, theme = null } = {}) {
   await page.waitForFunction(() => typeof L !== 'undefined' && document.getElementById('map') !== null, { timeout: 10000 });
   // Wait for app JS data to be defined (SPECIES_DATA is declared after Leaflet loads)
   await page.waitForFunction(() => typeof SPECIES_DATA !== 'undefined' && typeof EVENTS_DATA !== 'undefined', { timeout: 10000 });
-  // Hominin certainty fields merged from ./data/species.json (skipped on failure but flag still set)
+  // `loadData()` sets this after `adaptSpecies` maps JSON (certainty keys live on each species in `species.json`)
   await page.waitForFunction(() => window.__HOMININ_CERTAINTY_READY === true, { timeout: 10000 });
   // Wait for timeline to be rendered
   await page.waitForSelector('#timeline-lanes', { state: 'attached', timeout: 8000 });
