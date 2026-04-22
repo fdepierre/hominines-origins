@@ -49,12 +49,16 @@ async function runA11yTests(options = {}) {
     assert(text && text.length > 0, `Play button has accessible text: "${text}"`);
   });
 
-  await test('Theme toggle button has aria-label', async () => {
+  await test('Theme toggle button has accessible name', async () => {
     const label = await page.evaluate(() => {
       const btn = document.querySelector('[data-testid="theme-toggle"]');
-      return btn ? (btn.getAttribute('aria-label') || btn.title || '') : null;
+      if (!btn) return '';
+      const sub = btn.querySelector('span');
+      const subT = sub ? (sub.textContent || '').trim() : '';
+      return (btn.getAttribute('aria-label') || btn.title || subT).trim();
     });
-    assert(label && label.length > 0, `Theme toggle has aria-label: "${label}"`);
+    assert(label && label.length > 0, `Theme toggle has accessible name: "${label}"`);
+    assert(!label.includes('ui.ui.'), `Theme title must not double-prefix i18n keys (got "${label}")`);
   });
 
   await test('Language selector has aria-label', async () => {

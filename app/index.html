@@ -1310,18 +1310,43 @@ ul.uncertainty-level-list {
   color: var(--color-text);
   text-align: right;
 }
+/* Screen-reader + browser-translate friendly text inside icon-only controls */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.human-figure-spectrum-wrap {
+  flex-shrink: 0;
+  width: 140px;
+  max-width: 100%;
+}
+.human-figure-spectrum-wrap .human-figure-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.human-figure-one-species-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  opacity: 0.55;
+  text-align: center;
+  line-height: 1.25;
+  margin-top: 2px;
+  pointer-events: none;
+}
 [data-theme="light"] .human-figure-container { background: #c8bfb0; }
 
 .human-figure-svg {
   width: 72px;
   height: 96px;
-}
-/* Wider SVG for spectrum (3-figure) view */
-.human-figure-svg[viewBox="0 0 360 170"] {
-  width: 140px;
-  max-width: 140px;
-  height: auto;
-  flex-shrink: 0;
 }
 
 /* Scrollbar */
@@ -1919,8 +1944,9 @@ ul.uncertainty-level-list {
       <!-- Play overlay lives INSIDE map-container so it only covers the map -->
       <div id="play-overlay">
         <div id="play-overlay-inner">
-          <button id="play-overlay-btn" aria-label="Play">
-            <svg width="32" height="32" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>
+          <button id="play-overlay-btn" type="button">
+            <span class="sr-only" id="play-overlay-btn-sr" data-i18n="ui.play">Play</span>
+            <svg width="32" height="32" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><polygon points="2,1 13,7 2,13"/></svg>
           </button>
           <div id="play-overlay-label">Play</div>
         </div>
@@ -2143,7 +2169,7 @@ function updateMap() {
     : visible.map(s => `
       <div class="map-legend-item">
         <div class="legend-dot" style="background:${s.color}"></div>
-        <span style="color:${s.color};font-style:italic">${s.name.replace('Homo sapiens — ', 'H.s. ')}</span>
+        <span translate="no" style="color:${s.color};font-style:italic">${bandTipEscapeHtml(s.name.replace('Homo sapiens — ', 'H.s. '))}</span>
       </div>
     `).join('');
 
@@ -2168,7 +2194,7 @@ function updateMap() {
           opacity: 0.3,
           dashArray: '4 4',
         });
-        circle.bindTooltip(`<strong>${species.name}</strong><br>${region.note}`, {
+        circle.bindTooltip(`<strong>${scientificNameHtml(species.name)}</strong><br>${region.note}`, {
           permanent: false, direction: 'auto', offset: [0, -6], className: 'leaflet-tooltip-custom ho-map-rich-tip',
         });
         rangesLayer.addLayer(circle);
@@ -2197,7 +2223,7 @@ function updateMap() {
         marker.bindTooltip(`
           <div style="font-size:13px;line-height:1.5">
             <strong style="color:${species.color}">${site.name}</strong><br>
-            <em style="color:#9a8f7a">${species.name}</em><br>
+            <em style="color:#9a8f7a">${scientificNameHtml(species.name)}</em><br>
             ${site.note}
           </div>
         `, { direction: 'auto', offset: [0, -8], className: 'leaflet-tooltip-custom ho-map-rich-tip' });
@@ -2447,21 +2473,20 @@ function drawHumanFigure(pigmentation) {
     // Eye variants: dark eyes for dark/mid figure, light for third
     const eyeLight = pigmentation.eyes.variantColor || '#6ea0c8';
     const hairLight = pigmentation.hair.variantColor || '#d4b050';
-    return `
-      <svg class="human-figure-svg" viewBox="0 0 360 170" fill="none"
-           xmlns="http://www.w3.org/2000/svg" aria-label="Diversité de l'espèce Homo sapiens">
-        <!-- figure 1: dark skin, dark eyes, dark hair -->
-        <g transform="translate(0,5)">${humanFigureSVG(dark,  '#2a1400', '#080400',  60)}</g>
-        <!-- figure 2: medium skin, brown eyes, medium hair -->
-        <g transform="translate(120,5)">${humanFigureSVG(mid,  '#5c3317', '#4a2000',  60)}</g>
-        <!-- figure 3: light skin, variable eyes, light hair -->
-        <g transform="translate(240,5)">${humanFigureSVG(light, eyeLight, hairLight, 60)}</g>
-        <!-- label: “One species” -->
-        <text x="180" y="168" text-anchor="middle"
-              font-size="10" fill="currentColor" opacity="0.5"
-              font-family="var(--font-mono)">${(typeof i18next !== 'undefined' && i18next.isInitialized) ? i18next.t('ui.oneSpecies') : 'Homo sapiens — une seule espèce'}</text>
-      </svg>
-    `;
+    const oneSpeciesLbl = (typeof i18next !== 'undefined' && i18next.isInitialized)
+      ? i18next.t('ui.oneSpecies')
+      : 'Homo sapiens — une seule espèce';
+    return (
+      '<div class="human-figure-spectrum-wrap">' +
+      '<svg class="human-figure-svg" viewBox="0 0 360 158" fill="none" ' +
+      'xmlns="http://www.w3.org/2000/svg" aria-label="Diversité de l\'espèce Homo sapiens">' +
+      '<g transform="translate(0,5)">' + humanFigureSVG(dark, '#2a1400', '#080400', 60) + '</g>' +
+      '<g transform="translate(120,5)">' + humanFigureSVG(mid, '#5c3317', '#4a2000', 60) + '</g>' +
+      '<g transform="translate(240,5)">' + humanFigureSVG(light, eyeLight, hairLight, 60) + '</g>' +
+      '</svg>' +
+      '<div class="human-figure-one-species-label" translate="yes">' + bandTipEscapeHtml(oneSpeciesLbl) + '</div>' +
+      '</div>'
+    );
   }
 
   // Default: single figure
@@ -2563,7 +2588,7 @@ function renderPanel(species) {
       <div class="side-panel-header${hasTri ? ' side-panel-header--certainty' : ''}">
         <div class="side-panel-header-text">
           <div class="period-label">${formatTime(species.start)} ${T('periodTo','à')} ${formatTime(species.end)}</div>
-          <div class="species-name" style="color:${species.color}">${species.name}</div>
+          <div class="species-name" translate="no" style="color:${species.color}">${bandTipEscapeHtml(species.name)}</div>
           <div class="species-name-common">${species.common}</div>
         </div>
         ${renderCertaintyTriIcon(species, T)}
@@ -2770,9 +2795,10 @@ function initTimeline() {
     lane.setAttribute('data-id', species.id);
     lane.setAttribute('aria-label', species.name + ' (' + formatTime(species.start) + ' à ' + formatTime(species.end) + ')');
 
-    // Inline label
+    // Inline label (Latin taxon — do not feed page-translate)
     const lbl = document.createElement('span');
     lbl.className = 'species-lane-label';
+    lbl.setAttribute('translate', 'no');
     lbl.textContent = species.name.replace('Homo sapiens — ', 'H.s. ');
     lane.appendChild(lbl);
 
@@ -2968,6 +2994,11 @@ function bandTipEscapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
+/** Latin taxon / roster name — keep stable when the visitor uses “Translate this page”. */
+function scientificNameHtml(s) {
+  return '<span translate="no">' + bandTipEscapeHtml(s) + '</span>';
+}
+
 function skinBandTooltipHtml(seg) {
   return (
     '<strong style="color:var(--color-primary)">' + bandTipEscapeHtml(seg.label) + '</strong><br>' +
@@ -2979,7 +3010,7 @@ function skinBandTooltipHtml(seg) {
 
 function speciesLaneTooltipHtml(species) {
   return (
-    '<strong style="color:' + bandTipEscapeHtml(species.color) + '">' + bandTipEscapeHtml(species.name) + '</strong><br>' +
+    '<strong style="color:' + bandTipEscapeHtml(species.color) + '">' + scientificNameHtml(species.name) + '</strong><br>' +
     '<span style="color:var(--color-text-muted);font-size:11px;font-family:var(--font-mono)">' +
     bandTipEscapeHtml(formatTime(species.start)) + ' → ' + bandTipEscapeHtml(formatTime(species.end)) + '</span>'
   );
@@ -3572,9 +3603,13 @@ function startPlay() {
   const btn = document.getElementById('play-btn');
   const icon = document.getElementById('play-icon');
   const lbl = document.getElementById('play-label');
+  const ovl = document.getElementById('play-overlay-label');
+  const ovs = document.getElementById('play-overlay-btn-sr');
   btn.classList.add('playing');
   icon.innerHTML = '<rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/>';
   lbl.textContent = 'Pause';
+  if (ovl) ovl.textContent = 'Pause';
+  if (ovs) ovs.textContent = 'Pause';
   syncMobilePlayBarState();
 
   // Near end of timeline: clear figures + event markers so they can respawn cleanly,
@@ -3641,9 +3676,13 @@ function stopPlay() {
   const btn = document.getElementById('play-btn');
   const icon = document.getElementById('play-icon');
   const lbl = document.getElementById('play-label');
+  const ovl = document.getElementById('play-overlay-label');
+  const ovs = document.getElementById('play-overlay-btn-sr');
   btn.classList.remove('playing');
   icon.innerHTML = '<polygon points="3,1 13,7 3,13"/>';
   lbl.textContent = 'Play';
+  if (ovl) ovl.textContent = 'Play';
+  if (ovs) ovs.textContent = 'Play';
   syncMobilePlayBarState();
 }
 
@@ -4108,7 +4147,10 @@ document.addEventListener('DOMContentLoaded', function initBurger() {
           use the browser’s “Translate this page” on the whole document.
         - Keep <html translate="yes"> (re-applied on languageChanged). Mark only
           machine-readable or unstable text as translate=no (see #json-code).
-        - Do not mark translate=no on main article text, map labels, or panels.
+        - Do not mark translate=no on main narrative text. Do mark **Latin taxa**
+          (species roster names, map tooltips, timeline lane labels) so page-translate
+          does not corrupt scientific names; the spectrum “one species” caption is
+          plain HTML under the silhouettes, not an SVG text node.
      2) SECONDARY — i18next: instant menu chrome for **French and English** only
         (no round-trip to an online translator for those two).
      ===================================================================== -->
@@ -5020,6 +5062,14 @@ function applyTranslations() {
   if (playLabel) {
     playLabel.textContent = (typeof isPlaying !== 'undefined' && isPlaying) ? t('ui.pause') : t('ui.play');
   }
+  const playOverlayLbl = document.getElementById('play-overlay-label');
+  if (playOverlayLbl) {
+    playOverlayLbl.textContent = (typeof isPlaying !== 'undefined' && isPlaying) ? t('ui.pause') : t('ui.play');
+  }
+  const playOverlaySr = document.getElementById('play-overlay-btn-sr');
+  if (playOverlaySr) {
+    playOverlaySr.textContent = (typeof isPlaying !== 'undefined' && isPlaying) ? t('ui.pause') : t('ui.play');
+  }
 
   // Welcome hint (innerHTML to allow the <strong>)
   const wh = document.getElementById('welcome-hint');
@@ -5067,7 +5117,9 @@ function applyTranslations() {
   // Update all data-i18n-title elements (title= attributes)
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const key = el.getAttribute('data-i18n-title');
-    el.title = t('ui.' + key);
+    if (!key) return;
+    const fullKey = key.startsWith('ui.') ? key : ('ui.' + key);
+    el.title = t(fullKey);
   });
 
   // Rebuild skin band and events band so data-tip tooltips are translated
@@ -5143,10 +5195,13 @@ function initI18n() {
       i18next.changeLanguage(this.value).then(applyTranslations);
       // Update play/pause labels reactively when language changes
       const playLabel = document.getElementById('play-label');
-      if (playLabel) {
-        playLabel.textContent = (typeof isPlaying !== 'undefined' && isPlaying)
-          ? i18next.t('ui.pause') : i18next.t('ui.play');
-      }
+      const poL = document.getElementById('play-overlay-label');
+      const poS = document.getElementById('play-overlay-btn-sr');
+      const pTxt = (typeof isPlaying !== 'undefined' && isPlaying)
+        ? i18next.t('ui.pause') : i18next.t('ui.play');
+      if (playLabel) playLabel.textContent = pTxt;
+      if (poL) poL.textContent = pTxt;
+      if (poS) poS.textContent = pTxt;
     });
   }
 }
@@ -5218,15 +5273,29 @@ window.addEventListener('load', function() {
   if (origStop) {
     window.stopPlay = function() {
       origStop();
-      const lbl = document.getElementById('play-label');
-      if (lbl && i18next.isInitialized) lbl.textContent = i18next.t('ui.play');
+      if (i18next.isInitialized) {
+        const p = i18next.t('ui.play');
+        const lbl = document.getElementById('play-label');
+        if (lbl) lbl.textContent = p;
+        const ol = document.getElementById('play-overlay-label');
+        if (ol) ol.textContent = p;
+        const os = document.getElementById('play-overlay-btn-sr');
+        if (os) os.textContent = p;
+      }
     };
   }
   if (origStart) {
     window.startPlay = function() {
       origStart();
-      const lbl = document.getElementById('play-label');
-      if (lbl && i18next.isInitialized) lbl.textContent = i18next.t('ui.pause');
+      if (i18next.isInitialized) {
+        const p = i18next.t('ui.pause');
+        const lbl = document.getElementById('play-label');
+        if (lbl) lbl.textContent = p;
+        const ol = document.getElementById('play-overlay-label');
+        if (ol) ol.textContent = p;
+        const os = document.getElementById('play-overlay-btn-sr');
+        if (os) os.textContent = p;
+      }
     };
   }
 });
@@ -5459,13 +5528,13 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
       <div>
         <div class="burger-section-title" data-i18n="ui.displayBurgerSection">Affichage</div>
         <div class="burger-btn-row">
-          <button type="button" class="layer-btn" data-testid="theme-toggle" data-theme-toggle data-i18n-title="ui.toggleTheme" aria-label="Switch theme" style="flex:1; justify-content:center;">
+          <button type="button" class="layer-btn" data-testid="theme-toggle" data-theme-toggle data-i18n-title="ui.toggleTheme" style="flex:1; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
             <span data-i18n="ui.toggleTheme">Mode sombre</span>
           </button>
-          <button id="btn-data-viewer" class="layer-btn" title="Données JSON" data-i18n-title="ui.dataViewerTitle" aria-label="Données JSON" style="flex:1; justify-content:center;">
+          <button id="btn-data-viewer" class="layer-btn" title="Données JSON" data-i18n-title="ui.dataViewerTitle" style="flex:1; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
             <span data-i18n="ui.dataViewerTitle">Données</span>
           </button>
