@@ -96,7 +96,7 @@ When new research is published:
 3. If you care about **offline** or **`file://`** use, update the embedded JSON mirrors (`_EMBEDDED_SPECIES`, `_EMBEDDED_EVENTS`) inside [`app/index.html`](app/index.html) so they match `app/data/` — otherwise `fetch` failures will load stale data
 4. Run `node tests/run-all.js` to verify nothing is broken
 
-Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** still switches chrome UI strings across ten languages; for languages outside that set, or for translating French narrative wholesale, use the browser’s page translator. Coverage of SVG labels and Leaflet map chrome varies by browser.
+Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** switches **French and English** chrome UI strings only; for any other language, or for translating French narrative wholesale, use the browser’s page translator. Coverage of SVG labels and Leaflet map chrome varies by browser.
 
 ---
 
@@ -167,17 +167,16 @@ A single HTML file: [`app/index.html`](app/index.html).
 | Dependency | Role |
 |------------|------|
 | [Leaflet.js](https://leafletjs.com/) 1.9.4 | Interactive world map |
-| [i18next](https://www.i18next.com/) 23.11.5 | UI chrome in ~10 languages; does not replace browser page translation for all scientific copy |
+| [i18next](https://www.i18next.com/) 23.11.5 | **French and English** menu / control strings; all other languages rely on the browser’s page translator |
 | Space Grotesk + Space Mono | Typography (Google Fonts CDN) |
 
-10 languages supported out of the box for **interface strings**: FR, EN, ES, DE, ZH, AR, PT, IT, JA, KO.
-Arabic renders right-to-left. The selector detects your browser language automatically. Long scientific text shown in French can still be passed through the browser’s translate feature because the document is not marked `translate="no"` at the root.
+The welcome dialog asks which of **FR** or **EN** you want for interface labels (stored in `localStorage` as `ho_ui_lang`). Scientific copy in the map and side panel stays **French-first**; use **Translate this page** for Hindi, Spanish without full app bundles, etc. The document root stays `translate="yes"` so browser translation is not blocked.
 
 ---
 
 ## Tests
 
-**57** automated non-regression checks (named `test` cases across the three suites). They run in about 30–40 seconds.
+**56** automated non-regression checks (named `test` cases across the three suites). They run in about 35–60 seconds.
 
 ```bash
 npx playwright install chromium   # once
@@ -188,7 +187,7 @@ node tests/run-all.js             # run all tests
 |-------|-------|-----------------|
 | Unit | 23 | Broken species/events data, wrong arrow direction, timeline math, skin periods |
 | Visual | 9 (+ 8 PNG snapshot scenarios) | Missing UI elements, WCAG contrast, layout; PNG diff vs reference tiles |
-| A11y | 25 | Play/pause, language switching, touch targets, tablet layout |
+| A11y | 24 | Play/pause, FR/EN i18n, Playwright welcome hints (`locale` es/fr/en), touch targets, tablet layout |
 
 ---
 
@@ -198,7 +197,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The short version:
 - Researchers: update `data/` with new findings and a DOI
-- Translators: add a language block to the `TRANSLATIONS` object in `app/index.html`
+- Translators: improve the `fr` / `en` `TRANSLATIONS` blocks in `app/index.html` (see [CONTRIBUTING.md](CONTRIBUTING.md); a third bundled language is a large, explicit change)
 - Developers: fix a bug, improve the UI, open an issue first for big changes
 - Educators: tell us what doesn't work for your classroom
 

@@ -5,12 +5,16 @@
  *   const { launch, loadApp, setTime, getComputedStyle } = require('./utils/harness');
  *   const { browser, page } = await launch();
  *   await loadApp(page);
+ *   Welcome / locale: `launch({ locale: 'es-ES' })` then `loadApp(page, { dismissWelcome: false })`.
  *
  * Stable UI hooks live on `data-testid` in app/index.html (see tests/visual.test.js).
  * Fast pre-check: `npm run test:smoke` (no PNG snapshots, no tablet pass).
  *
  * Visible browser (debug): set HEADED=1 (e.g. `npm run test:headed`) so Chromium
  * opens with headless: false. Optional PLAYWRIGHT_SLOWMO=250 slows actions (ms).
+ *
+ * Locale: `launch({ locale: 'es-ES' })` sets `navigator.language` / `Intl` like a
+ * user whose browser UI is Spanish — used to assert the welcome translate hint.
  */
 
 const { chromium } = require('playwright');
@@ -108,7 +112,7 @@ function getStats() { return { pass: _pass, fail: _fail, warn: _warn }; }
 function resetStats() { _pass = 0; _fail = 0; _warn = 0; }
 
 // ─── browser helpers ──────────────────────────────────────────────────────────
-async function launch({ width = 1440, height = 900, mobile = false } = {}) {
+async function launch({ width = 1440, height = 900, mobile = false, locale = null } = {}) {
   // Let Playwright find the browser automatically.
   // The env var override is kept for unusual local setups only.
   const headed = process.env.HEADED === '1' || process.env.PLAYWRIGHT_HEADED === '1';
@@ -123,10 +127,12 @@ async function launch({ width = 1440, height = 900, mobile = false } = {}) {
   }
   const browser = await chromium.launch(launchOpts);
 
-  const context = await browser.newContext({
+  const contextOpts = {
     viewport: { width: mobile ? 768 : width, height: mobile ? 1024 : height },
     deviceScaleFactor: 1,
-  });
+  };
+  if (locale) contextOpts.locale = locale;
+  const context = await browser.newContext(contextOpts);
 
   const page = await context.newPage();
   // Suppress console noise from the app
@@ -137,7 +143,7 @@ async function launch({ width = 1440, height = 900, mobile = false } = {}) {
   return { browser, context, page };
 }
 
-async function loadApp(page, { lang = null, theme = null } = {}) {
+async function loadApp(page, { lang = null, theme = null, dismissWelcome = true } = {}) {
   const base = await startAppHttpServer();
   const url = `${base}/index.html`;
   await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -154,15 +160,17 @@ async function loadApp(page, { lang = null, theme = null } = {}) {
   await page.waitForTimeout(300);
 
   // Dismiss welcome modal so Play/theme clicks are not intercepted (tests use fresh storage)
-  await page.evaluate(() => {
-    const overlay = document.getElementById('welcome-modal-overlay');
-    if (overlay) {
-      overlay.style.display = 'none';
-      overlay.classList.add('hidden');
-      try { localStorage.setItem('ho_welcomed_v3', '1'); } catch (e) { /* ignore */ }
-    }
-  });
-  await page.waitForTimeout(100);
+  if (dismissWelcome) {
+    await page.evaluate(() => {
+      const overlay = document.getElementById('welcome-modal-overlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+        overlay.classList.add('hidden');
+        try { localStorage.setItem('ho_welcomed_v3', '1'); } catch (e) { /* ignore */ }
+      }
+    });
+    await page.waitForTimeout(100);
+  }
 
   // Override language if requested
   if (lang) {

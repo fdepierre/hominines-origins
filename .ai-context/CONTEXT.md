@@ -92,13 +92,13 @@ Functions: `linearToTime(t)` and `timeToLinear(time)` — do not change these wi
 
 **Goal:** any visitor should be able to read the app in **their** language. Two mechanisms work together:
 
-1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for languages **outside** the bundled list. Keep `<html translate="yes">` (re-applied after `i18next` init and on `languageChanged`). Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands only (e.g. `#json-code`, and the `#lang-select` block so option labels are not double-translated).
+1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for languages **outside** the bundled list. Keep `<html translate="yes">` (re-applied after `i18next` init and on `languageChanged`). Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands only (e.g. `#json-code`, `#welcome-translate-hint` so Chromium does not rewrite the injected bilingual `<code>` hint when the UI locale is non‑FR/EN, the `#lang-select` block so option labels are not double-translated).
 
-2. **i18next** — instant UI for **10** bundled locales without an online translator round-trip; `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]`, and rebuilds bands/map when needed. Scientific narrative from JSON remains **French-first** in the DOM (many JSON entries also carry `en`).
+2. **i18next** — instant UI for **French and English** only (menu / controls / uncertainty explainer); `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]`, and rebuilds bands/map when needed. Scientific narrative from JSON remains **French-first** in the DOM (many JSON entries also carry `en`). Optional `localStorage` key **`ho_ui_lang`** (`fr` \| `en`) is set from the welcome dialog.
 
-The `TRANSLATIONS` object near the bottom of `app/index.html` holds the bundled strings.
+The `TRANSLATIONS` object holds **fr** and **en** blocks only.
 
-To add a bundled language: copy the `fr` block in `TRANSLATIONS`, translate every string, add an `<option>` in `#lang-select`, and keep `translate="no"` on the selector wrapper if you want stable language names when the page is machine-translated.
+To add a **third** bundled language: copy the `fr` block, translate every `ui.*` string, add an `<option>` in `#lang-select`, extend the `supported` array in `initI18n()`, and keep `translate="no"` on the selector wrapper so option labels are not double-translated when users run page translation.
 
 ### Theme
 
@@ -157,9 +157,9 @@ Tests are written in plain Node.js — no test framework dependency. They run in
 
 ## Typical AI-assisted tasks
 
-### Adding a new translation
+### Adding a new bundled UI language (optional)
 
-"Add a Russian translation to the app. The `TRANSLATIONS` object is near the bottom of `app/index.html`. Copy the French block, translate every string, and add `<option value="ru">Русский</option>` to the language selector."
+"Add Russian as a **third** bundled UI language: copy the `fr` block in `TRANSLATIONS`, translate every `ui.*` string, add `<option value="ru">Русский</option>` to `#lang-select`, add `ru` to the `supported` array in `initI18n()`, then run `node tests/run-all.js`. For most classrooms, prefer **browser page translation** instead of growing `TRANSLATIONS`."
 
 ### Updating a species' pigmentation data
 

@@ -26,18 +26,20 @@ When updating data:
 - If the scientific community is divided, mark it as a debate and represent both positions
 - Do not remove debate entries — science works by exposing uncertainty, not hiding it
 
-### 2. New translations
+### 2. Translations (interface vs browser)
 
-The app supports 10 languages today. Adding a new one takes about 20 minutes.
+**Bundled in the app:** French and English only for menu buttons, tooltips, and the uncertainty explainer (`TRANSLATIONS` + `#lang-select` in `app/index.html`).
+
+**Everything else:** contributors and readers use the browser’s **Translate this page** feature; the root document stays `translate="yes"` on purpose.
+
+To add a **third** bundled UI language (not required for coverage):
 
 1. Open `app/index.html`
-2. Find the `TRANSLATIONS` object near the bottom of the file
-3. Copy the `fr` block and translate every string
-4. Add your language code to the `<select id="lang-select">` in the HTML
-5. Test by opening the file in a browser and selecting your language
-6. Open a pull request — include your name and the language in the PR title
+2. Copy the `fr` block inside `TRANSLATIONS`, translate every `ui.*` string, and register the locale in `i18next.init` resources
+3. Add an `<option>` to `#lang-select` and extend the `supported` array in `initI18n()`
+4. Run `node tests/run-all.js`
 
-No technical skills required beyond basic text editing.
+For one-off classroom use, **do not** add a pack — tell users to pick FR or EN in the burger, then translate the page.
 
 ### 3. UI and code improvements
 

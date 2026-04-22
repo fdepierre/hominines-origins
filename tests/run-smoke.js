@@ -3,7 +3,7 @@
  *
  * - Full unit suite (in-browser data + maths)
  * - Visual: DOM + data-testid contract + dark contrast only (no PNG snapshots, no light-mode pass)
- * - A11y: core interaction + EN/FR i18n only (no 3s play-to-end wait, no tablet viewport)
+ * - A11y: core interaction + EN/FR i18n only (no play-to-end wait, no tablet, no welcome-locale browsers)
  *
  * Run: node tests/run-smoke.js
  */

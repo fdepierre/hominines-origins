@@ -1,6 +1,6 @@
 ---
 name: New translation
-about: Add or improve a language translation
+about: Improve French/English UI strings or discuss a third bundled language
 title: '[TRANSLATION] '
 labels: translation, good first issue
 assignees: ''
@@ -14,9 +14,9 @@ assignees: ''
 
 ## Type of contribution
 
-- [ ] New language (not currently supported)
-- [ ] Correction to existing translation
-- [ ] Improvement to existing translation
+- [ ] Improve **French** (`fr`) `TRANSLATIONS` strings
+- [ ] Improve **English** (`en`) `TRANSLATIONS` strings
+- [ ] Propose a **third bundled UI language** (requires full `TRANSLATIONS` block + `initI18n` `supported` + `<option>` — large PR; browser page translation is usually enough)
 
 ## Notes
 
@@ -24,11 +24,11 @@ assignees: ''
 
 ---
 
-**How to contribute a translation:**
+**How to contribute:**
 
-1. Open `app/index.html`
-2. Find the `TRANSLATIONS` object near the bottom
-3. Copy the `fr` block and translate every string (French is the canonical UI baseline for scientific copy)
-4. Add `<option value="XX">Language name</option>` to `#lang-select`
-5. Test in browser
-6. Submit a pull request
+1. Open `app/index.html` — only **`fr`** and **`en`** blocks in `TRANSLATIONS` are shipped for menu chrome.
+2. Edit the relevant `ui.*` keys; keep scientific narrative in JSON **French-first** (separate from i18next).
+3. Run `node tests/run-all.js`.
+4. Open a pull request.
+
+**Readers in other languages:** use the browser’s **Translate this page** after picking FR or EN in the burger (welcome dialog explains this).

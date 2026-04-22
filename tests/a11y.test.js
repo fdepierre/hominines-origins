@@ -3,7 +3,8 @@
  * Checks keyboard nav, touch targets, i18n, ARIA labels, timeline interaction.
  *
  * Run: node tests/a11y.test.js
- * Smoke (faster, fewer cases): node tests/a11y.test.js --smoke
+ * Smoke (faster, fewer cases): node tests/a11y.test.js --smoke — skips tablet,
+ * Play auto-stop-at-end, dir=ltr sweep, and Playwright welcome-locale checks.
  */
 
 'use strict';
@@ -11,7 +12,7 @@ const { launch, loadApp, setTime,
         assert, assertSoft, getStats, resetStats,
         BOLD, CYAN, GREEN, RED, YELLOW, RESET } = require('./utils/harness');
 
-/** @param {{ smoke?: boolean }} [options] — smoke: skip slow / redundant checks (tablet, auto-stop, full i18n sweep) */
+/** @param {{ smoke?: boolean }} [options] — smoke: skip tablet, timing-sensitive play test, dir=ltr, welcome-locale */
 async function runA11yTests(options = {}) {
   const smoke = options.smoke === true;
   const errors = [];
@@ -230,10 +231,6 @@ async function runA11yTests(options = {}) {
   // Mobile tab labels are updated by applyTranslations() for every language.
   const LANG_CHECKS_FULL = [
     { lang: 'en', key: '#tab-map span', contains: 'Map' },
-    { lang: 'es', key: '#tab-map span', contains: 'Mapa' },
-    { lang: 'de', key: '#tab-map span', contains: 'Karte' },
-    { lang: 'zh', key: '#tab-map span', contains: '地图' },
-    { lang: 'ar', key: '#tab-map span', contains: 'خريطة' },
     { lang: 'fr', key: '#tab-map span', contains: 'Carte' },
   ];
   const LANG_CHECKS = smoke
@@ -261,17 +258,107 @@ async function runA11yTests(options = {}) {
   }
 
   if (!smoke) {
-    await test('Arabic (ar) sets dir=rtl on <html>', async () => {
+    await test('Layout direction stays LTR for bundled locales (fr/en)', async () => {
       await page.evaluate(() => {
         const sel = document.querySelector('[data-testid="lang-select"]');
-        if (sel) { sel.value = 'ar'; sel.dispatchEvent(new Event('change')); }
+        if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change')); }
       });
-      await page.waitForTimeout(300);
-      const dir = await page.evaluate(() => document.documentElement.getAttribute('dir'));
-      assertSoft(dir === 'rtl', `Arabic sets dir="rtl" (got: "${dir}")`);
+      await page.waitForTimeout(200);
+      const dirEn = await page.evaluate(() => document.documentElement.getAttribute('dir'));
+      await page.evaluate(() => {
+        const sel = document.querySelector('[data-testid="lang-select"]');
+        if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change')); }
+      });
+      await page.waitForTimeout(200);
+      const dirFr = await page.evaluate(() => document.documentElement.getAttribute('dir'));
+      assertSoft(dirEn === 'ltr' && dirFr === 'ltr', `html dir stays ltr for en/fr (got en="${dirEn}", fr="${dirFr}")`);
     });
   } else {
-    console.log(`\n  ${YELLOW}Arabic dir=rtl: skipped in smoke mode${RESET}`);
+    console.log(`\n  ${YELLOW}dir=ltr check: skipped in smoke mode${RESET}`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 6b. WELCOME MODAL — Playwright `locale` simulates non-FR/EN browser UI
+  // ═══════════════════════════════════════════════════════════════════════════
+  if (!smoke) {
+    console.log(`\n${BOLD}◆ WELCOME / BROWSER LOCALE (Playwright)${RESET}`);
+
+    await test('Welcome translate hint: locale es-ES (bilingual FR+EN + code es)', async () => {
+      const { browser: bEs, page: pEs } = await launch({ locale: 'es-ES' });
+      try {
+        await loadApp(pEs, { dismissWelcome: false });
+        const st = await pEs.evaluate(() => {
+          const hint = document.getElementById('welcome-translate-hint');
+          const overlay = document.getElementById('welcome-modal-overlay');
+          const open = !!(overlay && !overlay.classList.contains('hidden'));
+          return {
+            nav: navigator.language,
+            hintHtml: hint ? hint.innerHTML : '',
+            welcomeOpen: open,
+            hintTextLen: hint ? (hint.textContent || '').trim().length : 0,
+          };
+        });
+        assert(st.welcomeOpen, 'Welcome overlay is visible on first load (fresh storage)');
+        assert(/^es/i.test(st.nav), `navigator.language is es-* (got "${st.nav}")`);
+        assert(
+          /<\s*code(?:\s[^>]*)?>\s*es\s*<\s*\/\s*code\s*>/i.test(st.hintHtml),
+          `Hint includes <code…>es</code> (Chromium may add classes; got: ${JSON.stringify(st.hintHtml.slice(0, 240))})`
+        );
+        assert(st.hintHtml.includes('Translate this page'), 'Hint mentions Translate this page');
+        assert(st.hintHtml.includes('Traduire cette page'), 'Hint mentions Traduire cette page');
+        assert(st.hintTextLen > 80, `Hint text is substantive (length ${st.hintTextLen})`);
+      } finally {
+        await bEs.close();
+      }
+    });
+
+    await test('Welcome translate hint: locale fr-FR (French-only branch)', async () => {
+      const { browser: bFr, page: pFr } = await launch({ locale: 'fr-FR' });
+      try {
+        await loadApp(pFr, { dismissWelcome: false });
+        const st = await pFr.evaluate(() => {
+          const hint = document.getElementById('welcome-translate-hint');
+          const overlay = document.getElementById('welcome-modal-overlay');
+          return {
+            nav: navigator.language,
+            hintHtml: hint ? hint.innerHTML : '',
+            welcomeOpen: !!(overlay && !overlay.classList.contains('hidden')),
+          };
+        });
+        assert(st.welcomeOpen, 'Welcome overlay is visible on first load');
+        assert(/^fr/i.test(st.nav), `navigator.language is fr-* (got "${st.nav}")`);
+        assert(st.hintHtml.includes('Traduire cette page'), 'FR branch mentions Traduire cette page');
+        assert(st.hintHtml.includes('français'), 'FR branch mentions français');
+        assert(!st.hintHtml.includes('<code>'), 'FR branch has no <code> language tag in hint');
+      } finally {
+        await bFr.close();
+      }
+    });
+
+    await test('Welcome translate hint: locale en-GB (English-only branch)', async () => {
+      const { browser: bEn, page: pEn } = await launch({ locale: 'en-GB' });
+      try {
+        await loadApp(pEn, { dismissWelcome: false });
+        const st = await pEn.evaluate(() => {
+          const hint = document.getElementById('welcome-translate-hint');
+          const overlay = document.getElementById('welcome-modal-overlay');
+          return {
+            nav: navigator.language,
+            hintHtml: hint ? hint.innerHTML : '',
+            welcomeOpen: !!(overlay && !overlay.classList.contains('hidden')),
+          };
+        });
+        assert(st.welcomeOpen, 'Welcome overlay is visible on first load');
+        assert(/^en/i.test(st.nav), `navigator.language is en-* (got "${st.nav}")`);
+        assert(st.hintHtml.includes('Translate this page'), 'EN branch mentions Translate this page');
+        assert(st.hintHtml.includes('French'), 'EN branch mentions French as narrative language');
+        assert(!st.hintHtml.includes('Traduire cette page'), 'EN branch does not use the FR-only Traduire string');
+      } finally {
+        await bEn.close();
+      }
+    });
+  } else {
+    console.log(`\n  ${YELLOW}Welcome locale (Playwright): skipped in smoke mode${RESET}`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

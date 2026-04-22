@@ -1552,6 +1552,47 @@ ul.uncertainty-level-list {
 }
 #welcome-start-btn:hover { filter: brightness(1.1); }
 
+.welcome-lang-panel {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-divider);
+}
+.welcome-lang-panel-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+  color: var(--color-text);
+}
+.welcome-lang-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.welcome-lang-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-interactive), border-color var(--transition-interactive);
+}
+.welcome-lang-btn:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-highlight);
+}
+#welcome-translate-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-3);
+  line-height: 1.55;
+}
+
 /* ===== DATA VIEWER DRAWER ===== */
 .data-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;opacity:0;transition:opacity 250ms ease;}
 .data-viewer-overlay.visible{opacity:1;}
@@ -1974,7 +2015,7 @@ ul.uncertainty-level-list {
 
 </div>
 
-<!-- i18next: fast UI for 10 bundled locales + RTL for ar. For any other language, keep translate=yes on <html> and use the browser’s page translator. -->
+<!-- i18next: fast UI for fr + en menu labels. Any other language: keep translate=yes on <html> and use the browser page translator. -->
 <script src="https://unpkg.com/i18next@23.11.5/i18next.min.js"></script>
 <script src="https://unpkg.com/i18next-browser-languagedetector@8.0.0/i18nextBrowserLanguageDetector.min.js"></script>
 
@@ -4062,14 +4103,14 @@ document.addEventListener('DOMContentLoaded', function initBurger() {
      INTERNATIONALISATION — two layers (same goal: reach every language)
      1) PRIMARY — Browser page translation (Chrome, Edge, Safari, Firefox…):
         - Narrative from JSON is French-first in the DOM; the built-in selector
-          only switches the 10 bundled UI packs below.
-        - For Hindi, Swahili, Vietnamese, etc.: leave the selector on a bundled
-          language you read, or switch to French, then use “Translate this page”.
+          only switches **French or English** menu labels (see welcome dialog).
+        - For any other language: pick Français or English for menu labels, then
+          use the browser’s “Translate this page” on the whole document.
         - Keep <html translate="yes"> (re-applied on languageChanged). Mark only
           machine-readable or unstable text as translate=no (see #json-code).
         - Do not mark translate=no on main article text, map labels, or panels.
-     2) SECONDARY — i18next: instant chrome for 10 languages without a round-trip
-        to an online translator; also drives dir=rtl for Arabic.
+     2) SECONDARY — i18next: instant menu chrome for **French and English** only
+        (no round-trip to an online translator for those two).
      ===================================================================== -->
 <script>
 (function() {
@@ -4933,8 +4974,8 @@ function applyTranslations() {
   const t = i18next.t.bind(i18next);
   const lng = i18next.language;
 
-  // RTL support
-  document.documentElement.dir = (lng === 'ar') ? 'rtl' : 'ltr';
+  // Layout direction (only fr/en are bundled; use browser translation for other languages)
+  document.documentElement.dir = 'ltr';
   document.documentElement.lang = lng;
 
   // Logo subtitle
@@ -5068,8 +5109,10 @@ function getLangFromBrowser() {
 }
 
 function initI18n() {
-  const supported = Object.keys(TRANSLATIONS);
-  let detected = getLangFromBrowser();
+  const supported = ['fr', 'en'];
+  let stored = null;
+  try { stored = localStorage.getItem('ho_ui_lang'); } catch (e) { /* ignore */ }
+  let detected = (stored && supported.includes(stored)) ? stored : getLangFromBrowser();
   if (!supported.includes(detected)) detected = 'fr';
 
   // Sync the selector
@@ -5290,11 +5333,9 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   var overlay = document.getElementById('welcome-modal-overlay');
   if (!overlay) return;
 
-  // localStorage may throw in some file:// or private-browsing contexts
-  function storedGet() { try { return localStorage.getItem(STORAGE_KEY); } catch(e) { return null; } }
-  function storedSet() { try { localStorage.setItem(STORAGE_KEY, '1'); } catch(e) {} }
+  function storedGet() { try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; } }
+  function storedSet() { try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {} }
 
-  // Don't show if already dismissed
   if (storedGet()) { overlay.classList.add('hidden'); return; }
 
   function dismiss() {
@@ -5303,9 +5344,76 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
     storedSet();
   }
 
+  function browserUiLang() {
+    var raw = navigator.language || (navigator.languages && navigator.languages[0]) || 'fr';
+    return String(raw).split('-')[0].toLowerCase();
+  }
+  function humanLangName(code) {
+    try {
+      var loc = navigator.language || 'en';
+      var dn = new Intl.DisplayNames([loc, 'en', 'fr'], { type: 'language' });
+      return dn.of(code) || code;
+    } catch (err) { return code; }
+  }
+
+  var hint = document.getElementById('welcome-translate-hint');
+  var bl = browserUiLang();
+  if (hint) {
+    if (bl === 'fr') {
+      hint.innerHTML = 'Les textes scientifiques (carte, panneau de détail) sont rédigés en <strong>français</strong>. Pour une autre langue, utilisez la fonction <strong>Traduire cette page</strong> de votre navigateur après avoir fermé cette fenêtre.';
+    } else if (bl === 'en') {
+      hint.innerHTML = 'Scientific texts (map, side panel) are authored in <strong>French</strong>. For another language, use your browser’s <strong>Translate this page</strong> after closing this dialog.';
+    } else {
+      var name = humanLangName(bl);
+      hint.innerHTML =
+        'Votre navigateur signale <strong>' + name + '</strong> (<code>' + bl + '</code>). ' +
+        'Seuls le <strong>français</strong> et l’<strong>anglais</strong> couvrent l’interface du menu ; ' +
+        'les contenus scientifiques sont en <strong>français</strong>. ' +
+        'Pour tout l’afficher dans votre langue, fermez cette fenêtre puis utilisez <strong>Traduire cette page</strong> (menu ou clic droit).<br><br>' +
+        '<span style="opacity:0.92">Your browser reports <strong>' + name + '</strong> (<code>' + bl + '</code>). ' +
+        'Only <strong>French</strong> and <strong>English</strong> ship for menu controls; scientific copy is in <strong>French</strong>. ' +
+        'Close this dialog, then use <strong>Translate this page</strong> to read everything in your language.</span>';
+    }
+  }
+
+  function pickWelcomeLang(code) {
+    try { localStorage.setItem('ho_ui_lang', code); } catch (e) { /* ignore */ }
+    var sel = document.getElementById('lang-select');
+    if (sel) {
+      sel.value = code;
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    function afterI18n() {
+      if (typeof applyTranslations === 'function') applyTranslations();
+      dismiss();
+    }
+    var tries = 0;
+    function waitI18n() {
+      tries += 1;
+      if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+        i18next.changeLanguage(code).then(afterI18n).catch(afterI18n);
+        return;
+      }
+      if (tries > 60) {
+        dismiss();
+        return;
+      }
+      setTimeout(waitI18n, 50);
+    }
+    waitI18n();
+  }
+
+  var frBtn = document.getElementById('welcome-pick-fr');
+  var enBtn = document.getElementById('welcome-pick-en');
+  if (frBtn) frBtn.addEventListener('click', function (e) { e.stopPropagation(); pickWelcomeLang('fr'); });
+  if (enBtn) enBtn.addEventListener('click', function (e) { e.stopPropagation(); pickWelcomeLang('en'); });
+
   var btn = document.getElementById('welcome-start-btn');
-  if (btn) btn.addEventListener('click', function(e) { e.stopPropagation(); dismiss(); });
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) dismiss(); });
+  if (btn) {
+    btn.removeAttribute('onclick');
+    btn.addEventListener('click', function (e) { e.stopPropagation(); dismiss(); });
+  }
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) dismiss(); });
   document.addEventListener('keydown', function onEsc(e) {
     if (e.key === 'Escape') { dismiss(); document.removeEventListener('keydown', onEsc); }
   });
@@ -5343,14 +5451,6 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
           <select id="lang-select" data-testid="lang-select" aria-label="Language" translate="no">
             <option value="fr">Français</option>
             <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="de">Deutsch</option>
-            <option value="zh">中文</option>
-            <option value="ar">العربية</option>
-            <option value="pt">Português</option>
-            <option value="it">Italiano</option>
-            <option value="ja">日本語</option>
-            <option value="ko">한국어</option>
           </select>
         </div>
       </div>
@@ -5455,6 +5555,14 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
           </span>
           <span id="tip-play">Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.</span>
         </div>
+      </div>
+      <div class="welcome-lang-panel" id="welcome-lang-panel" translate="yes">
+        <div class="welcome-lang-panel-title" id="welcome-lang-panel-title">Langue du menu et des boutons</div>
+        <div class="welcome-lang-row">
+          <button type="button" class="welcome-lang-btn" id="welcome-pick-fr" translate="no">Français</button>
+          <button type="button" class="welcome-lang-btn" id="welcome-pick-en" translate="no">English</button>
+        </div>
+        <p id="welcome-translate-hint" translate="no"></p>
       </div>
       <button id="welcome-start-btn" onclick="document.getElementById('welcome-modal-overlay').style.display='none'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
