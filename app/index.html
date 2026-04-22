@@ -1349,6 +1349,8 @@ ul.uncertainty-level-list {
   height: 96px;
 }
 
+/* RTL: no bundled Arabic/Hebrew UI yet — enabling [dir="rtl"] would require a dedicated pass on Leaflet, timeline flex, and panel layout. */
+
 /* Scrollbar */
 #side-panel::-webkit-scrollbar { width: 4px; }
 #side-panel::-webkit-scrollbar-track { background: transparent; }
@@ -2194,7 +2196,7 @@ function updateMap() {
           opacity: 0.3,
           dashArray: '4 4',
         });
-        circle.bindTooltip(`<strong>${scientificNameHtml(species.name)}</strong><br>${region.note}`, {
+        circle.bindTooltip(`<strong>${scientificNameHtml(species.name)}</strong><br>${bandTipEscapeHtml(region.note)}`, {
           permanent: false, direction: 'auto', offset: [0, -6], className: 'leaflet-tooltip-custom ho-map-rich-tip',
         });
         rangesLayer.addLayer(circle);
@@ -2214,7 +2216,7 @@ function updateMap() {
             background:${species.color}22;
             border-color:${species.color};
             color:${species.color};
-          " title="${site.name}"></div>`,
+          " title="${escapeHtmlAttr(site.name)}"></div>`,
           iconSize: [size, size],
           iconAnchor: [size/2, size/2],
         });
@@ -2222,9 +2224,9 @@ function updateMap() {
         const marker = L.marker([site.lat, site.lng], { icon });
         marker.bindTooltip(`
           <div style="font-size:13px;line-height:1.5">
-            <strong style="color:${species.color}">${site.name}</strong><br>
+            <strong style="color:${species.color}">${bandTipEscapeHtml(site.name)}</strong><br>
             <em style="color:#9a8f7a">${scientificNameHtml(species.name)}</em><br>
-            ${site.note}
+            ${bandTipEscapeHtml(site.note)}
           </div>
         `, { direction: 'auto', offset: [0, -8], className: 'leaflet-tooltip-custom ho-map-rich-tip' });
 
@@ -2255,7 +2257,7 @@ function updateMap() {
           dashArray: '8 4',
           className: 'migration-path',
         });
-        line.bindTooltip(`<span style="color:${species.color}">${mig.label}</span>`, { direction: 'center' });
+        line.bindTooltip(`<span style="color:${species.color}">${bandTipEscapeHtml(mig.label)}</span>`, { direction: 'center' });
         migrationsLayer.addLayer(line);
         // Note: arrowhead and endpoint dot are handled by animMigLayer
       });
@@ -2368,10 +2370,10 @@ function updateEvents() {
     const marker = L.marker([ev.lat, ev.lng], { icon, zIndexOffset: 200 });
     marker.bindTooltip(`
       <div style="font-size:13px;line-height:1.5;max-width:240px">
-        <strong style="color:${ev.color}">${ev.label}</strong><br>
-        <em style="color:#9a8f7a">${getCategoryLabel(ev.category)}</em><br>
-        ${ev.desc}
-        ${ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + ev.source + '</span>' : ''}
+        <strong style="color:${ev.color}">${bandTipEscapeHtml(ev.label)}</strong><br>
+        <em style="color:#9a8f7a">${bandTipEscapeHtml(getCategoryLabel(ev.category))}</em><br>
+        ${bandTipEscapeHtml(ev.desc)}
+        ${ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>' : ''}
       </div>
     `, { direction: 'auto', offset: [0, -10], className: 'ho-map-rich-tip' });
     marker.on('click', function (e) {
@@ -2589,7 +2591,7 @@ function renderPanel(species) {
         <div class="side-panel-header-text">
           <div class="period-label">${formatTime(species.start)} ${T('periodTo','à')} ${formatTime(species.end)}</div>
           <div class="species-name" translate="no" style="color:${species.color}">${bandTipEscapeHtml(species.name)}</div>
-          <div class="species-name-common">${species.common}</div>
+          <div class="species-name-common">${bandTipEscapeHtml(species.common)}</div>
         </div>
         ${renderCertaintyTriIcon(species, T)}
       </div>
@@ -2628,34 +2630,34 @@ function renderPanel(species) {
               <div class="pig-label" style="text-align:left;margin-bottom:4px">${T('skinLabel','Peau')}</div>
               ${getSkinSwatch(pig.skin)}
             </div>
-            <div class="pig-desc" style="text-align:left;flex:1;margin-top:20px">${pig.skin.desc}</div>
+            <div class="pig-desc" style="text-align:left;flex:1;margin-top:20px">${bandTipEscapeHtml(pig.skin.desc)}</div>
           </div>
           <div class="pig-card">
             <div class="pig-label">${T('eyesLabel','Yeux')}</div>
             ${getEyeSwatch(pig.eyes)}
-            <div class="pig-desc">${pig.eyes.desc}</div>
+            <div class="pig-desc">${bandTipEscapeHtml(pig.eyes.desc)}</div>
           </div>
           <div class="pig-card">
             <div class="pig-label">${T('hairLabel','Cheveux / Pelage')}</div>
             ${getHairSwatch(pig.hair)}
-            <div class="pig-desc">${pig.hair.desc}</div>
+            <div class="pig-desc">${bandTipEscapeHtml(pig.hair.desc)}</div>
           </div>
           <div class="pig-card" style="grid-column:3"></div>
           ` : `
           <div class="pig-card">
             <div class="pig-label">${T('skinLabel','Peau')}</div>
             ${getSkinSwatch(pig.skin)}
-            <div class="pig-desc">${pig.skin.desc}</div>
+            <div class="pig-desc">${bandTipEscapeHtml(pig.skin.desc)}</div>
           </div>
           <div class="pig-card">
             <div class="pig-label">${T('eyesLabel','Yeux')}</div>
             ${getEyeSwatch(pig.eyes)}
-            <div class="pig-desc">${pig.eyes.desc}</div>
+            <div class="pig-desc">${bandTipEscapeHtml(pig.eyes.desc)}</div>
           </div>
           <div class="pig-card">
             <div class="pig-label">${T('hairLabel','Cheveux / Pelage')}</div>
             ${getHairSwatch(pig.hair)}
-            <div class="pig-desc">${pig.hair.desc}</div>
+            <div class="pig-desc">${bandTipEscapeHtml(pig.hair.desc)}</div>
           </div>
           `}
         </div>
@@ -2669,7 +2671,7 @@ function renderPanel(species) {
       <div class="tools-section">
         <div class="section-title">${T('toolsTitle','Technologies & Comportements')}</div>
         <div style="flex-wrap:wrap;display:flex;gap:var(--space-1)">
-          ${species.tools.map(t => `<span class="tool-tag">⛒ ${t}</span>`).join('')}
+          ${species.tools.map(t => `<span class="tool-tag">⛒ ${bandTipEscapeHtml(t)}</span>`).join('')}
         </div>
       </div>
 
@@ -2677,7 +2679,7 @@ function renderPanel(species) {
       ${species.debate ? `
       <div class="debate-section">
         <div class="section-title">${T('debateSection','Débats scientifiques actifs')}</div>
-        <div class="debate-item">❓ ${species.debate}</div>
+        <div class="debate-item">❓ ${bandTipEscapeHtml(species.debate)}</div>
       </div>` : ''}
 
       <!-- Certainty badge -->
@@ -3252,12 +3254,12 @@ function buildEventsBand() {
     // JS-driven tooltip matching Leaflet tooltip HTML style
     const catLabel = getCategoryLabel(ev.category);
     const srcHtml  = ev.source
-      ? '<br><span style="color:var(--color-text-faint);font-style:italic">' + ev.source + '</span>'
+      ? '<br><span style="color:var(--color-text-faint);font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>'
       : '';
     const tipHtml =
-      '<strong style="color:' + ev.color + '">' + ev.label + '</strong><br>' +
-      '<em style="color:var(--color-text-muted)">' + catLabel + '</em><br>' +
-      ev.desc + srcHtml;
+      '<strong style="color:' + bandTipEscapeHtml(ev.color) + '">' + bandTipEscapeHtml(ev.label) + '</strong><br>' +
+      '<em style="color:var(--color-text-muted)">' + bandTipEscapeHtml(catLabel) + '</em><br>' +
+      bandTipEscapeHtml(ev.desc) + srcHtml;
 
     el.addEventListener('mouseenter', function(e) {
       if (isMobileViewport()) return;
@@ -3745,7 +3747,7 @@ function updateAnimatedMigrations() {
         className: isPlaying ? 'migration-animated' : '',
         dashArray: isPlaying ? null : '8 4',
       });
-      line.bindTooltip('<span style="color:' + species.color + '">' + mig.label + '</span>', { direction: 'center' });
+      line.bindTooltip('<span style="color:' + species.color + '">' + bandTipEscapeHtml(mig.label) + '</span>', { direction: 'center' });
       animMigLayer.addLayer(line);
 
       // Single arrowhead at 2/3 of the path to show direction

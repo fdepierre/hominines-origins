@@ -41,6 +41,16 @@ To add a **third** bundled UI language (not required for coverage):
 
 For one-off classroom use, **do not** add a pack — tell users to pick FR or EN in the burger, then translate the page.
 
+#### Browser “Translate this page” — manual QA (before a release)
+
+Chrome / Edge / Firefox can translate the static DOM; **Leaflet tooltips** and the **#band-tooltip** panel are filled in JavaScript, so behaviour varies by browser and timing.
+
+1. Set the browser UI to a language you do not maintain (e.g. Spanish).
+2. Open the app over HTTP, pick **FR** or **EN** for menu chrome, then run **Translate this page**.
+3. Check: burger labels, timeline play/pause, layer **titles** on hover, **map tooltips** (sites, ranges, migrations, events), **timeline band** tooltips (skin + events), side panel narrative after selecting a species.
+4. Confirm **Latin taxon names** still look correct (they are marked `translate="no"` or escaped where injected).
+5. If a string shows raw HTML entities or a missing key, fix the template (prefer `bandTipEscapeHtml()` / `scientificNameHtml()` in `app/index.html`) rather than loosening `translate="yes"` on `<html>`.
+
 ### 3. UI and code improvements
 
 Before making significant changes to the interface:
