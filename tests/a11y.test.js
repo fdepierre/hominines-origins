@@ -378,6 +378,11 @@ async function runA11yTests(options = {}) {
         if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
       });
       await page.waitForTimeout(450);
+      const enMenuOpen = await page.evaluate(() => {
+        const el = document.querySelector('#burger-btn .sr-only');
+        return el ? el.textContent.trim() : '';
+      });
+      assert(enMenuOpen === 'Menu', `Burger open sr-only (en): "${enMenuOpen}"`);
       await page.click('[data-testid="burger-menu-button"]');
       await page.waitForSelector('#burger-panel.open', { timeout: 4000 });
       const enClose = await page.evaluate(() => {

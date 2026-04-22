@@ -1904,28 +1904,31 @@ ul.uncertainty-level-list {
       <div id="map" data-testid="map"></div>
 
       <!-- Burger menu button — top-left of map -->
-      <button id="burger-btn" type="button" data-testid="burger-menu-button" aria-label="Menu" title="Menu">☰</button>
+      <button id="burger-btn" type="button" data-testid="burger-menu-button">
+        <span class="sr-only" data-i18n="ui.menu">Menu</span>
+        <span aria-hidden="true">☰</span>
+      </button>
 
       <!-- Layer toggles hidden from map — shown in burger menu -->
       <div class="layer-toggle-group" id="layer-toggles" style="display:none;">
-        <button class="layer-btn active" data-layer="sites" title="Sites fossiles" data-i18n-title="ui.layerSitesTitle">
+        <button class="layer-btn active" data-layer="sites" data-i18n-title="ui.layerSitesTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
             <circle cx="7" cy="7" r="2" fill="currentColor"/>
           </svg>Sites fossiles
         </button>
-        <button class="layer-btn active" data-layer="migrations" title="Routes de migration" data-i18n-title="ui.layerMigrationsTitle">
+        <button class="layer-btn active" data-layer="migrations" data-i18n-title="ui.layerMigrationsTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M2 7 Q5 3 9 7 L12 7M10 5l2 2-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 2"/>
           </svg>Migrations
         </button>
-        <button class="layer-btn active" data-layer="range" title="Zones géographiques" data-i18n-title="ui.layerRangeTitle">
+        <button class="layer-btn active" data-layer="range" data-i18n-title="ui.layerRangeTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
             <circle cx="7" cy="7" r="5" fill="currentColor" opacity="0.15"/>
           </svg>Zones
         </button>
-        <button class="layer-btn active" data-layer="events" title="Jalons culturels et technologiques" data-i18n-title="ui.layerEventsTitle">
+        <button class="layer-btn active" data-layer="events" data-i18n-title="ui.layerEventsTitle">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <polygon points="7,2 9,6 13,6.5 10,9.5 10.5,13 7,11 3.5,13 4,9.5 1,6.5 5,6" stroke="currentColor" stroke-width="1" fill="currentColor" opacity="0.6"/>
           </svg>Jalons culturels
@@ -1984,9 +1987,7 @@ ul.uncertainty-level-list {
     <!-- Needle wrapper — play btn + time label float inside as overlays -->
     <div id="needle-wrapper" data-testid="timeline-needle-row" style="position:relative;">
       <!-- Play/pause button — overlays left of species track -->
-      <button id="play-btn" type="button" data-testid="play-toggle"
-              title="Lancez l'animation pour voir les migrations humaines se dérouler au fil du temps"
-              data-i18n-title="ui.playTitle">
+      <button id="play-btn" type="button" data-testid="play-toggle" data-i18n-title="ui.playTitle">
         <svg id="play-icon" width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
           <polygon points="3,1 13,7 3,13"/>
         </svg>
@@ -2018,7 +2019,7 @@ ul.uncertainty-level-list {
 
       <!-- THE NEEDLE — full height, round handle on top -->
       <div class="timeline-full-needle" id="timeline-full-needle">
-        <div class="timeline-needle-handle" id="timeline-scrubber" title="Glissez" data-i18n-title="ui.scrubberTitle"></div>
+        <div class="timeline-needle-handle" id="timeline-scrubber" data-i18n-title="ui.scrubberTitle"></div>
       </div>
 
     </div><!-- /needle-wrapper -->
@@ -2031,7 +2032,7 @@ ul.uncertainty-level-list {
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
       <span>Carte</span>
     </button>
-    <button type="button" class="mobile-tab-bar-play" id="mobile-play-btn" data-i18n-title="ui.playTitle" title="Lecture">
+    <button type="button" class="mobile-tab-bar-play" id="mobile-play-btn" data-i18n-title="ui.playTitle">
       <svg id="mobile-play-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="8,5 20,12 8,19"></polygon></svg>
       <span id="mobile-play-label">Play</span>
     </button>
@@ -2216,7 +2217,7 @@ function updateMap() {
             background:${species.color}22;
             border-color:${species.color};
             color:${species.color};
-          " title="${escapeHtmlAttr(site.name)}"></div>`,
+          "></div>`,
           iconSize: [size, size],
           iconAnchor: [size/2, size/2],
         });
@@ -2362,8 +2363,8 @@ function updateEvents() {
 
     const icon = L.divIcon({
       className: '',
-      html: '<div class="event-map-marker-inner" style="display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;min-width:22px;min-height:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));cursor:pointer" title="' +
-        escapeHtmlAttr(ev.label) + '">' + eventMapMarkerInnerContent(ev) + '</div>',
+      html: '<div class="event-map-marker-inner" style="display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;min-width:22px;min-height:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));cursor:pointer">' +
+        eventMapMarkerInnerContent(ev) + '</div>',
       iconSize: [24, 24],
       iconAnchor: [12, 12],
     });
@@ -2395,16 +2396,21 @@ function updateEvents() {
 // =====================================================================
 // SIDE PANEL — species detail
 // =====================================================================
-function getSkinSwatch(pig) {
+function getSkinSwatch(pig, T) {
   if (pig.variant === 'spectrum' && pig.spectrumColors) {
     const stops = pig.spectrumColors.join(', ');
-    return `<div style="
+    const spectrumLabel = typeof T === 'function'
+      ? T('pigmentationSpectrumLabel', 'Spectre synthétique illustrant la diversité de pigmentation humaine')
+      : ((typeof i18next !== 'undefined' && i18next.isInitialized)
+        ? i18next.t('ui.pigmentationSpectrumLabel', { defaultValue: 'Spectre synthétique illustrant la diversité de pigmentation humaine' })
+        : 'Spectre synthétique illustrant la diversité de pigmentation humaine');
+    return `<div role="img" aria-label="${escapeHtmlAttr(spectrumLabel)}" style="
       background: linear-gradient(to right, ${stops});
       border-radius: var(--radius-full);
       border: 2px solid var(--color-border);
       width: 160px; height: 22px;
       flex-shrink: 0;
-    " title="Spectre mondial de pigmentation humaine"></div>`;
+    "></div>`;
   }
   if (pig.variant === 'split') {
     return `<div class="pig-swatch" style="
@@ -2566,7 +2572,8 @@ function renderCertaintyTriIcon(species, T) {
     'Certitude par thème : secteur supérieur taxonomie, puis comportement, puis pigmentation (sens horaire). Survolez ou activez pour le détail.');
   return (
     '<div class="certainty-tri-slot">' +
-    '<button type="button" class="certainty-tri-hit" aria-label="' + escapeHtmlAttr(aria) + '">' +
+    '<button type="button" class="certainty-tri-hit">' +
+    '<span class="sr-only">' + bandTipEscapeHtml(aria) + '</span>' +
     '<svg class="certainty-tri-svg" viewBox="0 0 48 48" width="44" height="44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">' +
     paths +
     '</svg></button>' +
@@ -2628,7 +2635,7 @@ function renderPanel(species) {
           <div class="pig-card" style="grid-column:1/-1;flex-direction:row;align-items:flex-start;gap:var(--space-3)">
             <div style="flex-shrink:0">
               <div class="pig-label" style="text-align:left;margin-bottom:4px">${T('skinLabel','Peau')}</div>
-              ${getSkinSwatch(pig.skin)}
+              ${getSkinSwatch(pig.skin, T)}
             </div>
             <div class="pig-desc" style="text-align:left;flex:1;margin-top:20px">${bandTipEscapeHtml(pig.skin.desc)}</div>
           </div>
@@ -2646,7 +2653,7 @@ function renderPanel(species) {
           ` : `
           <div class="pig-card">
             <div class="pig-label">${T('skinLabel','Peau')}</div>
-            ${getSkinSwatch(pig.skin)}
+            ${getSkinSwatch(pig.skin, T)}
             <div class="pig-desc">${bandTipEscapeHtml(pig.skin.desc)}</div>
           </div>
           <div class="pig-card">
@@ -4217,6 +4224,8 @@ const TRANSLATIONS = {
         infoDrawerTitle: 'Informations',
         infoDrawerClose: 'Fermer le panneau',
         closeButton: 'Fermer',
+        menu: 'Menu',
+        pigmentationSpectrumLabel: 'Spectre synthétique illustrant la diversité de pigmentation humaine',
         infoAboutBody: 'Hominines présente l\'évolution humaine à partir de travaux publiés (fossiles, génomique, archéologie). Les cartes et silhouettes sont des synthèses : elles évoluent lorsque de nouvelles preuves apparaissent.',
         uncertaintySectionTitle: 'Comprendre les niveaux de certitude',
         uncertaintyIntro: 'Pour chaque espèce, trois thèmes sont évalués : la taxonomie (comment les spécialistes classent le groupe), les comportements déduits des traces matérielles, et la pigmentation. Deux axes complètent l\'image : à quel point la communauté est alignée, et quel type de preuve soutient l\'affichage.',
@@ -4304,6 +4313,8 @@ const TRANSLATIONS = {
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: 'Menu',
+        pigmentationSpectrumLabel: 'Synthetic gradient illustrating human pigmentation diversity',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -4391,6 +4402,8 @@ const TRANSLATIONS = {
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: 'Menú',
+        pigmentationSpectrumLabel: 'Degradado sintético que ilustra la diversidad de pigmentación humana',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -4471,11 +4484,13 @@ const TRANSLATIONS = {
         // Event categories
         catTools: 'Steinzeittechnologie', catFire: 'Feuerbeherrschung',
         catPhylo: 'Phylogenie', catSymbolic: 'Symbolisches Verhalten',
-        catArt: 'Höhlenmalerei', catMigration: 'Migrationen', catNeolithic: 'Neolithikum',
+        catArt: 'Höhlenmalerei', catMigration: 'Migrationen',         catNeolithic: 'Neolithikum',
         infoMenuTitle: 'Project context and scientific certainty',
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: 'Menü',
+        pigmentationSpectrumLabel: 'Synthetischer Farbverlauf zur menschlichen Pigmentationsvielfalt',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -4556,11 +4571,13 @@ const TRANSLATIONS = {
         // Event categories
         catTools: '石器技术', catFire: '火的掌握',
         catPhylo: '系统发育', catSymbolic: '象征行为',
-        catArt: '洞穴艺术', catMigration: '迁徙', catNeolithic: '新石器时代',
+        catArt: '洞穴艺术', catMigration: '迁徙',         catNeolithic: '新石器时代',
         infoMenuTitle: 'Project context and scientific certainty',
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: '菜单',
+        pigmentationSpectrumLabel: '示意性渐变，展示人类肤色多样性',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -4641,11 +4658,13 @@ const TRANSLATIONS = {
         // Event categories
         catTools: 'التكنولوجيا الحجرية', catFire: 'إتقان النار',
         catPhylo: 'علم الأنساب', catSymbolic: 'السلوك الرمزي',
-        catArt: 'فن الكهوف', catMigration: 'الهجرات', catNeolithic: 'العصر الحجري الحديث',
+        catArt: 'فن الكهوف', catMigration: 'الهجرات',         catNeolithic: 'العصر الحجري الحديث',
         infoMenuTitle: 'Project context and scientific certainty',
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: 'القائمة',
+        pigmentationSpectrumLabel: 'تدرج لوني توضيحي يمثل تنوع صبغة البشرة البشرية',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -4731,6 +4750,8 @@ const TRANSLATIONS = {
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: 'Menu',
+        pigmentationSpectrumLabel: 'Gradiente sintético que ilustra a diversidade de pigmentação humana',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -4816,6 +4837,8 @@ const TRANSLATIONS = {
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: 'Menu',
+        pigmentationSpectrumLabel: 'Gradiente sintetico che illustra la diversità della pigmentazione umana',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -4901,6 +4924,8 @@ const TRANSLATIONS = {
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: 'メニュー',
+        pigmentationSpectrumLabel: '人類の色素多様性を示す合成的なグラデーション',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -4986,6 +5011,8 @@ const TRANSLATIONS = {
         infoDrawerTitle: 'Information',
         infoDrawerClose: 'Close panel',
         closeButton: 'Close',
+        menu: '메뉴',
+        pigmentationSpectrumLabel: '인류 색소 다양성을 보여 주는 개념적 색상 그라데이션',
         infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
         uncertaintySectionTitle: 'How to read certainty here',
         uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
@@ -5028,7 +5055,10 @@ function applyTranslations() {
   const t = i18next.t.bind(i18next);
   const lng = i18next.language;
 
-  // Layout direction (only fr/en are bundled; use browser translation for other languages)
+  // Layout direction: keep LTR explicitly. Only fr/en UI strings are bundled; browser “translate
+  // this page” may render Arabic/Hebrew script but we do not ship a tested RTL layout (timeline,
+  // Leaflet, panels). A future RTL mode would need mirrored controls, map attribution, and QA —
+  // do not infer dir from navigator.language alone.
   document.documentElement.dir = 'ltr';
   document.documentElement.lang = lng;
 
@@ -5552,7 +5582,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
             </svg>
             <span data-i18n="ui.toggleTheme">Mode sombre</span>
           </button>
-          <button id="btn-data-viewer" class="layer-btn" title="Données JSON" data-i18n-title="ui.dataViewerTitle" style="flex:1; justify-content:center;">
+          <button id="btn-data-viewer" class="layer-btn" data-i18n-title="ui.dataViewerTitle" style="flex:1; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
             <span data-i18n="ui.dataViewerTitle">Données</span>
           </button>
