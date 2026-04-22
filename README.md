@@ -7,7 +7,7 @@
 [![Live app](https://img.shields.io/badge/Live%20app-open%20now-orange)](https://ho.lookingforanswers.eu/)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-blue)](https://creativecommons.org/licenses/by/4.0/)
-[![Tests](https://img.shields.io/badge/Tests-51%20passing-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/Tests-57%20passing-brightgreen)](#tests)
 [![Fork this](https://img.shields.io/badge/Fork%20this-please-blueviolet)](https://github.com/fdepierre/hominines-origins/fork)
 
 ---
@@ -71,7 +71,7 @@ Markdown tables written for humans: researchers, teachers, contributors. These a
 | File | Contents |
 |------|----------|
 | [`Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md`](data/Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md) | 12 hominine species: morphology, biometrics, pigmentation, fossil sites, migrations, tools, scientific debates — all with DOI |
-| [`Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md`](data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md) | 20 chronological milestones: Lomekwi tools (3.3 Ma), fire, cave art, burials, Out of Africa, peopling of Australia and the Americas — all with DOI |
+| [`Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md`](data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md) | Human-readable chronological milestones (tools, fire, art, burials, migrations, domestication — all with DOI). Keep in sync with [`app/data/events.json`](app/data/events.json), which currently lists **22** events. |
 
 ### `app/data/` — Machine-readable data (JSON-LD)
 
@@ -80,7 +80,7 @@ W3C JSON-LD files derived from the Markdown sources above. These are what the ap
 | File | Contents |
 |------|----------|
 | [`app/data/species.json`](app/data/species.json) | 14 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Narrative fields use `fr` as the canonical language in the running app (parallel `en` is often present in the file for reuse and tooling). |
-| [`app/data/events.json`](app/data/events.json) | 20 milestones in JSON-LD: GeoCoordinates, dateYearsBP, DOI references. Same pattern: French-first in the UI, optional `en` in the data. |
+| [`app/data/events.json`](app/data/events.json) | **22** milestones in JSON-LD: GeoCoordinates, `hominin:dateYearsBP`, DOI references. Same pattern: French-first in the UI, optional `en` in the data. |
 
 ### The relationship between the two
 
@@ -92,8 +92,9 @@ app/data/*.json    ←  app reads this (machine-readable, AI-friendly)
 
 When new research is published:
 1. Update the relevant `.md` file in `data/` with the new finding and its DOI
-2. Update the corresponding entry in `app/data/` to reflect the change
-3. Run `node tests/run-all.js` to verify nothing is broken
+2. Update the corresponding entry in `app/data/` (`species.json`, `events.json`, and/or `species-certainty.json`) to reflect the change
+3. If you care about **offline** or **`file://`** use, update the embedded JSON mirrors (`_EMBEDDED_SPECIES`, `_EMBEDDED_EVENTS`, `_EMBEDDED_CERTAINTY`) inside [`app/index.html`](app/index.html) so they match `app/data/` — otherwise `fetch` failures will load stale data
+4. Run `node tests/run-all.js` to verify nothing is broken
 
 Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** still switches chrome UI strings across ten languages; for languages outside that set, or for translating French narrative wholesale, use the browser’s page translator. Coverage of SVG labels and Leaflet map chrome varies by browser.
 
@@ -161,7 +162,7 @@ Every species entry in `app/data/species.json` carries these fields for each of 
 
 A single HTML file: [`app/index.html`](app/index.html).
 
-**No build step. No npm install. No framework.** Open it in a browser — it works.
+**No build step. No runtime npm dependencies. No framework.** Open [`app/index.html`](app/index.html) in a browser over HTTP (or a static server) — it works. The repo includes **`package.json`** and Playwright **only** so contributors can run `node tests/run-all.js` / `npm test`.
 
 | Dependency | Role |
 |------------|------|
@@ -176,18 +177,18 @@ Arabic renders right-to-left. The selector detects your browser language automat
 
 ## Tests
 
-51 automated non-regression tests. They run in about 30 seconds.
+**57** automated non-regression checks (named `test` cases across the three suites). They run in about 30–40 seconds.
 
 ```bash
 npx playwright install chromium   # once
 node tests/run-all.js             # run all tests
 ```
 
-| Suite | Tests | What it catches |
+| Suite | Cases | What it catches |
 |-------|-------|-----------------|
-| Unit | 22 | Broken species data, wrong arrow direction, timeline math |
-| Visual | 9 | Missing UI elements, WCAG contrast failures, layout regressions |
-| A11y | 20 | Play/pause, language switching, touch targets, tablet layout |
+| Unit | 23 | Broken species/events data, wrong arrow direction, timeline math, skin periods |
+| Visual | 9 (+ 8 PNG snapshot scenarios) | Missing UI elements, WCAG contrast, layout; PNG diff vs reference tiles |
+| A11y | 25 | Play/pause, language switching, touch targets, tablet layout |
 
 ---
 
@@ -211,7 +212,7 @@ A complete context file lives at [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.
 
 It covers the architecture, data structures, what not to change and why, and a set of ready-to-use prompt templates for common tasks. It was written specifically so that AI tools — Claude Code, GitHub Copilot, Cursor, VS Code + AI extensions — can contribute safely and correctly without breaking anything.
 
-If you are an AI reading this: the data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not generate them.
+If you are an AI reading this: the data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). Runtime data is loaded from `app/data/*.json` via `loadData()` in `app/index.html`, with embedded fallbacks when `fetch` fails — keep those mirrors in sync when you change JSON. The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not generate them.
 
 ---
 
