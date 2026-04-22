@@ -302,15 +302,21 @@ async function runA11yTests(options = {}) {
       assert(visible, 'Timeline footer is visible on 768px viewport');
     });
 
-    await test('Play button is visible and tappable on tablet', async () => {
+    await test('Play control is visible and tappable on tablet (bottom bar when ≤768px)', async () => {
       const size = await p2.evaluate(() => {
-        const btn = document.querySelector('[data-testid="play-toggle"]');
+        const desktop = document.querySelector('[data-testid="play-toggle"]');
+        const mobile = document.getElementById('mobile-play-btn');
+        const useDesktop = desktop && (function () {
+          const s = window.getComputedStyle(desktop);
+          return s.display !== 'none' && s.visibility !== 'hidden';
+        })();
+        const btn = useDesktop ? desktop : mobile;
         if (!btn) return null;
         const r = btn.getBoundingClientRect();
-        return { w: r.width, h: r.height };
+        return { w: r.width, h: r.height, which: useDesktop ? 'desktop' : 'mobile' };
       });
-      assert(size !== null, 'Play button found on tablet');
-      assert(size.h >= 32, `Play button height ${Math.round(size.h)}px ≥ 32px on tablet`);
+      assert(size !== null, 'Play control found on tablet');
+      assert(size.h >= 32, `Play control height ${Math.round(size.h)}px ≥ 32px on tablet (${size.which})`);
     });
 
     await b2.close();
