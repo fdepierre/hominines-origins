@@ -20,7 +20,7 @@ The data lives in `data/`. These Markdown tables are the single source of truth.
 
 When updating data:
 - Add or update the DOI reference in the source column
-- Mirror substantive changes in `app/data/` (`species.json`, `events.json`, `species-certainty.json`) — that is what the app loads at runtime
+- Mirror substantive changes in `app/data/` (`species.json`, `events.json`) — that is what the app loads at runtime
 - If you rely on offline or `file://` behaviour, update the `_EMBEDDED_*` JSON blobs in `app/index.html` to match (see `.ai-context/CONTEXT.md`)
 - Note whether the claim is `DNA direct` / `Genetic inference` / `Morphological inference` / `Debate`
 - If the scientific community is divided, mark it as a debate and represent both positions

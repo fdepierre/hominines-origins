@@ -92,8 +92,8 @@ app/data/*.json    ←  app reads this (machine-readable, AI-friendly)
 
 When new research is published:
 1. Update the relevant `.md` file in `data/` with the new finding and its DOI
-2. Update the corresponding entry in `app/data/` (`species.json`, `events.json`, and/or `species-certainty.json`) to reflect the change
-3. If you care about **offline** or **`file://`** use, update the embedded JSON mirrors (`_EMBEDDED_SPECIES`, `_EMBEDDED_EVENTS`, `_EMBEDDED_CERTAINTY`) inside [`app/index.html`](app/index.html) so they match `app/data/` — otherwise `fetch` failures will load stale data
+2. Update the corresponding entry in `app/data/` (`species.json` and/or `events.json`) to reflect the change (species rows include the six `hominin:*DebateLevel` / `hominin:*EvidenceType` certainty fields)
+3. If you care about **offline** or **`file://`** use, update the embedded JSON mirrors (`_EMBEDDED_SPECIES`, `_EMBEDDED_EVENTS`) inside [`app/index.html`](app/index.html) so they match `app/data/` — otherwise `fetch` failures will load stale data
 4. Run `node tests/run-all.js` to verify nothing is broken
 
 Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** still switches chrome UI strings across ten languages; for languages outside that set, or for translating French narrative wholesale, use the browser’s page translator. Coverage of SVG labels and Leaflet map chrome varies by browser.

@@ -21,9 +21,8 @@ hominines-origins/
 ├── app/
 │   ├── index.html              ← THE ENTIRE APPLICATION (single file; JS/CSS/HTML inline)
 │   └── data/
-│       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (14 entries)
-│       ├── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA (22 milestones)
-│       └── species-certainty.json  ← Per-id hominin certainty rows; merged after load
+│       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (14 entries; includes six hominin certainty keys per species)
+│       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA (22 milestones)
 ├── data/
 │   ├── Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md
 │   │   └── Human-readable species tables (12 named hominine rows in the source doc; JSON may split *H. sapiens* into phases — keep MD + JSON aligned by policy)
@@ -58,11 +57,10 @@ hominines-origins/
 ### Runtime data flow
 
 1. **`loadData()`** runs on startup. It `fetch`es [`app/data/species.json`](../app/data/species.json) and [`app/data/events.json`](../app/data/events.json) relative to the page (`./data/...` from `app/index.html`).
-2. On success, JSON-LD `itemListElement` arrays are mapped with **`adaptSpecies`** / **`adaptEvent`** into **`SPECIES_DATA`** and **`EVENTS_DATA`** (`let` arrays in script scope — **not** on `window`).
-3. **`mergeHomininCertainty()`** then loads [`app/data/species-certainty.json`](../app/data/species-certainty.json) (or falls back) and merges six `hominin:*DebateLevel` / `hominin:*EvidenceType` keys onto each species.
-4. **`bootApp()`** runs after data is ready.
+2. On success, JSON-LD `itemListElement` arrays are mapped with **`adaptSpecies`** / **`adaptEvent`** into **`SPECIES_DATA`** and **`EVENTS_DATA`** (`let` arrays in script scope — **not** on `window`). **`adaptSpecies`** copies the six `hominin:*DebateLevel` / `hominin:*EvidenceType` keys from each JSON item when present (`HOMININ_CERTAINTY_KEYS`).
+3. **`window.__HOMININ_CERTAINTY_READY = true`** is set (tests wait on this flag in the harness), then **`bootApp()`** runs.
 
-If `fetch` fails (`file://`, missing files, strict offline), the same **`_EMBEDDED_SPECIES`**, **`_EMBEDDED_EVENTS`**, and **`_EMBEDDED_CERTAINTY`** blobs inside `app/index.html` are used instead. **When you change the JSON files, update these embedded mirrors** so offline and `file://` users see the same catalogue as HTTP users.
+If `fetch` fails (`file://`, missing files, strict offline), the same **`_EMBEDDED_SPECIES`** and **`_EMBEDDED_EVENTS`** blobs inside `app/index.html` are used instead. **When you change the JSON files, update these embedded mirrors** so offline and `file://` users see the same catalogue as HTTP users.
 
 **`file://`** may block or restrict `fetch`; use a local static server or the Playwright harness (serves `app/` over **http://127.0.0.1**).
 
@@ -113,8 +111,8 @@ The **application** has no npm dependency at runtime (CDN scripts only). The **r
 When new research is published:
 
 1. Update the relevant Markdown file in `data/`.
-2. Update the corresponding JSON-LD in `app/data/` (`species.json`, `events.json`, and/or `species-certainty.json` as appropriate).
-3. If you rely on offline / `file://` behaviour, sync **`_EMBEDDED_SPECIES`**, **`_EMBEDDED_EVENTS`**, and/or **`_EMBEDDED_CERTAINTY`** in `app/index.html` with the same content (or regenerate from the JSON files).
+2. Update the corresponding JSON-LD in `app/data/` (`species.json` and/or `events.json` as appropriate). For species, keep the six certainty keys on the same object as the rest of the catalogue data.
+3. If you rely on offline / `file://` behaviour, sync **`_EMBEDDED_SPECIES`** and/or **`_EMBEDDED_EVENTS`** in `app/index.html` with the same content (or regenerate from the JSON files).
 4. Run tests: `node tests/run-all.js`.
 5. If the visual layout changed intentionally, update snapshots: `UPDATE_SNAPSHOTS=1 node tests/visual.test.js`.
 6. Open a pull request with the DOI of the new source.

@@ -75,7 +75,7 @@ async function runUnitTests() {
     assertSoft(bad.length === 0, `All species have at least one site (missing: ${bad.join(', ') || 'none'})`);
   });
 
-  await test('Every species has hominin certainty fields (merged from species-certainty.json)', async () => {
+  await test('Every species has hominin certainty fields (from species.json / adaptSpecies)', async () => {
     const keys = [
       'hominin:taxonomyDebateLevel',
       'hominin:taxonomyEvidenceType',

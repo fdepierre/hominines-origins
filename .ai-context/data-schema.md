@@ -25,9 +25,8 @@ Each `itemListElement` entry is a `Species`-shaped node (custom `hominin:` and `
 | `hominin:pigmentationCertainty`, `hominin:pigmentationCertLabel` | → `pigmentation.certainty`, `pigmentation.certLabel` |
 | `hominin:heightM`, `hominin:heightF`, `hominin:weightM`, `hominin:brain`, `hominin:dimorphism` | → `biometrics.*` |
 | `hominin:tools`, `hominin:debate`, `hominin:migrations` | Arrays / strings → same names on runtime object |
+| `hominin:taxonomyDebateLevel`, `hominin:taxonomyEvidenceType`, `hominin:behaviorDebateLevel`, `hominin:behaviorEvidenceType`, `hominin:pigmentationDebateLevel`, `hominin:pigmentationEvidenceType` | Uncertainty axes → copied onto runtime object by `adaptSpecies()` (`HOMININ_CERTAINTY_KEYS`) |
 | `hominin:lane` | **Present in JSON only** — not copied by `adaptSpecies()`; timeline layout uses **one row per species** via `buildRowOrder(SPECIES_DATA)` |
-
-Certainty enums (`CONSENSUS_FORT`, …) are **not** in the main species JSON; they live in [`app/data/species-certainty.json`](../app/data/species-certainty.json) and are merged after load (`mergeHomininCertainty()`).
 
 ---
 
@@ -60,7 +59,7 @@ One object per catalogue entry (currently **14**). Shape:
   debate:     String,
   migrations: Array[{ from: [lat,lng], to: [lat,lng], label: String }],
 
-  // After mergeHomininCertainty — use bracket notation:
+  // From species.json, copied in adaptSpecies — use bracket notation:
   "hominin:taxonomyDebateLevel":       String,
   "hominin:taxonomyEvidenceType":     String,
   "hominin:behaviorDebateLevel":      String,
@@ -70,7 +69,7 @@ One object per catalogue entry (currently **14**). Shape:
 }
 ```
 
-Use bracket notation for merged keys: `species['hominin:taxonomyDebateLevel']`.
+Use bracket notation for these keys: `species['hominin:taxonomyDebateLevel']`.
 
 ### Hominin certainty enums
 
@@ -88,7 +87,7 @@ Use bracket notation for merged keys: `species['hominin:taxonomyDebateLevel']`.
 | `INFERENCE_EVOLUTIVE` | Comparative or model-based evolutionary inference |
 | `NARRATIF_MEDIATIQUE` | Media-led narrative, weakly tied to primary literature |
 
-Canonical rows: [`app/data/species-certainty.json`](../app/data/species-certainty.json). Tests serve `app/` over HTTP so `fetch` works.
+Canonical values live on each species object in [`app/data/species.json`](../app/data/species.json). Tests serve `app/` over HTTP so `fetch` works.
 
 ### Pigmentation certainty (`pigmentation.certainty`)
 
@@ -171,9 +170,8 @@ There is **no** shared multi-species “lane” map in code.
 ## Adding a new species — checklist
 
 - [ ] Add or extend the row(s) in `data/Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md` with DOI.
-- [ ] Add a new `Species` object to `app/data/species.json` (`@id`, periods, regions, sites, migrations as `[lat,lng]`, etc.).
-- [ ] Add a matching row to `app/data/species-certainty.json` for the six `hominin:*` keys.
-- [ ] Update **`_EMBEDDED_SPECIES`** and **`_EMBEDDED_CERTAINTY`** in `app/index.html` if offline parity matters.
+- [ ] Add a new `Species` object to `app/data/species.json` (`@id`, periods, regions, sites, migrations as `[lat,lng]`, the six `hominin:*DebateLevel` / `hominin:*EvidenceType` keys, etc.).
+- [ ] Update **`_EMBEDDED_SPECIES`** in `app/index.html` if offline parity matters.
 - [ ] Run `node tests/run-all.js`.
 
 ## Adding a new milestone — checklist
