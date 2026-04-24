@@ -6,7 +6,10 @@
   },
   "@type": "ItemList",
   "name": "Hominines Species Catalogue",
-  "description": "Catalogue des espèces d'hominines de -4,1 Ma à -2 000 ans, basé sur les publications paléoanthropologiques récentes (2022-2026).",
+  "description": {
+    "fr": "Catalogue des espèces d'hominines de -4,1 Ma à -2 000 ans, basé sur les publications paléoanthropologiques récentes (2022-2026).",
+    "en": "Catalogue of hominin species from 4.1 Ma to 2,000 years BP, based on recent palaeoanthropological publications (2022-2026)."
+  },
   "itemListElement": [
     {
       "@type": "Species",
@@ -20,11 +23,26 @@
       "hominin:periodEnd": -2700000,
       "hominin:color": "#8B6914",
       "hominin:lane": 0,
-      "hominin:heightM": "~150 cm",
-      "hominin:heightF": "~105 cm",
-      "hominin:weightM": "~42 kg",
-      "hominin:brain": "385–550 cm³",
-      "hominin:dimorphism": "Très marqué (~40%)",
+      "hominin:heightM": {
+        "fr": "~150 cm",
+        "en": "~150 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~105 cm",
+        "en": "~105 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~42 kg",
+        "en": "~42 kg"
+      },
+      "hominin:brain": {
+        "fr": "385–550 cm³",
+        "en": "385–550 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Très marqué (~40%)",
+        "en": "Strongly marked (~40%)"
+      },
       "hominin:skinDesc": {
         "fr": "Fourrure + peau peu pigmentée (sous couverture)",
         "en": "Fur + lightly pigmented skin (beneath cover)"
@@ -42,54 +60,105 @@
       },
       "hominin:hairColor": "#1a0a00",
       "hominin:pigmentationCertainty": "inference",
-      "hominin:pigmentationCertLabel": "⚠️ Inférence évolutive",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive",
+        "en": "⚠️ Evolutionary inference"
+      },
       "hominin:tools": [
-        "Aucun outil connu",
-        "Comportement proche des grands singes",
-        "Bipédie régulière"
+        {
+          "fr": "Aucun outil connu",
+          "en": "No known tools"
+        },
+        {
+          "fr": "Comportement proche des grands singes",
+          "en": "Behaviour similar to great apes"
+        },
+        {
+          "fr": "Bipédie régulière",
+          "en": "Habitual bipedalism"
+        }
       ],
-      "hominin:debate": "Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées.",
+      "hominin:debate": {
+        "fr": "Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées.",
+        "en": "Bipedalism vs arboreality (Lovejoy vs Stern & Susman); date and mode of body-hair loss still discussed."
+      },
       "hominin:regions": [
         {
-          "name": "Afar (Éthiopie)",
+          "name": {
+            "fr": "Afar (Éthiopie)",
+            "en": "Afar (Ethiopia)"
+          },
           "lat": 11.5,
           "lng": 41,
           "radius": 700000,
-          "note": "Hadar — \"Lucy\" AL 288-1, ~3,2 Ma"
+          "note": {
+            "fr": "Hadar — \"Lucy\" AL 288-1, ~3,2 Ma",
+            "en": "Hadar — \"Lucy\" AL 288-1, ~3.2 Ma"
+          }
         },
         {
-          "name": "Laetoli (Tanzanie)",
+          "name": {
+            "fr": "Laetoli (Tanzanie)",
+            "en": "Laetoli (Tanzania)"
+          },
           "lat": -3.5,
           "lng": 35.5,
           "radius": 600000,
-          "note": "Empreintes de Laetoli, ~3,7 Ma"
+          "note": {
+            "fr": "Empreintes de Laetoli, ~3,7 Ma",
+            "en": "Laetoli footprints, ~3.7 Ma"
+          }
         },
         {
-          "name": "Afrique de l'Est",
+          "name": {
+            "fr": "Afrique de l'Est",
+            "en": "East Africa"
+          },
           "lat": 2,
           "lng": 38,
           "radius": 400000,
-          "note": "Distribution générale"
+          "note": {
+            "fr": "Distribution générale",
+            "en": "General distribution"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Hadar (Éthiopie)",
+          "name": {
+            "fr": "Hadar (Éthiopie)",
+            "en": "Hadar (Ethiopia)"
+          },
           "lat": 11.1,
           "lng": 40.6,
-          "note": "\"Lucy\" AL 288-1 — 3,2 Ma"
+          "note": {
+            "fr": "\"Lucy\" AL 288-1 — 3,2 Ma",
+            "en": "\"Lucy\" AL 288-1 — 3.2 Ma"
+          }
         },
         {
-          "name": "Laetoli (Tanzanie)",
+          "name": {
+            "fr": "Laetoli (Tanzanie)",
+            "en": "Laetoli (Tanzania)"
+          },
           "lat": -3.53,
           "lng": 35.35,
-          "note": "Empreintes de bipédie — 3,7 Ma"
+          "note": {
+            "fr": "Empreintes de bipédie — 3,7 Ma",
+            "en": "Bipedal footprints — 3.7 Ma"
+          }
         },
         {
-          "name": "Omo (Éthiopie)",
+          "name": {
+            "fr": "Omo (Éthiopie)",
+            "en": "Omo (Ethiopia)"
+          },
           "lat": 5,
           "lng": 35.9,
-          "note": "Nombreux fossiles, 2,8–3,9 Ma"
+          "note": {
+            "fr": "Nombreux fossiles, 2,8–3,9 Ma",
+            "en": "Numerous fossils, 2.8–3.9 Ma"
+          }
         }
       ],
       "hominin:migrations": [],
@@ -112,11 +181,26 @@
       "hominin:periodEnd": -1400000,
       "hominin:color": "#A07820",
       "hominin:lane": 1,
-      "hominin:heightM": "~130–135 cm",
-      "hominin:heightF": "~100–120 cm",
-      "hominin:weightM": "~37 kg",
-      "hominin:brain": "500–900 cm³",
-      "hominin:dimorphism": "Marqué",
+      "hominin:heightM": {
+        "fr": "~130–135 cm",
+        "en": "~130–135 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~100–120 cm",
+        "en": "~100–120 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~37 kg",
+        "en": "~37 kg"
+      },
+      "hominin:brain": {
+        "fr": "500–900 cm³",
+        "en": "500–900 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Marqué",
+        "en": "Marked"
+      },
       "hominin:skinDesc": {
         "fr": "Transition pelage → peau sombre émergente",
         "en": "Transition fur → emerging dark skin"
@@ -134,40 +218,79 @@
       },
       "hominin:hairColor": "#2a1200",
       "hominin:pigmentationCertainty": "inference",
-      "hominin:pigmentationCertLabel": "⚠️ Inférence évolutive",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive",
+        "en": "⚠️ Evolutionary inference"
+      },
       "hominin:tools": [
-        "Industrie Oldowayen",
-        "Galets taillés (choppers)",
-        "Outils sur éclats"
+        {
+          "fr": "Industrie Oldowayen",
+          "en": "Oldowan industry"
+        },
+        {
+          "fr": "Galets taillés (choppers)",
+          "en": "Knapped pebbles (choppers)"
+        },
+        {
+          "fr": "Outils sur éclats",
+          "en": "Flake tools"
+        }
       ],
-      "hominin:debate": "Statut d'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces.",
+      "hominin:debate": {
+        "fr": "Statut d'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces.",
+        "en": "Coherence as a single species debated (Wood & Collard 1999). Probably a grouping of several species."
+      },
       "hominin:regions": [
         {
-          "name": "Afrique de l'Est",
+          "name": {
+            "fr": "Afrique de l'Est",
+            "en": "East Africa"
+          },
           "lat": -2.5,
           "lng": 35,
           "radius": 800000,
-          "note": "Distribution principale"
+          "note": {
+            "fr": "Distribution principale",
+            "en": "Main distribution"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Olduvai Gorge (Tanzanie)",
+          "name": {
+            "fr": "Olduvai Gorge (Tanzanie)",
+            "en": "Olduvai Gorge (Tanzania)"
+          },
           "lat": -2.99,
           "lng": 35.35,
-          "note": "Site type — Industrie Oldowayen"
+          "note": {
+            "fr": "Site type — Industrie Oldowayen",
+            "en": "Type site — Oldowan industry"
+          }
         },
         {
-          "name": "Koobi Fora (Kenya)",
+          "name": {
+            "fr": "Koobi Fora (Kenya)",
+            "en": "Koobi Fora (Kenya)"
+          },
           "lat": 3.94,
           "lng": 36.17,
-          "note": "Nombreux fossiles H. habilis"
+          "note": {
+            "fr": "Nombreux fossiles H. habilis",
+            "en": "Numerous H. habilis fossils"
+          }
         },
         {
-          "name": "Omo (Éthiopie)",
+          "name": {
+            "fr": "Omo (Éthiopie)",
+            "en": "Omo (Ethiopia)"
+          },
           "lat": 5,
           "lng": 35.9,
-          "note": "Fossiles mixtes H. habilis / Au."
+          "note": {
+            "fr": "Fossiles mixtes H. habilis / Au.",
+            "en": "Mixed H. habilis / Australopithecus fossils"
+          }
         }
       ],
       "hominin:migrations": [],
@@ -190,11 +313,26 @@
       "hominin:periodEnd": -250000,
       "hominin:color": "#C04010",
       "hominin:lane": 2,
-      "hominin:heightM": "145–185 cm",
-      "hominin:heightF": "130–160 cm",
-      "hominin:weightM": "40–68 kg",
-      "hominin:brain": "600–1 100 cm³ (moy. ~900)",
-      "hominin:dimorphism": "Modéré",
+      "hominin:heightM": {
+        "fr": "145–185 cm",
+        "en": "145–185 cm"
+      },
+      "hominin:heightF": {
+        "fr": "130–160 cm",
+        "en": "130–160 cm"
+      },
+      "hominin:weightM": {
+        "fr": "40–68 kg",
+        "en": "40–68 kg"
+      },
+      "hominin:brain": {
+        "fr": "600–1 100 cm³ (moy. ~900)",
+        "en": "600–1,100 cm³ (avg. ~900)"
+      },
+      "hominin:dimorphism": {
+        "fr": "Modéré",
+        "en": "Moderate"
+      },
       "hominin:skinDesc": {
         "fr": "Noire ou très sombre (depuis ~1,2 Ma)",
         "en": "Black or very dark (since ~1.2 Ma)"
@@ -212,67 +350,133 @@
       },
       "hominin:hairColor": "#0a0500",
       "hominin:pigmentationCertainty": "genetic",
-      "hominin:pigmentationCertLabel": "🔬 MC1R sweep génétique (~1,2 Ma)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "🔬 MC1R sweep génétique (~1,2 Ma)",
+        "en": "🔬 MC1R genetic sweep (~1.2 Ma)"
+      },
       "hominin:tools": [
-        "Industrie Acheuléenne",
-        "Bifaces en amande",
-        "Usage du feu (probable)",
-        "Outils sur éclats Levallois (tardif)"
+        {
+          "fr": "Industrie Acheuléenne",
+          "en": "Acheulean industry"
+        },
+        {
+          "fr": "Bifaces en amande",
+          "en": "Almond-shaped handaxes"
+        },
+        {
+          "fr": "Usage du feu (probable)",
+          "en": "Fire use (probable)"
+        },
+        {
+          "fr": "Outils sur éclats Levallois (tardif)",
+          "en": "Levallois flake tools (late)"
+        }
       ],
-      "hominin:debate": "H. erectus sensu lato est probablement un groupement polyphylétique (Rogers et al. 2020) ; variations régionales importantes.",
+      "hominin:debate": {
+        "fr": "H. erectus sensu lato est probablement un groupement polyphylétique (Rogers et al. 2020) ; variations régionales importantes.",
+        "en": "H. erectus sensu lato is probably a polyphyletic grouping (Rogers et al. 2020); marked regional variation."
+      },
       "hominin:regions": [
         {
-          "name": "Afrique",
+          "name": {
+            "fr": "Afrique",
+            "en": "Africa"
+          },
           "lat": 5,
           "lng": 20,
           "radius": 2000000,
-          "note": "Origine et longue présence africaine"
+          "note": {
+            "fr": "Origine et longue présence africaine",
+            "en": "Origin and long African presence"
+          }
         },
         {
-          "name": "Asie du Sud-Est",
+          "name": {
+            "fr": "Asie du Sud-Est",
+            "en": "Southeast Asia"
+          },
           "lat": 0,
           "lng": 110,
           "radius": 1500000,
-          "note": "Java, Chine — formes asiatiques robustes"
+          "note": {
+            "fr": "Java, Chine — formes asiatiques robustes",
+            "en": "Java, China — robust Asian forms"
+          }
         },
         {
-          "name": "Eurasie",
+          "name": {
+            "fr": "Eurasie",
+            "en": "Eurasia"
+          },
           "lat": 42,
           "lng": 44,
           "radius": 900000,
-          "note": "Dmanisi (Géorgie) — ~1,8 Ma"
+          "note": {
+            "fr": "Dmanisi (Géorgie) — ~1,8 Ma",
+            "en": "Dmanisi (Georgia) — ~1.8 Ma"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Turkana (Kenya)",
+          "name": {
+            "fr": "Turkana (Kenya)",
+            "en": "Turkana (Kenya)"
+          },
           "lat": 3.9,
           "lng": 36.1,
-          "note": "\"Turkana Boy\" KNM-WT 15000 — ~1,5 Ma"
+          "note": {
+            "fr": "\"Turkana Boy\" KNM-WT 15000 — ~1,5 Ma",
+            "en": "\"Turkana Boy\" KNM-WT 15000 — ~1.5 Ma"
+          }
         },
         {
-          "name": "Dmanisi (Géorgie)",
+          "name": {
+            "fr": "Dmanisi (Géorgie)",
+            "en": "Dmanisi (Georgia)"
+          },
           "lat": 41.33,
           "lng": 44.1,
-          "note": "Plus ancien hors Afrique — 1,8 Ma"
+          "note": {
+            "fr": "Plus ancien hors Afrique — 1,8 Ma",
+            "en": "Oldest outside Africa — 1.8 Ma"
+          }
         },
         {
-          "name": "Sangiran (Java)",
+          "name": {
+            "fr": "Sangiran (Java)",
+            "en": "Sangiran (Java)"
+          },
           "lat": -7.46,
           "lng": 110.83,
-          "note": "H. erectus asiatique — 1,5 Ma"
+          "note": {
+            "fr": "H. erectus asiatique — 1,5 Ma",
+            "en": "Asian H. erectus — 1.5 Ma"
+          }
         },
         {
-          "name": "Zhoukoudian (Chine)",
+          "name": {
+            "fr": "Zhoukoudian (Chine)",
+            "en": "Zhoukoudian (China)"
+          },
           "lat": 39.7,
           "lng": 115.9,
-          "note": "\"Homme de Pékin\" — 780–250 ka"
+          "note": {
+            "fr": "\"Homme de Pékin\" — 780–250 ka",
+            "en": "\"Peking Man\" — 780–250 ka"
+          }
         },
         {
-          "name": "Ndutu (Tanzanie)",
+          "name": {
+            "fr": "Ndutu (Tanzanie)",
+            "en": "Ndutu (Tanzania)"
+          },
           "lat": -3.2,
           "lng": 35.5,
-          "note": "Forme africaine tardive"
+          "note": {
+            "fr": "Forme africaine tardive",
+            "en": "Late African form"
+          }
         }
       ],
       "hominin:migrations": [
@@ -285,7 +489,10 @@
             41.33,
             44.1
           ],
-          "label": "Sortie d'Afrique ~1,8 Ma"
+          "label": {
+            "fr": "Sortie d'Afrique ~1,8 Ma",
+            "en": "Out of Africa ~1.8 Ma"
+          }
         },
         {
           "from": [
@@ -296,7 +503,10 @@
             -7.46,
             110.83
           ],
-          "label": "Dispersion asiatique ~1,5 Ma"
+          "label": {
+            "fr": "Dispersion asiatique ~1,5 Ma",
+            "en": "Asian dispersal ~1.5 Ma"
+          }
         },
         {
           "from": [
@@ -307,7 +517,10 @@
             39.7,
             115.9
           ],
-          "label": "Dispersion Chine ~0,78 Ma"
+          "label": {
+            "fr": "Dispersion Chine ~0,78 Ma",
+            "en": "China dispersal ~0.78 Ma"
+          }
         }
       ],
       "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
@@ -329,11 +542,26 @@
       "hominin:periodEnd": -200000,
       "hominin:color": "#805090",
       "hominin:lane": 3,
-      "hominin:heightM": "~175 cm (jusqu'à 181)",
-      "hominin:heightF": "~157 cm",
-      "hominin:weightM": "~62 kg",
-      "hominin:brain": "1 100–1 400 cm³",
-      "hominin:dimorphism": "Modéré",
+      "hominin:heightM": {
+        "fr": "~175 cm (jusqu'à 181)",
+        "en": "~175 cm (up to 181)"
+      },
+      "hominin:heightF": {
+        "fr": "~157 cm",
+        "en": "~157 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~62 kg",
+        "en": "~62 kg"
+      },
+      "hominin:brain": {
+        "fr": "1 100–1 400 cm³",
+        "en": "1,100–1,400 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Modéré",
+        "en": "Moderate"
+      },
       "hominin:skinDesc": {
         "fr": "Sombre (continuité africaine)",
         "en": "Dark (African continuity)"
@@ -351,60 +579,120 @@
       },
       "hominin:hairColor": "#1a0800",
       "hominin:pigmentationCertainty": "inference",
-      "hominin:pigmentationCertLabel": "⚠️ Inférence évolutive (pas d'ADN)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
+        "en": "⚠️ Evolutionary inference (no DNA)"
+      },
       "hominin:tools": [
-        "Acheuléen avancé",
-        "Bifaces façonnés",
-        "Premières sépultures (Sima de los Huesos)",
-        "Débitage discoïde"
+        {
+          "fr": "Acheuléen avancé",
+          "en": "Advanced Acheulean"
+        },
+        {
+          "fr": "Bifaces façonnés",
+          "en": "Shaped handaxes"
+        },
+        {
+          "fr": "Premières sépultures (Sima de los Huesos)",
+          "en": "Earliest burials (Sima de los Huesos)"
+        },
+        {
+          "fr": "Débitage discoïde",
+          "en": "Discoidal core reduction"
+        }
       ],
-      "hominin:debate": "Statut d'espèce très débattu. Certains chercheurs le séparent en H. antecessor (Europe) et gardent H. heidelbergensis pour l'Afrique.",
+      "hominin:debate": {
+        "fr": "Statut d'espèce très débattu. Certains chercheurs le séparent en H. antecessor (Europe) et gardent H. heidelbergensis pour l'Afrique.",
+        "en": "Species status strongly debated. Some researchers split it into H. antecessor (Europe) and retain H. heidelbergensis for Africa."
+      },
       "hominin:regions": [
         {
-          "name": "Afrique",
+          "name": {
+            "fr": "Afrique",
+            "en": "Africa"
+          },
           "lat": 8,
           "lng": 20,
           "radius": 1800000,
-          "note": "Lignée vers H. sapiens"
+          "note": {
+            "fr": "Lignée vers H. sapiens",
+            "en": "Lineage leading to H. sapiens"
+          }
         },
         {
-          "name": "Europe occidentale",
+          "name": {
+            "fr": "Europe occidentale",
+            "en": "Western Europe"
+          },
           "lat": 46,
           "lng": 12,
           "radius": 1200000,
-          "note": "Lignée vers Néandertaliens"
+          "note": {
+            "fr": "Lignée vers Néandertaliens",
+            "en": "Lineage leading to Neanderthals"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Kabwe (Zambie)",
+          "name": {
+            "fr": "Kabwe (Zambie)",
+            "en": "Kabwe (Zambia)"
+          },
           "lat": -14.45,
           "lng": 28.45,
-          "note": "\"Crâne de Broken Hill\" — 299 ka"
+          "note": {
+            "fr": "\"Crâne de Broken Hill\" — 299 ka",
+            "en": "\"Broken Hill skull\" — 299 ka"
+          }
         },
         {
-          "name": "Casablanca (Maroc)",
+          "name": {
+            "fr": "Casablanca (Maroc)",
+            "en": "Casablanca (Morocco)"
+          },
           "lat": 33.59,
           "lng": -7.62,
-          "note": "Thomas Quarry I — ~773 ka"
+          "note": {
+            "fr": "Thomas Quarry I — ~773 ka",
+            "en": "Thomas Quarry I — ~773 ka"
+          }
         },
         {
-          "name": "Mauer (Allemagne)",
+          "name": {
+            "fr": "Mauer (Allemagne)",
+            "en": "Mauer (Germany)"
+          },
           "lat": 49.35,
           "lng": 8.8,
-          "note": "Site type — mâchoire 600 ka"
+          "note": {
+            "fr": "Site type — mâchoire 600 ka",
+            "en": "Type site — 600 ka mandible"
+          }
         },
         {
-          "name": "Bodo (Éthiopie)",
+          "name": {
+            "fr": "Bodo (Éthiopie)",
+            "en": "Bodo (Ethiopia)"
+          },
           "lat": 10.9,
           "lng": 40.1,
-          "note": "Crâne africain 600 ka"
+          "note": {
+            "fr": "Crâne africain 600 ka",
+            "en": "African skull 600 ka"
+          }
         },
         {
-          "name": "Atapuerca (Espagne)",
+          "name": {
+            "fr": "Atapuerca (Espagne)",
+            "en": "Atapuerca (Spain)"
+          },
           "lat": 42.36,
           "lng": -3.52,
-          "note": "Sima de los Huesos — ~430 ka"
+          "note": {
+            "fr": "Sima de los Huesos — ~430 ka",
+            "en": "Sima de los Huesos — ~430 ka"
+          }
         }
       ],
       "hominin:migrations": [
@@ -417,7 +705,10 @@
             46,
             12
           ],
-          "label": "Dispersion vers l'Europe ~600 ka"
+          "label": {
+            "fr": "Dispersion vers l'Europe ~600 ka",
+            "en": "Dispersal into Europe ~600 ka"
+          }
         }
       ],
       "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
@@ -439,11 +730,26 @@
       "hominin:periodEnd": -28000,
       "hominin:color": "#2070B0",
       "hominin:lane": 3,
-      "hominin:heightM": "~164 cm (148–177)",
-      "hominin:heightF": "~155 cm",
-      "hominin:weightM": "~65 kg",
-      "hominin:brain": "1 200–1 750 cm³",
-      "hominin:dimorphism": "Faible",
+      "hominin:heightM": {
+        "fr": "~164 cm (148–177)",
+        "en": "~164 cm (148–177)"
+      },
+      "hominin:heightF": {
+        "fr": "~155 cm",
+        "en": "~155 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~65 kg",
+        "en": "~65 kg"
+      },
+      "hominin:brain": {
+        "fr": "1 200–1 750 cm³",
+        "en": "1,200–1,750 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
       "hominin:skinDesc": {
         "fr": "Variable : brun-sombre (majorité) ; pâle/rousse ~1% (MC1R R307G)",
         "en": "Variable: dark-brown (majority); pale/red ~1% (MC1R R307G)"
@@ -466,73 +772,145 @@
       "hominin:hairVariantColor": "#c06030",
       "hominin:hairVariant": "split",
       "hominin:pigmentationCertainty": "dna-direct",
-      "hominin:pigmentationCertLabel": "✅ ADN direct (MC1R + génomes complets)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "✅ ADN direct (MC1R + génomes complets)",
+        "en": "✅ Direct DNA (MC1R + full genomes)"
+      },
       "hominin:tools": [
-        "Industrie Moustérienne",
-        "Débitage Levallois",
-        "Industrie Châtelperronienne (tardif)",
-        "Bijoux, ocre, sépultures rituelles"
+        {
+          "fr": "Industrie Moustérienne",
+          "en": "Mousterian industry"
+        },
+        {
+          "fr": "Débitage Levallois",
+          "en": "Levallois reduction"
+        },
+        {
+          "fr": "Industrie Châtelperronienne (tardif)",
+          "en": "Châtelperronian industry (late)"
+        },
+        {
+          "fr": "Bijoux, ocre, sépultures rituelles",
+          "en": "Ornaments, ochre, ritual burials"
+        }
       ],
-      "hominin:debate": "Hawks (2023) : limites méthodologiques de l'inférence phénotypique. Introgression de pigmentation Néandertal → H. sapiens (Iasi et al., Science 2024). Extinction : compétition avec H. sapiens vs absorption génétique.",
+      "hominin:debate": {
+        "fr": "Hawks (2023) : limites méthodologiques de l'inférence phénotypique. Introgression de pigmentation Néandertal → H. sapiens (Iasi et al., Science 2024). Extinction : compétition avec H. sapiens vs absorption génétique.",
+        "en": "Hawks (2023): methodological limits of phenotype inference. Neanderthal → H. sapiens pigmentation introgression (Iasi et al., Science 2024). Extinction: competition with H. sapiens vs genetic absorption."
+      },
       "hominin:regions": [
         {
-          "name": "Europe",
+          "name": {
+            "fr": "Europe",
+            "en": "Europe"
+          },
           "lat": 47,
           "lng": 10,
           "radius": 1800000,
-          "note": "Centre principal de dispersion"
+          "note": {
+            "fr": "Centre principal de dispersion",
+            "en": "Main dispersal centre"
+          }
         },
         {
-          "name": "Proche-Orient",
+          "name": {
+            "fr": "Proche-Orient",
+            "en": "Near East"
+          },
           "lat": 35,
           "lng": 38,
           "radius": 700000,
-          "note": "Coexistence avec H. sapiens"
+          "note": {
+            "fr": "Coexistence avec H. sapiens",
+            "en": "Coexistence with H. sapiens"
+          }
         },
         {
-          "name": "Asie centrale",
+          "name": {
+            "fr": "Asie centrale",
+            "en": "Central Asia"
+          },
           "lat": 45,
           "lng": 65,
           "radius": 900000,
-          "note": "Extension orientale"
+          "note": {
+            "fr": "Extension orientale",
+            "en": "Eastern extension"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Néander (Allemagne)",
+          "name": {
+            "fr": "Néander (Allemagne)",
+            "en": "Neander (Germany)"
+          },
           "lat": 51.22,
           "lng": 6.95,
-          "note": "Site type — 1856, ~40 ka"
+          "note": {
+            "fr": "Site type — 1856, ~40 ka",
+            "en": "Type site — 1856, ~40 ka"
+          }
         },
         {
-          "name": "El Sidrón (Espagne)",
+          "name": {
+            "fr": "El Sidrón (Espagne)",
+            "en": "El Sidrón (Spain)"
+          },
           "lat": 43.38,
           "lng": -5.38,
-          "note": "ADN MC1R — pigmentation documentée"
+          "note": {
+            "fr": "ADN MC1R — pigmentation documentée",
+            "en": "MC1R DNA — pigmentation documented"
+          }
         },
         {
-          "name": "Shanidar (Irak)",
+          "name": {
+            "fr": "Shanidar (Irak)",
+            "en": "Shanidar (Iraq)"
+          },
           "lat": 36.83,
           "lng": 44.22,
-          "note": "Sépultures + fleurs — ~65 ka"
+          "note": {
+            "fr": "Sépultures + fleurs — ~65 ka",
+            "en": "Burials + flowers — ~65 ka"
+          }
         },
         {
-          "name": "La Chapelle (France)",
+          "name": {
+            "fr": "La Chapelle (France)",
+            "en": "La Chapelle (France)"
+          },
           "lat": 45.22,
           "lng": 1.75,
-          "note": "\"Vieillard\" — anatomie classique"
+          "note": {
+            "fr": "\"Vieillard\" — anatomie classique",
+            "en": "\"Old Man\" — classic anatomy"
+          }
         },
         {
-          "name": "Vindija (Croatie)",
+          "name": {
+            "fr": "Vindija (Croatie)",
+            "en": "Vindija (Croatia)"
+          },
           "lat": 46.34,
           "lng": 16.07,
-          "note": "Génomes complets séquencés — ~44 ka"
+          "note": {
+            "fr": "Génomes complets séquencés — ~44 ka",
+            "en": "Full genomes sequenced — ~44 ka"
+          }
         },
         {
-          "name": "Teshik-Tash (Ouzbékistan)",
+          "name": {
+            "fr": "Teshik-Tash (Ouzbékistan)",
+            "en": "Teshik-Tash (Uzbekistan)"
+          },
           "lat": 38.35,
           "lng": 66.83,
-          "note": "Extension orientale — ~70 ka"
+          "note": {
+            "fr": "Extension orientale — ~70 ka",
+            "en": "Eastern extension — ~70 ka"
+          }
         }
       ],
       "hominin:migrations": [
@@ -545,7 +923,10 @@
             35,
             38
           ],
-          "label": "Expansion vers Proche-Orient"
+          "label": {
+            "fr": "Expansion vers Proche-Orient",
+            "en": "Expansion into the Near East"
+          }
         },
         {
           "from": [
@@ -556,7 +937,10 @@
             45,
             65
           ],
-          "label": "Extension orientale ~70 ka"
+          "label": {
+            "fr": "Extension orientale ~70 ka",
+            "en": "Eastern extension ~70 ka"
+          }
         }
       ],
       "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
@@ -578,11 +962,26 @@
       "hominin:periodEnd": -30000,
       "hominin:color": "#208060",
       "hominin:lane": 3,
-      "hominin:heightM": "> 180 cm (estimé)",
-      "hominin:heightF": "Non documenté",
-      "hominin:weightM": "~100 kg (estimé)",
-      "hominin:brain": "≥ H. sapiens (estimé)",
-      "hominin:dimorphism": "Inconnu",
+      "hominin:heightM": {
+        "fr": "> 180 cm (estimé)",
+        "en": "> 180 cm (estimated)"
+      },
+      "hominin:heightF": {
+        "fr": "Non documenté",
+        "en": "Not documented"
+      },
+      "hominin:weightM": {
+        "fr": "~100 kg (estimé)",
+        "en": "~100 kg (estimated)"
+      },
+      "hominin:brain": {
+        "fr": "≥ H. sapiens (estimé)",
+        "en": "≥ H. sapiens (estimated)"
+      },
+      "hominin:dimorphism": {
+        "fr": "Inconnu",
+        "en": "Unknown"
+      },
       "hominin:skinDesc": {
         "fr": "Sombre",
         "en": "Dark"
@@ -600,53 +999,104 @@
       },
       "hominin:hairColor": "#0a0500",
       "hominin:pigmentationCertainty": "dna-direct",
-      "hominin:pigmentationCertLabel": "✅ ADN ancien direct (Denisova 3)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "✅ ADN ancien direct (Denisova 3)",
+        "en": "✅ Direct ancient DNA (Denisova 3)"
+      },
       "hominin:tools": [
-        "Industrie intermédiaire (Altaï)",
-        "Bracelet en chloritolite (Denisova)",
-        "Parures et ornements"
+        {
+          "fr": "Industrie intermédiaire (Altaï)",
+          "en": "Intermediate industry (Altai)"
+        },
+        {
+          "fr": "Bracelet en chloritolite (Denisova)",
+          "en": "Chlorite bracelet (Denisova)"
+        },
+        {
+          "fr": "Parures et ornements",
+          "en": "Ornaments and personal adornments"
+        }
       ],
-      "hominin:debate": "Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (Fu Qiaomei et al., 2025). ADN nucléaire pas encore disponible — certains paléoanthropologues attendent confirmation définitive.",
+      "hominin:debate": {
+        "fr": "Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (Fu Qiaomei et al., 2025). ADN nucléaire pas encore disponible — certains paléoanthropologues attendent confirmation définitive.",
+        "en": "Dragon Man = Denisovan identification confirmed by proteomics + mtDNA (Fu Qiaomei et al., 2025). Nuclear DNA not yet available — some palaeoanthropologists await definitive confirmation."
+      },
       "hominin:regions": [
         {
-          "name": "Asie centrale/orientale",
+          "name": {
+            "fr": "Asie centrale/orientale",
+            "en": "Central/East Asia"
+          },
           "lat": 40,
           "lng": 90,
           "radius": 2500000,
-          "note": "Vaste distribution en Asie"
+          "note": {
+            "fr": "Vaste distribution en Asie",
+            "en": "Wide Asian distribution"
+          }
         },
         {
-          "name": "Altaï (Sibérie)",
+          "name": {
+            "fr": "Altaï (Sibérie)",
+            "en": "Altai (Siberia)"
+          },
           "lat": 51.4,
           "lng": 85.7,
           "radius": 500000,
-          "note": "Grotte de Denisova — fossiles originaux"
+          "note": {
+            "fr": "Grotte de Denisova — fossiles originaux",
+            "en": "Denisova Cave — original fossils"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Denisova (Sibérie)",
+          "name": {
+            "fr": "Denisova (Sibérie)",
+            "en": "Denisova (Siberia)"
+          },
           "lat": 51.4,
           "lng": 84.67,
-          "note": "Grotte de Denisova — doigt + dents, ~60 ka"
+          "note": {
+            "fr": "Grotte de Denisova — doigt + dents, ~60 ka",
+            "en": "Denisova Cave — finger + teeth, ~60 ka"
+          }
         },
         {
-          "name": "Harbin (Chine)",
+          "name": {
+            "fr": "Harbin (Chine)",
+            "en": "Harbin (China)"
+          },
           "lat": 45.8,
           "lng": 126.53,
-          "note": "\"Dragon Man\" ~146 ka — identifié Dénisovien en 2025"
+          "note": {
+            "fr": "\"Dragon Man\" ~146 ka — identifié Dénisovien en 2025",
+            "en": "\"Dragon Man\" ~146 ka — identified as Denisovan in 2025"
+          }
         },
         {
-          "name": "Xiahe (Tibet)",
+          "name": {
+            "fr": "Xiahe (Tibet)",
+            "en": "Xiahe (Tibet)"
+          },
           "lat": 35.2,
           "lng": 102.5,
-          "note": "Mâchoire Dénisovienne — ~160 ka, altitude 3280m"
+          "note": {
+            "fr": "Mâchoire Dénisovienne — ~160 ka, altitude 3280m",
+            "en": "Denisovan mandible — ~160 ka, altitude 3,280 m"
+          }
         },
         {
-          "name": "Penghu (Taiwan)",
+          "name": {
+            "fr": "Penghu (Taiwan)",
+            "en": "Penghu (Taiwan)"
+          },
           "lat": 23.57,
           "lng": 119.57,
-          "note": "Mâchoire de Penghu — Dénisovien probable"
+          "note": {
+            "fr": "Mâchoire de Penghu — Dénisovien probable",
+            "en": "Penghu mandible — probable Denisovan"
+          }
         }
       ],
       "hominin:migrations": [
@@ -659,7 +1109,10 @@
             35.2,
             102.5
           ],
-          "label": "Présence tibétaine (altitude)"
+          "label": {
+            "fr": "Présence tibétaine (altitude)",
+            "en": "Tibetan presence (altitude)"
+          }
         },
         {
           "from": [
@@ -670,7 +1123,10 @@
             45.8,
             126.53
           ],
-          "label": "Dragon Man ~146 ka"
+          "label": {
+            "fr": "Dragon Man ~146 ka",
+            "en": "Dragon Man ~146 ka"
+          }
         }
       ],
       "hominin:taxonomyDebateLevel": "CONSENSUS_MODERE",
@@ -692,11 +1148,26 @@
       "hominin:periodEnd": -100000,
       "hominin:color": "#C0A000",
       "hominin:lane": 4,
-      "hominin:heightM": "~185 cm",
-      "hominin:heightF": "~170 cm",
-      "hominin:weightM": "~70 kg",
-      "hominin:brain": "1 200–1 600 cm³",
-      "hominin:dimorphism": "Faible",
+      "hominin:heightM": {
+        "fr": "~185 cm",
+        "en": "~185 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~170 cm",
+        "en": "~170 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~70 kg",
+        "en": "~70 kg"
+      },
+      "hominin:brain": {
+        "fr": "1 200–1 600 cm³",
+        "en": "1,200–1,600 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
       "hominin:skinDesc": {
         "fr": "Très sombre / noire (allèles fixés)",
         "en": "Very dark/black (fixed alleles)"
@@ -714,48 +1185,99 @@
       },
       "hominin:hairColor": "#080400",
       "hominin:pigmentationCertainty": "dna-direct",
-      "hominin:pigmentationCertLabel": "✅ ADN africain ancien (Nature 2025)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "✅ ADN africain ancien (Nature 2025)",
+        "en": "✅ Ancient African DNA (Nature 2025)"
+      },
       "hominin:tools": [
-        "Industrie MSA (Middle Stone Age)",
-        "Pointes foliacées",
-        "Perles en coquillage",
-        "Art rupestre précoce",
-        "Pêche, piégeage"
+        {
+          "fr": "Industrie MSA (Middle Stone Age)",
+          "en": "MSA industry (Middle Stone Age)"
+        },
+        {
+          "fr": "Pointes foliacées",
+          "en": "Foliate points"
+        },
+        {
+          "fr": "Perles en coquillage",
+          "en": "Shell beads"
+        },
+        {
+          "fr": "Art rupestre précoce",
+          "en": "Early rock art"
+        },
+        {
+          "fr": "Pêche, piégeage",
+          "en": "Fishing, trapping"
+        }
       ],
-      "hominin:debate": "Débat \"pan-africain\" vs origine unique Est-africaine. Jebel Irhoud plaide pour une évolution sur l'ensemble du continent.",
+      "hominin:debate": {
+        "fr": "Débat \"pan-africain\" vs origine unique Est-africaine. Jebel Irhoud plaide pour une évolution sur l'ensemble du continent.",
+        "en": "\"Pan-African\" debate vs single East-African origin. Jebel Irhoud supports evolution across the whole continent."
+      },
       "hominin:regions": [
         {
-          "name": "Afrique",
+          "name": {
+            "fr": "Afrique",
+            "en": "Africa"
+          },
           "lat": 5,
           "lng": 20,
           "radius": 3000000,
-          "note": "Berceau de H. sapiens"
+          "note": {
+            "fr": "Berceau de H. sapiens",
+            "en": "Cradle of H. sapiens"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Jebel Irhoud (Maroc)",
+          "name": {
+            "fr": "Jebel Irhoud (Maroc)",
+            "en": "Jebel Irhoud (Morocco)"
+          },
           "lat": 32.12,
           "lng": -8.27,
-          "note": "Plus anciens H. sapiens — 315 ka"
+          "note": {
+            "fr": "Plus anciens H. sapiens — 315 ka",
+            "en": "Oldest H. sapiens — 315 ka"
+          }
         },
         {
-          "name": "Omo Kibish (Éthiopie)",
+          "name": {
+            "fr": "Omo Kibish (Éthiopie)",
+            "en": "Omo Kibish (Ethiopia)"
+          },
           "lat": 5.15,
           "lng": 35.87,
-          "note": "Omo I et II — 195 ka"
+          "note": {
+            "fr": "Omo I et II — 195 ka",
+            "en": "Omo I and II — 195 ka"
+          }
         },
         {
-          "name": "Herto (Éthiopie)",
+          "name": {
+            "fr": "Herto (Éthiopie)",
+            "en": "Herto (Ethiopia)"
+          },
           "lat": 10.67,
           "lng": 40.67,
-          "note": "Crânes modernes — 160 ka"
+          "note": {
+            "fr": "Crânes modernes — 160 ka",
+            "en": "Modern skulls — 160 ka"
+          }
         },
         {
-          "name": "Florisbad (Afrique du Sud)",
+          "name": {
+            "fr": "Florisbad (Afrique du Sud)",
+            "en": "Florisbad (South Africa)"
+          },
           "lat": -28.77,
           "lng": 26.07,
-          "note": "Fossile 259 ka — \"Homo helmei\"?"
+          "note": {
+            "fr": "Fossile 259 ka — \"Homo helmei\"?",
+            "en": "259 ka fossil — \"Homo helmei\"?"
+          }
         }
       ],
       "hominin:migrations": [],
@@ -778,11 +1300,26 @@
       "hominin:periodEnd": -90000,
       "hominin:color": "#D07010",
       "hominin:lane": 4,
-      "hominin:heightM": "~185 cm",
-      "hominin:heightF": "~170 cm",
-      "hominin:weightM": "~70 kg",
-      "hominin:brain": "~1 450–1 550 cm³",
-      "hominin:dimorphism": "Faible",
+      "hominin:heightM": {
+        "fr": "~185 cm",
+        "en": "~185 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~170 cm",
+        "en": "~170 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~70 kg",
+        "en": "~70 kg"
+      },
+      "hominin:brain": {
+        "fr": "~1 450–1 550 cm³",
+        "en": "~1,450–1,550 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
       "hominin:skinDesc": {
         "fr": "Très sombre (continuité africaine)",
         "en": "Very dark (African continuity)"
@@ -800,41 +1337,83 @@
       },
       "hominin:hairColor": "#0a0500",
       "hominin:pigmentationCertainty": "inference",
-      "hominin:pigmentationCertLabel": "⚠️ Inférence par continuité génomique",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence par continuité génomique",
+        "en": "⚠️ Inference from genomic continuity"
+      },
       "hominin:tools": [
-        "MSA / Early IUP",
-        "Ocre utilisée",
-        "Sépultures rituelles",
-        "Perles et parures"
+        {
+          "fr": "MSA / Early IUP",
+          "en": "MSA / Early IUP"
+        },
+        {
+          "fr": "Ocre utilisée",
+          "en": "Ochre use"
+        },
+        {
+          "fr": "Sépultures rituelles",
+          "en": "Ritual burials"
+        },
+        {
+          "fr": "Perles et parures",
+          "en": "Beads and ornaments"
+        }
       ],
-      "hominin:debate": "Cette 1ère sortie (~130 ka) ne semble pas avoir contribué au peuplement mondial. La grande dispersion vient d'une vague ultérieure (~60–70 ka).",
+      "hominin:debate": {
+        "fr": "Cette 1ère sortie (~130 ka) ne semble pas avoir contribué au peuplement mondial. La grande dispersion vient d'une vague ultérieure (~60–70 ka).",
+        "en": "This first Out-of-Africa (~130 ka) does not appear to have contributed to the global population. The main dispersal came with a later wave (~60–70 ka)."
+      },
       "hominin:regions": [
         {
-          "name": "Levant / Proche-Orient",
+          "name": {
+            "fr": "Levant / Proche-Orient",
+            "en": "Levant / Near East"
+          },
           "lat": 32,
           "lng": 35.5,
           "radius": 600000,
-          "note": "1ère présence hors Afrique"
+          "note": {
+            "fr": "1ère présence hors Afrique",
+            "en": "First presence outside Africa"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Skhul (Israël)",
+          "name": {
+            "fr": "Skhul (Israël)",
+            "en": "Skhul (Israel)"
+          },
           "lat": 32.67,
           "lng": 35.07,
-          "note": "Sépultures — ~100–130 ka"
+          "note": {
+            "fr": "Sépultures — ~100–130 ka",
+            "en": "Burials — ~100–130 ka"
+          }
         },
         {
-          "name": "Qafzeh (Israël)",
+          "name": {
+            "fr": "Qafzeh (Israël)",
+            "en": "Qafzeh (Israel)"
+          },
           "lat": 32.7,
           "lng": 35.27,
-          "note": "Sépultures avec parures — ~90–130 ka"
+          "note": {
+            "fr": "Sépultures avec parures — ~90–130 ka",
+            "en": "Burials with ornaments — ~90–130 ka"
+          }
         },
         {
-          "name": "Tinshemet (Israël)",
+          "name": {
+            "fr": "Tinshemet (Israël)",
+            "en": "Tinshemet (Israel)"
+          },
           "lat": 32.6,
           "lng": 34.97,
-          "note": "5 sépultures H. sapiens — ~110 ka (2025)"
+          "note": {
+            "fr": "5 sépultures H. sapiens — ~110 ka (2025)",
+            "en": "5 H. sapiens burials — ~110 ka (2025)"
+          }
         }
       ],
       "hominin:migrations": [
@@ -847,7 +1426,10 @@
             32,
             35.5
           ],
-          "label": "Sortie d'Afrique ~130 ka"
+          "label": {
+            "fr": "Sortie d'Afrique ~130 ka",
+            "en": "Out of Africa ~130 ka"
+          }
         }
       ],
       "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
@@ -869,11 +1451,26 @@
       "hominin:periodEnd": -14000,
       "hominin:color": "#E08020",
       "hominin:lane": 4,
-      "hominin:heightM": "~170–185 cm",
-      "hominin:heightF": "~158–168 cm",
-      "hominin:weightM": "~70 kg",
-      "hominin:brain": "~1 350–1 500 cm³",
-      "hominin:dimorphism": "Faible",
+      "hominin:heightM": {
+        "fr": "~170–185 cm",
+        "en": "~170–185 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~158–168 cm",
+        "en": "~158–168 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~70 kg",
+        "en": "~70 kg"
+      },
+      "hominin:brain": {
+        "fr": "~1 350–1 500 cm³",
+        "en": "~1,350–1,500 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
       "hominin:skinDesc": {
         "fr": "Sombre (347/348 individus sur toute la période)",
         "en": "Dark (347/348 individuals across the period)"
@@ -893,75 +1490,153 @@
       },
       "hominin:hairColor": "#1a0800",
       "hominin:pigmentationCertainty": "dna-direct",
-      "hominin:pigmentationCertLabel": "✅ ADN direct — 348 génomes (PNAS 2025)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "✅ ADN direct — 348 génomes (PNAS 2025)",
+        "en": "✅ Direct DNA — 348 genomes (PNAS 2025)"
+      },
       "hominin:tools": [
-        "Industrie Aurignacienne",
-        "Industrie Gravettienne",
-        "Sagaies en os",
-        "Art pariétal (Lascaux, Altamira, Chauvet)",
-        "Statuettes Vénus",
-        "Parures élaborées"
+        {
+          "fr": "Industrie Aurignacienne",
+          "en": "Aurignacian industry"
+        },
+        {
+          "fr": "Industrie Gravettienne",
+          "en": "Gravettian industry"
+        },
+        {
+          "fr": "Sagaies en os",
+          "en": "Bone spearpoints"
+        },
+        {
+          "fr": "Art pariétal (Lascaux, Altamira, Chauvet)",
+          "en": "Cave art (Lascaux, Altamira, Chauvet)"
+        },
+        {
+          "fr": "Statuettes Vénus",
+          "en": "Venus figurines"
+        },
+        {
+          "fr": "Parures élaborées",
+          "en": "Elaborate personal adornments"
+        }
       ],
-      "hominin:debate": "Découplage yeux/peau : les yeux clairs précèdent la peau claire de plusieurs millénaires. Mécanisme sélectif non élucidé (sélection sexuelle ? dérive ? pléiotropie ?).",
+      "hominin:debate": {
+        "fr": "Découplage yeux/peau : les yeux clairs précèdent la peau claire de plusieurs millénaires. Mécanisme sélectif non élucidé (sélection sexuelle ? dérive ? pléiotropie ?).",
+        "en": "Eye/skin decoupling: light eyes precede light skin by several millennia. Selective mechanism still unexplained (sexual selection? drift? pleiotropy?)."
+      },
       "hominin:regions": [
         {
-          "name": "Eurasie",
+          "name": {
+            "fr": "Eurasie",
+            "en": "Eurasia"
+          },
           "lat": 50,
           "lng": 40,
           "radius": 3000000,
-          "note": "Dispersion post-sortie d'Afrique"
+          "note": {
+            "fr": "Dispersion post-sortie d'Afrique",
+            "en": "Post Out-of-Africa dispersal"
+          }
         },
         {
-          "name": "Australie",
+          "name": {
+            "fr": "Australie",
+            "en": "Australia"
+          },
           "lat": -25,
           "lng": 133,
           "radius": 1500000,
-          "note": "Peuplement ~50 ka"
+          "note": {
+            "fr": "Peuplement ~50 ka",
+            "en": "Peopling ~50 ka"
+          }
         },
         {
-          "name": "Amériques",
+          "name": {
+            "fr": "Amériques",
+            "en": "Americas"
+          },
           "lat": 55,
           "lng": -120,
           "radius": 2000000,
-          "note": "Via Béringie ~16–20 ka"
+          "note": {
+            "fr": "Via Béringie ~16–20 ka",
+            "en": "Via Beringia ~16–20 ka"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Ust'-Ishim (Sibérie)",
+          "name": {
+            "fr": "Ust'-Ishim (Sibérie)",
+            "en": "Ust'-Ishim (Siberia)"
+          },
           "lat": 57.3,
           "lng": 69,
-          "note": "Plus ancien génome H. sapiens non-africain — 45 ka"
+          "note": {
+            "fr": "Plus ancien génome H. sapiens non-africain — 45 ka",
+            "en": "Oldest non-African H. sapiens genome — 45 ka"
+          }
         },
         {
-          "name": "Lascaux (France)",
+          "name": {
+            "fr": "Lascaux (France)",
+            "en": "Lascaux (France)"
+          },
           "lat": 45.05,
           "lng": 1.07,
-          "note": "Peintures rupestres — ~17 ka"
+          "note": {
+            "fr": "Peintures rupestres — ~17 ka",
+            "en": "Cave paintings — ~17 ka"
+          }
         },
         {
-          "name": "Altamira (Espagne)",
+          "name": {
+            "fr": "Altamira (Espagne)",
+            "en": "Altamira (Spain)"
+          },
           "lat": 43.38,
           "lng": -4.1,
-          "note": "Peintures rupestres bisons — ~35 ka"
+          "note": {
+            "fr": "Peintures rupestres bisons — ~35 ka",
+            "en": "Bison cave paintings — ~35 ka"
+          }
         },
         {
-          "name": "Dolní Věstonice (Tchéquie)",
+          "name": {
+            "fr": "Dolní Věstonice (Tchéquie)",
+            "en": "Dolní Věstonice (Czechia)"
+          },
           "lat": 48.88,
           "lng": 16.65,
-          "note": "Vénus paléolithique — ~26 ka"
+          "note": {
+            "fr": "Vénus paléolithique — ~26 ka",
+            "en": "Palaeolithic Venus — ~26 ka"
+          }
         },
         {
-          "name": "Sungir (Russie)",
+          "name": {
+            "fr": "Sungir (Russie)",
+            "en": "Sungir (Russia)"
+          },
           "lat": 56.18,
           "lng": 40.43,
-          "note": "Sépulture parée de perles — ~34 ka"
+          "note": {
+            "fr": "Sépulture parée de perles — ~34 ka",
+            "en": "Bead-adorned burial — ~34 ka"
+          }
         },
         {
-          "name": "Mungo (Australie)",
+          "name": {
+            "fr": "Mungo (Australie)",
+            "en": "Mungo (Australia)"
+          },
           "lat": -33.73,
           "lng": 143.05,
-          "note": "Peuplement australien — ~42 ka"
+          "note": {
+            "fr": "Peuplement australien — ~42 ka",
+            "en": "Peopling of Australia — ~42 ka"
+          }
         }
       ],
       "hominin:migrations": [
@@ -974,7 +1649,10 @@
             57.3,
             69
           ],
-          "label": "Grande sortie d'Afrique ~60–70 ka"
+          "label": {
+            "fr": "Grande sortie d'Afrique ~60–70 ka",
+            "en": "Main Out of Africa ~60–70 ka"
+          }
         },
         {
           "from": [
@@ -985,7 +1663,10 @@
             -33.73,
             143.05
           ],
-          "label": "Peuplement Australie ~50 ka"
+          "label": {
+            "fr": "Peuplement Australie ~50 ka",
+            "en": "Peopling of Australia ~50 ka"
+          }
         },
         {
           "from": [
@@ -996,7 +1677,10 @@
             55,
             -120
           ],
-          "label": "Béringie → Amériques ~16–20 ka"
+          "label": {
+            "fr": "Béringie → Amériques ~16–20 ka",
+            "en": "Beringia → Americas ~16–20 ka"
+          }
         }
       ],
       "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
@@ -1018,11 +1702,26 @@
       "hominin:periodEnd": -7000,
       "hominin:color": "#909030",
       "hominin:lane": 4,
-      "hominin:heightM": "~167–172 cm",
-      "hominin:heightF": "~155–163 cm",
-      "hominin:weightM": "~65 kg",
-      "hominin:brain": "~1 400 cm³",
-      "hominin:dimorphism": "Faible",
+      "hominin:heightM": {
+        "fr": "~167–172 cm",
+        "en": "~167–172 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~155–163 cm",
+        "en": "~155–163 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~65 kg",
+        "en": "~65 kg"
+      },
+      "hominin:brain": {
+        "fr": "~1 400 cm³",
+        "en": "~1,400 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
       "hominin:skinDesc": {
         "fr": "Sombre à intermédiaire (transition en cours)",
         "en": "Dark to intermediate (ongoing transition)"
@@ -1043,48 +1742,99 @@
       },
       "hominin:hairColor": "#1a0800",
       "hominin:pigmentationCertainty": "dna-direct",
-      "hominin:pigmentationCertLabel": "✅ ADN direct — \"Paradoxe pigmentaire\" documenté",
+      "hominin:pigmentationCertLabel": {
+        "fr": "✅ ADN direct — \"Paradoxe pigmentaire\" documenté",
+        "en": "✅ Direct DNA — \"Pigmentation paradox\" documented"
+      },
       "hominin:tools": [
-        "Industrie Mésolithique",
-        "Microlithes géométriques",
-        "Arc et flèches perfectionnés",
-        "Pirogues",
-        "Pêche intensive"
+        {
+          "fr": "Industrie Mésolithique",
+          "en": "Mesolithic industry"
+        },
+        {
+          "fr": "Microlithes géométriques",
+          "en": "Geometric microliths"
+        },
+        {
+          "fr": "Arc et flèches perfectionnés",
+          "en": "Refined bow and arrow"
+        },
+        {
+          "fr": "Pirogues",
+          "en": "Dugout canoes"
+        },
+        {
+          "fr": "Pêche intensive",
+          "en": "Intensive fishing"
+        }
       ],
-      "hominin:debate": "Paradoxe peau sombre + yeux clairs : combinaison directement attestée par ADN. Le mécanisme de sélection des yeux clairs avant la peau est toujours inexpliqué.",
+      "hominin:debate": {
+        "fr": "Paradoxe peau sombre + yeux clairs : combinaison directement attestée par ADN. Le mécanisme de sélection des yeux clairs avant la peau est toujours inexpliqué.",
+        "en": "Dark skin + light eyes paradox: combination directly confirmed by DNA. The mechanism selecting light eyes before light skin remains unexplained."
+      },
       "hominin:regions": [
         {
-          "name": "Europe",
+          "name": {
+            "fr": "Europe",
+            "en": "Europe"
+          },
           "lat": 52,
           "lng": 15,
           "radius": 1800000,
-          "note": "Chasseurs-cueilleurs WHG post-glaciaires"
+          "note": {
+            "fr": "Chasseurs-cueilleurs WHG post-glaciaires",
+            "en": "Post-glacial WHG hunter-gatherers"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Cheddar (Grande-Bretagne)",
+          "name": {
+            "fr": "Cheddar (Grande-Bretagne)",
+            "en": "Cheddar (Great Britain)"
+          },
           "lat": 51.28,
           "lng": -2.77,
-          "note": "\"Cheddar Man\" — peau sombre + yeux bleus, ~9 ka"
+          "note": {
+            "fr": "\"Cheddar Man\" — peau sombre + yeux bleus, ~9 ka",
+            "en": "\"Cheddar Man\" — dark skin + blue eyes, ~9 ka"
+          }
         },
         {
-          "name": "Skateholm (Suède)",
+          "name": {
+            "fr": "Skateholm (Suède)",
+            "en": "Skateholm (Sweden)"
+          },
           "lat": 55.5,
           "lng": 13.57,
-          "note": "SF12 — peau sombre + yeux clairs, ~9 ka"
+          "note": {
+            "fr": "SF12 — peau sombre + yeux clairs, ~9 ka",
+            "en": "SF12 — dark skin + light eyes, ~9 ka"
+          }
         },
         {
-          "name": "Loschbour (Luxembourg)",
+          "name": {
+            "fr": "Loschbour (Luxembourg)",
+            "en": "Loschbour (Luxembourg)"
+          },
           "lat": 49.78,
           "lng": 6.28,
-          "note": "WHG type — peau sombre + yeux bleus, ~8 ka"
+          "note": {
+            "fr": "WHG type — peau sombre + yeux bleus, ~8 ka",
+            "en": "WHG type — dark skin + blue eyes, ~8 ka"
+          }
         },
         {
-          "name": "La Braña (Espagne)",
+          "name": {
+            "fr": "La Braña (Espagne)",
+            "en": "La Braña (Spain)"
+          },
           "lat": 42.97,
           "lng": -5.87,
-          "note": "Individu peau sombre + yeux bleus, ~7 ka"
+          "note": {
+            "fr": "Individu peau sombre + yeux bleus, ~7 ka",
+            "en": "Individual with dark skin + blue eyes, ~7 ka"
+          }
         }
       ],
       "hominin:migrations": [],
@@ -1107,11 +1857,26 @@
       "hominin:periodEnd": -5000,
       "hominin:color": "#60A040",
       "hominin:lane": 4,
-      "hominin:heightM": "~163–168 cm (légère réduction)",
-      "hominin:heightF": "~152–158 cm",
-      "hominin:weightM": "~60–65 kg",
-      "hominin:brain": "~1 400 cm³",
-      "hominin:dimorphism": "Faible",
+      "hominin:heightM": {
+        "fr": "~163–168 cm (légère réduction)",
+        "en": "~163–168 cm (slight reduction)"
+      },
+      "hominin:heightF": {
+        "fr": "~152–158 cm",
+        "en": "~152–158 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~60–65 kg",
+        "en": "~60–65 kg"
+      },
+      "hominin:brain": {
+        "fr": "~1 400 cm³",
+        "en": "~1,400 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
       "hominin:skinDesc": {
         "fr": "Intermédiaire → claire en augmentation (SLC24A5 en diffusion) ; Ötzi : peau sombre attestée",
         "en": "Intermediate → lightening (SLC24A5 spreading); Ötzi: dark skin confirmed"
@@ -1134,50 +1899,104 @@
       "hominin:hairVariantColor": "#7a5020",
       "hominin:hairVariant": "split",
       "hominin:pigmentationCertainty": "dna-direct",
-      "hominin:pigmentationCertLabel": "✅ ADN direct (Ötzi + nombreux génomes)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "✅ ADN direct (Ötzi + nombreux génomes)",
+        "en": "✅ Direct DNA (Ötzi + many genomes)"
+      },
       "hominin:tools": [
-        "Agriculture (blé, orge, légumineuses)",
-        "Élevage (bovins, ovins, porcins)",
-        "Poterie",
-        "Mégalithes (Stonehenge)",
-        "Polissage de la pierre",
-        "Tissage"
+        {
+          "fr": "Agriculture (blé, orge, légumineuses)",
+          "en": "Agriculture (wheat, barley, legumes)"
+        },
+        {
+          "fr": "Élevage (bovins, ovins, porcins)",
+          "en": "Animal husbandry (cattle, sheep, pigs)"
+        },
+        {
+          "fr": "Poterie",
+          "en": "Pottery"
+        },
+        {
+          "fr": "Mégalithes (Stonehenge)",
+          "en": "Megaliths (Stonehenge)"
+        },
+        {
+          "fr": "Polissage de la pierre",
+          "en": "Stone polishing"
+        },
+        {
+          "fr": "Tissage",
+          "en": "Weaving"
+        }
       ],
-      "hominin:debate": "La réduction de taille est liée à la sédentarisation et aux déficiences alimentaires. Tri-hybridation WHG + EEF (agriculteurs anatoliens) + début apport Yamna.",
+      "hominin:debate": {
+        "fr": "La réduction de taille est liée à la sédentarisation et aux déficiences alimentaires. Tri-hybridation WHG + EEF (agriculteurs anatoliens) + début apport Yamna.",
+        "en": "Stature reduction linked to sedentism and dietary deficiencies. Three-way admixture of WHG + EEF (Anatolian farmers) + early Yamnaya input."
+      },
       "hominin:regions": [
         {
-          "name": "Europe",
+          "name": {
+            "fr": "Europe",
+            "en": "Europe"
+          },
           "lat": 48,
           "lng": 18,
           "radius": 1800000,
-          "note": "Agriculteurs anatoliens (EEF) + WHG"
+          "note": {
+            "fr": "Agriculteurs anatoliens (EEF) + WHG",
+            "en": "Anatolian farmers (EEF) + WHG"
+          }
         },
         {
-          "name": "Proche-Orient (Anatolie)",
+          "name": {
+            "fr": "Proche-Orient (Anatolie)",
+            "en": "Near East (Anatolia)"
+          },
           "lat": 39,
           "lng": 33,
           "radius": 800000,
-          "note": "Berceau de l'agriculture — 10 ka"
+          "note": {
+            "fr": "Berceau de l'agriculture — 10 ka",
+            "en": "Cradle of agriculture — 10 ka"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Ötzi (Alpes)",
+          "name": {
+            "fr": "Ötzi (Alpes)",
+            "en": "Ötzi (Alps)"
+          },
           "lat": 46.78,
           "lng": 10.84,
-          "note": "\"L'homme des glaces\" — peau sombre + cheveux noirs, ~5 300 ans"
+          "note": {
+            "fr": "\"L'homme des glaces\" — peau sombre + cheveux noirs, ~5 300 ans",
+            "en": "\"The Iceman\" — dark skin + black hair, ~5,300 years"
+          }
         },
         {
-          "name": "Çatalhöyük (Turquie)",
+          "name": {
+            "fr": "Çatalhöyük (Turquie)",
+            "en": "Çatalhöyük (Turkey)"
+          },
           "lat": 37.67,
           "lng": 32.83,
-          "note": "Grande ville néolithique — ~7 500 ans"
+          "note": {
+            "fr": "Grande ville néolithique — ~7 500 ans",
+            "en": "Large Neolithic town — ~7,500 years"
+          }
         },
         {
-          "name": "Stonehenge (GB)",
+          "name": {
+            "fr": "Stonehenge (GB)",
+            "en": "Stonehenge (UK)"
+          },
           "lat": 51.18,
           "lng": -1.83,
-          "note": "Constructeurs peau intermédiaire — ~4 500 ans"
+          "note": {
+            "fr": "Constructeurs peau intermédiaire — ~4 500 ans",
+            "en": "Builders with intermediate skin — ~4,500 years"
+          }
         }
       ],
       "hominin:migrations": [
@@ -1190,7 +2009,10 @@
             48,
             18
           ],
-          "label": "Expansion agriculteurs anatoliens ~7 000 ans"
+          "label": {
+            "fr": "Expansion agriculteurs anatoliens ~7 000 ans",
+            "en": "Anatolian farmer expansion ~7,000 years"
+          }
         }
       ],
       "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
@@ -1212,11 +2034,26 @@
       "hominin:periodEnd": -2000,
       "hominin:color": "#A06020",
       "hominin:lane": 4,
-      "hominin:heightM": "~168–175 cm",
-      "hominin:heightF": "~156–163 cm",
-      "hominin:weightM": "~65–70 kg",
-      "hominin:brain": "~1 400 cm³",
-      "hominin:dimorphism": "Faible",
+      "hominin:heightM": {
+        "fr": "~168–175 cm",
+        "en": "~168–175 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~156–163 cm",
+        "en": "~156–163 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~65–70 kg",
+        "en": "~65–70 kg"
+      },
+      "hominin:brain": {
+        "fr": "~1 400 cm³",
+        "en": "~1,400 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
       "hominin:skinDesc": {
         "fr": "Spectre continu : très sombre (Afrique sub-saharienne, Mélanésie) à claire (Europe du Nord). Peau sombre = état ancestral majoritaire mondialement.",
         "en": "Continuous spectrum: very dark (sub-Saharan Africa, Melanesia) to light (N. Europe). Dark skin = ancestral state, worldwide majority."
@@ -1247,49 +2084,100 @@
       "hominin:hairVariantColor": "#d4b050",
       "hominin:hairVariant": "split",
       "hominin:pigmentationCertainty": "dna-direct",
-      "hominin:pigmentationCertLabel": "✅ ADN ancien + génomique moderne (PNAS 2025)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "✅ ADN ancien + génomique moderne (PNAS 2025)",
+        "en": "✅ Ancient DNA + modern genomics (PNAS 2025)"
+      },
       "hominin:tools": [
-        "Métallurgie bronze puis fer",
-        "Chars de combat",
-        "Écriture (cunéiforme, hiéroglyphes)",
-        "Navigation avancée",
-        "Commerce longue distance"
+        {
+          "fr": "Métallurgie bronze puis fer",
+          "en": "Bronze then iron metallurgy"
+        },
+        {
+          "fr": "Chars de combat",
+          "en": "War chariots"
+        },
+        {
+          "fr": "Écriture (cunéiforme, hiéroglyphes)",
+          "en": "Writing (cuneiform, hieroglyphs)"
+        },
+        {
+          "fr": "Navigation avancée",
+          "en": "Advanced navigation"
+        },
+        {
+          "fr": "Commerce longue distance",
+          "en": "Long-distance trade"
+        }
       ],
-      "hominin:debate": "Ghirotto et al. (PNAS 2025) et Ju & Kelleher (PNAS 2021) s'accordent sur le caractère récent (~3 000 ans) de la peau claire mais divergent sur les rythmes de sélection vs dérive.",
+      "hominin:debate": {
+        "fr": "Ghirotto et al. (PNAS 2025) et Ju & Kelleher (PNAS 2021) s'accordent sur le caractère récent (~3 000 ans) de la peau claire mais divergent sur les rythmes de sélection vs dérive.",
+        "en": "Ghirotto et al. (PNAS 2025) and Ju & Kelleher (PNAS 2021) agree that light skin is recent (~3,000 years) but differ on the relative roles of selection vs drift."
+      },
       "hominin:regions": [
         {
-          "name": "Europe",
+          "name": {
+            "fr": "Europe",
+            "en": "Europe"
+          },
           "lat": 52,
           "lng": 18,
           "radius": 2000000,
-          "note": "Peau claire généralisée en Europe du Nord"
+          "note": {
+            "fr": "Peau claire généralisée en Europe du Nord",
+            "en": "Light skin widespread in Northern Europe"
+          }
         },
         {
-          "name": "Steppes pontiques",
+          "name": {
+            "fr": "Steppes pontiques",
+            "en": "Pontic steppes"
+          },
           "lat": 48,
           "lng": 40,
           "radius": 1200000,
-          "note": "Yamna / Cordé — migrants des steppes"
+          "note": {
+            "fr": "Yamna / Cordé — migrants des steppes",
+            "en": "Yamnaya / Corded Ware — steppe migrants"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Ötmarsum (Pays-Bas)",
+          "name": {
+            "fr": "Ötmarsum (Pays-Bas)",
+            "en": "Ootmarsum (Netherlands)"
+          },
           "lat": 52.41,
           "lng": 6.9,
-          "note": "WHG tardif — peau claire émergente, ~3 500 ans"
+          "note": {
+            "fr": "WHG tardif — peau claire émergente, ~3 500 ans",
+            "en": "Late WHG — emerging light skin, ~3,500 years"
+          }
         },
         {
-          "name": "Lolland (Danemark)",
+          "name": {
+            "fr": "Lolland (Danemark)",
+            "en": "Lolland (Denmark)"
+          },
           "lat": 54.77,
           "lng": 11.5,
-          "note": "Bronze Age — peau claire attestée, ~3 200 ans"
+          "note": {
+            "fr": "Bronze Age — peau claire attestée, ~3 200 ans",
+            "en": "Bronze Age — light skin confirmed, ~3,200 years"
+          }
         },
         {
-          "name": "Hallstatt (Autriche)",
+          "name": {
+            "fr": "Hallstatt (Autriche)",
+            "en": "Hallstatt (Austria)"
+          },
           "lat": 47.56,
           "lng": 13.65,
-          "note": "Civilisation du Fer — ~2 800 ans"
+          "note": {
+            "fr": "Civilisation du Fer — ~2 800 ans",
+            "en": "Iron Age civilisation — ~2,800 years"
+          }
         }
       ],
       "hominin:migrations": [
@@ -1302,7 +2190,10 @@
             52,
             18
           ],
-          "label": "Migration Yamna → Europe ~5 000 ans"
+          "label": {
+            "fr": "Migration Yamna → Europe ~5 000 ans",
+            "en": "Yamnaya → Europe migration ~5,000 years"
+          }
         }
       ],
       "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
@@ -1324,11 +2215,26 @@
       "hominin:periodEnd": -236000,
       "hominin:color": "#8C5A2B",
       "hominin:lane": 3,
-      "hominin:heightM": "~145 cm",
-      "hominin:heightF": "~140 cm",
-      "hominin:weightM": "~45 kg",
-      "hominin:brain": "465–610 cm³",
-      "hominin:dimorphism": "Faible à modéré",
+      "hominin:heightM": {
+        "fr": "~145 cm",
+        "en": "~145 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~140 cm",
+        "en": "~140 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~45 kg",
+        "en": "~45 kg"
+      },
+      "hominin:brain": {
+        "fr": "465–610 cm³",
+        "en": "465–610 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible à modéré",
+        "en": "Low to moderate"
+      },
       "hominin:skinDesc": {
         "fr": "Sombre, inférée par continuité évolutive africaine",
         "en": "Dark, inferred from African evolutionary continuity"
@@ -1346,34 +2252,67 @@
       },
       "hominin:hairColor": "#120800",
       "hominin:pigmentationCertainty": "inference",
-      "hominin:pigmentationCertLabel": "⚠️ Inférence évolutive (pas d'ADN)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
+        "en": "⚠️ Evolutionary inference (no DNA)"
+      },
       "hominin:tools": [
-        "Outils non attribués avec certitude",
-        "Mains adaptées à la préhension fine",
-        "Bipédie efficace avec capacités grimpeuses"
+        {
+          "fr": "Outils non attribués avec certitude",
+          "en": "Tools not confidently attributed"
+        },
+        {
+          "fr": "Mains adaptées à la préhension fine",
+          "en": "Hands adapted to fine manipulation"
+        },
+        {
+          "fr": "Bipédie efficace avec capacités grimpeuses",
+          "en": "Efficient bipedalism with climbing abilities"
+        }
       ],
-      "hominin:debate": "Débat fort sur le statut comportemental et phylogénétique : pratique funéraire, usage du feu et position dans Homo restent contestés ; plusieurs affirmations récentes ont été critiquées comme prématurées.",
+      "hominin:debate": {
+        "fr": "Débat fort sur le statut comportemental et phylogénétique : pratique funéraire, usage du feu et position dans Homo restent contestés ; plusieurs affirmations récentes ont été critiquées comme prématurées.",
+        "en": "Strong debate over behavioural and phylogenetic status: funerary practice, fire use and position within Homo remain contested; several recent claims have been criticised as premature."
+      },
       "hominin:regions": [
         {
-          "name": "Afrique australe",
+          "name": {
+            "fr": "Afrique australe",
+            "en": "Southern Africa"
+          },
           "lat": -25.9,
           "lng": 27.8,
           "radius": 300000,
-          "note": "Rising Star Cave et environs"
+          "note": {
+            "fr": "Rising Star Cave et environs",
+            "en": "Rising Star Cave and surroundings"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Rising Star Cave (Afrique du Sud)",
+          "name": {
+            "fr": "Rising Star Cave (Afrique du Sud)",
+            "en": "Rising Star Cave (South Africa)"
+          },
           "lat": -25.92,
           "lng": 27.73,
-          "note": "Dinaledi Chamber — espèce décrite en 2015, datée ~335–236 ka"
+          "note": {
+            "fr": "Dinaledi Chamber — espèce décrite en 2015, datée ~335–236 ka",
+            "en": "Dinaledi Chamber — species described in 2015, dated ~335–236 ka"
+          }
         },
         {
-          "name": "Lesedi Chamber (Afrique du Sud)",
+          "name": {
+            "fr": "Lesedi Chamber (Afrique du Sud)",
+            "en": "Lesedi Chamber (South Africa)"
+          },
           "lat": -25.92,
           "lng": 27.73,
-          "note": "Matériel supplémentaire attribué à H. naledi"
+          "note": {
+            "fr": "Matériel supplémentaire attribué à H. naledi",
+            "en": "Additional material attributed to H. naledi"
+          }
         }
       ],
       "hominin:migrations": [],
@@ -1396,11 +2335,26 @@
       "hominin:periodEnd": -50000,
       "hominin:color": "#B46A3A",
       "hominin:lane": 2,
-      "hominin:heightM": "~106 cm",
-      "hominin:heightF": "~100 cm",
-      "hominin:weightM": "~30 kg",
-      "hominin:brain": "~380–430 cm³",
-      "hominin:dimorphism": "Faible",
+      "hominin:heightM": {
+        "fr": "~106 cm",
+        "en": "~106 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~100 cm",
+        "en": "~100 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~30 kg",
+        "en": "~30 kg"
+      },
+      "hominin:brain": {
+        "fr": "~380–430 cm³",
+        "en": "~380–430 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
       "hominin:skinDesc": {
         "fr": "Sombre, inférée pour un hominine tropical insulaire",
         "en": "Dark, inferred for a tropical island hominin"
@@ -1418,34 +2372,67 @@
       },
       "hominin:hairColor": "#140a00",
       "hominin:pigmentationCertainty": "inference",
-      "hominin:pigmentationCertLabel": "⚠️ Inférence évolutive (pas d'ADN)",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
+        "en": "⚠️ Evolutionary inference (no DNA)"
+      },
       "hominin:tools": [
-        "Outils lithiques simples",
-        "Faune insulaire chassée ou charognée",
-        "Adaptation probable au nanisme insulaire"
+        {
+          "fr": "Outils lithiques simples",
+          "en": "Simple lithic tools"
+        },
+        {
+          "fr": "Faune insulaire chassée ou charognée",
+          "en": "Island fauna hunted or scavenged"
+        },
+        {
+          "fr": "Adaptation probable au nanisme insulaire",
+          "en": "Probable adaptation to insular dwarfism"
+        }
       ],
-      "hominin:debate": "Le débat a opposé espèce distincte et pathologie de H. sapiens, mais l'interprétation comme espèce distincte domine aujourd'hui ; l'ascendance exacte (H. erectus insulaire ou lignée plus ancienne) reste discutée.",
+      "hominin:debate": {
+        "fr": "Le débat a opposé espèce distincte et pathologie de H. sapiens, mais l'interprétation comme espèce distincte domine aujourd'hui ; l'ascendance exacte (H. erectus insulaire ou lignée plus ancienne) reste discutée.",
+        "en": "Debate once opposed a distinct species to a pathology of H. sapiens, but the distinct-species interpretation now dominates; exact ancestry (insular H. erectus vs more basal lineage) is still discussed."
+      },
       "hominin:regions": [
         {
-          "name": "Île de Flores (Indonésie)",
+          "name": {
+            "fr": "Île de Flores (Indonésie)",
+            "en": "Flores Island (Indonesia)"
+          },
           "lat": -8.5,
           "lng": 121,
           "radius": 180000,
-          "note": "Distribution connue limitée à Flores"
+          "note": {
+            "fr": "Distribution connue limitée à Flores",
+            "en": "Known distribution limited to Flores"
+          }
         }
       ],
       "hominin:fossilSites": [
         {
-          "name": "Liang Bua (Flores, Indonésie)",
+          "name": {
+            "fr": "Liang Bua (Flores, Indonésie)",
+            "en": "Liang Bua (Flores, Indonesia)"
+          },
           "lat": -8.53,
           "lng": 120.45,
-          "note": "LB1 et autres fossiles — ~100 à 50 ka"
+          "note": {
+            "fr": "LB1 et autres fossiles — ~100 à 50 ka",
+            "en": "LB1 and other fossils — ~100 to 50 ka"
+          }
         },
         {
-          "name": "Mata Menge (Flores, Indonésie)",
+          "name": {
+            "fr": "Mata Menge (Flores, Indonésie)",
+            "en": "Mata Menge (Flores, Indonesia)"
+          },
           "lat": -8.68,
           "lng": 121.08,
-          "note": "Restes plus anciens attribués à des ancêtres de H. floresiensis — ~700 ka"
+          "note": {
+            "fr": "Restes plus anciens attribués à des ancêtres de H. floresiensis — ~700 ka",
+            "en": "Older remains attributed to H. floresiensis ancestors — ~700 ka"
+          }
         }
       ],
       "hominin:migrations": [],
