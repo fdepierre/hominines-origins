@@ -5,7 +5,10 @@
   },
   "@type": "ItemList",
   "name": "Hominines Key Events",
-  "description": "Jalons culturels, technologiques et phylogénétiques de l'évolution des hominines, de -3,3 Ma à -10 400 ans.",
+  "description": {
+    "fr": "Jalons culturels, technologiques et phylogénétiques de l'évolution des hominines, de -3,3 Ma à -10 400 ans.",
+    "en": "Cultural, technological and phylogenetic milestones in hominin evolution, from 3.3 Ma to 10,400 years BP."
+  },
   "itemListElement": [
     {
       "@type": "Event",
