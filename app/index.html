@@ -3899,7 +3899,7 @@ function currentDataLang() {
     if (stored) return String(stored).toLowerCase().startsWith('en') ? 'en' : 'fr';
   } catch (e) { /* ignore */ }
   const nav = (navigator.language || 'fr').toLowerCase();
-  return nav.startsWith('en') ? 'en' : 'fr';
+  return nav.startsWith('fr') ? 'fr' : 'en';
 }
 
 // Picks the localised string from an {fr,en} object; tolerates plain strings
@@ -5331,16 +5331,23 @@ function applyTranslations() {
 // INIT
 // =====================================================================
 function getLangFromBrowser() {
-  const raw = (navigator.language || navigator.languages && navigator.languages[0] || 'fr');
+  const raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en');
   return raw.split('-')[0].toLowerCase();
 }
 
-function initI18n() {
+function getInitialUiLang() {
   const supported = ['fr', 'en'];
-  let stored = null;
-  try { stored = localStorage.getItem('ho_ui_lang'); } catch (e) { /* ignore */ }
-  let detected = (stored && supported.includes(stored)) ? stored : getLangFromBrowser();
-  if (!supported.includes(detected)) detected = 'fr';
+  try {
+    const stored = localStorage.getItem('ho_ui_lang');
+    if (supported.includes(stored)) return stored;
+  } catch (e) { /* ignore */ }
+  const browserLang = getLangFromBrowser();
+  if (browserLang === 'fr') return 'fr';
+  return 'en';
+}
+
+function initI18n() {
+  const detected = getInitialUiLang();
 
   // Sync the selector
   const sel = document.getElementById('lang-select');
@@ -5369,6 +5376,7 @@ function initI18n() {
   // Language selector change handler
   if (sel) {
     sel.addEventListener('change', function() {
+      try { localStorage.setItem('ho_ui_lang', this.value); } catch (e) { /* ignore */ }
       i18next.changeLanguage(this.value).then(applyTranslations);
       // Update play/pause labels reactively when language changes
       const playLabel = document.getElementById('play-label');
@@ -5602,56 +5610,46 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
     } catch (err) { return code; }
   }
 
+  function setHtml(id, html) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  function setWelcomeCopy(lang, browserLang) {
+    if (lang === 'fr') {
+      setHtml('welcome-tagline', 'Des origines africaines à la conquête du monde');
+      setHtml('welcome-body', 'Depuis l\'<strong>Afrique orientale</strong>, il y a plus de 4 millions d\'années, différentes espèces d\'hominines — nos ancêtres et leurs cousins — ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.');
+      setHtml('tip-cursor', 'Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.');
+      setHtml('tip-marker', 'Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d\'une espèce.');
+      setHtml('tip-play', 'Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.');
+      setHtml('welcome-start-label', 'Commencer l\'exploration');
+      return;
+    }
+
+    setHtml('welcome-tagline', 'From African origins to the peopling of the world');
+    setHtml('welcome-body', 'From <strong>East Africa</strong>, more than 4 million years ago, different hominin species — our ancestors and their cousins — gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.');
+    setHtml('tip-cursor', 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.');
+    setHtml('tip-marker', 'Click a <strong>marker</strong> on the map to show details for a species.');
+    setHtml('tip-play', 'Press <strong>Play</strong> to animate migrations through time.');
+    setHtml('welcome-start-label', 'Start exploring');
+
+    if (browserLang !== 'en') {
+      var hint = document.getElementById('welcome-translate-hint');
+      var panel = document.getElementById('welcome-lang-panel');
+      if (hint && panel) {
+        var name = humanLangName(browserLang);
+        panel.hidden = false;
+        hint.innerHTML =
+          'Your browser language appears to be <strong>' + name + '</strong> (<code>' + browserLang + '</code>). ' +
+          'The app ships in English and French; if your browser offers <strong>Translate this page</strong>, you can use it after closing this dialog.';
+      }
+    }
+  }
+
   var hint = document.getElementById('welcome-translate-hint');
   var bl = browserUiLang();
-  if (hint) {
-    if (bl === 'fr') {
-      hint.innerHTML = 'Les textes scientifiques (carte, panneau de détail) sont disponibles en <strong>français</strong> et en <strong>anglais</strong>. Pour toute autre langue, utilisez la fonction <strong>Traduire cette page</strong> de votre navigateur après avoir fermé cette fenêtre.';
-    } else if (bl === 'en') {
-      hint.innerHTML = 'Scientific texts (map, side panel) are available in <strong>French</strong> and <strong>English</strong>. For any other language, use your browser’s <strong>Translate this page</strong> after closing this dialog.';
-    } else {
-      var name = humanLangName(bl);
-      hint.innerHTML =
-        'Votre navigateur signale <strong>' + name + '</strong> (<code>' + bl + '</code>). ' +
-        'L’interface et les contenus scientifiques sont disponibles en <strong>français</strong> et en <strong>anglais</strong>. ' +
-        'Pour les afficher dans votre langue, fermez cette fenêtre puis utilisez <strong>Traduire cette page</strong> (menu ou clic droit).<br><br>' +
-        '<span style="opacity:0.92">Your browser reports <strong>' + name + '</strong> (<code>' + bl + '</code>). ' +
-        'The interface and scientific content ship in <strong>French</strong> and <strong>English</strong>. ' +
-        'Close this dialog, then use <strong>Translate this page</strong> to read everything in your language.</span>';
-    }
-  }
-
-  function pickWelcomeLang(code) {
-    try { localStorage.setItem('ho_ui_lang', code); } catch (e) { /* ignore */ }
-    var sel = document.getElementById('lang-select');
-    if (sel) {
-      sel.value = code;
-      sel.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    function afterI18n() {
-      if (typeof applyTranslations === 'function') applyTranslations();
-      dismiss();
-    }
-    var tries = 0;
-    function waitI18n() {
-      tries += 1;
-      if (typeof i18next !== 'undefined' && i18next.isInitialized) {
-        i18next.changeLanguage(code).then(afterI18n).catch(afterI18n);
-        return;
-      }
-      if (tries > 60) {
-        dismiss();
-        return;
-      }
-      setTimeout(waitI18n, 50);
-    }
-    waitI18n();
-  }
-
-  var frBtn = document.getElementById('welcome-pick-fr');
-  var enBtn = document.getElementById('welcome-pick-en');
-  if (frBtn) frBtn.addEventListener('click', function (e) { e.stopPropagation(); pickWelcomeLang('fr'); });
-  if (enBtn) enBtn.addEventListener('click', function (e) { e.stopPropagation(); pickWelcomeLang('en'); });
+  if (hint) hint.textContent = '';
+  setWelcomeCopy(bl === 'fr' ? 'fr' : 'en', bl);
 
   var btn = document.getElementById('welcome-start-btn');
   if (btn) {
@@ -5807,17 +5805,12 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
           <span id="tip-play">Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.</span>
         </div>
       </div>
-      <div class="welcome-lang-panel" id="welcome-lang-panel" translate="yes">
-        <div class="welcome-lang-panel-title" id="welcome-lang-panel-title">Langue du menu et des boutons</div>
-        <div class="welcome-lang-row">
-          <button type="button" class="welcome-lang-btn" id="welcome-pick-fr" translate="no">Français</button>
-          <button type="button" class="welcome-lang-btn" id="welcome-pick-en" translate="no">English</button>
-        </div>
+      <div class="welcome-lang-panel" id="welcome-lang-panel" translate="yes" hidden>
         <p id="welcome-translate-hint" translate="no"></p>
       </div>
       <button id="welcome-start-btn" onclick="document.getElementById('welcome-modal-overlay').style.display='none'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        Commencer l'exploration
+        <span id="welcome-start-label">Commencer l'exploration</span>
       </button>
     </div>
   </div>

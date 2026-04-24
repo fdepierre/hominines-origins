@@ -288,76 +288,104 @@ async function runA11yTests(options = {}) {
   if (!smoke) {
     console.log(`\n${BOLD}◆ WELCOME / BROWSER LOCALE (Playwright)${RESET}`);
 
-    await test('Welcome translate hint: locale es-ES (bilingual FR+EN + code es)', async () => {
+    await test('Welcome locale: es-ES defaults to EN and suggests browser translate', async () => {
       const { browser: bEs, page: pEs } = await launch({ locale: 'es-ES' });
       try {
         await loadApp(pEs, { dismissWelcome: false });
         const st = await pEs.evaluate(() => {
           const hint = document.getElementById('welcome-translate-hint');
+          const panel = document.getElementById('welcome-lang-panel');
           const overlay = document.getElementById('welcome-modal-overlay');
+          const sel = document.getElementById('lang-select');
           const open = !!(overlay && !overlay.classList.contains('hidden'));
           return {
             nav: navigator.language,
+            htmlLang: document.documentElement.lang,
+            selectorValue: sel ? sel.value : '',
             hintHtml: hint ? hint.innerHTML : '',
+            hintPanelVisible: !!(panel && !panel.hidden),
             welcomeOpen: open,
             hintTextLen: hint ? (hint.textContent || '').trim().length : 0,
+            welcomeFrBtn: !!document.getElementById('welcome-pick-fr'),
+            welcomeEnBtn: !!document.getElementById('welcome-pick-en'),
           };
         });
         assert(st.welcomeOpen, 'Welcome overlay is visible on first load (fresh storage)');
         assert(/^es/i.test(st.nav), `navigator.language is es-* (got "${st.nav}")`);
+        assert(st.htmlLang === 'en', `Unsupported browser locale defaults page to EN (got "${st.htmlLang}")`);
+        assert(st.selectorValue === 'en', `Burger language selector defaults to EN (got "${st.selectorValue}")`);
+        assert(st.hintPanelVisible, 'Unsupported locale shows browser-translate hint panel');
         assert(
           /<\s*code(?:\s[^>]*)?>\s*es\s*<\s*\/\s*code\s*>/i.test(st.hintHtml),
           `Hint includes <code…>es</code> (Chromium may add classes; got: ${JSON.stringify(st.hintHtml.slice(0, 240))})`
         );
         assert(st.hintHtml.includes('Translate this page'), 'Hint mentions Translate this page');
-        assert(st.hintHtml.includes('Traduire cette page'), 'Hint mentions Traduire cette page');
         assert(st.hintTextLen > 80, `Hint text is substantive (length ${st.hintTextLen})`);
+        assert(!st.welcomeFrBtn && !st.welcomeEnBtn, 'Welcome screen has no language-choice buttons');
       } finally {
         await bEs.close();
       }
     });
 
-    await test('Welcome translate hint: locale fr-FR (French-only branch)', async () => {
+    await test('Welcome locale: fr-FR auto-selects FR without language buttons', async () => {
       const { browser: bFr, page: pFr } = await launch({ locale: 'fr-FR' });
       try {
         await loadApp(pFr, { dismissWelcome: false });
         const st = await pFr.evaluate(() => {
           const hint = document.getElementById('welcome-translate-hint');
+          const panel = document.getElementById('welcome-lang-panel');
           const overlay = document.getElementById('welcome-modal-overlay');
+          const sel = document.getElementById('lang-select');
           return {
             nav: navigator.language,
+            htmlLang: document.documentElement.lang,
+            selectorValue: sel ? sel.value : '',
             hintHtml: hint ? hint.innerHTML : '',
+            hintPanelVisible: !!(panel && !panel.hidden),
             welcomeOpen: !!(overlay && !overlay.classList.contains('hidden')),
+            welcomeFrBtn: !!document.getElementById('welcome-pick-fr'),
+            welcomeEnBtn: !!document.getElementById('welcome-pick-en'),
           };
         });
         assert(st.welcomeOpen, 'Welcome overlay is visible on first load');
         assert(/^fr/i.test(st.nav), `navigator.language is fr-* (got "${st.nav}")`);
-        assert(st.hintHtml.includes('Traduire cette page'), 'FR branch mentions Traduire cette page');
-        assert(st.hintHtml.includes('français'), 'FR branch mentions français');
-        assert(!st.hintHtml.includes('<code>'), 'FR branch has no <code> language tag in hint');
+        assert(st.htmlLang === 'fr', `FR browser locale selects FR (got "${st.htmlLang}")`);
+        assert(st.selectorValue === 'fr', `Burger language selector selects FR (got "${st.selectorValue}")`);
+        assert(!st.hintPanelVisible, 'FR locale does not show translation hint panel');
+        assert(st.hintHtml === '', 'FR locale has no translate hint copy');
+        assert(!st.welcomeFrBtn && !st.welcomeEnBtn, 'Welcome screen has no language-choice buttons');
       } finally {
         await bFr.close();
       }
     });
 
-    await test('Welcome translate hint: locale en-GB (English-only branch)', async () => {
+    await test('Welcome locale: en-GB auto-selects EN without language buttons', async () => {
       const { browser: bEn, page: pEn } = await launch({ locale: 'en-GB' });
       try {
         await loadApp(pEn, { dismissWelcome: false });
         const st = await pEn.evaluate(() => {
           const hint = document.getElementById('welcome-translate-hint');
+          const panel = document.getElementById('welcome-lang-panel');
           const overlay = document.getElementById('welcome-modal-overlay');
+          const sel = document.getElementById('lang-select');
           return {
             nav: navigator.language,
+            htmlLang: document.documentElement.lang,
+            selectorValue: sel ? sel.value : '',
             hintHtml: hint ? hint.innerHTML : '',
+            hintPanelVisible: !!(panel && !panel.hidden),
             welcomeOpen: !!(overlay && !overlay.classList.contains('hidden')),
+            welcomeFrBtn: !!document.getElementById('welcome-pick-fr'),
+            welcomeEnBtn: !!document.getElementById('welcome-pick-en'),
           };
         });
         assert(st.welcomeOpen, 'Welcome overlay is visible on first load');
         assert(/^en/i.test(st.nav), `navigator.language is en-* (got "${st.nav}")`);
-        assert(st.hintHtml.includes('Translate this page'), 'EN branch mentions Translate this page');
-        assert(st.hintHtml.includes('French'), 'EN branch mentions French as narrative language');
-        assert(!st.hintHtml.includes('Traduire cette page'), 'EN branch does not use the FR-only Traduire string');
+        assert(st.htmlLang === 'en', `EN browser locale selects EN (got "${st.htmlLang}")`);
+        assert(st.selectorValue === 'en', `Burger language selector selects EN (got "${st.selectorValue}")`);
+        assert(!st.hintPanelVisible, 'EN locale does not show translation hint panel');
+        assert(st.hintHtml === '', 'EN locale has no translate hint copy');
+        assert(!st.welcomeFrBtn && !st.welcomeEnBtn, 'Welcome screen has no language-choice buttons');
       } finally {
         await bEn.close();
       }
