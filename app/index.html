@@ -467,6 +467,15 @@ ul.uncertainty-level-list {
   height: 100%;
   z-index: 1;
   background: #0e1220;
+  opacity: 0;
+  filter: blur(24px) saturate(0.35) brightness(0.25);
+  transform: scale(1.05);
+  transition: opacity 0.18s ease, filter 0.22s ease, transform 0.22s ease;
+}
+html[data-map-ready="1"] #map {
+  opacity: 1;
+  filter: none;
+  transform: none;
 }
 
 .maplibregl-map { font-family: var(--font-body); background: #0e1220; }
@@ -2157,6 +2166,14 @@ const mapLibreFigureMarkers = new Map();
 const mapLibreLabelMarkers = new Map();
 let isDragging = false;
 
+const MAP_WORLD_CENTER = [20, 15];
+const MAP_WORLD_ZOOM_DESKTOP = 1.15;
+const MAP_WORLD_ZOOM_MOBILE = 0.72;
+
+function mapWorldZoom() {
+  return isMobileViewport() ? MAP_WORLD_ZOOM_MOBILE : MAP_WORLD_ZOOM_DESKTOP;
+}
+
 const COUNTRY_LABEL_POINTS = [
   { code: 'MA', lat: 31.8, lng: -7.1 }, { code: 'DZ', lat: 28.0, lng: 2.6 },
   { code: 'TN', lat: 34.0, lng: 9.5 }, { code: 'LY', lat: 26.3, lng: 17.2 },
@@ -2312,14 +2329,22 @@ function applyMapLibreNeutralBasemap(map, isDark) {
   paint('countries-label', 'text-opacity', 0);
 }
 
+function revealMapLibreWhenStyled() {
+  requestAnimationFrame(function () {
+    document.documentElement.setAttribute('data-map-ready', '1');
+    document.dispatchEvent(new CustomEvent('ho:map-ready'));
+  });
+}
+
 function initMapLibre() {
   if (typeof maplibregl === 'undefined') return;
+  document.documentElement.removeAttribute('data-map-ready');
   mapLibreMap = new maplibregl.Map({
     container: 'map',
     style: 'https://demotiles.maplibre.org/style.json',
-    center: [20, 20],
-    zoom: 1.6,
-    minZoom: 1,
+    center: MAP_WORLD_CENTER,
+    zoom: mapWorldZoom(),
+    minZoom: 0.5,
     maxZoom: 7,
     attributionControl: false,
   });
@@ -2331,6 +2356,7 @@ function initMapLibre() {
     updateMapLibre();
     updateMapLibreLabels();
     mapLibreMap.resize();
+    revealMapLibreWhenStyled();
   });
   mapLibreMap.on('zoomend', updateMapLibreLabels);
 }
@@ -3890,6 +3916,10 @@ function scheduleFitMapToVisibleNarrative() {
   _fitNarrativeTimer = setTimeout(function () {
     _fitNarrativeTimer = null;
     if (isMobileViewport() && Date.now() < _suppressMobileNarrativeFitUntil) return;
+    if (isPlaying) {
+      resetMapToWorldView();
+      return;
+    }
     fitMapToVisibleNarrative({ animate: false });
   }, 160);
 }
@@ -3923,7 +3953,7 @@ function fitMapToVisibleNarrative(opts) {
 function resetMapToWorldView() {
   if (!mapLibreMap) return;
   try {
-    mapLibreMap.easeTo({ center: [20, 20], zoom: 1.6, duration: 400 });
+    mapLibreMap.easeTo({ center: MAP_WORLD_CENTER, zoom: mapWorldZoom(), duration: 400 });
   } catch (e) { /* ignore */ }
 }
 
@@ -4111,10 +4141,11 @@ function startPlay() {
   // Init figure markers; resume any paused walks (no-op on fresh start)
   resumeAllFigureWalks();
 
-  // Desktop: world view for global migrations. Mobile: fit map to visible species sites + migrations.
+  // Play favours a stable world view so long-range migrations stay readable,
+  // especially on narrow mobile screens.
   if (isMobileViewport()) {
     requestAnimationFrame(function () {
-      fitMapToVisibleNarrative({ animate: true });
+      resetMapToWorldView();
     });
   } else {
     resetMapToWorldView();
@@ -5970,12 +6001,26 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   function storedGet() { try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; } }
   function storedSet() { try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {} }
 
-  if (storedGet()) { overlay.classList.add('hidden'); return; }
+  function isMapReady() {
+    return document.documentElement.getAttribute('data-map-ready') === '1';
+  }
 
-  function dismiss() {
+  function afterMapReady(fn) {
+    if (isMapReady()) {
+      fn();
+      return;
+    }
+    document.addEventListener('ho:map-ready', fn, { once: true });
+  }
+
+  function hideOverlay() {
     overlay.style.display = 'none';
     overlay.classList.add('hidden');
+  }
+
+  function dismiss() {
     storedSet();
+    afterMapReady(hideOverlay);
   }
 
   function browserUiLang() {
@@ -6029,7 +6074,15 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   var hint = document.getElementById('welcome-translate-hint');
   var bl = browserUiLang();
   if (hint) hint.textContent = '';
-  setWelcomeCopy(bl === 'fr' ? 'fr' : 'en', bl);
+  var welcomeLang = bl === 'fr' ? 'fr' : 'en';
+  var alreadyWelcomed = !!storedGet();
+  setWelcomeCopy(welcomeLang, bl);
+  if (alreadyWelcomed) {
+    afterMapReady(function () {
+      setTimeout(hideOverlay, 1000);
+    });
+    return;
+  }
 
   var btn = document.getElementById('welcome-start-btn');
   if (btn) {

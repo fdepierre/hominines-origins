@@ -15,6 +15,7 @@ async function loadMapLibreApp(page) {
   const base = await startAppHttpServer();
   await page.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__mapLibreMap && window.__mapLibreMap.isStyleLoaded(), { timeout: 20000 });
+  await page.waitForFunction(() => document.documentElement.getAttribute('data-map-ready') === '1', { timeout: 20000 });
   await page.waitForFunction(() => (
     typeof SPECIES_DATA !== 'undefined' &&
     typeof EVENTS_DATA !== 'undefined' &&
@@ -48,9 +49,80 @@ async function runMapLibreTests() {
     const state = await page.evaluate(() => ({
       hasMapLibre: !!window.__mapLibreMap,
       mapClass: document.getElementById('map') ? document.getElementById('map').className : '',
+      minZoom: window.__mapLibreMap ? window.__mapLibreMap.getMinZoom() : null,
+      mapReady: document.documentElement.getAttribute('data-map-ready'),
     }));
     assert(state.hasMapLibre, 'MapLibre map instance is exposed for tests');
     assert(String(state.mapClass).includes('maplibregl-map'), 'Map container has MapLibre class');
+    assert(state.minZoom <= 0.5, `MapLibre can zoom out to a full-world view (minZoom ${state.minZoom})`);
+    assert(state.mapReady === '1', 'Map is revealed only after the neutral MapLibre style is applied');
+  });
+
+  await test('MapLibre play starts from a wide world view on desktop and mobile', async () => {
+    const desktop = await page.evaluate(async () => {
+      resetMapToWorldView();
+      await new Promise(resolve => setTimeout(resolve, 520));
+      return window.__mapLibreMap.getZoom();
+    });
+    assert(desktop <= 1.25, `Desktop world view is wide enough for intercontinental migrations (zoom ${desktop.toFixed(2)})`);
+
+    const { browser: mobileBrowser, page: mobilePage } = await launch({ width: 390, height: 844 });
+    try {
+      await loadMapLibreApp(mobilePage);
+      const mobile = await mobilePage.evaluate(async () => {
+        startPlay();
+        await new Promise(resolve => setTimeout(resolve, 620));
+        setTime(-65000);
+        await new Promise(resolve => setTimeout(resolve, 620));
+        stopPlay();
+        return window.__mapLibreMap.getZoom();
+      });
+      assert(mobile <= 0.85, `Mobile play world view stays wide after timeline changes (zoom ${mobile.toFixed(2)})`);
+    } finally {
+      await mobileBrowser.close();
+    }
+  });
+
+  await test('Returning visitors keep the standard welcome overlay until the readable map is ready', async () => {
+    const { browser: returningBrowser, page: returningPage } = await launch({ width: 1440, height: 900 });
+    try {
+      await returningPage.addInitScript(() => {
+        localStorage.setItem('ho_welcomed_v3', '1');
+      });
+      const base = await startAppHttpServer();
+      await returningPage.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded' });
+      const initial = await returningPage.evaluate(() => {
+        const overlay = document.getElementById('welcome-modal-overlay');
+        return {
+          hidden: overlay ? overlay.classList.contains('hidden') : true,
+          transient: overlay ? overlay.classList.contains('welcome-modal-transient') : false,
+          startVisible: !!document.getElementById('welcome-start-btn') && getComputedStyle(document.getElementById('welcome-start-btn')).display !== 'none',
+          mapFilter: getComputedStyle(document.getElementById('map')).filter,
+          mapOpacity: getComputedStyle(document.getElementById('map')).opacity,
+          mapReady: document.documentElement.getAttribute('data-map-ready'),
+        };
+      });
+      assert(!initial.hidden, 'Returning visitor overlay is visible while the map is being prepared');
+      assert(!initial.transient, 'Returning visitor overlay uses the standard welcome modal');
+      assert(initial.startVisible, 'Standard welcome modal keeps its start button visible');
+      assert(String(initial.mapFilter).includes('blur'), 'Map is blurred while the readable style is being prepared');
+      assert(Number(initial.mapOpacity) === 0, 'Initial MapLibre colours are fully hidden while the readable style is being prepared');
+      await returningPage.waitForFunction(() => document.documentElement.getAttribute('data-map-ready') === '1', { timeout: 20000 });
+      await returningPage.waitForTimeout(1200);
+      const afterReady = await returningPage.evaluate(() => {
+        const overlay = document.getElementById('welcome-modal-overlay');
+        return {
+          hidden: overlay ? overlay.classList.contains('hidden') : false,
+          mapFilter: getComputedStyle(document.getElementById('map')).filter,
+          mapOpacity: getComputedStyle(document.getElementById('map')).opacity,
+        };
+      });
+      assert(afterReady.hidden, 'Returning visitor overlay auto-hides after the readable map is ready');
+      assert(afterReady.mapFilter === 'none', 'Map blur is removed after the readable style is ready');
+      assert(Number(afterReady.mapOpacity) === 1, 'Map is visible after the readable style is ready');
+    } finally {
+      await returningBrowser.close();
+    }
   });
 
   await test('MapLibre sources and layers receive app data', async () => {

@@ -150,6 +150,7 @@ async function loadApp(page, { lang = null, theme = null, dismissWelcome = true 
 
   // Wait for the map container and default MapLibre map to be ready.
   await page.waitForFunction(() => document.getElementById('map') !== null && window.__mapLibreMap, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.getAttribute('data-map-ready') === '1', { timeout: 15000 });
   // Wait for app JS data to be defined.
   await page.waitForFunction(() => typeof SPECIES_DATA !== 'undefined' && typeof EVENTS_DATA !== 'undefined', { timeout: 10000 });
   // `loadData()` sets this after `adaptSpecies` maps JSON (certainty keys live on each species in `species.json`)
