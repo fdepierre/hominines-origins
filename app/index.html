@@ -2510,6 +2510,29 @@ function ensureMapLibreSitesLayer() {
       },
     });
   }
+  if (!mapLibreMap.getSource('hominine-migrations')) {
+    mapLibreMap.addSource('hominine-migrations', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+  }
+  if (!mapLibreMap.getLayer('hominine-migrations')) {
+    mapLibreMap.addLayer({
+      id: 'hominine-migrations',
+      type: 'line',
+      source: 'hominine-migrations',
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round',
+      },
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-opacity': 0.55,
+        'line-width': 2,
+        'line-dasharray': [3, 2],
+      },
+    });
+  }
   if (!mapLibreMap.getSource('hominine-sites')) {
     mapLibreMap.addSource('hominine-sites', {
       type: 'geojson',
@@ -2589,6 +2612,19 @@ function updateMapLibre() {
       },
     }))
   ) : [];
+  const migrationFeatures = layerStates.migrations ? visible.flatMap(species =>
+    species.migrations.map((mig, idx) => ({
+      type: 'Feature',
+      geometry: { type: 'LineString', coordinates: [[mig.from[1], mig.from[0]], [mig.to[1], mig.to[0]]] },
+      properties: {
+        id: species.id + '-migration-' + idx,
+        speciesId: species.id,
+        speciesName: species.name,
+        label: mig.label,
+        color: species.color,
+      },
+    }))
+  ) : [];
   const siteFeatures = layerStates.sites ? visible.flatMap(species =>
     species.sites.map((site, idx) => ({
       type: 'Feature',
@@ -2605,6 +2641,7 @@ function updateMapLibre() {
     }))
   ) : [];
   mapLibreMap.getSource('hominine-ranges').setData({ type: 'FeatureCollection', features: rangeFeatures });
+  mapLibreMap.getSource('hominine-migrations').setData({ type: 'FeatureCollection', features: migrationFeatures });
   mapLibreMap.getSource('hominine-sites').setData({ type: 'FeatureCollection', features: siteFeatures });
 }
 
