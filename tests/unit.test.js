@@ -54,6 +54,36 @@ async function runUnitTests() {
     assert(issues.length === 0, `All species have required fields (issues: ${issues.join(', ') || 'none'})`);
   });
 
+  await test('Species panel keeps scientific names stable and common names translatable', async () => {
+    const state = await page.evaluate(async () => {
+      if (window.i18next) await i18next.changeLanguage('fr');
+      const species = SPECIES_DATA.find(sp => sp.id === 'erectus') || SPECIES_DATA[0];
+      renderPanel(species);
+      const scientific = document.querySelector('.species-name');
+      const common = document.querySelector('.species-name-common');
+      const panel = document.getElementById('panel-content');
+      const root = document.querySelector('#panel-content .animate-in');
+      return {
+        panelTranslate: panel ? panel.getAttribute('translate') : '',
+        panelLang: panel ? panel.getAttribute('lang') : '',
+        rootTranslate: root ? root.getAttribute('translate') : '',
+        rootLang: root ? root.getAttribute('lang') : '',
+        scientificTranslate: scientific ? scientific.getAttribute('translate') : '',
+        commonTranslate: common ? common.getAttribute('translate') : '',
+        commonLang: common ? common.getAttribute('lang') : '',
+        commonText: common ? common.textContent.trim() : '',
+      };
+    });
+    assert(state.panelTranslate === 'yes', 'Species panel content is browser-translatable');
+    assert(state.panelLang === 'fr', `Species panel exposes source language (got "${state.panelLang}")`);
+    assert(state.rootTranslate === 'yes', 'Rendered species block is browser-translatable');
+    assert(state.rootLang === 'fr', `Rendered species block exposes source language (got "${state.rootLang}")`);
+    assert(state.scientificTranslate === 'no', 'Scientific taxon name is protected from browser translation');
+    assert(state.commonTranslate === 'yes', 'Common/descriptive species name is browser-translatable');
+    assert(state.commonLang === 'fr', `Common species name exposes source language (got "${state.commonLang}")`);
+    assert(/homme debout/i.test(state.commonText), `French common name rendered for translation (got "${state.commonText}")`);
+  });
+
   await test('Every species start < end (chronological order)', async () => {
     const bad = await page.evaluate(() =>
       SPECIES_DATA.filter(sp => sp.start >= sp.end).map(sp => sp.id)

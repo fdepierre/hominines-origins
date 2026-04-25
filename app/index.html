@@ -2001,8 +2001,8 @@ html[data-map-ready="1"] #map {
     </div>
 
     <!-- SIDE PANEL -->
-    <aside id="side-panel" data-testid="side-panel">
-      <div id="panel-content">
+    <aside id="side-panel" data-testid="side-panel" translate="yes">
+      <div id="panel-content" translate="yes" dir="auto">
         <div class="empty-state">
           <div class="empty-state-icon">🦴</div>
           <div class="empty-state-title">Sélectionnez une espèce</div>
@@ -3086,12 +3086,12 @@ function renderPanel(species) {
 
   const hasTri = !!species['hominin:taxonomyDebateLevel'];
   const html = `
-    <div class="animate-in">
+    <div class="animate-in" lang="${currentDataLang()}" dir="auto" translate="yes">
       <div class="side-panel-header${hasTri ? ' side-panel-header--certainty' : ''}">
         <div class="side-panel-header-text">
           <div class="period-label">${formatTime(species.start)} ${T('periodTo','à')} ${formatTime(species.end)}</div>
           <div class="species-name" translate="no" style="color:${species.color}">${bandTipEscapeHtml(species.name)}</div>
-          <div class="species-name-common">${bandTipEscapeHtml(species.common)}</div>
+          <div class="species-name-common" lang="${currentDataLang()}" dir="auto" translate="yes">${bandTipEscapeHtml(species.common)}</div>
         </div>
         ${renderCertaintyTriIcon(species, T)}
       </div>
@@ -3196,7 +3196,9 @@ function renderPanel(species) {
       </div>
     </div>
   `;
-  document.getElementById('panel-content').innerHTML = html;
+  const panelContent = document.getElementById('panel-content');
+  panelContent.setAttribute('lang', currentDataLang());
+  panelContent.innerHTML = html;
   document.getElementById('side-panel').scrollTop = 0;
 }
 
