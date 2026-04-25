@@ -536,6 +536,23 @@ ul.uncertainty-level-list {
 }
 [data-theme="light"] .leaflet-tooltip-custom { color: #1a1208; }
 
+.country-label-marker {
+  color: rgba(237, 229, 212, 0.72);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.85);
+  white-space: nowrap;
+  pointer-events: none;
+}
+[data-theme="light"] .country-label-marker {
+  color: rgba(26, 18, 8, 0.68);
+  text-shadow: 0 1px 2px rgba(255,255,255,0.85);
+}
+
 /* Custom markers */
 .hominine-marker {
   display: flex;
@@ -2135,10 +2152,124 @@ let mapMarkers = {};
 let mapPolygons = {};
 let mapArrows = {};
 let leafletMap = null;
+let baseTileLayer = null;
+let countryLabelLayer = null;
 let markersLayer = null;
 let migrationsLayer = null;
 let rangesLayer = null;
 let isDragging = false;
+
+const COUNTRY_LABEL_POINTS = [
+  { code: 'MA', lat: 31.8, lng: -7.1 }, { code: 'DZ', lat: 28.0, lng: 2.6 },
+  { code: 'TN', lat: 34.0, lng: 9.5 }, { code: 'LY', lat: 26.3, lng: 17.2 },
+  { code: 'EG', lat: 26.8, lng: 30.8 }, { code: 'ET', lat: 8.6, lng: 39.6 },
+  { code: 'KE', lat: 0.6, lng: 37.9 }, { code: 'TZ', lat: -6.2, lng: 35.0 },
+  { code: 'ZA', lat: -30.6, lng: 24.0 }, { code: 'ZM', lat: -13.1, lng: 27.8 },
+  { code: 'CM', lat: 5.7, lng: 12.7 }, { code: 'NG', lat: 9.1, lng: 8.7 },
+  { code: 'CD', lat: -2.9, lng: 23.7 }, { code: 'SD', lat: 15.5, lng: 30.2 },
+  { code: 'SA', lat: 23.9, lng: 45.1 }, { code: 'YE', lat: 15.8, lng: 47.6 },
+  { code: 'OM', lat: 20.6, lng: 56.1 }, { code: 'IR', lat: 32.4, lng: 53.7 },
+  { code: 'IQ', lat: 33.2, lng: 43.7 }, { code: 'IL', lat: 31.4, lng: 35.0 },
+  { code: 'TR', lat: 39.0, lng: 35.2 }, { code: 'GE', lat: 42.0, lng: 43.5 },
+  { code: 'AM', lat: 40.3, lng: 44.9 }, { code: 'AZ', lat: 40.2, lng: 47.6 },
+  { code: 'FR', lat: 46.2, lng: 2.2 }, { code: 'ES', lat: 40.3, lng: -3.7 },
+  { code: 'PT', lat: 39.6, lng: -8.0 }, { code: 'GB', lat: 54.5, lng: -2.5 },
+  { code: 'IE', lat: 53.2, lng: -8.0 }, { code: 'DE', lat: 51.1, lng: 10.3 },
+  { code: 'IT', lat: 42.8, lng: 12.5 }, { code: 'CH', lat: 46.8, lng: 8.2 },
+  { code: 'AT', lat: 47.6, lng: 14.1 }, { code: 'NL', lat: 52.1, lng: 5.3 },
+  { code: 'BE', lat: 50.6, lng: 4.7 }, { code: 'DK', lat: 56.2, lng: 9.5 },
+  { code: 'SE', lat: 62.2, lng: 16.8 }, { code: 'NO', lat: 62.0, lng: 10.0 },
+  { code: 'FI', lat: 64.5, lng: 26.3 }, { code: 'PL', lat: 52.1, lng: 19.4 },
+  { code: 'CZ', lat: 49.8, lng: 15.5 }, { code: 'HR', lat: 45.1, lng: 15.2 },
+  { code: 'GR', lat: 39.1, lng: 22.9 }, { code: 'RO', lat: 45.9, lng: 25.0 },
+  { code: 'UA', lat: 49.0, lng: 31.4 }, { code: 'RU', lat: 58.0, lng: 90.0 },
+  { code: 'KZ', lat: 48.0, lng: 67.0 }, { code: 'UZ', lat: 41.3, lng: 64.6 },
+  { code: 'MN', lat: 46.8, lng: 103.8 }, { code: 'CN', lat: 35.6, lng: 103.8 },
+  { code: 'IN', lat: 22.9, lng: 79.6 }, { code: 'PK', lat: 30.3, lng: 69.4 },
+  { code: 'AF', lat: 33.8, lng: 66.0 }, { code: 'NP', lat: 28.2, lng: 84.0 },
+  { code: 'BD', lat: 23.7, lng: 90.3 }, { code: 'MM', lat: 21.0, lng: 96.5 },
+  { code: 'TH', lat: 15.8, lng: 101.0 }, { code: 'VN', lat: 16.2, lng: 106.3 },
+  { code: 'MY', lat: 4.2, lng: 102.0 }, { code: 'ID', lat: -2.5, lng: 118.0 },
+  { code: 'PH', lat: 12.8, lng: 122.8 }, { code: 'JP', lat: 37.6, lng: 138.0 },
+  { code: 'KR', lat: 36.4, lng: 127.8 }, { code: 'AU', lat: -25.3, lng: 133.8 },
+  { code: 'PG', lat: -6.5, lng: 145.2 }, { code: 'NZ', lat: -41.0, lng: 172.8 },
+  { code: 'CA', lat: 58.0, lng: -106.0 }, { code: 'US', lat: 39.8, lng: -98.6 },
+  { code: 'MX', lat: 23.7, lng: -102.5 }, { code: 'GT', lat: 15.7, lng: -90.2 },
+  { code: 'BR', lat: -10.8, lng: -53.0 }, { code: 'AR', lat: -38.4, lng: -63.6 },
+  { code: 'CL', lat: -30.0, lng: -71.0 }, { code: 'PE', lat: -9.2, lng: -75.0 },
+  { code: 'CO', lat: 4.5, lng: -74.0 }, { code: 'VE', lat: 7.0, lng: -66.0 },
+];
+
+function addBaseTileLayer(isDark) {
+  if (!leafletMap) return;
+  if (baseTileLayer) {
+    leafletMap.removeLayer(baseTileLayer);
+    baseTileLayer = null;
+  }
+  baseTileLayer = L.tileLayer(isDark
+    ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd', maxZoom: 20, noWrap: true,
+  }).addTo(leafletMap);
+}
+
+function browserCountryLabelLocale() {
+  const raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en');
+  return String(raw).replace(/[^a-zA-Z0-9-]/g, '') || 'en';
+}
+
+function countryLabelLocale() {
+  try {
+    const stored = localStorage.getItem('ho_ui_lang');
+    if (stored === 'fr' || stored === 'en') return stored;
+  } catch (e) { /* ignore */ }
+  const browserLocale = browserCountryLabelLocale();
+  const primary = browserLocale.split('-')[0].toLowerCase();
+  if (primary === 'fr' || primary === 'en') return primary;
+  return browserLocale;
+}
+
+function countryLabelName(code) {
+  const lang = countryLabelLocale();
+  try {
+    const dn = new Intl.DisplayNames([lang], { type: 'region' });
+    return dn.of(code) || code;
+  } catch (e) {
+    try {
+      const dn = new Intl.DisplayNames(['en'], { type: 'region' });
+      return dn.of(code) || code;
+    } catch (ignore) {
+      return code;
+    }
+  }
+}
+
+function rebuildCountryLabels() {
+  if (!leafletMap || typeof L === 'undefined') return;
+  if (countryLabelLayer) {
+    leafletMap.removeLayer(countryLabelLayer);
+    countryLabelLayer = null;
+  }
+  countryLabelLayer = L.layerGroup();
+  const labelLocale = countryLabelLocale();
+  COUNTRY_LABEL_POINTS.forEach(function (p) {
+    const label = countryLabelName(p.code);
+    const icon = L.divIcon({
+      className: '',
+      html: '<span class="country-label-marker" data-country-code="' + p.code + '" lang="' + bandTipEscapeHtml(labelLocale) + '" dir="auto">' + bandTipEscapeHtml(label) + '</span>',
+      iconSize: [0, 0],
+      iconAnchor: [0, 0],
+    });
+    countryLabelLayer.addLayer(L.marker([p.lat, p.lng], {
+      icon,
+      interactive: false,
+      keyboard: false,
+      zIndexOffset: -300,
+    }));
+  });
+  countryLabelLayer.addTo(leafletMap);
+}
 
 // =====================================================================
 // MAP — LEAFLET INITIALISATION
@@ -2156,19 +2287,11 @@ function initMap() {
     maxBoundsViscosity: 0.8,
   });
 
-  // Tile layer — matches initial data-theme
+  // Tile layer — matches initial data-theme. Country names are rendered by
+  // rebuildCountryLabels() so they can follow browser locale / manual override.
   const _initDark = document.documentElement.getAttribute('data-theme') !== 'light';
-  L.tileLayer(_initDark
-    ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 20, noWrap: true,
-  }).addTo(leafletMap);
-  L.tileLayer(_initDark
-    ? 'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd', opacity: _initDark ? 0.4 : 0.5, maxZoom: 20, pane: 'overlayPane', noWrap: true,
-  }).addTo(leafletMap);
+  addBaseTileLayer(_initDark);
+  rebuildCountryLabels();
 
   markersLayer = L.layerGroup().addTo(leafletMap);
   migrationsLayer = L.layerGroup().addTo(leafletMap);
@@ -3587,24 +3710,8 @@ function setTheme(theme) {
   });
   // Swap map tiles
   if (leafletMap) {
-    const layers = [];
-    leafletMap.eachLayer(l => { if (l.options && l.options.attribution) layers.push(l); });
-    layers.forEach(l => leafletMap.removeLayer(l));
-    if (theme === 'light') {
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20, noWrap: true
-      }).addTo(leafletMap);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd', opacity: 0.5, maxZoom: 20, noWrap: true
-      }).addTo(leafletMap);
-    } else {
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 20, noWrap: true
-      }).addTo(leafletMap);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd', opacity: 0.4, maxZoom: 20, noWrap: true
-      }).addTo(leafletMap);
-    }
+    addBaseTileLayer(theme === 'dark');
+    rebuildCountryLabels();
     document.getElementById('map').style.background = theme === 'dark' ? '#0e1220' : '#d4d0c8';
     updateMap();
   }
@@ -4034,6 +4141,7 @@ function relocaliseData() {
   if (!sj || !ej) return;
   SPECIES_DATA = sj.itemListElement.map(adaptSpecies);
   EVENTS_DATA  = ej.itemListElement.map(adaptEvent);
+  if (typeof rebuildCountryLabels === 'function') rebuildCountryLabels();
   // Keep the current selection identity stable across language switches.
   if (typeof selectedSpecies !== 'undefined' && selectedSpecies && selectedSpecies.id) {
     const next = SPECIES_DATA.find(s => s.id === selectedSpecies.id);

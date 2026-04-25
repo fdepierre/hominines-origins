@@ -278,6 +278,62 @@ async function runA11yTests(options = {}) {
       const dirFr = await page.evaluate(() => document.documentElement.getAttribute('dir'));
       assertSoft(dirEn === 'ltr' && dirFr === 'ltr', `html dir stays ltr for en/fr (got en="${dirEn}", fr="${dirFr}")`);
     });
+
+    await test('Country labels follow the selected language', async () => {
+      await page.evaluate(() => {
+        const sel = document.querySelector('[data-testid="lang-select"]');
+        if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      await page.waitForTimeout(450);
+      const en = await page.evaluate(() => {
+        const label = document.querySelector('.country-label-marker[data-country-code="DE"]');
+        const tileUrls = [];
+        if (typeof leafletMap !== 'undefined' && leafletMap) {
+          leafletMap.eachLayer((layer) => { if (layer && layer._url) tileUrls.push(layer._url); });
+        }
+        return { text: label ? label.textContent.trim() : '', tileUrls };
+      });
+      await page.evaluate(() => {
+        const sel = document.querySelector('[data-testid="lang-select"]');
+        if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      await page.waitForTimeout(450);
+      const fr = await page.evaluate(() => {
+        const label = document.querySelector('.country-label-marker[data-country-code="DE"]');
+        return label ? label.textContent.trim() : '';
+      });
+      assert(en.text === 'Germany', `Country label for DE in EN is "Germany" (got "${en.text}")`);
+      assert(fr === 'Allemagne', `Country label for DE in FR is "Allemagne" (got "${fr}")`);
+      assert(!en.tileUrls.some((url) => /only_labels/.test(url)), 'CARTO only_labels raster layer is not used for country names');
+    });
+
+    for (const locale of ['zh-CN', 'ar-EG', 'ja-JP']) {
+      await test(`Country labels use browser locale for ${locale}`, async () => {
+        const { browser: bCountry, page: pCountry } = await launch({ locale });
+        try {
+          await loadApp(pCountry);
+          const st = await pCountry.evaluate(() => {
+            const label = document.querySelector('.country-label-marker[data-country-code="DE"]');
+            const expected = new Intl.DisplayNames([navigator.language], { type: 'region' }).of('DE');
+            return {
+              nav: navigator.language,
+              htmlLang: document.documentElement.lang,
+              text: label ? label.textContent.trim() : '',
+              labelLang: label ? label.getAttribute('lang') : '',
+              labelDir: label ? label.getAttribute('dir') : '',
+              expected,
+            };
+          });
+          assert(st.nav.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `navigator.language is ${locale} (got "${st.nav}")`);
+          assert(st.htmlLang === 'en', `${locale} keeps app UI in EN (got "${st.htmlLang}")`);
+          assert(st.text === st.expected, `${locale} country label follows browser locale (got "${st.text}", expected "${st.expected}")`);
+          assert(st.labelLang.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `${locale} country label lang attribute follows browser locale (got "${st.labelLang}")`);
+          assert(st.labelDir === 'auto', `${locale} country label uses dir="auto" (got "${st.labelDir}")`);
+        } finally {
+          await bCountry.close();
+        }
+      });
+    }
   } else {
     console.log(`\n  ${YELLOW}dir=ltr check: skipped in smoke mode${RESET}`);
   }
