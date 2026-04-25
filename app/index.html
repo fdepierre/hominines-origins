@@ -1703,6 +1703,29 @@ ul.uncertainty-level-list {
 .mig-arrow-head {
   pointer-events: none;
 }
+.maplibre-migration-cue {
+  pointer-events: none;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.maplibre-migration-cue-arrow,
+.maplibre-migration-cue-dot {
+  transition: transform 0.18s, opacity 0.18s, filter 0.18s;
+}
+.maplibre-migration-cue-arrow {
+  display: block;
+  transform-origin: center;
+}
+.maplibre-migration-cue-dot {
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+}
+.maplibre-walking-figure {
+  pointer-events: none;
+  z-index: 8;
+}
 
 /* Speed selector — hidden, speed is fixed */
 #play-speed { display: none; }
@@ -2186,6 +2209,9 @@ let mapLibreSitePopup = null;
 let mapLibreEventPopup = null;
 let mapLibreSiteHandlersReady = false;
 const mapLibreEventMarkers = new Map();
+const mapLibreMigrationMarkers = new Map();
+const mapLibreFigureMarkers = new Map();
+const mapLibreLabelMarkers = new Map();
 let baseTileLayer = null;
 let countryLabelLayer = null;
 let markersLayer = null;
@@ -2407,12 +2433,14 @@ function applyMapLibreNeutralBasemap(map, isDark) {
   paint('coastline', 'line-color', palette.coast);
   paint('coastline', 'line-opacity', 0.65);
   paint('geolines', 'line-color', palette.geo);
-  paint('geolines', 'line-opacity', 0.55);
+  paint('geolines', 'line-opacity', 0);
   paint('geolines-label', 'text-color', palette.geoLabel);
   paint('geolines-label', 'text-halo-color', palette.water);
+  paint('geolines-label', 'text-opacity', 0);
   paint('countries-label', 'text-color', palette.countryLabel);
   paint('countries-label', 'text-halo-color', palette.halo);
   paint('countries-label', 'text-halo-width', 1.1);
+  paint('countries-label', 'text-opacity', 0);
 }
 
 function initMapLibre() {
@@ -2432,8 +2460,10 @@ function initMapLibre() {
   mapLibreMap.on('load', function () {
     applyMapLibreNeutralBasemap(mapLibreMap, document.documentElement.getAttribute('data-theme') === 'dark');
     updateMapLibre();
+    updateMapLibreLabels();
     mapLibreMap.resize();
   });
+  mapLibreMap.on('zoomend', updateMapLibreLabels);
 }
 
 function initMap() {
@@ -2727,6 +2757,136 @@ function updateMapLibreEvents() {
   syncMapLibreEventMarkers(visibleEvents);
 }
 
+function updateMapLibreLabels() {
+  if (!mapLibreMap) return;
+  const labelLocale = countryLabelLocale();
+  const zoom = mapLibreMap.getZoom();
+  const points = zoom <= 2
+    ? CONTINENT_LABEL_POINTS.map(function (p) {
+      return {
+        id: 'continent-' + p.code,
+        kind: 'continent',
+        code: p.code,
+        label: continentLabelName(p.code),
+        lngLat: [p.lng, p.lat],
+      };
+    })
+    : COUNTRY_LABEL_POINTS.filter(function (p) {
+      return zoom >= countryLabelMinZoom(p.code);
+    }).map(function (p) {
+      return {
+        id: 'country-' + p.code,
+        kind: 'country',
+        code: p.code,
+        label: countryLabelName(p.code),
+        lngLat: [p.lng, p.lat],
+      };
+    });
+  const visibleIds = new Set(points.map(function (p) { return p.id; }));
+  mapLibreLabelMarkers.forEach(function (marker, id) {
+    if (!visibleIds.has(id)) {
+      marker.remove();
+      mapLibreLabelMarkers.delete(id);
+    }
+  });
+  points.forEach(function (p) {
+    const className = p.kind === 'continent' ? 'continent-label-marker' : 'country-label-marker';
+    const dataAttr = p.kind === 'continent'
+      ? 'data-continent-code="' + bandTipEscapeHtml(p.code) + '"'
+      : 'data-country-code="' + bandTipEscapeHtml(p.code) + '"';
+    const html = '<span class="' + className + '" ' + dataAttr + ' lang="' + bandTipEscapeHtml(labelLocale) + '" dir="auto">' + bandTipEscapeHtml(p.label) + '</span>';
+    const existing = mapLibreLabelMarkers.get(p.id);
+    if (existing) {
+      existing.setLngLat(p.lngLat);
+      const el = existing.getElement && existing.getElement();
+      if (el) el.innerHTML = html;
+      return;
+    }
+    const el = document.createElement('div');
+    el.className = 'maplibre-label-marker';
+    el.style.cssText = 'pointer-events:none;';
+    el.innerHTML = html;
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat(p.lngLat)
+      .addTo(mapLibreMap);
+    mapLibreLabelMarkers.set(p.id, marker);
+  });
+}
+
+function mapLibreMigrationCueHtml(kind, species, bearing) {
+  const color = species.color || '#d2a45f';
+  if (kind === 'dot') {
+    const size = isPlaying ? 9 : 7;
+    return '<span class="maplibre-migration-cue-dot" style="' +
+      'display:block;width:' + size + 'px;height:' + size + 'px;' +
+      'color:' + bandTipEscapeHtml(color) + ';background:' + bandTipEscapeHtml(color) + ';' +
+      'opacity:' + (isPlaying ? '0.9' : '0.65') + ';' +
+      'filter:' + (isPlaying ? 'drop-shadow(0 0 6px ' + bandTipEscapeHtml(color) + ')' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))') + '"></span>';
+  }
+  const size = isPlaying ? 16 : 13;
+  return '<svg class="maplibre-migration-cue-arrow" width="' + size + '" height="' + size + '" viewBox="0 0 12 12" aria-hidden="true" style="' +
+    'opacity:' + (isPlaying ? '0.92' : '0.68') + ';' +
+    'transform:rotate(' + Number(bearing || 0) + 'deg);' +
+    'filter:' + (isPlaying ? 'drop-shadow(0 0 4px ' + bandTipEscapeHtml(color) + ')' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))') + '">' +
+    '<path d="M6 1.2 10.3 10.2 6 8.1 1.7 10.2Z" fill="' + bandTipEscapeHtml(color) + '"/></svg>';
+}
+
+function syncMapLibreMigrationCues(visible) {
+  if (!mapLibreMap) return;
+  const cueItems = [];
+  if (layerStates.migrations) {
+    visible.forEach(function (species) {
+      species.migrations.forEach(function (mig, idx) {
+        const bearing = getBearing(mig.from, mig.to);
+        const t = 0.65;
+        cueItems.push({
+          id: species.id + '-migration-' + idx + '-arrow',
+          kind: 'arrow',
+          species: species,
+          bearing: bearing,
+          lngLat: [
+            mig.from[1] + (mig.to[1] - mig.from[1]) * t,
+            mig.from[0] + (mig.to[0] - mig.from[0]) * t,
+          ],
+        });
+        cueItems.push({
+          id: species.id + '-migration-' + idx + '-dot',
+          kind: 'dot',
+          species: species,
+          bearing: bearing,
+          lngLat: [mig.to[1], mig.to[0]],
+        });
+      });
+    });
+  }
+
+  const visibleIds = new Set(cueItems.map(function (item) { return item.id; }));
+  mapLibreMigrationMarkers.forEach(function (marker, id) {
+    if (!visibleIds.has(id)) {
+      marker.remove();
+      mapLibreMigrationMarkers.delete(id);
+    }
+  });
+
+  cueItems.forEach(function (item) {
+    const html = mapLibreMigrationCueHtml(item.kind, item.species, item.bearing);
+    const existing = mapLibreMigrationMarkers.get(item.id);
+    if (existing) {
+      existing.setLngLat(item.lngLat);
+      const el = existing.getElement && existing.getElement();
+      if (el) el.innerHTML = html;
+      return;
+    }
+    const el = document.createElement('div');
+    el.className = 'maplibre-migration-cue';
+    el.innerHTML = html;
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat(item.lngLat)
+      .addTo(mapLibreMap);
+    mapLibreMigrationMarkers.set(item.id, marker);
+  });
+}
+
 function updateMapLibre() {
   const visible = getVisibleSpecies();
   updateMapLegend(visible);
@@ -2781,6 +2941,12 @@ function updateMapLibre() {
   mapLibreMap.getSource('hominine-ranges').setData({ type: 'FeatureCollection', features: rangeFeatures });
   mapLibreMap.getSource('hominine-migrations').setData({ type: 'FeatureCollection', features: migrationFeatures });
   mapLibreMap.getSource('hominine-sites').setData({ type: 'FeatureCollection', features: siteFeatures });
+  try {
+    mapLibreMap.setPaintProperty('hominine-migrations', 'line-opacity', isPlaying ? 0.85 : 0.55);
+    mapLibreMap.setPaintProperty('hominine-migrations', 'line-width', isPlaying ? 4 : 2);
+    mapLibreMap.setPaintProperty('hominine-migrations', 'line-dasharray', isPlaying ? [1, 0] : [3, 2]);
+  } catch (e) { /* ignore */ }
+  syncMapLibreMigrationCues(visible);
   updateMapLibreEvents();
 }
 
@@ -4221,6 +4387,7 @@ function setTheme(theme) {
     updateMap();
   } else if (mapLibreMap) {
     applyMapLibreNeutralBasemap(mapLibreMap, theme === 'dark');
+    updateMapLibreLabels();
     document.getElementById('map').style.background = theme === 'dark' ? '#101722' : '#d8e5e8';
   }
   requestAnimationFrame(function () {
@@ -4315,11 +4482,11 @@ function startPlay() {
     _lastVisibleIds = '';
   }
 
-  // Init figure layer; resume any paused walks (no-op on fresh start)
+  // Init figure layer/markers; resume any paused walks (no-op on fresh start)
   if (!isMapLibreMode()) {
     if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
-    resumeAllFigureWalks();
   }
+  resumeAllFigureWalks();
 
   // Desktop: world view for global migrations. Mobile: fit map to visible species sites + migrations.
   if (isMobileViewport()) {
@@ -4419,6 +4586,19 @@ function getBearing(from, to) {
 }
 
 function updateAnimatedMigrations() {
+  if (isMapLibreMode()) {
+    if (!mapLibreMap) return;
+    try {
+      const visible = getVisibleSpecies();
+      if (mapLibreMap.getLayer('hominine-migrations')) {
+        mapLibreMap.setPaintProperty('hominine-migrations', 'line-opacity', isPlaying ? 0.85 : 0.55);
+        mapLibreMap.setPaintProperty('hominine-migrations', 'line-width', isPlaying ? 4 : 2);
+        mapLibreMap.setPaintProperty('hominine-migrations', 'line-dasharray', isPlaying ? [1, 0] : [3, 2]);
+      }
+      syncMapLibreMigrationCues(visible);
+    } catch (e) { /* ignore */ }
+    return;
+  }
   if (!animMigLayer) return;
   animMigLayer.clearLayers();
   if (!layerStates.migrations) return;
@@ -4705,15 +4885,44 @@ function makeFigureIcon(species) {
   });
 }
 
+function makeMapLibreFigureElement(species) {
+  const pig       = species.pigmentation || {};
+  const skinColor = (pig.skin  && pig.skin.color)  || species.color || '#8B6347';
+  const eyeColor  = (pig.eyes  && pig.eyes.color)  || '#2a1400';
+  const hairColor = (pig.hair  && pig.hair.color) || '#1a0800';
+  const hStr  = (species.biometrics && species.biometrics.heightM || '170').replace(/[^\d.\u2013-]/g, '');
+  const nums  = hStr.split(/[\u2013-]/).map(parseFloat).filter(function(n){ return !isNaN(n); });
+  const cm    = nums.length ? nums.reduce(function(a,b){ return a+b; }, 0) / nums.length : 170;
+  const scale = Math.max(0.7, Math.min(1.3, cm / 170));
+  const w = Math.round(22 * scale), h = Math.round(35 * scale);
+  const el = document.createElement('div');
+  el.className = 'maplibre-walking-figure';
+  el.style.cssText = 'width:' + w + 'px;height:' + h + 'px;display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.72));';
+  el.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 120 160" fill="none"' +
+    ' xmlns="http://www.w3.org/2000/svg" style="display:block">' +
+    humanFigureSVG(skinColor, eyeColor, hairColor, 60) + '</svg>';
+  return el;
+}
+
+function setFigureMarkerPosition(marker, latlng) {
+  if (!marker || !latlng) return;
+  if (marker.setLatLng) {
+    marker.setLatLng(latlng);
+  } else if (marker.setLngLat) {
+    marker.setLngLat([latlng[1], latlng[0]]);
+  }
+}
+
 // Remove figures for species that are no longer in the visible time window
 function syncFigureVisibility() {
-  if (!figureLayer) return;
+  if (!isMapLibreMode() && !figureLayer) return;
   const visibleIds = new Set(getVisibleSpecies().map(function(s){ return s.id; }));
   Object.keys(speciesFigures).forEach(function(id) {
     if (!visibleIds.has(id)) {
       const e = speciesFigures[id];
       if (e.raf) cancelAnimationFrame(e.raf);
       if (e.marker) e.marker.remove();
+      mapLibreFigureMarkers.delete(id);
       delete speciesFigures[id];
     }
   });
@@ -4722,12 +4931,18 @@ function syncFigureVisibility() {
 // Spawn a figure for a newly visible species and queue its migrations
 function spawnFigure(species) {
   if (speciesFigures[species.id]) return;
-  if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
   const origin = (species.sites && species.sites[0]) || (species.regions && species.regions[0]);
   const latlng = origin ? [origin.lat, origin.lng] : null;
-  const marker = latlng
-    ? L.marker(latlng, { icon: makeFigureIcon(species), zIndexOffset: 700 }).addTo(figureLayer)
-    : null;
+  let marker = null;
+  if (latlng && isMapLibreMode() && mapLibreMap) {
+    marker = new maplibregl.Marker({ element: makeMapLibreFigureElement(species), anchor: 'bottom' })
+      .setLngLat([latlng[1], latlng[0]])
+      .addTo(mapLibreMap);
+    mapLibreFigureMarkers.set(species.id, marker);
+  } else if (latlng) {
+    if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
+    marker = L.marker(latlng, { icon: makeFigureIcon(species), zIndexOffset: 700 }).addTo(figureLayer);
+  }
   speciesFigures[species.id] = {
     marker   : marker,
     migQueue : (species.migrations || []).slice(),
@@ -4765,11 +4980,11 @@ function startWalkFigure(id, mig, resumeElapsed) {
     }
     const raw  = Math.min((now - t0) / dur, 1);
     const ease = raw < 0.5 ? 2*raw*raw : -1 + (4-2*raw)*raw;
-    entry.marker.setLatLng([from[0]+(to[0]-from[0])*ease, from[1]+(to[1]-from[1])*ease]);
+    setFigureMarkerPosition(entry.marker, [from[0]+(to[0]-from[0])*ease, from[1]+(to[1]-from[1])*ease]);
     if (raw < 1) {
       entry.raf = requestAnimationFrame(step);
     } else {
-      entry.marker.setLatLng(to);  // stay at destination
+      setFigureMarkerPosition(entry.marker, to);  // stay at destination
       entry.raf       = null;
       entry.walkState = null;
       setTimeout(function(){ advanceFigure(id); }, 600); // next migration
@@ -5952,11 +6167,12 @@ function applyTranslations() {
     }
   }
 
-  // Rebuild map events layer so category tooltips are translated
+  // Rebuild map layers whose labels/tooltips depend on i18n.
   if (typeof updateEvents === 'function' && typeof eventsLayer !== 'undefined' && eventsLayer) {
     eventsLayer.clearLayers();
     updateEvents();
   }
+  if (typeof updateMapLibreLabels === 'function') updateMapLibreLabels();
 
   // Re-render open species panel so detail labels update immediately
   if (typeof selectedSpecies !== 'undefined' && selectedSpecies) {

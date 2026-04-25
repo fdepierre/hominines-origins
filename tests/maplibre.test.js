@@ -58,13 +58,25 @@ async function runMapLibreTests() {
   await test('MapLibre sources and layers receive app data', async () => {
     const data = await page.evaluate(async () => {
       setTime(-438000);
-      await new Promise(resolve => setTimeout(resolve, 350));
+      updateMapLibre();
       const map = window.__mapLibreMap;
       function featureCount(sourceId) {
         const source = map.getSource(sourceId);
         return source && source._data && Array.isArray(source._data.features)
           ? source._data.features.length
           : 0;
+      }
+      const start = Date.now();
+      while (
+        (
+          featureCount('hominine-ranges') === 0 ||
+          featureCount('hominine-migrations') === 0 ||
+          featureCount('hominine-sites') === 0 ||
+          featureCount('hominine-events') === 0
+        ) &&
+        Date.now() - start < 1800
+      ) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       return {
         hasRangesLayer: !!map.getLayer('hominine-ranges-fill'),
@@ -76,6 +88,9 @@ async function runMapLibreTests() {
         siteCount: featureCount('hominine-sites'),
         eventCount: featureCount('hominine-events'),
         eventMarkerCount: document.querySelectorAll('.maplibre-event-marker').length,
+        migrationCueCount: document.querySelectorAll('.maplibre-migration-cue').length,
+        migrationArrowCount: document.querySelectorAll('.maplibre-migration-cue-arrow').length,
+        migrationDotCount: document.querySelectorAll('.maplibre-migration-cue-dot').length,
       };
     });
     assert(data.hasRangesLayer, 'Species ranges layer exists');
@@ -87,6 +102,96 @@ async function runMapLibreTests() {
     assert(data.siteCount > 0, `Site source has features (${data.siteCount})`);
     assert(data.eventCount > 0, `Event source has features (${data.eventCount})`);
     assert(data.eventMarkerCount > 0, `Event HTML markers rendered (${data.eventMarkerCount})`);
+    assert(data.migrationCueCount > 0, `Migration cue markers rendered (${data.migrationCueCount})`);
+    assert(data.migrationArrowCount > 0, `Migration arrow markers rendered (${data.migrationArrowCount})`);
+    assert(data.migrationDotCount > 0, `Migration endpoint markers rendered (${data.migrationDotCount})`);
+  });
+
+  await test('MapLibre neutral basemap hides geolines and native country labels', async () => {
+    const paint = await page.evaluate(() => {
+      const map = window.__mapLibreMap;
+      return {
+        geolinesOpacity: map.getPaintProperty('geolines', 'line-opacity'),
+        geolinesLabelOpacity: map.getPaintProperty('geolines-label', 'text-opacity'),
+        countriesLabelOpacity: map.getPaintProperty('countries-label', 'text-opacity'),
+      };
+    });
+    assert(paint.geolinesOpacity === 0, 'Equator/tropic geolines are hidden');
+    assert(paint.geolinesLabelOpacity === 0, 'Equator/tropic labels are hidden');
+    assert(paint.countriesLabelOpacity === 0, 'Native country labels are hidden');
+  });
+
+  await test('MapLibre labels use app-managed continent and country names', async () => {
+    const labels = await page.evaluate(async () => {
+      localStorage.setItem('ho_ui_lang', 'fr');
+      const map = window.__mapLibreMap;
+      map.jumpTo({ zoom: 1.6, center: [20, 20] });
+      updateMapLibreLabels();
+      await new Promise(resolve => setTimeout(resolve, 250));
+      function domLabels(selector) {
+        return [...document.querySelectorAll(selector)].map(el => ({
+          text: el.textContent.trim(),
+          lang: el.getAttribute('lang'),
+          dir: el.getAttribute('dir'),
+        }));
+      }
+      const continentLabels = domLabels('.continent-label-marker');
+      map.jumpTo({ zoom: 4, center: [90, 25] });
+      updateMapLibreLabels();
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const countryLabels = domLabels('.country-label-marker');
+      return {
+        hasNativeCountryLabels: !!map.getLayer('countries-label'),
+        nativeCountryOpacity: map.getPaintProperty('countries-label', 'text-opacity'),
+        hasMapLibreLabelSource: !!map.getSource('hominine-map-labels'),
+        continentTexts: continentLabels.map(l => l.text),
+        continentLangs: [...new Set(continentLabels.map(l => l.lang))],
+        continentDirs: [...new Set(continentLabels.map(l => l.dir))],
+        countryTexts: countryLabels.map(l => l.text),
+        countryLangs: [...new Set(countryLabels.map(l => l.lang))],
+      };
+    });
+    assert(labels.hasNativeCountryLabels, 'Native MapLibre country label layer exists');
+    assert(labels.nativeCountryOpacity === 0, 'Native MapLibre country labels are hidden');
+    assert(!labels.hasMapLibreLabelSource, 'App-managed MapLibre labels are DOM markers, not canvas text');
+    assert(labels.continentTexts.includes('Asie'), 'French continent label is present');
+    assert(labels.continentLangs.includes('fr'), 'Continent labels expose lang for browser translation');
+    assert(labels.continentDirs.includes('auto'), 'Continent labels expose dir=auto');
+    assert(labels.countryTexts.includes('Chine'), 'French country label is present');
+    assert(labels.countryLangs.includes('fr'), 'Country labels expose lang for browser translation');
+  });
+
+  await test('MapLibre play renders walking hominins on migration paths', async () => {
+    const result = await page.evaluate(async () => {
+      stopPlay();
+      Object.keys(speciesFigures).forEach(id => {
+        const entry = speciesFigures[id];
+        if (entry && entry.raf) cancelAnimationFrame(entry.raf);
+        if (entry && entry.marker) entry.marker.remove();
+        delete speciesFigures[id];
+      });
+      mapLibreFigureMarkers.forEach(marker => marker.remove());
+      mapLibreFigureMarkers.clear();
+      setTime(-438000);
+      startPlay();
+      await new Promise(resolve => setTimeout(resolve, 900));
+      const firstMarker = mapLibreFigureMarkers.values().next().value;
+      const firstPos = firstMarker && firstMarker.getLngLat ? firstMarker.getLngLat() : null;
+      await new Promise(resolve => setTimeout(resolve, 700));
+      const secondPos = firstMarker && firstMarker.getLngLat ? firstMarker.getLngLat() : null;
+      stopPlay();
+      return {
+        figureCount: document.querySelectorAll('.maplibre-walking-figure').length,
+        trackedCount: mapLibreFigureMarkers.size,
+        moved: !!(firstPos && secondPos && (
+          Math.abs(firstPos.lng - secondPos.lng) > 0.0001 ||
+          Math.abs(firstPos.lat - secondPos.lat) > 0.0001
+        )),
+      };
+    });
+    assert(result.figureCount > 0, `MapLibre walking figures rendered (${result.figureCount})`);
+    assert(result.trackedCount > 0, `MapLibre figure markers are tracked (${result.trackedCount})`);
+    assert(result.moved, 'At least one MapLibre figure moves along a migration path during play');
   });
 
   await test('Timeline event click creates an immediately pulsing MapLibre marker', async () => {
