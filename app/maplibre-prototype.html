@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hominines Origins — MapLibre GL JS prototype</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --panel-bg: rgba(20, 18, 15, 0.86);
+      --panel-text: #f6efe2;
+      --panel-muted: #d7c8ad;
+      --accent: #d2a45f;
+    }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #111827;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    .prototype-panel {
+      position: absolute;
+      z-index: 2;
+      top: 16px;
+      left: 16px;
+      max-width: min(420px, calc(100vw - 32px));
+      padding: 14px 16px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 14px;
+      background: var(--panel-bg);
+      color: var(--panel-text);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+      backdrop-filter: blur(10px);
+    }
+    .prototype-panel h1 {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 16px;
+      line-height: 1.25;
+    }
+    .prototype-panel p {
+      margin: 6px 0;
+      color: var(--panel-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .prototype-panel code {
+      color: #fff;
+      font-size: 12px;
+    }
+    .maplibregl-ctrl-attrib {
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <aside class="prototype-panel">
+    <h1>Prototype MapLibre GL JS</h1>
+    <p>Cette page teste un rendu vectoriel MapLibre isolé de l'application Leaflet actuelle.</p>
+    <p>Style de démonstration : <code>demotiles.maplibre.org</code>. Il valide le moteur, les couches vectorielles, les zooms et les labels natifs.</p>
+    <p>Pour la migration réelle, il faudra choisir un fournisseur de tuiles/style avec champs localisés ou héberger nos propres tuiles.</p>
+  </aside>
+
+  <script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
+  <script>
+    const browserLocale = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
+    document.documentElement.lang = browserLocale.startsWith('fr') ? 'fr' : 'en';
+
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://demotiles.maplibre.org/style.json',
+      center: [20, 20],
+      zoom: 1.6,
+      minZoom: 1,
+      maxZoom: 7,
+      attributionControl: false,
+    });
+
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+
+    map.on('load', () => {
+      map.resize();
+    });
+  </script>
+</body>
+</html>
