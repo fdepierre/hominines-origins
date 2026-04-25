@@ -23,13 +23,13 @@ const SUITES = SMOKE
       { name: 'Unit tests (full)', fn: runUnitTests },
       { name: 'Visual tests [smoke — no snapshots]', fn: () => runVisualTests({ smoke: true }) },
       { name: 'A11y [smoke — no tablet]', fn: () => runA11yTests({ smoke: true }) },
-      { name: 'MapLibre tests (feature flag)', fn: runMapLibreTests },
+      { name: 'MapLibre tests (default map engine)', fn: runMapLibreTests },
     ]
   : [
       { name: 'Unit tests        (data integrity, maths, bearing)', fn: runUnitTests },
       { name: 'Visual tests      (layout, contrast, snapshots)', fn: () => runVisualTests({ smoke: false }) },
       { name: 'A11y/interaction  (ARIA, touch, i18n, play/pause)', fn: () => runA11yTests({ smoke: false }) },
-      { name: 'MapLibre          (feature-flagged map engine)', fn: runMapLibreTests },
+      { name: 'MapLibre          (default map engine)', fn: runMapLibreTests },
     ];
 
 async function main() {

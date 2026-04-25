@@ -43,7 +43,7 @@ For one-off classroom use, **do not** add a pack — tell users to pick FR or EN
 
 #### Browser “Translate this page” — manual QA (before a release)
 
-Chrome / Edge / Firefox can translate the static DOM; **Leaflet tooltips** and the **#band-tooltip** panel are filled in JavaScript, so behaviour varies by browser and timing.
+Chrome / Edge / Firefox can translate the static DOM; **MapLibre DOM markers/popups** and the **#band-tooltip** panel are filled in JavaScript, so behaviour varies by browser and timing.
 
 1. Set the browser UI to a language you do not maintain (e.g. Spanish).
 2. Open the app over HTTP, pick **FR** or **EN** for menu chrome, then run **Translate this page**.

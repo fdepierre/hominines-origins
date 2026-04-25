@@ -281,7 +281,10 @@ async function runA11yTests(options = {}) {
 
     await test('Country labels follow the selected language', async () => {
       await page.evaluate(() => {
-        if (typeof leafletMap !== 'undefined' && leafletMap) leafletMap.setZoom(3);
+        if (window.__mapLibreMap) {
+          window.__mapLibreMap.jumpTo({ zoom: 4, center: [90, 25] });
+          if (typeof updateMapLibreLabels === 'function') updateMapLibreLabels();
+        }
       });
       await page.waitForTimeout(200);
       await page.evaluate(() => {
@@ -291,11 +294,7 @@ async function runA11yTests(options = {}) {
       await page.waitForTimeout(450);
       const en = await page.evaluate(() => {
         const label = document.querySelector('.country-label-marker[data-country-code="CN"]');
-        const tileUrls = [];
-        if (typeof leafletMap !== 'undefined' && leafletMap) {
-          leafletMap.eachLayer((layer) => { if (layer && layer._url) tileUrls.push(layer._url); });
-        }
-        return { text: label ? label.textContent.trim() : '', tileUrls };
+        return { text: label ? label.textContent.trim() : '' };
       });
       await page.evaluate(() => {
         const sel = document.querySelector('[data-testid="lang-select"]');
@@ -308,14 +307,16 @@ async function runA11yTests(options = {}) {
       });
       assert(en.text === 'China', `Country label for CN in EN is "China" (got "${en.text}")`);
       assert(fr === 'Chine', `Country label for CN in FR is "Chine" (got "${fr}")`);
-      assert(!en.tileUrls.some((url) => /only_labels/.test(url)), 'CARTO only_labels raster layer is not used for country names');
     });
 
     await test('World zoom shows continents instead of country labels', async () => {
       await page.evaluate(() => {
         const sel = document.querySelector('[data-testid="lang-select"]');
         if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-        if (typeof leafletMap !== 'undefined' && leafletMap) leafletMap.setZoom(2);
+        if (window.__mapLibreMap) {
+          window.__mapLibreMap.jumpTo({ zoom: 1.6, center: [20, 20] });
+          if (typeof updateMapLibreLabels === 'function') updateMapLibreLabels();
+        }
       });
       await page.waitForTimeout(450);
       const st = await page.evaluate(() => {
@@ -335,6 +336,13 @@ async function runA11yTests(options = {}) {
         const { browser: bCountry, page: pCountry } = await launch({ locale });
         try {
           await loadApp(pCountry);
+          await pCountry.evaluate(() => {
+            if (window.__mapLibreMap) {
+              window.__mapLibreMap.jumpTo({ zoom: 1.6, center: [20, 20] });
+              if (typeof updateMapLibreLabels === 'function') updateMapLibreLabels();
+            }
+          });
+          await pCountry.waitForTimeout(250);
           const st = await pCountry.evaluate(() => {
             const label = document.querySelector('.continent-label-marker[data-continent-code="asia"]');
             const expectedByLang = { zh: '亚洲', ar: 'آسيا', ja: 'アジア' };

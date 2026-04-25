@@ -68,7 +68,7 @@ When new research is published:
 3. If you care about **offline** or **`file://`** use, update the embedded JSON mirrors (`_EMBEDDED_SPECIES`, `_EMBEDDED_EVENTS`) inside [`app/index.html`](app/index.html) so they match `app/data/` — otherwise `fetch` failures will load stale data
 4. Run `node tests/run-all.js` to verify nothing is broken
 
-Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** switches **French and English** chrome UI strings only; for any other language, or for translating French narrative wholesale, use the browser’s page translator. Coverage of SVG labels and Leaflet map chrome varies by browser.
+Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** switches **French and English** chrome UI strings only; for any other language, or for translating French narrative wholesale, use the browser’s page translator. Map labels are rendered as DOM markers so browser translation can see them.
 
 ---
 
@@ -138,11 +138,11 @@ A single HTML file: [`app/index.html`](app/index.html).
 
 | Dependency | Role |
 |------------|------|
-| [Leaflet.js](https://leafletjs.com/) 1.9.4 | Interactive world map |
+| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) 5.9.0 | Interactive vector world map |
 | [i18next](https://www.i18next.com/) 23.11.5 | **French and English** menu / control strings; all other languages rely on the browser’s page translator |
 | Space Grotesk + Space Mono | Typography (Google Fonts CDN) |
 
-The welcome dialog asks which of **FR** or **EN** you want for interface labels (stored in `localStorage` as `ho_ui_lang`). Scientific copy in the map and side panel stays **French-first**; use **Translate this page** for Hindi, Spanish without full app bundles, etc. The document root stays `translate="yes"` so browser translation is not blocked.
+The app auto-selects **FR** or **EN** from the browser language and keeps the burger-menu selector for manual override (stored in `localStorage` as `ho_ui_lang`). For other languages, use **Translate this page**; the document root stays `translate="yes"` so browser translation is not blocked.
 
 ---
 

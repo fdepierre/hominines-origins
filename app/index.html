@@ -27,9 +27,7 @@
 </script>
 <style>html[data-i18n-pending="1"] body { visibility: hidden; }</style>
 
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<!-- MapLibre GL JS CSS (prototype engine behind ?map=maplibre) -->
+<!-- MapLibre GL JS CSS -->
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css" />
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -471,19 +469,10 @@ ul.uncertainty-level-list {
   background: #0e1220;
 }
 
-/* Leaflet overrides */
-.leaflet-container { font-family: var(--font-body); background: #0e1220; }
 .maplibregl-map { font-family: var(--font-body); background: #0e1220; }
-.leaflet-control-zoom { display: none; }
-.leaflet-attribution-flag { display: none !important; }
-.leaflet-control-attribution { 
-  background: rgba(14,13,11,0.8) !important; 
-  color: var(--color-text-faint) !important;
-  font-size: 10px;
-}
-.leaflet-control-attribution a { color: var(--color-text-muted) !important; }
+
 /* ===== SHARED TOOLTIP TOKEN =====
-   Tous les tooltips (CSS ::after, Leaflet, .map-tooltip) utilisent les
+   Tous les tooltips (CSS ::after, .map-tooltip, #band-tooltip) utilisent les
    mêmes variables pour garantir un rendu homogène dans les deux thèmes. */
 :root {
   --tooltip-bg:     var(--color-surface);
@@ -496,49 +485,6 @@ ul.uncertainty-level-list {
   --tooltip-pad:    8px 13px;
   --tooltip-lh:     1.55;
 }
-
-/* Leaflet tooltips — both themes */
-.leaflet-tooltip {
-  font-family: var(--tooltip-font) !important;
-  font-size: var(--tooltip-size) !important;
-  padding: var(--tooltip-pad) !important;
-  border-radius: var(--tooltip-radius) !important;
-  line-height: var(--tooltip-lh) !important;
-  background: var(--tooltip-bg) !important;
-  color: var(--tooltip-color) !important;
-  border: 1px solid var(--tooltip-border) !important;
-  box-shadow: var(--tooltip-shadow) !important;
-  max-width: 260px !important;
-  white-space: normal !important;
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-}
-/* Remove Leaflet's directional arrows — all selector variants for cross-browser */
-.leaflet-tooltip:before,   .leaflet-tooltip::before,
-.leaflet-tooltip-top:before,   .leaflet-tooltip-top::before,
-.leaflet-tooltip-bottom:before,.leaflet-tooltip-bottom::before,
-.leaflet-tooltip-left:before,  .leaflet-tooltip-left::before,
-.leaflet-tooltip-right:before, .leaflet-tooltip-right::before {
-  display: none !important;
-  content: none !important;
-  border: none !important;
-  width: 0 !important; height: 0 !important;
-}
-.leaflet-tooltip.ho-map-rich-tip {
-  max-width: min(92vw, 300px) !important;
-}
-@media (max-width: 768px) {
-  .leaflet-tooltip.ho-map-rich-tip {
-    max-height: min(38vh, 280px) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    font-size: 12px !important;
-    line-height: 1.35 !important;
-    padding: 7px 10px !important;
-  }
-}
-[data-theme="light"] .leaflet-tooltip-custom { color: #1a1208; }
-
 .country-label-marker {
   color: rgba(237, 229, 212, 0.72);
   font-family: var(--font-body);
@@ -1087,7 +1033,7 @@ ul.uncertainty-level-list {
   animation: eventMapMarkerPulse 0.8s ease-in-out 3;
 }
 
-/* Shared JS-driven tooltip for events band — mirrors Leaflet tooltip style */
+/* Shared JS-driven tooltip for events band */
 #band-tooltip {
   display: none;
   position: fixed;
@@ -1411,7 +1357,7 @@ ul.uncertainty-level-list {
   height: 96px;
 }
 
-/* RTL: no bundled Arabic/Hebrew UI yet — enabling [dir="rtl"] would require a dedicated pass on Leaflet, timeline flex, and panel layout. */
+/* RTL: no bundled Arabic/Hebrew UI yet — enabling [dir="rtl"] would require a dedicated pass on map controls, timeline flex, and panel layout. */
 
 /* Scrollbar */
 #side-panel::-webkit-scrollbar { width: 4px; }
@@ -1457,12 +1403,12 @@ ul.uncertainty-level-list {
   flex-shrink: 0;
 }
 
-/* Map container relative position — overflow visible so Leaflet tooltips are not clipped at top/sides */
+/* Map container relative position — overflow visible so map overlays are not clipped at top/sides */
 .map-container {
   position: relative;
   overflow: visible;
 }
-.map-container .leaflet-container {
+.map-container .maplibregl-map {
   overflow: visible;
 }
 
@@ -1520,7 +1466,7 @@ ul.uncertainty-level-list {
   animation: playPulse 1.2s ease-out infinite;
 }
 
-/* Walking figure — no Leaflet click zones */
+/* Walking figure — no map click zones */
 .walking-figure { pointer-events: none !important; }
 
 /* === FUR TEXTURE on skin band === */
@@ -1876,7 +1822,7 @@ ul.uncertainty-level-list {
    ============================================================== */
 @media (min-width: 769px) {
   #mobile-tab-bar { display: none !important; }
-  /* Map vs panel: two grid columns; keep panel above the map so Leaflet layers never paint over it after flyTo/invalidateSize. */
+  /* Map vs panel: two grid columns; keep panel above the map after camera moves/resizes. */
   .map-container  { opacity: 1 !important; pointer-events: all !important; z-index: 1 !important; }
   #side-panel {
     position: relative !important;
@@ -2135,9 +2081,7 @@ ul.uncertainty-level-list {
 <script src="https://unpkg.com/i18next@23.11.5/i18next.min.js"></script>
 <script src="https://unpkg.com/i18next-browser-languagedetector@8.0.0/i18nextBrowserLanguageDetector.min.js"></script>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- MapLibre GL JS — inactive unless ?map=maplibre is present. -->
+<!-- MapLibre GL JS -->
 <script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
 
 <script>
@@ -2203,7 +2147,6 @@ let layerStates = { sites: true, migrations: true, range: true };
 let mapMarkers = {};
 let mapPolygons = {};
 let mapArrows = {};
-let leafletMap = null;
 let mapLibreMap = null;
 let mapLibreSitePopup = null;
 let mapLibreEventPopup = null;
@@ -2212,20 +2155,7 @@ const mapLibreEventMarkers = new Map();
 const mapLibreMigrationMarkers = new Map();
 const mapLibreFigureMarkers = new Map();
 const mapLibreLabelMarkers = new Map();
-let baseTileLayer = null;
-let countryLabelLayer = null;
-let markersLayer = null;
-let migrationsLayer = null;
-let rangesLayer = null;
 let isDragging = false;
-
-function isMapLibreMode() {
-  try {
-    return new URLSearchParams(window.location.search).get('map') === 'maplibre';
-  } catch (e) {
-    return false;
-  }
-}
 
 const COUNTRY_LABEL_POINTS = [
   { code: 'MA', lat: 31.8, lng: -7.1 }, { code: 'DZ', lat: 28.0, lng: 2.6 },
@@ -2287,20 +2217,6 @@ const CONTINENT_LABEL_NAMES = {
   es: { americas: 'Américas', europe: 'Europa', africa: 'África', asia: 'Asia', oceania: 'Oceanía' },
 };
 
-function addBaseTileLayer(isDark) {
-  if (!leafletMap) return;
-  if (baseTileLayer) {
-    leafletMap.removeLayer(baseTileLayer);
-    baseTileLayer = null;
-  }
-  baseTileLayer = L.tileLayer(isDark
-    ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 20, noWrap: true,
-  }).addTo(leafletMap);
-}
-
 function browserCountryLabelLocale() {
   const raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en');
   return String(raw).replace(/[^a-zA-Z0-9-]/g, '') || 'en';
@@ -2349,55 +2265,8 @@ function countryLabelMinZoom(code) {
   return 5;
 }
 
-function rebuildCountryLabels() {
-  if (!leafletMap || typeof L === 'undefined') return;
-  if (countryLabelLayer) {
-    leafletMap.removeLayer(countryLabelLayer);
-    countryLabelLayer = null;
-  }
-  countryLabelLayer = L.layerGroup();
-  const labelLocale = countryLabelLocale();
-  const zoom = leafletMap.getZoom();
-  if (zoom <= 2) {
-    CONTINENT_LABEL_POINTS.forEach(function (p) {
-      const label = continentLabelName(p.code);
-      const icon = L.divIcon({
-        className: '',
-        html: '<span class="continent-label-marker" data-continent-code="' + p.code + '" lang="' + bandTipEscapeHtml(labelLocale) + '" dir="auto">' + bandTipEscapeHtml(label) + '</span>',
-        iconSize: [0, 0],
-        iconAnchor: [0, 0],
-      });
-      countryLabelLayer.addLayer(L.marker([p.lat, p.lng], {
-        icon,
-        interactive: false,
-        keyboard: false,
-        zIndexOffset: -320,
-      }));
-    });
-    countryLabelLayer.addTo(leafletMap);
-    return;
-  }
-  COUNTRY_LABEL_POINTS.forEach(function (p) {
-    if (zoom < countryLabelMinZoom(p.code)) return;
-    const label = countryLabelName(p.code);
-    const icon = L.divIcon({
-      className: '',
-      html: '<span class="country-label-marker" data-country-code="' + p.code + '" lang="' + bandTipEscapeHtml(labelLocale) + '" dir="auto">' + bandTipEscapeHtml(label) + '</span>',
-      iconSize: [0, 0],
-      iconAnchor: [0, 0],
-    });
-    countryLabelLayer.addLayer(L.marker([p.lat, p.lng], {
-      icon,
-      interactive: false,
-      keyboard: false,
-      zIndexOffset: -300,
-    }));
-  });
-  countryLabelLayer.addTo(leafletMap);
-}
-
 // =====================================================================
-// MAP — LEAFLET INITIALISATION
+// MAP — MAPLIBRE INITIALISATION
 // =====================================================================
 function applyMapLibreNeutralBasemap(map, isDark) {
   function paint(layerId, prop, value) {
@@ -2467,36 +2336,7 @@ function initMapLibre() {
 }
 
 function initMap() {
-  if (isMapLibreMode()) {
-    initMapLibre();
-    return;
-  }
-  leafletMap = L.map('map', {
-    center: [20, 20],
-    zoom: 2,
-    minZoom: 2,
-    maxZoom: 7,
-    zoomControl: false,
-    attributionControl: true,
-    worldCopyJump: false,
-    maxBounds: [[-85, -200], [85, 200]],
-    maxBoundsViscosity: 0.8,
-  });
-
-  // Tile layer — matches initial data-theme. Country names are rendered by
-  // rebuildCountryLabels() so they can follow browser locale / manual override.
-  const _initDark = document.documentElement.getAttribute('data-theme') !== 'light';
-  addBaseTileLayer(_initDark);
-  rebuildCountryLabels();
-
-  markersLayer = L.layerGroup().addTo(leafletMap);
-  migrationsLayer = L.layerGroup().addTo(leafletMap);
-  rangesLayer = L.layerGroup().addTo(leafletMap);
-
-  leafletMap.on('click', function () {
-    closeMobileBandTooltip();
-  });
-  leafletMap.on('zoomend', rebuildCountryLabels);
+  initMapLibre();
 }
 
 // =====================================================================
@@ -2679,6 +2519,13 @@ function syncMapLibreEventMarkers(visibleEvents) {
   });
 }
 
+function clearMapLibreEventMarkers() {
+  mapLibreEventMarkers.forEach(function (marker) {
+    marker.remove();
+  });
+  mapLibreEventMarkers.clear();
+}
+
 function ensureMapLibreEventMarker(ev) {
   if (!mapLibreMap || !ev) return null;
   const existing = mapLibreEventMarkers.get(ev.id);
@@ -2709,11 +2556,7 @@ function ensureMapLibreEventMarker(ev) {
       scheduleTimelineBandSync();
       requestAnimationFrame(function () { scheduleTimelineBandSync(); });
     }
-    if (isMapLibreMode() && typeof focusEventOnMap === 'function') {
-      focusEventOnMap(ev.id);
-    } else if (typeof queueEventMapFocus === 'function') {
-      queueEventMapFocus(ev.id);
-    }
+    if (typeof focusEventOnMap === 'function') focusEventOnMap(ev.id);
   });
   const marker = new maplibregl.Marker({ element: el })
     .setLngLat([ev.lng, ev.lat])
@@ -2951,119 +2794,8 @@ function updateMapLibre() {
 }
 
 function updateMap() {
-  if (isMapLibreMode()) {
-    updateMapLibre();
-    return;
-  }
-  const visible = getVisibleSpecies();
-
-  // Clear layers
-  markersLayer.clearLayers();
-  migrationsLayer.clearLayers();
-  rangesLayer.clearLayers();
-
-  // Update legend
-  updateMapLegend(visible);
-
-  // Detect species appearing for the first time this play session
-  const newSpeciesIds = new Set();
-  if (isPlaying) {
-    visible.forEach(s => { if (!_prevVisibleSpeciesIds.has(s.id)) newSpeciesIds.add(s.id); });
-  }
-  _prevVisibleSpeciesIds = new Set(visible.map(s => s.id));
-
-  visible.forEach(species => {
-    const isNewSpecies = newSpeciesIds.has(species.id);
-    // --- RANGES ---
-    if (layerStates.range) {
-      species.regions.forEach(region => {
-        const circle = L.circle([region.lat, region.lng], {
-          radius: region.radius * 0.5,
-          color: species.color,
-          fillColor: species.color,
-          fillOpacity: 0.07,
-          weight: 1,
-          opacity: 0.3,
-          dashArray: '4 4',
-        });
-        circle.bindTooltip(`<strong>${scientificNameHtml(species.name)}</strong><br>${bandTipEscapeHtml(region.note)}`, {
-          permanent: false, direction: 'auto', offset: [0, -6], className: 'leaflet-tooltip-custom ho-map-rich-tip',
-        });
-        rangesLayer.addLayer(circle);
-      });
-    }
-
-    // --- SITES (MARKERS) ---
-    if (layerStates.sites) {
-      let firstSiteMarker = null;
-      species.sites.forEach(site => {
-        const isSelected = selectedSpecies && selectedSpecies.id === species.id;
-        const size = isSelected ? 18 : 14;
-        const icon = L.divIcon({
-          className: '',
-          html: `<div class="hominine-marker ${isSelected ? 'active' : ''}" style="
-            width:${size}px; height:${size}px;
-            background:${species.color}22;
-            border-color:${species.color};
-            color:${species.color};
-          "></div>`,
-          iconSize: [size, size],
-          iconAnchor: [size/2, size/2],
-        });
-
-        const marker = L.marker([site.lat, site.lng], { icon });
-        marker.bindTooltip(`
-          <div style="font-size:13px;line-height:1.5">
-            <strong style="color:${species.color}">${bandTipEscapeHtml(site.name)}</strong><br>
-            <em style="color:#9a8f7a">${scientificNameHtml(species.name)}</em><br>
-            ${bandTipEscapeHtml(site.note)}
-          </div>
-        `, { direction: 'auto', offset: [0, -8], className: 'leaflet-tooltip-custom ho-map-rich-tip' });
-
-        marker.on('click', () => {
-          window._userPickedSpecies = true;
-          selectSpecies(species);
-          window._userPickedSpecies = false;
-        });
-        markersLayer.addLayer(marker);
-        if (!firstSiteMarker) firstSiteMarker = marker;
-      });
-      // Flash intro tooltip on first site when a species newly appears during play
-      if (isNewSpecies && firstSiteMarker) {
-        setTimeout(function() {
-          try { firstSiteMarker.openTooltip(); } catch(e) {}
-          setTimeout(function() { try { firstSiteMarker.closeTooltip(); } catch(e) {} }, 4000);
-        }, 400);
-      }
-    }
-
-    // --- MIGRATIONS ---
-    if (layerStates.migrations) {
-      species.migrations.forEach(mig => {
-        const line = L.polyline([mig.from, mig.to], {
-          color: species.color,
-          weight: 2,
-          opacity: 0.5,
-          dashArray: '8 4',
-          className: 'migration-path',
-        });
-        line.bindTooltip(`<span style="color:${species.color}">${bandTipEscapeHtml(mig.label)}</span>`, { direction: 'center' });
-        migrationsLayer.addLayer(line);
-        // Note: arrowhead and endpoint dot are handled by animMigLayer
-      });
-    }
-  });
-
-  // --- EVENTS ---
-  updateEvents();
-
-  // --- MIGRATION ARROWS (always visible with direction, animated during play) ---
-  if (typeof updateAnimatedMigrations === 'function') updateAnimatedMigrations();
+  updateMapLibre();
 }
-
-// Persistent map of rendered event markers (eventId → Leaflet marker).
-// Avoids destroying/recreating markers every tick so intro tooltips survive.
-const _renderedEventMarkers = new Map();
 
 /** Borne haute pour jalons cumulatifs sur la carte. `currentTime * 1.001` est incorrect si currentTime < 0 (exclut le jalon pile à la date du curseur). */
 function eventCumulativeTimeMax() {
@@ -3080,9 +2812,9 @@ function switchMobileTabToMap() {
     document.querySelectorAll('.mobile-tab').forEach(function (b) {
       b.classList.toggle('mobile-tab-active', b.dataset.view === 'map');
     });
-    if (typeof leafletMap !== 'undefined' && leafletMap) {
+    if (mapLibreMap) {
       setTimeout(function () {
-        try { leafletMap.invalidateSize(); } catch (e) { /* ignore */ }
+        try { mapLibreMap.resize(); } catch (e) { /* ignore */ }
         if (typeof scheduleFitMapToVisibleNarrative === 'function') scheduleFitMapToVisibleNarrative();
       }, 350);
     }
@@ -3107,103 +2839,25 @@ function queueEventMapFocus(eventId) {
 }
 
 function focusEventOnMap(eventId) {
-  if (isMapLibreMode()) {
-    if (!mapLibreMap) return;
-    const ev = EVENTS_DATA.find(item => item.id === eventId);
-    if (!ev) return;
-    try {
-      updateMapLibreEvents();
-      if (!mapLibreEventMarkers.has(eventId)) {
-        ensureMapLibreEventMarker(ev);
-      }
-      pulseMapLibreEventMarker(eventId, 2600);
-    } catch (e0) { /* ignore */ }
-    try {
-      mapLibreMap.flyTo({
-        center: [ev.lng, ev.lat],
-        zoom: Math.max(mapLibreMap.getZoom(), 4),
-        duration: 550,
-      });
-    } catch (e) { /* ignore */ }
-    return;
-  }
-  if (typeof leafletMap === 'undefined' || !leafletMap) return;
-  const m = _renderedEventMarkers.get(eventId);
-  if (!m) return;
+  if (!mapLibreMap) return;
+  const ev = EVENTS_DATA.find(item => item.id === eventId);
+  if (!ev) return;
   try {
-    const ll = m.getLatLng();
-    const z = Math.max(leafletMap.getZoom(), 4);
-    leafletMap.flyTo(ll, z, { duration: 0.55, easeLinearity: 0.35 });
+    updateMapLibreEvents();
+    if (!mapLibreEventMarkers.has(eventId)) ensureMapLibreEventMarker(ev);
+    pulseMapLibreEventMarker(eventId, 2600);
+  } catch (e0) { /* ignore */ }
+  try {
+    mapLibreMap.flyTo({
+      center: [ev.lng, ev.lat],
+      zoom: Math.max(mapLibreMap.getZoom(), 4),
+      duration: 550,
+    });
   } catch (e) { /* ignore */ }
-  try {
-    const el = m.getElement();
-    if (!el) return;
-    const inner = el.querySelector('.event-map-marker-inner') || el;
-    inner.classList.remove('event-map-marker-pulse');
-    void inner.offsetWidth;
-    inner.classList.add('event-map-marker-pulse');
-    setTimeout(function () { inner.classList.remove('event-map-marker-pulse'); }, 2600);
-  } catch (e2) { /* ignore */ }
 }
 
 function updateEvents() {
-  if (isMapLibreMode()) {
-    updateMapLibreEvents();
-    return;
-  }
-  if (!eventsLayer) return;
-
-  if (!showEvents) {
-    eventsLayer.clearLayers();
-    _renderedEventMarkers.clear();
-    return;
-  }
-
-  const visible = EVENTS_DATA.filter(ev => ev.time >= TIMELINE_MIN && ev.time <= eventCumulativeTimeMax());
-  const visibleIds = new Set(visible.map(ev => ev.id));
-
-  // Remove markers for events that scrolled back into the future (manual scrub backwards)
-  _renderedEventMarkers.forEach(function(marker, id) {
-    if (!visibleIds.has(id)) {
-      eventsLayer.removeLayer(marker);
-      _renderedEventMarkers.delete(id);
-    }
-  });
-
-  // Add markers only for newly visible events
-  visible.forEach(ev => {
-    if (_renderedEventMarkers.has(ev.id)) return; // already on map
-
-    const icon = L.divIcon({
-      className: '',
-      html: '<div class="event-map-marker-inner" style="display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;min-width:22px;min-height:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));cursor:pointer">' +
-        eventMapMarkerInnerContent(ev) + '</div>',
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
-    });
-    const marker = L.marker([ev.lat, ev.lng], { icon, zIndexOffset: 200 });
-    marker.bindTooltip(`
-      <div style="font-size:13px;line-height:1.5;max-width:240px">
-        <strong style="color:${ev.color}">${bandTipEscapeHtml(ev.label)}</strong><br>
-        <em style="color:#9a8f7a">${bandTipEscapeHtml(getCategoryLabel(ev.category))}</em><br>
-        ${bandTipEscapeHtml(ev.desc)}
-        ${ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>' : ''}
-      </div>
-    `, { direction: 'auto', offset: [0, -10], className: 'ho-map-rich-tip' });
-    marker.on('click', function (e) {
-      if (e && e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
-      stopPlay();
-      suppressMobileNarrativeFit(2000);
-      setTime(ev.time);
-      if (typeof scheduleTimelineBandSync === 'function') {
-        scheduleTimelineBandSync();
-        requestAnimationFrame(function () { scheduleTimelineBandSync(); });
-      }
-      if (typeof queueEventMapFocus === 'function') queueEventMapFocus(ev.id);
-    });
-    eventsLayer.addLayer(marker);
-    _renderedEventMarkers.set(ev.id, marker);
-  });
+  updateMapLibreEvents();
 }
 
 // =====================================================================
@@ -3564,9 +3218,9 @@ function updateMobileTimelineReserve() {
     document.documentElement.style.setProperty('--mobile-timeline-reserve', reserve + 'px');
   } catch (e) { /* ignore */ }
   if (typeof scheduleTimelineBandSync === 'function') scheduleTimelineBandSync();
-  if (typeof leafletMap !== 'undefined' && leafletMap) {
+  if (mapLibreMap) {
     requestAnimationFrame(function () {
-      try { leafletMap.invalidateSize(); } catch (e1) { /* ignore */ }
+      try { mapLibreMap.resize(); } catch (e1) { /* ignore */ }
       if (typeof scheduleFitMapToVisibleNarrative === 'function') scheduleFitMapToVisibleNarrative();
     });
   }
@@ -4101,7 +3755,7 @@ function buildEventsBand() {
       el.style.color = ev.color;
     }
 
-    // JS-driven tooltip matching Leaflet tooltip HTML style
+    // JS-driven tooltip matching shared tooltip HTML style
     const catLabel = getCategoryLabel(ev.category);
     const srcHtml  = ev.source
       ? '<br><span style="color:var(--color-text-faint);font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>'
@@ -4151,15 +3805,9 @@ function buildEventsBand() {
           btn.classList.add('active');
         });
       }
-      if (isMapLibreMode() && typeof focusEventOnMap === 'function') {
-        if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
-        focusEventOnMap(ev.id);
-        setTime(ev.time);
-      } else {
-        setTime(ev.time);
-        if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
-        if (typeof queueEventMapFocus === 'function') queueEventMapFocus(ev.id);
-      }
+      if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
+      if (typeof focusEventOnMap === 'function') focusEventOnMap(ev.id);
+      setTime(ev.time);
       scheduleTimelineBandSync();
       requestAnimationFrame(function () { scheduleTimelineBandSync(); });
       if (isMobileViewport() && tip && tip.style.display === 'block') {
@@ -4216,8 +3864,6 @@ function suppressMobileNarrativeFit(ms) {
   _fitNarrativeTimer = null;
   _suppressMobileNarrativeFitUntil = Date.now() + (ms || 2000);
 }
-let _prevVisibleSpeciesIds = new Set(); // for species intro tooltip on first appearance during play
-
 /** Sites, regions, and migration endpoints for the current visible species — used to frame the story on the map. */
 function collectNarrativeLatLngs(visible) {
   const latlngs = [];
@@ -4234,12 +3880,7 @@ function collectNarrativeLatLngs(visible) {
 
 // Instantly fit map to encompass all sites/regions/migration endpoints of visible species (optionnel / debug).
 function autoFitMap() {
-  const visible = getVisibleSpecies();
-  if (!visible.length || !leafletMap) return;
-  const latlngs = collectNarrativeLatLngs(visible);
-  if (!latlngs.length) return;
-  const bounds = L.latLngBounds(latlngs);
-  leafletMap.fitBounds(bounds, { padding: [60, 60], maxZoom: 5 });
+  fitMapToVisibleNarrative({ animate: true });
 }
 
 /** Mobile: keep the map centred on geography that matters for the species visible at the needle (debounced). */
@@ -4254,8 +3895,7 @@ function scheduleFitMapToVisibleNarrative() {
 }
 
 function fitMapToVisibleNarrative(opts) {
-  if (isMapLibreMode()) return;
-  if (!leafletMap) return;
+  if (!mapLibreMap) return;
   const visible = getVisibleSpecies();
   if (!visible.length) {
     resetMapToWorldView();
@@ -4264,30 +3904,26 @@ function fitMapToVisibleNarrative(opts) {
   const latlngs = collectNarrativeLatLngs(visible);
   if (!latlngs.length) return;
   try {
-    const bounds = L.latLngBounds(latlngs);
+    const bounds = new maplibregl.LngLatBounds();
+    latlngs.forEach(function (latlng) {
+      bounds.extend([latlng[1], latlng[0]]);
+    });
     const mobile = isMobileViewport();
     const pad = mobile ? 12 : 52;
     const maxZ = mobile ? 6 : 5;
-    leafletMap.fitBounds(bounds, {
+    mapLibreMap.fitBounds(bounds, {
       padding: [pad, pad],
       maxZoom: maxZ,
-      animate: !!(opts && opts.animate),
+      duration: opts && opts.animate ? 400 : 0,
     });
   } catch (e) { /* ignore */ }
 }
 
 /** Même vue large qu’au chargement (zoom min) — pour voir les migrations après un zoom sur un jalon. */
 function resetMapToWorldView() {
-  if (isMapLibreMode()) {
-    if (!mapLibreMap) return;
-    try {
-      mapLibreMap.easeTo({ center: [20, 20], zoom: 1.6, duration: 400 });
-    } catch (e) { /* ignore */ }
-    return;
-  }
-  if (!leafletMap) return;
+  if (!mapLibreMap) return;
   try {
-    leafletMap.setView([20, 20], 2, { animate: true, duration: 0.4 });
+    mapLibreMap.easeTo({ center: [20, 20], zoom: 1.6, duration: 400 });
   } catch (e) { /* ignore */ }
 }
 
@@ -4379,13 +4015,7 @@ function setTheme(theme) {
   document.querySelectorAll('[data-theme-toggle]').forEach(b => {
     b.innerHTML = theme === 'light' ? SVG_MOON : SVG_SUN;
   });
-  // Swap map tiles
-  if (leafletMap) {
-    addBaseTileLayer(theme === 'dark');
-    rebuildCountryLabels();
-    document.getElementById('map').style.background = theme === 'dark' ? '#0e1220' : '#d4d0c8';
-    updateMap();
-  } else if (mapLibreMap) {
+  if (mapLibreMap) {
     applyMapLibreNeutralBasemap(mapLibreMap, theme === 'dark');
     updateMapLibreLabels();
     document.getElementById('map').style.background = theme === 'dark' ? '#101722' : '#d8e5e8';
@@ -4437,8 +4067,6 @@ function getCategoryLabel(cat) {
 }
 
 let showEvents = true;
-let eventsLayer = null;
-
 // =====================================================================
 // PLAY / AUTOPLAY
 // =====================================================================
@@ -4476,16 +4104,11 @@ function startPlay() {
       if (e.marker) e.marker.remove();
       delete speciesFigures[id];
     });
-    _prevVisibleSpeciesIds = new Set();
-    _renderedEventMarkers.forEach(function(m) { try { if (eventsLayer) eventsLayer.removeLayer(m); } catch(e){} });
-    _renderedEventMarkers.clear();
+    clearMapLibreEventMarkers();
     _lastVisibleIds = '';
   }
 
-  // Init figure layer/markers; resume any paused walks (no-op on fresh start)
-  if (!isMapLibreMode()) {
-    if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
-  }
+  // Init figure markers; resume any paused walks (no-op on fresh start)
   resumeAllFigureWalks();
 
   // Desktop: world view for global migrations. Mobile: fit map to visible species sites + migrations.
@@ -4574,8 +4197,6 @@ window.togglePlay = togglePlay;
 // =====================================================================
 // ANIMATED MIGRATION ARROWS (during play)
 // =====================================================================
-let animMigLayer = null;
-
 function getBearing(from, to) {
   // Rhumb-line bearing: matches the apparent direction of the
   // straight polyline on a Mercator (flat) map projection.
@@ -4586,78 +4207,16 @@ function getBearing(from, to) {
 }
 
 function updateAnimatedMigrations() {
-  if (isMapLibreMode()) {
-    if (!mapLibreMap) return;
-    try {
-      const visible = getVisibleSpecies();
-      if (mapLibreMap.getLayer('hominine-migrations')) {
-        mapLibreMap.setPaintProperty('hominine-migrations', 'line-opacity', isPlaying ? 0.85 : 0.55);
-        mapLibreMap.setPaintProperty('hominine-migrations', 'line-width', isPlaying ? 4 : 2);
-        mapLibreMap.setPaintProperty('hominine-migrations', 'line-dasharray', isPlaying ? [1, 0] : [3, 2]);
-      }
-      syncMapLibreMigrationCues(visible);
-    } catch (e) { /* ignore */ }
-    return;
-  }
-  if (!animMigLayer) return;
-  animMigLayer.clearLayers();
-  if (!layerStates.migrations) return;
-
-  const visible = getVisibleSpecies();
-  visible.forEach(species => {
-    species.migrations.forEach(mig => {
-      // Animated line with moving dashes
-      const line = L.polyline([mig.from, mig.to], {
-        color: species.color,
-        weight: isPlaying ? 4 : 2,
-        opacity: isPlaying ? 0.9 : 0.55,
-        className: isPlaying ? 'migration-animated' : '',
-        dashArray: isPlaying ? null : '8 4',
-      });
-      line.bindTooltip('<span style="color:' + species.color + '">' + bandTipEscapeHtml(mig.label) + '</span>', { direction: 'center' });
-      animMigLayer.addLayer(line);
-
-      // Single arrowhead at 2/3 of the path to show direction
-      const numArrows = 1;
-      const bearing = getBearing(mig.from, mig.to);
-
-      for (let i = 0; i < numArrows; i++) {
-        const t = 0.65; // 2/3 towards destination
-        const lat = mig.from[0] + (mig.to[0] - mig.from[0]) * t;
-        const lng = mig.from[1] + (mig.to[1] - mig.from[1]) * t;
-
-        const arrowSize = isPlaying ? 16 : 12;
-        const glow = isPlaying ? 'filter:drop-shadow(0 0 6px ' + species.color + ');' : '';
-
-        const arrow = L.marker([lat, lng], {
-          icon: L.divIcon({
-            className: 'mig-arrow-head',
-            html: '<div style="width:0;height:0;' +
-                  'border-left:' + (arrowSize*0.5) + 'px solid transparent;' +
-                  'border-right:' + (arrowSize*0.5) + 'px solid transparent;' +
-                  'border-bottom:' + arrowSize + 'px solid ' + species.color + ';' +
-                  'transform:rotate(' + bearing + 'deg);' +
-                  'opacity:' + (isPlaying ? '0.95' : '0.6') + ';' +
-                  glow + '"></div>',
-            iconSize: [arrowSize, arrowSize],
-            iconAnchor: [arrowSize/2, arrowSize/2],
-          }),
-          zIndexOffset: 300,
-        });
-        animMigLayer.addLayer(arrow);
-      }
-
-      // Endpoint dot
-      const dot = L.circleMarker(mig.to, {
-        radius: isPlaying ? 6 : 4,
-        color: species.color,
-        fillColor: species.color,
-        fillOpacity: 0.85,
-        weight: 1.5,
-      });
-      animMigLayer.addLayer(dot);
-    });
-  });
+  if (!mapLibreMap) return;
+  try {
+    const visible = getVisibleSpecies();
+    if (mapLibreMap.getLayer('hominine-migrations')) {
+      mapLibreMap.setPaintProperty('hominine-migrations', 'line-opacity', isPlaying ? 0.85 : 0.55);
+      mapLibreMap.setPaintProperty('hominine-migrations', 'line-width', isPlaying ? 4 : 2);
+      mapLibreMap.setPaintProperty('hominine-migrations', 'line-dasharray', isPlaying ? [1, 0] : [3, 2]);
+    }
+    syncMapLibreMigrationCues(visible);
+  } catch (e) { /* ignore */ }
 }
 
 
@@ -4860,30 +4419,9 @@ function relocaliseData() {
 // Lifecycle: appear at origin → walk migrations → stay → vanish at extinction
 // Pause freezes figures in place; Play resumes walks from exact position
 // =====================================================================
-let figureLayer = null;
 // speciesFigures[id] = { marker, migQueue, walkState, raf }
 // walkState = { mig, from, to, dur, t0, pausedAt } | null
 const speciesFigures = {};
-
-function makeFigureIcon(species) {
-  const pig       = species.pigmentation || {};
-  const skinColor = (pig.skin  && pig.skin.color)  || species.color || '#8B6347';
-  const eyeColor  = (pig.eyes  && pig.eyes.color)  || '#2a1400';
-  const hairColor = (pig.hair  && pig.hair.color)  || '#1a0800';
-  const hStr  = (species.biometrics && species.biometrics.heightM || '170').replace(/[^\d.\u2013-]/g, '');
-  const nums  = hStr.split(/[\u2013-]/).map(parseFloat).filter(function(n){ return !isNaN(n); });
-  const cm    = nums.length ? nums.reduce(function(a,b){ return a+b; }, 0) / nums.length : 170;
-  const scale = Math.max(0.7, Math.min(1.3, cm / 170));
-  const w = Math.round(24 * scale), h = Math.round(38 * scale);
-  return L.divIcon({
-    className: 'walking-figure',
-    html: '<svg width="' + w + '" height="' + h + '" viewBox="0 0 120 160" fill="none"' +
-          ' xmlns="http://www.w3.org/2000/svg"' +
-          ' style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.75))">' +
-          humanFigureSVG(skinColor, eyeColor, hairColor, 60) + '</svg>',
-    iconSize: [w, h], iconAnchor: [w/2, h],
-  });
-}
 
 function makeMapLibreFigureElement(species) {
   const pig       = species.pigmentation || {};
@@ -4906,16 +4444,11 @@ function makeMapLibreFigureElement(species) {
 
 function setFigureMarkerPosition(marker, latlng) {
   if (!marker || !latlng) return;
-  if (marker.setLatLng) {
-    marker.setLatLng(latlng);
-  } else if (marker.setLngLat) {
-    marker.setLngLat([latlng[1], latlng[0]]);
-  }
+  marker.setLngLat([latlng[1], latlng[0]]);
 }
 
 // Remove figures for species that are no longer in the visible time window
 function syncFigureVisibility() {
-  if (!isMapLibreMode() && !figureLayer) return;
   const visibleIds = new Set(getVisibleSpecies().map(function(s){ return s.id; }));
   Object.keys(speciesFigures).forEach(function(id) {
     if (!visibleIds.has(id)) {
@@ -4934,14 +4467,11 @@ function spawnFigure(species) {
   const origin = (species.sites && species.sites[0]) || (species.regions && species.regions[0]);
   const latlng = origin ? [origin.lat, origin.lng] : null;
   let marker = null;
-  if (latlng && isMapLibreMode() && mapLibreMap) {
+  if (latlng && mapLibreMap) {
     marker = new maplibregl.Marker({ element: makeMapLibreFigureElement(species), anchor: 'bottom' })
       .setLngLat([latlng[1], latlng[0]])
       .addTo(mapLibreMap);
     mapLibreFigureMarkers.set(species.id, marker);
-  } else if (latlng) {
-    if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
-    marker = L.marker(latlng, { icon: makeFigureIcon(species), zIndexOffset: 700 }).addTo(figureLayer);
   }
   speciesFigures[species.id] = {
     marker   : marker,
@@ -5019,10 +4549,6 @@ function checkAndSpawnFigures() {
 // =====================================================================
 function bootApp() {
   initMap();
-  if (!isMapLibreMode()) {
-    eventsLayer = L.layerGroup().addTo(leafletMap);
-    animMigLayer = L.layerGroup().addTo(leafletMap);
-  }
   initTimeline();
   window.addEventListener('resize', function () {
     scheduleMobileTimelineReserve();
@@ -6043,7 +5569,7 @@ function applyTranslations() {
 
   // Layout direction: keep LTR explicitly. Only fr/en UI strings are bundled; browser “translate
   // this page” may render Arabic/Hebrew script but we do not ship a tested RTL layout (timeline,
-  // Leaflet, panels). A future RTL mode would need mirrored controls, map attribution, and QA —
+  // map controls and panels). A future RTL mode would need mirrored controls, attribution, and QA —
   // do not infer dir from navigator.language alone.
   document.documentElement.dir = 'ltr';
   document.documentElement.lang = lng;
@@ -6168,10 +5694,7 @@ function applyTranslations() {
   }
 
   // Rebuild map layers whose labels/tooltips depend on i18n.
-  if (typeof updateEvents === 'function' && typeof eventsLayer !== 'undefined' && eventsLayer) {
-    eventsLayer.clearLayers();
-    updateEvents();
-  }
+  if (typeof updateEvents === 'function') updateEvents();
   if (typeof updateMapLibreLabels === 'function') updateMapLibreLabels();
 
   // Re-render open species panel so detail labels update immediately
@@ -6248,7 +5771,7 @@ function initI18n() {
   }
 }
 
-// Wait for DOM + Leaflet to be ready
+// Wait for DOM + app scripts to be ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initI18n);
 } else {
@@ -6389,8 +5912,8 @@ window.addEventListener('load', function() {
       if (view === 'detail' && typeof selectedSpecies !== 'undefined' && selectedSpecies && typeof renderPanel === 'function') {
         renderPanel(selectedSpecies);
       }
-      if (view === 'map' && typeof leafletMap !== 'undefined' && leafletMap) {
-        setTimeout(function() { leafletMap.invalidateSize(); }, 310);
+      if (view === 'map' && mapLibreMap) {
+        setTimeout(function() { mapLibreMap.resize(); }, 310);
       }
     });
   });
@@ -6672,7 +6195,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
     </div>
   </div>
 
-  <!-- Shared tooltip for events band (JS-driven, matches Leaflet tooltip style) -->
+  <!-- Shared tooltip for events band (JS-driven, matches app tooltip style) -->
   <div id="band-tooltip"></div>
 
 </body>

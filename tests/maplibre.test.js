@@ -1,5 +1,5 @@
 /**
- * MAPLIBRE TESTS — feature-flagged map engine checks.
+ * MAPLIBRE TESTS — default map engine checks.
  *
  * Run: node tests/maplibre.test.js
  */
@@ -13,7 +13,7 @@ const {
 
 async function loadMapLibreApp(page) {
   const base = await startAppHttpServer();
-  await page.goto(`${base}/index.html?map=maplibre`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__mapLibreMap && window.__mapLibreMap.isStyleLoaded(), { timeout: 20000 });
   await page.waitForFunction(() => (
     typeof SPECIES_DATA !== 'undefined' &&
@@ -44,14 +44,12 @@ async function runMapLibreTests() {
   const { browser, page } = await launch({ width: 1440, height: 900 });
   await loadMapLibreApp(page);
 
-  await test('MapLibre mode initializes without Leaflet map instance', async () => {
+  await test('MapLibre initializes as the only map engine', async () => {
     const state = await page.evaluate(() => ({
       hasMapLibre: !!window.__mapLibreMap,
-      hasLeafletMap: typeof leafletMap !== 'undefined' && !!leafletMap,
       mapClass: document.getElementById('map') ? document.getElementById('map').className : '',
     }));
     assert(state.hasMapLibre, 'MapLibre map instance is exposed for tests');
-    assert(!state.hasLeafletMap, 'Leaflet map instance is not created in MapLibre mode');
     assert(String(state.mapClass).includes('maplibregl-map'), 'Map container has MapLibre class');
   });
 

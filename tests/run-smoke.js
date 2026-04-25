@@ -22,7 +22,7 @@ const SUITES = [
   { name: 'Unit tests (full in-browser suite)', fn: () => runUnitTests() },
   { name: 'Visual tests [smoke — no snapshots]', fn: () => runVisualTests({ smoke: true }) },
   { name: 'A11y tests [smoke — no tablet]', fn: () => runA11yTests({ smoke: true }) },
-  { name: 'MapLibre tests (feature flag)', fn: () => runMapLibreTests() },
+  { name: 'MapLibre tests (default map engine)', fn: () => runMapLibreTests() },
 ];
 
 async function main() {

@@ -148,9 +148,9 @@ async function loadApp(page, { lang = null, theme = null, dismissWelcome = true 
   const url = `${base}/index.html`;
   await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-  // Wait for Leaflet map to be ready
-  await page.waitForFunction(() => typeof L !== 'undefined' && document.getElementById('map') !== null, { timeout: 10000 });
-  // Wait for app JS data to be defined (SPECIES_DATA is declared after Leaflet loads)
+  // Wait for the map container and default MapLibre map to be ready.
+  await page.waitForFunction(() => document.getElementById('map') !== null && window.__mapLibreMap, { timeout: 15000 });
+  // Wait for app JS data to be defined.
   await page.waitForFunction(() => typeof SPECIES_DATA !== 'undefined' && typeof EVENTS_DATA !== 'undefined', { timeout: 10000 });
   // `loadData()` sets this after `adaptSpecies` maps JSON (certainty keys live on each species in `species.json`)
   await page.waitForFunction(() => window.__HOMININ_CERTAINTY_READY === true, { timeout: 10000 });

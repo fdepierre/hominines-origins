@@ -94,7 +94,7 @@ Functions: `linearToTime(t)` and `timeToLinear(time)` — do not change these wi
 
 1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for languages **outside** the bundled list. Keep `<html translate="yes">` (re-applied after `i18next` init and on `languageChanged`). Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands (e.g. `#json-code`, `#welcome-translate-hint`, **Latin taxon names** via `scientificNameHtml()` / `translate="no"` on timeline lane labels and the side-panel `.species-name`, so auto-translate does not corrupt `Homo sapiens`-style strings), the `#lang-select` block so option labels are not double-translated.
 
-2. **i18next** — instant UI for **French and English** only (menu / controls / uncertainty explainer); `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]` (keys may be `ui.*` or bare keys — the handler avoids double `ui.ui`), and rebuilds bands/map when needed. Any HTML built from JSON for Leaflet or `#band-tooltip` must go through **`bandTipEscapeHtml()`**; roster names use **`scientificNameHtml()`** (`translate="no"`). Scientific narrative from JSON remains **French-first** in the DOM (many JSON entries also carry `en`). Optional `localStorage` key **`ho_ui_lang`** (`fr` \| `en`) is set from the welcome dialog.
+2. **i18next** — instant UI for **French and English** only (menu / controls / uncertainty explainer); `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]` (keys may be `ui.*` or bare keys — the handler avoids double `ui.ui`), and rebuilds bands/map when needed. Any HTML built from JSON for MapLibre popups/markers or `#band-tooltip` must go through **`bandTipEscapeHtml()`**; roster names use **`scientificNameHtml()`** (`translate="no"`). Scientific narrative from JSON remains **French-first** in the DOM (many JSON entries also carry `en`). Optional `localStorage` key **`ho_ui_lang`** (`fr` \| `en`) stores the manual language override.
 
 The `TRANSLATIONS` object holds **fr** and **en** blocks only.
 
@@ -185,5 +185,5 @@ Source code: `https://github.com/fdepierre/hominines-origins`
 - Catalogue loaded from JSON-LD on disk, with embedded mirrors for fetch failure.
 - Earthy colour palette: amber `#d4820a` on obsidian `#0e0d0b`.
 - Fonts: Space Grotesk + Space Mono (Google Fonts CDN).
-- Map: Leaflet.js with CartoDB dark/light tiles.
+- Map: MapLibre GL JS with neutral vector styling and app-managed labels.
 - No frontend build tool and no SPA framework; optional **`npm`** only for the test runner.
