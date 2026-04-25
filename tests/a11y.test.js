@@ -286,7 +286,7 @@ async function runA11yTests(options = {}) {
       });
       await page.waitForTimeout(450);
       const en = await page.evaluate(() => {
-        const label = document.querySelector('.country-label-marker[data-country-code="DE"]');
+        const label = document.querySelector('.country-label-marker[data-country-code="CN"]');
         const tileUrls = [];
         if (typeof leafletMap !== 'undefined' && leafletMap) {
           leafletMap.eachLayer((layer) => { if (layer && layer._url) tileUrls.push(layer._url); });
@@ -299,11 +299,11 @@ async function runA11yTests(options = {}) {
       });
       await page.waitForTimeout(450);
       const fr = await page.evaluate(() => {
-        const label = document.querySelector('.country-label-marker[data-country-code="DE"]');
+        const label = document.querySelector('.country-label-marker[data-country-code="CN"]');
         return label ? label.textContent.trim() : '';
       });
-      assert(en.text === 'Germany', `Country label for DE in EN is "Germany" (got "${en.text}")`);
-      assert(fr === 'Allemagne', `Country label for DE in FR is "Allemagne" (got "${fr}")`);
+      assert(en.text === 'China', `Country label for CN in EN is "China" (got "${en.text}")`);
+      assert(fr === 'Chine', `Country label for CN in FR is "Chine" (got "${fr}")`);
       assert(!en.tileUrls.some((url) => /only_labels/.test(url)), 'CARTO only_labels raster layer is not used for country names');
     });
 
@@ -313,8 +313,8 @@ async function runA11yTests(options = {}) {
         try {
           await loadApp(pCountry);
           const st = await pCountry.evaluate(() => {
-            const label = document.querySelector('.country-label-marker[data-country-code="DE"]');
-            const expected = new Intl.DisplayNames([navigator.language], { type: 'region' }).of('DE');
+            const label = document.querySelector('.country-label-marker[data-country-code="CN"]');
+            const expected = new Intl.DisplayNames([navigator.language], { type: 'region' }).of('CN');
             return {
               nav: navigator.language,
               htmlLang: document.documentElement.lang,

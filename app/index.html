@@ -2245,6 +2245,16 @@ function countryLabelName(code) {
   }
 }
 
+function countryLabelMinZoom(code) {
+  const worldZoom = new Set(['CA', 'US', 'BR', 'AR', 'RU', 'CN', 'IN', 'AU', 'ZA']);
+  const regionZoom = new Set(['MX', 'CL', 'PE', 'CO', 'VE', 'EG', 'ET', 'KE', 'TZ', 'CD', 'SA', 'IR', 'TR', 'KZ', 'MN', 'ID', 'JP']);
+  const continentZoom = new Set(['MA', 'DZ', 'LY', 'SD', 'NG', 'ZM', 'CM', 'YE', 'OM', 'IQ', 'FR', 'ES', 'GB', 'DE', 'IT', 'UA', 'PK', 'AF', 'TH', 'VN', 'MY', 'PH', 'KR', 'NZ']);
+  if (worldZoom.has(code)) return 2;
+  if (regionZoom.has(code)) return 3;
+  if (continentZoom.has(code)) return 4;
+  return 5;
+}
+
 function rebuildCountryLabels() {
   if (!leafletMap || typeof L === 'undefined') return;
   if (countryLabelLayer) {
@@ -2253,7 +2263,9 @@ function rebuildCountryLabels() {
   }
   countryLabelLayer = L.layerGroup();
   const labelLocale = countryLabelLocale();
+  const zoom = leafletMap.getZoom();
   COUNTRY_LABEL_POINTS.forEach(function (p) {
+    if (zoom < countryLabelMinZoom(p.code)) return;
     const label = countryLabelName(p.code);
     const icon = L.divIcon({
       className: '',
@@ -2300,6 +2312,7 @@ function initMap() {
   leafletMap.on('click', function () {
     closeMobileBandTooltip();
   });
+  leafletMap.on('zoomend', rebuildCountryLabels);
 }
 
 // =====================================================================
