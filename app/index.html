@@ -29,6 +29,8 @@
 
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- MapLibre GL JS CSS (prototype engine behind ?map=maplibre) -->
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css" />
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -471,6 +473,7 @@ ul.uncertainty-level-list {
 
 /* Leaflet overrides */
 .leaflet-container { font-family: var(--font-body); background: #0e1220; }
+.maplibregl-map { font-family: var(--font-body); background: #0e1220; }
 .leaflet-control-zoom { display: none; }
 .leaflet-attribution-flag { display: none !important; }
 .leaflet-control-attribution { 
@@ -2104,6 +2107,8 @@ ul.uncertainty-level-list {
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- MapLibre GL JS — inactive unless ?map=maplibre is present. -->
+<script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
 
 <script>
 // =====================================================================
@@ -2169,12 +2174,21 @@ let mapMarkers = {};
 let mapPolygons = {};
 let mapArrows = {};
 let leafletMap = null;
+let mapLibreMap = null;
 let baseTileLayer = null;
 let countryLabelLayer = null;
 let markersLayer = null;
 let migrationsLayer = null;
 let rangesLayer = null;
 let isDragging = false;
+
+function isMapLibreMode() {
+  try {
+    return new URLSearchParams(window.location.search).get('map') === 'maplibre';
+  } catch (e) {
+    return false;
+  }
+}
 
 const COUNTRY_LABEL_POINTS = [
   { code: 'MA', lat: 31.8, lng: -7.1 }, { code: 'DZ', lat: 28.0, lng: 2.6 },
@@ -2348,7 +2362,73 @@ function rebuildCountryLabels() {
 // =====================================================================
 // MAP — LEAFLET INITIALISATION
 // =====================================================================
+function applyMapLibreNeutralBasemap(map, isDark) {
+  function paint(layerId, prop, value) {
+    try {
+      if (map.getLayer(layerId)) map.setPaintProperty(layerId, prop, value);
+    } catch (e) { /* style may not expose this property */ }
+  }
+  const palette = isDark ? {
+    water: '#101722',
+    land: '#24211b',
+    border: '#5a5043',
+    coast: '#526b75',
+    geo: '#526b75',
+    geoLabel: '#87949a',
+    countryLabel: '#b9ac97',
+    halo: '#24211b',
+  } : {
+    water: '#d8e5e8',
+    land: '#f1eadc',
+    border: '#b8aa96',
+    coast: '#8fb0b8',
+    geo: '#81a9b3',
+    geoLabel: '#607985',
+    countryLabel: '#6d6254',
+    halo: '#f1eadc',
+  };
+  paint('background', 'background-color', palette.water);
+  paint('countries-fill', 'fill-color', palette.land);
+  paint('countries-fill', 'fill-opacity', 0.96);
+  paint('countries-boundary', 'line-color', palette.border);
+  paint('countries-boundary', 'line-opacity', 0.62);
+  paint('countries-boundary', 'line-width', 0.6);
+  paint('coastline', 'line-color', palette.coast);
+  paint('coastline', 'line-opacity', 0.65);
+  paint('geolines', 'line-color', palette.geo);
+  paint('geolines', 'line-opacity', 0.55);
+  paint('geolines-label', 'text-color', palette.geoLabel);
+  paint('geolines-label', 'text-halo-color', palette.water);
+  paint('countries-label', 'text-color', palette.countryLabel);
+  paint('countries-label', 'text-halo-color', palette.halo);
+  paint('countries-label', 'text-halo-width', 1.1);
+}
+
+function initMapLibre() {
+  if (typeof maplibregl === 'undefined') return;
+  mapLibreMap = new maplibregl.Map({
+    container: 'map',
+    style: 'https://demotiles.maplibre.org/style.json',
+    center: [20, 20],
+    zoom: 1.6,
+    minZoom: 1,
+    maxZoom: 7,
+    attributionControl: false,
+  });
+  window.__mapLibreMap = mapLibreMap;
+  mapLibreMap.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+  mapLibreMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+  mapLibreMap.on('load', function () {
+    applyMapLibreNeutralBasemap(mapLibreMap, document.documentElement.getAttribute('data-theme') === 'dark');
+    mapLibreMap.resize();
+  });
+}
+
 function initMap() {
+  if (isMapLibreMode()) {
+    initMapLibre();
+    return;
+  }
   leafletMap = L.map('map', {
     center: [20, 20],
     zoom: 2,
@@ -2384,7 +2464,16 @@ function getVisibleSpecies() {
   return SPECIES_DATA.filter(s => s.start <= currentTime && s.end >= currentTime);
 }
 
+function updateMapLibre() {
+  // Step 2 only validates the MapLibre engine inside the app shell.
+  // Species, ranges, migrations and event layers are ported in later milestones.
+}
+
 function updateMap() {
+  if (isMapLibreMode()) {
+    updateMapLibre();
+    return;
+  }
   const visible = getVisibleSpecies();
 
   // Clear layers
@@ -3666,6 +3755,7 @@ function scheduleFitMapToVisibleNarrative() {
 }
 
 function fitMapToVisibleNarrative(opts) {
+  if (isMapLibreMode()) return;
   if (!leafletMap) return;
   const visible = getVisibleSpecies();
   if (!visible.length) {
@@ -3689,6 +3779,13 @@ function fitMapToVisibleNarrative(opts) {
 
 /** Même vue large qu’au chargement (zoom min) — pour voir les migrations après un zoom sur un jalon. */
 function resetMapToWorldView() {
+  if (isMapLibreMode()) {
+    if (!mapLibreMap) return;
+    try {
+      mapLibreMap.easeTo({ center: [20, 20], zoom: 1.6, duration: 400 });
+    } catch (e) { /* ignore */ }
+    return;
+  }
   if (!leafletMap) return;
   try {
     leafletMap.setView([20, 20], 2, { animate: true, duration: 0.4 });
@@ -3789,6 +3886,9 @@ function setTheme(theme) {
     rebuildCountryLabels();
     document.getElementById('map').style.background = theme === 'dark' ? '#0e1220' : '#d4d0c8';
     updateMap();
+  } else if (mapLibreMap) {
+    applyMapLibreNeutralBasemap(mapLibreMap, theme === 'dark');
+    document.getElementById('map').style.background = theme === 'dark' ? '#101722' : '#d8e5e8';
   }
   requestAnimationFrame(function () {
     syncTimelineBandsToSpeciesTrack();
@@ -3877,14 +3977,16 @@ function startPlay() {
       delete speciesFigures[id];
     });
     _prevVisibleSpeciesIds = new Set();
-    _renderedEventMarkers.forEach(function(m) { try { eventsLayer.removeLayer(m); } catch(e){} });
+    _renderedEventMarkers.forEach(function(m) { try { if (eventsLayer) eventsLayer.removeLayer(m); } catch(e){} });
     _renderedEventMarkers.clear();
     _lastVisibleIds = '';
   }
 
   // Init figure layer; resume any paused walks (no-op on fresh start)
-  if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
-  resumeAllFigureWalks();
+  if (!isMapLibreMode()) {
+    if (!figureLayer) figureLayer = L.layerGroup().addTo(leafletMap);
+    resumeAllFigureWalks();
+  }
 
   // Desktop: world view for global migrations. Mobile: fit map to visible species sites + migrations.
   if (isMobileViewport()) {
@@ -4369,8 +4471,10 @@ function checkAndSpawnFigures() {
 // =====================================================================
 function bootApp() {
   initMap();
-  eventsLayer = L.layerGroup().addTo(leafletMap);
-  animMigLayer = L.layerGroup().addTo(leafletMap);
+  if (!isMapLibreMode()) {
+    eventsLayer = L.layerGroup().addTo(leafletMap);
+    animMigLayer = L.layerGroup().addTo(leafletMap);
+  }
   initTimeline();
   window.addEventListener('resize', function () {
     scheduleMobileTimelineReserve();

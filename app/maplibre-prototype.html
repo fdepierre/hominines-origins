@@ -82,11 +82,55 @@
       maxZoom: 7,
       attributionControl: false,
     });
+    window.__mapLibrePrototypeMap = map;
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
+    function applyNeutralBasemap(targetMap, isDark) {
+      function paint(layerId, prop, value) {
+        try {
+          if (targetMap.getLayer(layerId)) targetMap.setPaintProperty(layerId, prop, value);
+        } catch (e) { /* demo style may not expose this property */ }
+      }
+      const palette = isDark ? {
+        water: '#101722',
+        land: '#24211b',
+        border: '#5a5043',
+        coast: '#526b75',
+        geo: '#526b75',
+        geoLabel: '#87949a',
+        countryLabel: '#b9ac97',
+        halo: '#24211b',
+      } : {
+        water: '#d8e5e8',
+        land: '#f1eadc',
+        border: '#b8aa96',
+        coast: '#8fb0b8',
+        geo: '#81a9b3',
+        geoLabel: '#607985',
+        countryLabel: '#6d6254',
+        halo: '#f1eadc',
+      };
+      paint('background', 'background-color', palette.water);
+      paint('countries-fill', 'fill-color', palette.land);
+      paint('countries-fill', 'fill-opacity', 0.96);
+      paint('countries-boundary', 'line-color', palette.border);
+      paint('countries-boundary', 'line-opacity', 0.62);
+      paint('countries-boundary', 'line-width', 0.6);
+      paint('coastline', 'line-color', palette.coast);
+      paint('coastline', 'line-opacity', 0.65);
+      paint('geolines', 'line-color', palette.geo);
+      paint('geolines', 'line-opacity', 0.55);
+      paint('geolines-label', 'text-color', palette.geoLabel);
+      paint('geolines-label', 'text-halo-color', palette.water);
+      paint('countries-label', 'text-color', palette.countryLabel);
+      paint('countries-label', 'text-halo-color', palette.halo);
+      paint('countries-label', 'text-halo-width', 1.1);
+    }
+
     map.on('load', () => {
+      applyNeutralBasemap(map, matchMedia('(prefers-color-scheme: dark)').matches);
       map.resize();
     });
   </script>
