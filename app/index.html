@@ -1060,12 +1060,13 @@ ul.uncertainty-level-list {
   line-height: 1;
   cursor: pointer;
   z-index: 5;
-  transition: transform 0.15s;
+  transition: transform 0.15s, filter 0.15s;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
 }
 .event-marker:hover {
-  transform: translate(-50%, -50%) scale(1.4);
+  transform: translate(-50%, -50%) scale(1.85);
   z-index: 10;
+  filter: drop-shadow(0 0 7px rgba(212,130,10,0.55)) drop-shadow(0 1px 2px rgba(0,0,0,0.72));
 }
 
 @keyframes eventMapMarkerPulse {
@@ -1078,6 +1079,12 @@ ul.uncertainty-level-list {
 .event-map-marker-inner.event-map-marker-pulse {
   animation: eventMapMarkerPulse 1.1s ease-in-out 2;
   filter: drop-shadow(0 0 10px rgba(212, 130, 10, 0.95)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85)) !important;
+}
+.maplibre-event-marker.event-map-marker-pulse {
+  filter: drop-shadow(0 0 10px rgba(212, 130, 10, 0.95)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85)) !important;
+}
+.maplibre-event-marker.event-map-marker-pulse .maplibre-event-marker-inner {
+  animation: eventMapMarkerPulse 0.8s ease-in-out 3;
 }
 
 /* Shared JS-driven tooltip for events band — mirrors Leaflet tooltip style */
@@ -2176,7 +2183,9 @@ let mapArrows = {};
 let leafletMap = null;
 let mapLibreMap = null;
 let mapLibreSitePopup = null;
+let mapLibreEventPopup = null;
 let mapLibreSiteHandlersReady = false;
+const mapLibreEventMarkers = new Map();
 let baseTileLayer = null;
 let countryLabelLayer = null;
 let markersLayer = null;
@@ -2554,6 +2563,27 @@ function ensureMapLibreSitesLayer() {
       },
     });
   }
+  if (!mapLibreMap.getSource('hominine-events')) {
+    mapLibreMap.addSource('hominine-events', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+  }
+  if (!mapLibreMap.getLayer('hominine-events-halo')) {
+    mapLibreMap.addLayer({
+      id: 'hominine-events-halo',
+      type: 'circle',
+      source: 'hominine-events',
+      paint: {
+        'circle-radius': 10,
+        'circle-color': ['get', 'color'],
+        'circle-opacity': 0.14,
+        'circle-stroke-color': ['get', 'color'],
+        'circle-stroke-opacity': 0.78,
+        'circle-stroke-width': 1.5,
+      },
+    });
+  }
   if (!mapLibreSiteHandlersReady) {
     mapLibreSitePopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: '280px' });
     mapLibreMap.on('mouseenter', 'hominine-sites', function (e) {
@@ -2587,6 +2617,114 @@ function ensureMapLibreSitesLayer() {
     mapLibreSiteHandlersReady = true;
   }
   return true;
+}
+
+function mapLibreEventPopupHtml(ev) {
+  return (
+    '<div style="font-size:13px;line-height:1.5;max-width:240px">' +
+    '<strong style="color:' + bandTipEscapeHtml(ev.color || '#d2a45f') + '">' + bandTipEscapeHtml(ev.label || '') + '</strong><br>' +
+    '<em style="color:#9a8f7a">' + bandTipEscapeHtml(getCategoryLabel(ev.category || '')) + '</em><br>' +
+    bandTipEscapeHtml(ev.desc || '') +
+    (ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>' : '') +
+    '</div>'
+  );
+}
+
+function syncMapLibreEventMarkers(visibleEvents) {
+  if (!mapLibreMap) return;
+  const visibleIds = new Set(visibleEvents.map(ev => ev.id));
+  mapLibreEventMarkers.forEach(function (marker, id) {
+    if (!visibleIds.has(id)) {
+      marker.remove();
+      mapLibreEventMarkers.delete(id);
+    }
+  });
+  visibleEvents.forEach(function (ev) {
+    const existing = mapLibreEventMarkers.get(ev.id);
+    if (existing) {
+      existing.setLngLat([ev.lng, ev.lat]);
+      return;
+    }
+    ensureMapLibreEventMarker(ev);
+  });
+}
+
+function ensureMapLibreEventMarker(ev) {
+  if (!mapLibreMap || !ev) return null;
+  const existing = mapLibreEventMarkers.get(ev.id);
+  if (existing) {
+    existing.setLngLat([ev.lng, ev.lat]);
+    return existing;
+  }
+  const el = document.createElement('div');
+  el.className = 'maplibre-event-marker';
+  el.style.cssText = 'display:flex;align-items:center;justify-content:center;min-width:26px;min-height:26px;font-size:18px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.72));will-change:transform;';
+  el.innerHTML = '<span class="maplibre-event-marker-inner" style="display:flex;align-items:center;justify-content:center;will-change:transform;">' + eventMapMarkerInnerContent(ev) + '</span>';
+  el.addEventListener('mouseenter', function () {
+    mapLibreEventPopup = mapLibreEventPopup || new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 14, maxWidth: '280px' });
+    mapLibreEventPopup
+      .setLngLat([ev.lng, ev.lat])
+      .setHTML(mapLibreEventPopupHtml(ev))
+      .addTo(mapLibreMap);
+  });
+  el.addEventListener('mouseleave', function () {
+    if (mapLibreEventPopup) mapLibreEventPopup.remove();
+  });
+  el.addEventListener('click', function (e) {
+    e.stopPropagation();
+    stopPlay();
+    suppressMobileNarrativeFit(2000);
+    setTime(ev.time);
+    if (typeof scheduleTimelineBandSync === 'function') {
+      scheduleTimelineBandSync();
+      requestAnimationFrame(function () { scheduleTimelineBandSync(); });
+    }
+    if (isMapLibreMode() && typeof focusEventOnMap === 'function') {
+      focusEventOnMap(ev.id);
+    } else if (typeof queueEventMapFocus === 'function') {
+      queueEventMapFocus(ev.id);
+    }
+  });
+  const marker = new maplibregl.Marker({ element: el })
+    .setLngLat([ev.lng, ev.lat])
+    .addTo(mapLibreMap);
+  mapLibreEventMarkers.set(ev.id, marker);
+  return marker;
+}
+
+function pulseMapLibreEventMarker(eventId, durationMs) {
+  const marker = mapLibreEventMarkers.get(eventId);
+  const el = marker && marker.getElement ? marker.getElement() : null;
+  if (!el) return false;
+  el.classList.remove('event-map-marker-pulse');
+  void el.offsetWidth;
+  el.classList.add('event-map-marker-pulse');
+  setTimeout(function () { el.classList.remove('event-map-marker-pulse'); }, durationMs || 2600);
+  return true;
+}
+
+function updateMapLibreEvents() {
+  if (!mapLibreMap || !mapLibreMap.getSource('hominine-events')) return;
+  const visibleEvents = showEvents
+    ? EVENTS_DATA.filter(ev => ev.time >= TIMELINE_MIN && ev.time <= eventCumulativeTimeMax())
+    : [];
+  const features = visibleEvents
+      .map(ev => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [ev.lng, ev.lat] },
+        properties: {
+          id: ev.id,
+          time: ev.time,
+          label: ev.label,
+          desc: ev.desc,
+          source: ev.source || '',
+          category: ev.category,
+          icon: ev.icon || '•',
+          color: ev.color,
+        },
+      }));
+  mapLibreMap.getSource('hominine-events').setData({ type: 'FeatureCollection', features });
+  syncMapLibreEventMarkers(visibleEvents);
 }
 
 function updateMapLibre() {
@@ -2643,6 +2781,7 @@ function updateMapLibre() {
   mapLibreMap.getSource('hominine-ranges').setData({ type: 'FeatureCollection', features: rangeFeatures });
   mapLibreMap.getSource('hominine-migrations').setData({ type: 'FeatureCollection', features: migrationFeatures });
   mapLibreMap.getSource('hominine-sites').setData({ type: 'FeatureCollection', features: siteFeatures });
+  updateMapLibreEvents();
 }
 
 function updateMap() {
@@ -2802,6 +2941,26 @@ function queueEventMapFocus(eventId) {
 }
 
 function focusEventOnMap(eventId) {
+  if (isMapLibreMode()) {
+    if (!mapLibreMap) return;
+    const ev = EVENTS_DATA.find(item => item.id === eventId);
+    if (!ev) return;
+    try {
+      updateMapLibreEvents();
+      if (!mapLibreEventMarkers.has(eventId)) {
+        ensureMapLibreEventMarker(ev);
+      }
+      pulseMapLibreEventMarker(eventId, 2600);
+    } catch (e0) { /* ignore */ }
+    try {
+      mapLibreMap.flyTo({
+        center: [ev.lng, ev.lat],
+        zoom: Math.max(mapLibreMap.getZoom(), 4),
+        duration: 550,
+      });
+    } catch (e) { /* ignore */ }
+    return;
+  }
   if (typeof leafletMap === 'undefined' || !leafletMap) return;
   const m = _renderedEventMarkers.get(eventId);
   if (!m) return;
@@ -2822,6 +2981,10 @@ function focusEventOnMap(eventId) {
 }
 
 function updateEvents() {
+  if (isMapLibreMode()) {
+    updateMapLibreEvents();
+    return;
+  }
   if (!eventsLayer) return;
 
   if (!showEvents) {
@@ -3677,11 +3840,11 @@ function eventFigurePigmentation(ev) {
 
 /** Marqueurs carte : même logique que la bande jalons (SVG + espèce à la date du jalon). */
 function eventMapMarkerInnerContent(ev) {
-  if (!eventUsesPigmentedHumanSvg(ev)) return ev.icon;
+  if (!eventUsesPigmentedHumanSvg(ev)) return bandTipEscapeHtml(ev.icon || '•');
   const c = eventFigurePigmentation(ev);
   return (
-    '<svg width="14" height="22" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg"' +
-    ' style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.75))">' +
+    '<svg width="17" height="24" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg"' +
+    ' style="display:block;shape-rendering:geometricPrecision;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.55))">' +
     humanFigureSVG(c.skin, c.eye, c.hair, 60) + '</svg>'
   );
 }
@@ -3764,16 +3927,12 @@ function buildEventsBand() {
     el.setAttribute('data-t-linear', String(tLin));
     el.style.left = '0px';
 
-    // Icônes « personne » / jalons migration → SVG pigmentation (données espèce à ev.time), pas emoji OS
+    // Human/migration markers use data-driven SVG; other milestones keep their compact pictogram.
     if (eventUsesPigmentedHumanSvg(ev)) {
-      const c = eventFigurePigmentation(ev);
-      el.innerHTML =
-        '<svg width="12" height="19" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg"' +
-        ' style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.7))">' +
-        humanFigureSVG(c.skin, c.eye, c.hair, 60) + '</svg>';
+      el.innerHTML = eventMapMarkerInnerContent(ev);
     } else {
       el.textContent = ev.icon;
-      el.style.color = ev.color; // tint emoji with category color where platform supports it
+      el.style.color = ev.color;
     }
 
     // JS-driven tooltip matching Leaflet tooltip HTML style
@@ -3826,9 +3985,15 @@ function buildEventsBand() {
           btn.classList.add('active');
         });
       }
-      setTime(ev.time);
-      if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
-      if (typeof queueEventMapFocus === 'function') queueEventMapFocus(ev.id);
+      if (isMapLibreMode() && typeof focusEventOnMap === 'function') {
+        if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
+        focusEventOnMap(ev.id);
+        setTime(ev.time);
+      } else {
+        setTime(ev.time);
+        if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
+        if (typeof queueEventMapFocus === 'function') queueEventMapFocus(ev.id);
+      }
       scheduleTimelineBandSync();
       requestAnimationFrame(function () { scheduleTimelineBandSync(); });
       if (isMobileViewport() && tip && tip.style.display === 'block') {
