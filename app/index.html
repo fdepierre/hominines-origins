@@ -2175,6 +2175,8 @@ let mapPolygons = {};
 let mapArrows = {};
 let leafletMap = null;
 let mapLibreMap = null;
+let mapLibreSitePopup = null;
+let mapLibreSiteHandlersReady = false;
 let baseTileLayer = null;
 let countryLabelLayer = null;
 let markersLayer = null;
@@ -2420,6 +2422,7 @@ function initMapLibre() {
   mapLibreMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
   mapLibreMap.on('load', function () {
     applyMapLibreNeutralBasemap(mapLibreMap, document.documentElement.getAttribute('data-theme') === 'dark');
+    updateMapLibre();
     mapLibreMap.resize();
   });
 }
@@ -2464,9 +2467,102 @@ function getVisibleSpecies() {
   return SPECIES_DATA.filter(s => s.start <= currentTime && s.end >= currentTime);
 }
 
+function updateMapLegend(visible) {
+  const legendContent = document.getElementById('legend-content');
+  if (!legendContent) return;
+  legendContent.innerHTML = visible.length === 0
+    ? '<div style="font-size:var(--text-xs);color:var(--color-text-faint)">Aucune espèce à cette période</div>'
+    : visible.map(s => `
+      <div class="map-legend-item">
+        <div class="legend-dot" style="background:${s.color}"></div>
+        <span translate="no" style="color:${s.color};font-style:italic">${bandTipEscapeHtml(s.name.replace('Homo sapiens — ', 'H.s. '))}</span>
+      </div>
+    `).join('');
+}
+
+function ensureMapLibreSitesLayer() {
+  if (!mapLibreMap || !mapLibreMap.isStyleLoaded()) return false;
+  if (!mapLibreMap.getSource('hominine-sites')) {
+    mapLibreMap.addSource('hominine-sites', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+  }
+  if (!mapLibreMap.getLayer('hominine-sites')) {
+    mapLibreMap.addLayer({
+      id: 'hominine-sites',
+      type: 'circle',
+      source: 'hominine-sites',
+      paint: {
+        'circle-radius': ['case', ['==', ['get', 'selected'], true], 9, 7],
+        'circle-color': ['get', 'color'],
+        'circle-opacity': 0.28,
+        'circle-stroke-color': ['get', 'color'],
+        'circle-stroke-opacity': 0.95,
+        'circle-stroke-width': ['case', ['==', ['get', 'selected'], true], 3, 2],
+      },
+    });
+  }
+  if (!mapLibreSiteHandlersReady) {
+    mapLibreSitePopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: '280px' });
+    mapLibreMap.on('mouseenter', 'hominine-sites', function (e) {
+      mapLibreMap.getCanvas().style.cursor = 'pointer';
+      const f = e.features && e.features[0];
+      if (!f) return;
+      const p = f.properties || {};
+      mapLibreSitePopup
+        .setLngLat(e.lngLat)
+        .setHTML(
+          '<div style="font-size:13px;line-height:1.5">' +
+          '<strong style="color:' + bandTipEscapeHtml(p.color || '#d2a45f') + '">' + bandTipEscapeHtml(p.siteName || '') + '</strong><br>' +
+          '<em style="color:#9a8f7a">' + scientificNameHtml(p.speciesName || '') + '</em><br>' +
+          bandTipEscapeHtml(p.siteNote || '') +
+          '</div>'
+        )
+        .addTo(mapLibreMap);
+    });
+    mapLibreMap.on('mouseleave', 'hominine-sites', function () {
+      mapLibreMap.getCanvas().style.cursor = '';
+      if (mapLibreSitePopup) mapLibreSitePopup.remove();
+    });
+    mapLibreMap.on('click', 'hominine-sites', function (e) {
+      const f = e.features && e.features[0];
+      const species = f ? SPECIES_DATA.find(s => s.id === f.properties.speciesId) : null;
+      if (!species) return;
+      window._userPickedSpecies = true;
+      selectSpecies(species);
+      window._userPickedSpecies = false;
+    });
+    mapLibreSiteHandlersReady = true;
+  }
+  return true;
+}
+
 function updateMapLibre() {
-  // Step 2 only validates the MapLibre engine inside the app shell.
-  // Species, ranges, migrations and event layers are ported in later milestones.
+  const visible = getVisibleSpecies();
+  updateMapLegend(visible);
+  if (!mapLibreMap) return;
+  if (!mapLibreMap.isStyleLoaded()) {
+    setTimeout(updateMapLibre, 100);
+    return;
+  }
+  if (!ensureMapLibreSitesLayer()) return;
+  const features = layerStates.sites ? visible.flatMap(species =>
+    species.sites.map((site, idx) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [site.lng, site.lat] },
+      properties: {
+        id: species.id + '-site-' + idx,
+        speciesId: species.id,
+        speciesName: species.name,
+        siteName: site.name,
+        siteNote: site.note,
+        color: species.color,
+        selected: !!(selectedSpecies && selectedSpecies.id === species.id),
+      },
+    }))
+  ) : [];
+  mapLibreMap.getSource('hominine-sites').setData({ type: 'FeatureCollection', features });
 }
 
 function updateMap() {
@@ -2482,15 +2578,7 @@ function updateMap() {
   rangesLayer.clearLayers();
 
   // Update legend
-  const legendContent = document.getElementById('legend-content');
-  legendContent.innerHTML = visible.length === 0
-    ? '<div style="font-size:var(--text-xs);color:var(--color-text-faint)">Aucune espèce à cette période</div>'
-    : visible.map(s => `
-      <div class="map-legend-item">
-        <div class="legend-dot" style="background:${s.color}"></div>
-        <span translate="no" style="color:${s.color};font-style:italic">${bandTipEscapeHtml(s.name.replace('Homo sapiens — ', 'H.s. '))}</span>
-      </div>
-    `).join('');
+  updateMapLegend(visible);
 
   // Detect species appearing for the first time this play session
   const newSpeciesIds = new Set();
