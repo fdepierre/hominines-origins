@@ -281,6 +281,10 @@ async function runA11yTests(options = {}) {
 
     await test('Country labels follow the selected language', async () => {
       await page.evaluate(() => {
+        if (typeof leafletMap !== 'undefined' && leafletMap) leafletMap.setZoom(3);
+      });
+      await page.waitForTimeout(200);
+      await page.evaluate(() => {
         const sel = document.querySelector('[data-testid="lang-select"]');
         if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
       });
@@ -307,28 +311,48 @@ async function runA11yTests(options = {}) {
       assert(!en.tileUrls.some((url) => /only_labels/.test(url)), 'CARTO only_labels raster layer is not used for country names');
     });
 
+    await test('World zoom shows continents instead of country labels', async () => {
+      await page.evaluate(() => {
+        const sel = document.querySelector('[data-testid="lang-select"]');
+        if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+        if (typeof leafletMap !== 'undefined' && leafletMap) leafletMap.setZoom(2);
+      });
+      await page.waitForTimeout(450);
+      const st = await page.evaluate(() => {
+        const continent = document.querySelector('.continent-label-marker[data-continent-code="asia"]');
+        const countries = document.querySelectorAll('.country-label-marker').length;
+        return {
+          continent: continent ? continent.textContent.trim() : '',
+          countries,
+        };
+      });
+      assert(st.continent === 'Asie', `World zoom shows localized continent label "Asie" (got "${st.continent}")`);
+      assert(st.countries === 0, `World zoom hides country labels (got ${st.countries})`);
+    });
+
     for (const locale of ['zh-CN', 'ar-EG', 'ja-JP']) {
-      await test(`Country labels use browser locale for ${locale}`, async () => {
+      await test(`World map labels use browser locale for ${locale}`, async () => {
         const { browser: bCountry, page: pCountry } = await launch({ locale });
         try {
           await loadApp(pCountry);
           const st = await pCountry.evaluate(() => {
-            const label = document.querySelector('.country-label-marker[data-country-code="CN"]');
-            const expected = new Intl.DisplayNames([navigator.language], { type: 'region' }).of('CN');
+            const label = document.querySelector('.continent-label-marker[data-continent-code="asia"]');
+            const expectedByLang = { zh: '亚洲', ar: 'آسيا', ja: 'アジア' };
+            const primary = navigator.language.split('-')[0].toLowerCase();
             return {
               nav: navigator.language,
               htmlLang: document.documentElement.lang,
               text: label ? label.textContent.trim() : '',
               labelLang: label ? label.getAttribute('lang') : '',
               labelDir: label ? label.getAttribute('dir') : '',
-              expected,
+              expected: expectedByLang[primary],
             };
           });
           assert(st.nav.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `navigator.language is ${locale} (got "${st.nav}")`);
           assert(st.htmlLang === 'en', `${locale} keeps app UI in EN (got "${st.htmlLang}")`);
-          assert(st.text === st.expected, `${locale} country label follows browser locale (got "${st.text}", expected "${st.expected}")`);
-          assert(st.labelLang.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `${locale} country label lang attribute follows browser locale (got "${st.labelLang}")`);
-          assert(st.labelDir === 'auto', `${locale} country label uses dir="auto" (got "${st.labelDir}")`);
+          assert(st.text === st.expected, `${locale} continent label follows browser locale (got "${st.text}", expected "${st.expected}")`);
+          assert(st.labelLang.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `${locale} continent label lang attribute follows browser locale (got "${st.labelLang}")`);
+          assert(st.labelDir === 'auto', `${locale} continent label uses dir="auto" (got "${st.labelDir}")`);
         } finally {
           await bCountry.close();
         }

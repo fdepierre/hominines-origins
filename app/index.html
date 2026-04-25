@@ -552,6 +552,23 @@ ul.uncertainty-level-list {
   color: rgba(26, 18, 8, 0.68);
   text-shadow: 0 1px 2px rgba(255,255,255,0.85);
 }
+.continent-label-marker {
+  color: rgba(237, 229, 212, 0.78);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.85);
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+[data-theme="light"] .continent-label-marker {
+  color: rgba(26, 18, 8, 0.54);
+  text-shadow: 0 1px 3px rgba(255,255,255,0.9);
+}
 
 /* Custom markers */
 .hominine-marker {
@@ -2200,6 +2217,25 @@ const COUNTRY_LABEL_POINTS = [
   { code: 'CO', lat: 4.5, lng: -74.0 }, { code: 'VE', lat: 7.0, lng: -66.0 },
 ];
 
+const CONTINENT_LABEL_POINTS = [
+  { code: 'americas', lat: 8, lng: -88 },
+  { code: 'europe', lat: 52, lng: 17 },
+  { code: 'africa', lat: 5, lng: 22 },
+  { code: 'asia', lat: 38, lng: 88 },
+  { code: 'oceania', lat: -24, lng: 135 },
+];
+
+const CONTINENT_LABEL_NAMES = {
+  en: { americas: 'Americas', europe: 'Europe', africa: 'Africa', asia: 'Asia', oceania: 'Oceania' },
+  fr: { americas: 'Amériques', europe: 'Europe', africa: 'Afrique', asia: 'Asie', oceania: 'Océanie' },
+  zh: { americas: '美洲', europe: '欧洲', africa: '非洲', asia: '亚洲', oceania: '大洋洲' },
+  ar: { americas: 'الأمريكيتان', europe: 'أوروبا', africa: 'أفريقيا', asia: 'آسيا', oceania: 'أوقيانوسيا' },
+  ja: { americas: 'アメリカ大陸', europe: 'ヨーロッパ', africa: 'アフリカ', asia: 'アジア', oceania: 'オセアニア' },
+  de: { americas: 'Amerika', europe: 'Europa', africa: 'Afrika', asia: 'Asien', oceania: 'Ozeanien' },
+  it: { americas: 'Americhe', europe: 'Europa', africa: 'Africa', asia: 'Asia', oceania: 'Oceania' },
+  es: { americas: 'Américas', europe: 'Europa', africa: 'África', asia: 'Asia', oceania: 'Oceanía' },
+};
+
 function addBaseTileLayer(isDark) {
   if (!leafletMap) return;
   if (baseTileLayer) {
@@ -2245,13 +2281,20 @@ function countryLabelName(code) {
   }
 }
 
+function continentLabelName(code) {
+  const lang = countryLabelLocale();
+  const primary = String(lang).split('-')[0].toLowerCase();
+  const names = CONTINENT_LABEL_NAMES[primary] || CONTINENT_LABEL_NAMES.en;
+  return names[code] || CONTINENT_LABEL_NAMES.en[code] || code;
+}
+
 function countryLabelMinZoom(code) {
-  const worldZoom = new Set(['CA', 'US', 'BR', 'AR', 'RU', 'CN', 'IN', 'AU', 'ZA']);
-  const regionZoom = new Set(['MX', 'CL', 'PE', 'CO', 'VE', 'EG', 'ET', 'KE', 'TZ', 'CD', 'SA', 'IR', 'TR', 'KZ', 'MN', 'ID', 'JP']);
-  const continentZoom = new Set(['MA', 'DZ', 'LY', 'SD', 'NG', 'ZM', 'CM', 'YE', 'OM', 'IQ', 'FR', 'ES', 'GB', 'DE', 'IT', 'UA', 'PK', 'AF', 'TH', 'VN', 'MY', 'PH', 'KR', 'NZ']);
-  if (worldZoom.has(code)) return 2;
+  const regionZoom = new Set(['CA', 'US', 'BR', 'AR', 'RU', 'CN', 'IN', 'AU', 'ZA']);
+  const countryZoom = new Set(['MX', 'CL', 'PE', 'CO', 'VE', 'EG', 'ET', 'KE', 'TZ', 'CD', 'SA', 'IR', 'TR', 'KZ', 'MN', 'ID', 'JP']);
+  const detailZoom = new Set(['MA', 'DZ', 'LY', 'SD', 'NG', 'ZM', 'CM', 'YE', 'OM', 'IQ', 'FR', 'ES', 'GB', 'DE', 'IT', 'UA', 'PK', 'AF', 'TH', 'VN', 'MY', 'PH', 'KR', 'NZ']);
   if (regionZoom.has(code)) return 3;
-  if (continentZoom.has(code)) return 4;
+  if (countryZoom.has(code)) return 4;
+  if (detailZoom.has(code)) return 5;
   return 5;
 }
 
@@ -2264,6 +2307,25 @@ function rebuildCountryLabels() {
   countryLabelLayer = L.layerGroup();
   const labelLocale = countryLabelLocale();
   const zoom = leafletMap.getZoom();
+  if (zoom <= 2) {
+    CONTINENT_LABEL_POINTS.forEach(function (p) {
+      const label = continentLabelName(p.code);
+      const icon = L.divIcon({
+        className: '',
+        html: '<span class="continent-label-marker" data-continent-code="' + p.code + '" lang="' + bandTipEscapeHtml(labelLocale) + '" dir="auto">' + bandTipEscapeHtml(label) + '</span>',
+        iconSize: [0, 0],
+        iconAnchor: [0, 0],
+      });
+      countryLabelLayer.addLayer(L.marker([p.lat, p.lng], {
+        icon,
+        interactive: false,
+        keyboard: false,
+        zIndexOffset: -320,
+      }));
+    });
+    countryLabelLayer.addTo(leafletMap);
+    return;
+  }
   COUNTRY_LABEL_POINTS.forEach(function (p) {
     if (zoom < countryLabelMinZoom(p.code)) return;
     const label = countryLabelName(p.code);
