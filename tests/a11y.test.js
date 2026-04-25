@@ -390,6 +390,77 @@ async function runA11yTests(options = {}) {
         await bEn.close();
       }
     });
+
+    await test('Welcome locale: fr-CA auto-selects FR', async () => {
+      const { browser: bFrCa, page: pFrCa } = await launch({ locale: 'fr-CA' });
+      try {
+        await loadApp(pFrCa, { dismissWelcome: false });
+        const st = await pFrCa.evaluate(() => ({
+          nav: navigator.language,
+          htmlLang: document.documentElement.lang,
+          selectorValue: document.getElementById('lang-select')?.value || '',
+          i18nPending: document.documentElement.hasAttribute('data-i18n-pending'),
+        }));
+        assert(/^fr-CA/i.test(st.nav), `navigator.language is fr-CA (got "${st.nav}")`);
+        assert(st.htmlLang === 'fr', `fr-CA browser locale selects FR (got "${st.htmlLang}")`);
+        assert(st.selectorValue === 'fr', `Burger language selector selects FR (got "${st.selectorValue}")`);
+        assert(!st.i18nPending, 'Initial i18n paint guard is removed after translations apply');
+      } finally {
+        await bFrCa.close();
+      }
+    });
+
+    for (const locale of ['it-IT', 'de-DE']) {
+      await test(`Welcome locale: ${locale} defaults to EN`, async () => {
+        const { browser: bOther, page: pOther } = await launch({ locale });
+        try {
+          await loadApp(pOther, { dismissWelcome: false });
+          const st = await pOther.evaluate(() => {
+            const hint = document.getElementById('welcome-translate-hint');
+            const panel = document.getElementById('welcome-lang-panel');
+            return {
+              nav: navigator.language,
+              htmlLang: document.documentElement.lang,
+              selectorValue: document.getElementById('lang-select')?.value || '',
+              hintText: hint ? hint.textContent || '' : '',
+              hintPanelVisible: !!(panel && !panel.hidden),
+            };
+          });
+          assert(st.nav.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `navigator.language is ${locale} (got "${st.nav}")`);
+          assert(st.htmlLang === 'en', `${locale} browser locale defaults to EN (got "${st.htmlLang}")`);
+          assert(st.selectorValue === 'en', `Burger language selector defaults to EN (got "${st.selectorValue}")`);
+          assert(st.hintPanelVisible, `${locale} shows browser-translate hint panel`);
+          assert(st.hintText.includes('Translate this page'), `${locale} hint mentions Translate this page`);
+        } finally {
+          await bOther.close();
+        }
+      });
+    }
+
+    await test('Manual language switch persists and overrides browser locale', async () => {
+      const { browser: bManual, page: pManual } = await launch({ locale: 'fr-FR' });
+      try {
+        await loadApp(pManual);
+        await pManual.evaluate(() => {
+          const sel = document.getElementById('lang-select');
+          if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+        });
+        await pManual.waitForTimeout(450);
+        await loadApp(pManual);
+        const st = await pManual.evaluate(() => ({
+          nav: navigator.language,
+          stored: localStorage.getItem('ho_ui_lang'),
+          htmlLang: document.documentElement.lang,
+          selectorValue: document.getElementById('lang-select')?.value || '',
+        }));
+        assert(/^fr/i.test(st.nav), `navigator.language remains fr-* (got "${st.nav}")`);
+        assert(st.stored === 'en', `Manual EN preference persisted (got "${st.stored}")`);
+        assert(st.htmlLang === 'en', `Stored manual preference overrides browser FR after reload (got "${st.htmlLang}")`);
+        assert(st.selectorValue === 'en', `Burger language selector reflects stored EN (got "${st.selectorValue}")`);
+      } finally {
+        await bManual.close();
+      }
+    });
   } else {
     console.log(`\n  ${YELLOW}Welcome locale (Playwright): skipped in smoke mode${RESET}`);
   }

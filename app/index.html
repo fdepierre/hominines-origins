@@ -1,13 +1,31 @@
 <!DOCTYPE html>
 <!-- translate=yes: let the browser translate the page to any language (Chrome/Edge/Safari/Firefox page translation). -->
-<html lang="fr" data-theme="light" translate="yes">
+<html lang="en" data-theme="light" translate="yes">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Claude Code — Anthropic">
 <meta name="author" content="fdepierre">
-<title>Hominines — Évolution & Migrations sur Terre</title>
-<meta name="description" content="Carte interactive de l'évolution des hominines : apparition, migrations, pigmentation et outils de -4,1 Ma à -2 000 ans.">
+<title>Hominines — Evolution & Migrations on Earth</title>
+<meta name="description" content="Interactive map of hominin evolution: emergence, migrations, pigmentation and tools from 4.1 Ma to 2,000 years BP.">
+<script>
+// Resolve the initial document language before the app paints.
+(function() {
+  var lang = 'en';
+  try {
+    var stored = localStorage.getItem('ho_ui_lang');
+    if (stored === 'fr' || stored === 'en') lang = stored;
+    else {
+      var raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
+      lang = raw.indexOf('fr') === 0 ? 'fr' : 'en';
+    }
+  } catch (e) { /* keep English default */ }
+  document.documentElement.lang = lang;
+  document.documentElement.setAttribute('data-initial-ui-lang', lang);
+  document.documentElement.setAttribute('data-i18n-pending', '1');
+})();
+</script>
+<style>html[data-i18n-pending="1"] body { visibility: hidden; }</style>
 
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -3898,7 +3916,7 @@ function currentDataLang() {
     const stored = localStorage.getItem('ho_ui_lang');
     if (stored) return String(stored).toLowerCase().startsWith('en') ? 'en' : 'fr';
   } catch (e) { /* ignore */ }
-  const nav = (navigator.language || 'fr').toLowerCase();
+  const nav = (((navigator.languages && navigator.languages[0]) || navigator.language || 'en')).toLowerCase();
   return nav.startsWith('fr') ? 'fr' : 'en';
 }
 
@@ -5194,6 +5212,7 @@ function applyTranslations() {
   // do not infer dir from navigator.language alone.
   document.documentElement.dir = 'ltr';
   document.documentElement.lang = lng;
+  document.documentElement.removeAttribute('data-i18n-pending');
 
   // Logo subtitle
   const logoSub = document.querySelector('.logo-sub');
@@ -5337,6 +5356,8 @@ function getLangFromBrowser() {
 
 function getInitialUiLang() {
   const supported = ['fr', 'en'];
+  const initial = document.documentElement.getAttribute('data-initial-ui-lang');
+  if (supported.includes(initial)) return initial;
   try {
     const stored = localStorage.getItem('ho_ui_lang');
     if (supported.includes(stored)) return stored;
@@ -5599,7 +5620,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   }
 
   function browserUiLang() {
-    var raw = navigator.language || (navigator.languages && navigator.languages[0]) || 'fr';
+    var raw = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
     return String(raw).split('-')[0].toLowerCase();
   }
   function humanLangName(code) {
