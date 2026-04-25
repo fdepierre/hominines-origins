@@ -10,6 +10,7 @@
     "test:unit": "node tests/unit.test.js",
     "test:visual": "node tests/visual.test.js",
     "test:a11y": "node tests/a11y.test.js",
+    "test:maplibre": "node tests/maplibre.test.js",
     "test:update-snapshots": "UPDATE_SNAPSHOTS=1 node tests/visual.test.js",
     "test:ci": "node tests/run-all.js --ci",
     "setup": "npx playwright install chromium"

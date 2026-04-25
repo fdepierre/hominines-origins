@@ -12,6 +12,7 @@
 const { runUnitTests } = require('./unit.test');
 const { runVisualTests } = require('./visual.test');
 const { runA11yTests } = require('./a11y.test');
+const { runMapLibreTests } = require('./maplibre.test');
 const { resetStats, BOLD, CYAN, GREEN, RED, YELLOW, RESET } = require('./utils/harness');
 
 const CI = process.argv.includes('--ci');
@@ -21,6 +22,7 @@ const SUITES = [
   { name: 'Unit tests (full in-browser suite)', fn: () => runUnitTests() },
   { name: 'Visual tests [smoke — no snapshots]', fn: () => runVisualTests({ smoke: true }) },
   { name: 'A11y tests [smoke — no tablet]', fn: () => runA11yTests({ smoke: true }) },
+  { name: 'MapLibre tests (feature flag)', fn: () => runMapLibreTests() },
 ];
 
 async function main() {

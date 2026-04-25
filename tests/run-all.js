@@ -11,6 +11,7 @@
 const { runUnitTests }   = require('./unit.test');
 const { runVisualTests } = require('./visual.test');
 const { runA11yTests }   = require('./a11y.test');
+const { runMapLibreTests } = require('./maplibre.test');
 const { BOLD, CYAN, GREEN, RED, YELLOW, RESET, resetStats } = require('./utils/harness');
 
 const CI = process.argv.includes('--ci');
@@ -22,11 +23,13 @@ const SUITES = SMOKE
       { name: 'Unit tests (full)', fn: runUnitTests },
       { name: 'Visual tests [smoke — no snapshots]', fn: () => runVisualTests({ smoke: true }) },
       { name: 'A11y [smoke — no tablet]', fn: () => runA11yTests({ smoke: true }) },
+      { name: 'MapLibre tests (feature flag)', fn: runMapLibreTests },
     ]
   : [
       { name: 'Unit tests        (data integrity, maths, bearing)', fn: runUnitTests },
       { name: 'Visual tests      (layout, contrast, snapshots)', fn: () => runVisualTests({ smoke: false }) },
       { name: 'A11y/interaction  (ARIA, touch, i18n, play/pause)', fn: () => runA11yTests({ smoke: false }) },
+      { name: 'MapLibre          (feature-flagged map engine)', fn: runMapLibreTests },
     ];
 
 async function main() {
