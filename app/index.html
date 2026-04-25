@@ -2482,6 +2482,34 @@ function updateMapLegend(visible) {
 
 function ensureMapLibreSitesLayer() {
   if (!mapLibreMap || !mapLibreMap.isStyleLoaded()) return false;
+  if (!mapLibreMap.getSource('hominine-ranges')) {
+    mapLibreMap.addSource('hominine-ranges', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+  }
+  if (!mapLibreMap.getLayer('hominine-ranges-fill')) {
+    mapLibreMap.addLayer({
+      id: 'hominine-ranges-fill',
+      type: 'circle',
+      source: 'hominine-ranges',
+      paint: {
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          1, ['/', ['get', 'radius'], 240000],
+          4, ['/', ['get', 'radius'], 65000],
+          7, ['/', ['get', 'radius'], 14000],
+        ],
+        'circle-color': ['get', 'color'],
+        'circle-opacity': 0.08,
+        'circle-stroke-color': ['get', 'color'],
+        'circle-stroke-opacity': 0.32,
+        'circle-stroke-width': 1,
+      },
+    });
+  }
   if (!mapLibreMap.getSource('hominine-sites')) {
     mapLibreMap.addSource('hominine-sites', {
       type: 'geojson',
@@ -2547,7 +2575,21 @@ function updateMapLibre() {
     return;
   }
   if (!ensureMapLibreSitesLayer()) return;
-  const features = layerStates.sites ? visible.flatMap(species =>
+  const rangeFeatures = layerStates.range ? visible.flatMap(species =>
+    species.regions.map((region, idx) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [region.lng, region.lat] },
+      properties: {
+        id: species.id + '-range-' + idx,
+        speciesId: species.id,
+        speciesName: species.name,
+        regionNote: region.note,
+        radius: region.radius * 0.5,
+        color: species.color,
+      },
+    }))
+  ) : [];
+  const siteFeatures = layerStates.sites ? visible.flatMap(species =>
     species.sites.map((site, idx) => ({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [site.lng, site.lat] },
@@ -2562,7 +2604,8 @@ function updateMapLibre() {
       },
     }))
   ) : [];
-  mapLibreMap.getSource('hominine-sites').setData({ type: 'FeatureCollection', features });
+  mapLibreMap.getSource('hominine-ranges').setData({ type: 'FeatureCollection', features: rangeFeatures });
+  mapLibreMap.getSource('hominine-sites').setData({ type: 'FeatureCollection', features: siteFeatures });
 }
 
 function updateMap() {
