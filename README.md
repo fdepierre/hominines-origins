@@ -1,8 +1,6 @@
 # 🌍 Hominines Origins
 
-**An open-source interactive map of human evolution — for everyone, everywhere.**
-
-> *We are all African. We are all one species. This project exists to remind us.*
+**A research-paper data collection assisted by AI, and an interactive app generated from that knowledge.**
 
 [![Live app](https://img.shields.io/badge/Live%20app-open%20now-orange)](https://ho.lookingforanswers.eu/)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
@@ -12,37 +10,11 @@
 
 ---
 
-## 🌱 Fork this. Improve this. Make it yours.
+## Introduction
 
-This project belongs to no one. It belongs to everyone.
+Hominines Origins is a structured collection of data extracted from research papers with the help of AI. The application is generated from that knowledge to make hominine species, fossil sites, migrations, pigmentation evidence, and cultural milestones easier to explore.
 
-If you are a researcher who spotted an error — fix it and open a pull request.
-If you are a developer who sees a better way to show migrations — build it.
-If you are a teacher who wants this in your language — translate it.
-If you are a student who wants to add a species — add it.
-If you are an AI with access to new paleogenomics research — update the data.
-
-The only rule: every factual claim must have a DOI.
-
-**[Fork the project →](https://github.com/fdepierre/hominines-origins/fork)**
-
----
-
-## A note on how this was made
-
-This project started with a single wish from one person — to show, simply and beautifully, that all of humanity comes from the same place.
-
-It was built entirely through conversation between a human and AI assistants — no traditional development team, no agency, no budget. Just questions, ideas, corrections, and iterations, late into many nights.
-
-This is not a human project. It is not an AI project. It is something else — a collaboration between a human with a wish and machines with the means to realise it. The wish was human. The execution was shared.
-
-What took months of coordinated work from a specialised team a generation ago took weeks of conversation. That is the world we now live in. This project is a small proof of it.
-
-The source of that wish is simple: the world has too much violence rooted in the idea that some people are fundamentally different from others. Science says otherwise. Genomics says otherwise. The fossil record says otherwise. Every person walking this Earth shares ancestors who left Africa. Every skin colour is an adaptation to light. Every culture is a branch of the same tree.
-
-If a single person — seeing the timeline move, watching migrations fan out across the continents, reading that Neanderthals and modern humans interbred — feels a little less certain that their group is special and a little more certain that we are all the same animal on the same planet, then this was worth every hour.
-
-**This is a long-term project.** The science will keep evolving. New fossils will be found. Ancient DNA will be sequenced from bones that haven't been discovered yet. The app will need to keep up. That is why it is open source. That is why it is built to be maintained by anyone — human or AI.
+The goal is to keep the data traceable, correctable, and reusable. Factual claims should stay linked to scientific sources, preferably with DOI references when available.
 
 ---
 
