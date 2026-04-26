@@ -1,6 +1,6 @@
-# AI Context — Hominines Origins
+# Project context — Hominines Origins
 
-This file gives AI assistants (Claude Code, GitHub Copilot, Cursor, VS Code + AI extensions, ChatGPT, Gemini) everything they need to make useful, safe contributions to this project.
+This file gives human contributors and coding assistants everything they need to make useful, safe changes to this repository.
 
 Read this file before making any changes.
 
@@ -143,7 +143,7 @@ Tests are written in plain Node.js — no test framework dependency. They run in
 
 ---
 
-## What AI assistants should NOT do
+## What not to do
 
 - Do not split `app/index.html` into multiple files without explicit instruction.
 - Do not change `linearToTime` / `timeToLinear` without updating all timeline tests.

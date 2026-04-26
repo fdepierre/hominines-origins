@@ -104,11 +104,11 @@ If you see content that violates these values, open an issue.
 
 ---
 
-## AI-assisted contributions
+## Assisted contributions
 
-We welcome contributions made with AI tools (Claude Code, GitHub Copilot, Cursor, VS Code + AI extensions). See [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.md) for the context file that helps AI assistants understand this project.
+Contributions prepared with help from generative tools are welcome. See [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.md) for architecture, constraints, and safe task patterns.
 
-When using AI to update scientific data, always verify the generated DOI references manually — AI systems can hallucinate citations.
+When using any assistant to update scientific data, always verify DOI references and citations manually — generated identifiers can be wrong or invented.
 
 ---
 

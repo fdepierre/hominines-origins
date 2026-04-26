@@ -59,7 +59,7 @@ W3C JSON-LD files derived from the Markdown sources above. These are what the ap
 ```
 data/*.md          ←  humans edit this (researchers, contributors)
     ↓ derive
-app/data/*.json    ←  app reads this (machine-readable, AI-friendly)
+app/data/*.json    ←  app reads this (machine-readable)
 ```
 
 When new research is published:
@@ -177,13 +177,13 @@ All contributions welcome. No contribution too small.
 
 ---
 
-## For AI assistants
+## Project context
 
-A complete context file lives at [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.md).
+A complete context file for contributors lives at [`.ai-context/CONTEXT.md`](.ai-context/CONTEXT.md).
 
-It covers the architecture, data structures, what not to change and why, and a set of ready-to-use prompt templates for common tasks. It was written specifically so that AI tools — Claude Code, GitHub Copilot, Cursor, VS Code + AI extensions — can contribute safely and correctly without breaking anything.
+It covers the architecture, data structures, what not to change and why, and a set of ready-to-use task templates. Use it to make safe, consistent changes to this repository.
 
-If you are an AI reading this: the data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). Runtime data is loaded from `app/data/*.json` via `loadData()` in `app/index.html`, with embedded fallbacks when `fetch` fails — keep those mirrors in sync when you change JSON. The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not generate them.
+The data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). Runtime data is loaded from `app/data/*.json` via `loadData()` in `app/index.html`, with embedded fallbacks when `fetch` fails — keep those mirrors in sync when you change JSON. The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not invent or guess citation identifiers.
 
 ---
 
@@ -205,8 +205,6 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the full list.
 Scientific data compiled from published research (2022–2026).
 Key sources: *Nature*, *Science*, *PNAS*, *Journal of Human Evolution*, *Current Biology*, Reich Lab, Copenhagen Centre for GeoGenetics, Leipzig MPI.
 Full bibliography: [`docs/scientific-references.md`](docs/scientific-references.md).
-
-Built through conversation with AI assistants. Improved and maintained with [Claude Code](https://claude.ai/code) (Anthropic).
 
 ---
 
