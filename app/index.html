@@ -27,12 +27,12 @@
 </script>
 <style>html[data-i18n-pending="1"] body { visibility: hidden; }</style>
 
-<!-- MapLibre GL JS CSS -->
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css" />
-<!-- Google Fonts -->
+<!-- MapLibre: loaded on demand in JS (avoids blocking first paint on slow links). -->
+<!-- Google Fonts: non-blocking so shell + timeline can render with fallbacks first -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"></noscript>
 
 <style>
 /* ===== DESIGN TOKENS ===== */
@@ -2102,9 +2102,7 @@ html[data-map-ready="1"] #map {
 <!-- i18next: fast UI for fr + en menu labels. Any other language: keep translate=yes on <html> and use the browser page translator. -->
 <script src="https://unpkg.com/i18next@23.11.5/i18next.min.js"></script>
 <script src="https://unpkg.com/i18next-browser-languagedetector@8.0.0/i18nextBrowserLanguageDetector.min.js"></script>
-
-<!-- MapLibre GL JS -->
-<script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
+<!-- MapLibre is injected after first paint (see loadMapLibre) -->
 
 <script>
 // =====================================================================
@@ -2185,6 +2183,38 @@ const MAP_WORLD_ZOOM_MOBILE = 0.72;
 
 function mapWorldZoom() {
   return isMobileViewport() ? MAP_WORLD_ZOOM_MOBILE : MAP_WORLD_ZOOM_DESKTOP;
+}
+
+// MapLibre (~large) loads after the document and i18n; timeline + shell paint first on slow links.
+const MAPLIBRE_CDN = {
+  css: 'https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css',
+  js:  'https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js',
+};
+
+function loadMapLibre() {
+  if (typeof maplibregl !== 'undefined' && maplibregl) {
+    return Promise.resolve();
+  }
+  if (window.__maplibreLoadPromise) {
+    return window.__maplibreLoadPromise;
+  }
+  window.__maplibreLoadPromise = new Promise(function (resolve, reject) {
+    var head = document.head;
+    if (!document.querySelector('link[href="' + MAPLIBRE_CDN.css + '"]')) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = MAPLIBRE_CDN.css;
+      head.appendChild(link);
+    }
+    var s = document.createElement('script');
+    s.src = MAPLIBRE_CDN.js;
+    s.async = true;
+    s.setAttribute('data-ho-maplibre', '1');
+    s.onload = function () { resolve(); };
+    s.onerror = function () { reject(new Error('MapLibre failed to load')); };
+    head.appendChild(s);
+  });
+  return window.__maplibreLoadPromise;
 }
 
 const COUNTRY_LABEL_POINTS = [
@@ -4631,7 +4661,6 @@ function checkAndSpawnFigures() {
 // BOOT
 // =====================================================================
 function bootApp() {
-  initMap();
   initTimeline();
   window.addEventListener('resize', function () {
     scheduleMobileTimelineReserve();
@@ -4639,14 +4668,39 @@ function bootApp() {
   });
   initLayerToggles();
   initThemeToggle();
-  setTime(-4100000);
-  updateMap();
-  requestAnimationFrame(function () {
+
+  function afterMapInited() {
+    setTime(-4100000);
+    updateMap();
     requestAnimationFrame(function () {
-      updateMobileTimelineReserve();
-      syncTimelineBandsToSpeciesTrack();
+      requestAnimationFrame(function () {
+        updateMobileTimelineReserve();
+        syncTimelineBandsToSpeciesTrack();
+      });
     });
-  });
+  }
+
+  loadMapLibre()
+    .then(function () {
+      initMap();
+      afterMapInited();
+      // Default species selection: brief delay so map + markers can attach
+      setTimeout(function () {
+        if (SPECIES_DATA.length) {
+          window._suppressMobileSwitch = true;
+          selectSpecies(SPECIES_DATA[0]);
+          setTimeout(function () { window._suppressMobileSwitch = false; }, 200);
+        }
+      }, 400);
+    })
+    .catch(function (err) {
+      console.error('[Hominines]', err);
+      var el = document.getElementById('map');
+      if (el) {
+        el.setAttribute('role', 'alert');
+        el.innerHTML = '<p style="padding:var(--space-4);color:var(--color-text-muted);font:var(--text-sm) var(--font-body)">Map could not load (network). Check your connection and reload.</p>';
+      }
+    });
 
   // Play button
   const playBtn = document.getElementById('play-btn');
@@ -4669,15 +4723,6 @@ function bootApp() {
     const hint = document.getElementById('welcome-hint');
     if (hint) { hint.classList.add('hidden'); setTimeout(() => hint.remove(), 700); }
   });
-
-  // Show afarensis by default (suppress mobile tab switch on initial auto-select)
-  setTimeout(() => {
-    if (SPECIES_DATA.length) {
-      window._suppressMobileSwitch = true;
-      selectSpecies(SPECIES_DATA[0]);
-      setTimeout(() => { window._suppressMobileSwitch = false; }, 200);
-    }
-  }, 400);
 
   // UX: after 3s of idle, pulse the play button + show welcome hint
   let autoPlayTimer = setTimeout(() => {
