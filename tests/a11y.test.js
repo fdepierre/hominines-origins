@@ -45,7 +45,10 @@ async function runA11yTests(options = {}) {
   await test('Play button has accessible text', async () => {
     const text = await page.evaluate(() => {
       const btn = document.querySelector('[data-testid="play-toggle"]');
-      return btn ? (btn.textContent || btn.getAttribute('aria-label') || '').trim() : null;
+      if (!btn) return null;
+      const a = (btn.getAttribute('aria-label') || '').trim();
+      if (a) return a;
+      return (btn.textContent || '').trim();
     });
     assert(text && text.length > 0, `Play button has accessible text: "${text}"`);
   });

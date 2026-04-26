@@ -1268,8 +1268,12 @@ html[data-map-ready="1"] #map {
   top: 44px;   /* shifted down to clear the new title strip */
   z-index: 40;
 }
-/* Show the Play/Pause label alongside the icon */
+/* Show the Play/Pause label alongside the icon (wrapper contains idle+busy spans) */
 #play-btn #play-label { display: inline !important; }
+/* Two i18n strings stay in the DOM; visibility toggles with .is-playing (page translate keeps both) */
+.play-toggle-label .play-txt--busy { display: none; }
+.play-toggle-label.is-playing .play-txt--idle { display: none; }
+.play-toggle-label.is-playing .play-txt--busy { display: inline; }
 /* Time label: follows the needle cursor (left updated by updateNeedlePosition) */
 .timeline-current-label {
   position: absolute;
@@ -1992,10 +1996,13 @@ html[data-map-ready="1"] #map {
       <div id="play-overlay">
         <div id="play-overlay-inner">
           <button id="play-overlay-btn" type="button">
-            <span class="sr-only" id="play-overlay-btn-sr" data-i18n="ui.play">Play</span>
+            <span class="sr-only" id="play-overlay-btn-sr">Play</span>
             <svg width="32" height="32" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><polygon points="2,1 13,7 2,13"/></svg>
           </button>
-          <div id="play-overlay-label">Play</div>
+          <div id="play-overlay-label" class="play-toggle-label" translate="yes">
+            <span class="play-txt play-txt--idle" translate="yes" data-testid="play-overlay-label-paused">Play</span>
+            <span class="play-txt play-txt--busy" translate="yes" data-testid="play-overlay-label-playing">Pause</span>
+          </div>
         </div>
       </div>
     </div>
@@ -2033,7 +2040,10 @@ html[data-map-ready="1"] #map {
         <svg id="play-icon" width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
           <polygon points="3,1 13,7 3,13"/>
         </svg>
-        <span id="play-label">Play</span>
+        <span id="play-label" class="play-toggle-label" translate="yes">
+          <span class="play-txt play-txt--idle" translate="yes" data-testid="play-label-paused">Play</span>
+          <span class="play-txt play-txt--busy" translate="yes" data-testid="play-label-playing">Pause</span>
+        </span>
       </button>
       <!-- Time label floats next to play btn -->
       <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
@@ -2076,7 +2086,10 @@ html[data-map-ready="1"] #map {
     </button>
     <button type="button" class="mobile-tab-bar-play" id="mobile-play-btn" data-i18n-title="ui.playTitle">
       <svg id="mobile-play-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="8,5 20,12 8,19"></polygon></svg>
-      <span id="mobile-play-label">Play</span>
+      <span id="mobile-play-label" class="play-toggle-label" translate="yes">
+        <span class="play-txt play-txt--idle" translate="yes" data-testid="mobile-play-label-paused">Play</span>
+        <span class="play-txt play-txt--busy" translate="yes" data-testid="mobile-play-label-playing">Pause</span>
+      </span>
     </button>
     <button class="mobile-tab" data-view="detail" id="tab-detail">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"></circle><path d="M20 21a8 8 0 1 0-16 0"></path></svg>
@@ -4110,20 +4123,56 @@ let isPlaying = false;
 const PLAY_FPS = 30;
 const PLAY_TOTAL_TICKS = 9600; // full sweep at speed ×1 (~5.3 min at 30fps — calmer first viewing)
 
+/** @param {string} k @param {string} d */
+function _playUiT(k, d) {
+  return (typeof i18next !== 'undefined' && i18next.isInitialized)
+    ? i18next.t('ui.' + k, { defaultValue: d }) : d;
+}
+/** aria-labels + screen reader: always from bundled FR/EN (not from page-translate DOM) */
+function updatePlayControlAccessibility() {
+  const name = (typeof isPlaying !== 'undefined' && isPlaying) ? _playUiT('pause', 'Pause') : _playUiT('play', 'Play');
+  ['play-btn', 'mobile-play-btn', 'play-overlay-btn'].forEach(function (id) {
+    const b = document.getElementById(id);
+    if (b) b.setAttribute('aria-label', name);
+  });
+  const os = document.getElementById('play-overlay-btn-sr');
+  if (os) os.textContent = name;
+}
+function syncPlayToggleLabelLang() {
+  var lang = 'en';
+  try {
+    if (typeof currentDataLang === 'function') {
+      lang = currentDataLang();
+    } else if (typeof i18next !== 'undefined' && i18next.language) {
+      lang = String(i18next.language).toLowerCase().startsWith('en') ? 'en' : 'fr';
+    }
+  } catch (e) { /* ignore */ }
+  document.querySelectorAll('.play-toggle-label').forEach(function (el) { el.setAttribute('lang', lang); });
+}
+/** Fills “Play” + “Pause” on all .play-toggle-label children; keeps both in the DOM for browser page translation. */
+function fillPlayToggleLabelTexts() {
+  const p = _playUiT('play', 'Play');
+  const pa = _playUiT('pause', 'Pause');
+  document.querySelectorAll('.play-toggle-label .play-txt--idle').forEach(function (el) { el.textContent = p; });
+  document.querySelectorAll('.play-toggle-label .play-txt--busy').forEach(function (el) { el.textContent = pa; });
+  syncPlayToggleLabelLang();
+  updatePlayControlAccessibility();
+}
+function setPlayToggleVisualPlaying(on) {
+  document.querySelectorAll('.play-toggle-label').forEach(function (el) {
+    if (on) el.classList.add('is-playing');
+    else el.classList.remove('is-playing');
+  });
+}
+
 function startPlay() {
   if (isPlaying) return;
   isPlaying = true;
 
   const btn = document.getElementById('play-btn');
   const icon = document.getElementById('play-icon');
-  const lbl = document.getElementById('play-label');
-  const ovl = document.getElementById('play-overlay-label');
-  const ovs = document.getElementById('play-overlay-btn-sr');
   btn.classList.add('playing');
   icon.innerHTML = '<rect x="3" y="2" width="3" height="10"/><rect x="8" y="2" width="3" height="10"/>';
-  lbl.textContent = 'Pause';
-  if (ovl) ovl.textContent = 'Pause';
-  if (ovs) ovs.textContent = 'Pause';
   syncMobilePlayBarState();
 
   // Near end of timeline: clear figures + event markers so they can respawn cleanly,
@@ -4187,14 +4236,8 @@ function stopPlay() {
 
   const btn = document.getElementById('play-btn');
   const icon = document.getElementById('play-icon');
-  const lbl = document.getElementById('play-label');
-  const ovl = document.getElementById('play-overlay-label');
-  const ovs = document.getElementById('play-overlay-btn-sr');
   btn.classList.remove('playing');
   icon.innerHTML = '<polygon points="3,1 13,7 3,13"/>';
-  lbl.textContent = 'Play';
-  if (ovl) ovl.textContent = 'Play';
-  if (ovs) ovs.textContent = 'Play';
   syncMobilePlayBarState();
 }
 
@@ -4203,19 +4246,16 @@ function syncMobilePlayBarState() {
   const wrap = document.getElementById('mobile-play-btn');
   if (!wrap) return;
   const icon = document.getElementById('mobile-play-icon');
-  const lbl = document.getElementById('mobile-play-label');
-  const T = function (key, fb) {
-    return (typeof i18next !== 'undefined' && i18next.isInitialized) ? i18next.t('ui.' + key) : fb;
-  };
   if (isPlaying) {
     wrap.classList.add('mobile-tab-bar-play--active');
     if (icon) icon.innerHTML = '<rect x="5" y="4" width="4" height="16"></rect><rect x="13" y="4" width="4" height="16"></rect>';
-    if (lbl) lbl.textContent = T('pause', 'Pause');
   } else {
     wrap.classList.remove('mobile-tab-bar-play--active');
     if (icon) icon.innerHTML = '<polygon points="8,5 20,12 8,19"></polygon>';
-    if (lbl) lbl.textContent = T('play', 'Play');
   }
+  /* .play-toggle-label is toggled in start/stop; keep in sync if called alone */
+  setPlayToggleVisualPlaying(!!isPlaying);
+  updatePlayControlAccessibility();
 }
 
 function togglePlay() {
@@ -5645,20 +5685,6 @@ function applyTranslations() {
   const legTitle = document.querySelector('.map-legend-title');
   if (legTitle) legTitle.textContent = t('ui.legendTitle');
 
-  // Play/Pause button label (only if not currently playing)
-  const playLabel = document.getElementById('play-label');
-  if (playLabel) {
-    playLabel.textContent = (typeof isPlaying !== 'undefined' && isPlaying) ? t('ui.pause') : t('ui.play');
-  }
-  const playOverlayLbl = document.getElementById('play-overlay-label');
-  if (playOverlayLbl) {
-    playOverlayLbl.textContent = (typeof isPlaying !== 'undefined' && isPlaying) ? t('ui.pause') : t('ui.play');
-  }
-  const playOverlaySr = document.getElementById('play-overlay-btn-sr');
-  if (playOverlaySr) {
-    playOverlaySr.textContent = (typeof isPlaying !== 'undefined' && isPlaying) ? t('ui.pause') : t('ui.play');
-  }
-
   // Welcome hint (innerHTML to allow the <strong>)
   const wh = document.getElementById('welcome-hint');
   if (wh && !wh.classList.contains('hidden')) {
@@ -5680,6 +5706,14 @@ function applyTranslations() {
     el.textContent = val;
     if (svg) el.prepend(svg);
   });
+
+  // Play/Pause: two static strings in DOM, toggle with .is-playing (after [data-i18n] so nothing clobbers)
+  if (typeof fillPlayToggleLabelTexts === 'function') {
+    fillPlayToggleLabelTexts();
+    if (typeof setPlayToggleVisualPlaying === 'function') {
+      setPlayToggleVisualPlaying(!!(typeof isPlaying !== 'undefined' && isPlaying));
+    }
+  }
 
   // Mobile tab labels
   document.querySelectorAll('.mobile-tab').forEach(function(btn) {
@@ -5791,15 +5825,6 @@ function initI18n() {
     sel.addEventListener('change', function() {
       try { localStorage.setItem('ho_ui_lang', this.value); } catch (e) { /* ignore */ }
       i18next.changeLanguage(this.value).then(applyTranslations);
-      // Update play/pause labels reactively when language changes
-      const playLabel = document.getElementById('play-label');
-      const poL = document.getElementById('play-overlay-label');
-      const poS = document.getElementById('play-overlay-btn-sr');
-      const pTxt = (typeof isPlaying !== 'undefined' && isPlaying)
-        ? i18next.t('ui.pause') : i18next.t('ui.play');
-      if (playLabel) playLabel.textContent = pTxt;
-      if (poL) poL.textContent = pTxt;
-      if (poS) poS.textContent = pTxt;
     });
   }
 }
@@ -5864,40 +5889,6 @@ function initDataViewer() {
 }
 window.addEventListener('load', initDataViewer);
 
-// Patch stopPlay / startPlay to update label language-aware
-window.addEventListener('load', function() {
-  const origStop = window.stopPlay;
-  const origStart = window.startPlay;
-  if (origStop) {
-    window.stopPlay = function() {
-      origStop();
-      if (i18next.isInitialized) {
-        const p = i18next.t('ui.play');
-        const lbl = document.getElementById('play-label');
-        if (lbl) lbl.textContent = p;
-        const ol = document.getElementById('play-overlay-label');
-        if (ol) ol.textContent = p;
-        const os = document.getElementById('play-overlay-btn-sr');
-        if (os) os.textContent = p;
-      }
-    };
-  }
-  if (origStart) {
-    window.startPlay = function() {
-      origStart();
-      if (i18next.isInitialized) {
-        const p = i18next.t('ui.pause');
-        const lbl = document.getElementById('play-label');
-        if (lbl) lbl.textContent = p;
-        const ol = document.getElementById('play-overlay-label');
-        if (ol) ol.textContent = p;
-        const os = document.getElementById('play-overlay-btn-sr');
-        if (os) os.textContent = p;
-      }
-    };
-  }
-});
-
 })();
 
 // =====================================================================
@@ -5918,10 +5909,9 @@ window.addEventListener('load', function() {
   });
   var nw = document.getElementById('needle-wrapper');
   if (nw) nw.addEventListener('pointerdown', dismiss, { once: true });
-  // Update label from i18n once it's ready
+  // Keep overlay label strings in sync if i18n became ready after first paint
   setTimeout(function() {
-    var lbl = document.getElementById('play-overlay-label');
-    if (lbl && typeof i18next !== 'undefined' && i18next.isInitialized) lbl.textContent = i18next.t('ui.play');
+    if (typeof fillPlayToggleLabelTexts === 'function') fillPlayToggleLabelTexts();
   }, 1200);
   // Auto-dismiss after 10s
   setTimeout(function() { if (!overlay.classList.contains('dismissed')) dismiss(); }, 10000);
