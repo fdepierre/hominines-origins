@@ -99,7 +99,7 @@ Claims about tool use, symbolic behaviour, burial practices or fire control requ
 **Genetic evidence**
 When ancient DNA is recoverable, it provides direct evidence for taxonomy, pigmentation, population structure and admixture. When it is not (as for most pre-100 ka specimens), inferences must rely on evolutionary models, which carry considerably more uncertainty.
 
-A claim reaches `CONSENSUS_FORT` when several of these lines converge and have survived repeated independent scrutiny. It stays at `EN_DEBAT_ACTIF` when specialists publish substantive critiques that have not yet been answered conclusively.
+A claim reaches `STRONG_CONSENSUS` when several of these lines converge and have survived repeated independent scrutiny. It stays at `ACTIVE_DEBATE` when specialists publish substantive critiques that have not yet been answered conclusively.
 
 ---
 
@@ -114,19 +114,19 @@ Every species entry in `app/data/species.json` carries these fields for each of 
 
 | Value | Meaning |
 |-------|---------|
-| `CONSENSUS_FORT` | Multiple independent peer-reviewed studies converge on the same conclusion. Existing critiques are minority positions and do not challenge the core result. |
-| `CONSENSUS_MODERE` | Most specialists agree on the general interpretation, but legitimate debates persist on details: precise scenario, exact ancestor, numerical parameters. No fundamental controversy, just unresolved nuance. |
-| `EN_DEBAT_ACTIF` | Teams are publishing opposing, well-argued interpretations in peer-reviewed journals. No position has yet stabilised the consensus. Both sides have serious data and arguments. This signals active science, not vague uncertainty. |
-| `HYPOTHESE_SPECULATIVE` | The interpretation rests on very indirect inferences, weak analogies or models poorly constrained by data. Often overrepresented in media relative to its actual standing in the scientific literature. Not necessarily wrong — it may become `EN_DEBAT_ACTIF` if new data emerge. |
+| `STRONG_CONSENSUS` | Multiple independent peer-reviewed studies converge on the same conclusion. Existing critiques are minority positions and do not challenge the core result. |
+| `MODERATE_CONSENSUS` | Most specialists agree on the general interpretation, but legitimate debates persist on details: precise scenario, exact ancestor, numerical parameters. No fundamental controversy, just unresolved nuance. |
+| `ACTIVE_DEBATE` | Teams are publishing opposing, well-argued interpretations in peer-reviewed journals. No position has yet stabilised the consensus. Both sides have serious data and arguments. This signals active science, not vague uncertainty. |
+| `SPECULATIVE_HYPOTHESIS` | The interpretation rests on very indirect inferences, weak analogies or models poorly constrained by data. Often overrepresented in media relative to its actual standing in the scientific literature. Not necessarily wrong — it may become `ACTIVE_DEBATE` if new data emerge. |
 
 ### `hominin:evidenceType`
 
 | Value | Meaning |
 |-------|---------|
-| `DONNEES_DIRECTES` | Based on direct fossil description and measurement, radiometric dating, documented stratigraphic context. The link between observation and conclusion is short and traceable to primary description papers. |
-| `DONNEES_INDIRECTES` | Based on secondary indicators: taphonomic context, spatial distribution of remains, comparison with modern or fossil analogues. One additional interpretive step is required, but the underlying observations remain tangible. |
-| `INFERENCE_EVOLUTIVE` | Based on phylogenetic, genetic or ecological models, without direct data on the taxon in question. Typical for pigmentation when no ancient DNA is available, or for behaviours inferred by analogy with closely related species. |
-| `NARRATIF_MEDIATIQUE` | The interpretation circulates mainly through press releases, public lectures, videos or social media rather than robust scientific syntheses. Flagging this value documents the gap between popular narrative and the actual state of the literature. It is not necessarily factually wrong — it is a question of proportionality and nuance. |
+| `DIRECT_DATA` | Based on direct fossil description and measurement, radiometric dating, documented stratigraphic context. The link between observation and conclusion is short and traceable to primary description papers. |
+| `INDIRECT_DATA` | Based on secondary indicators: taphonomic context, spatial distribution of remains, comparison with modern or fossil analogues. One additional interpretive step is required, but the underlying observations remain tangible. |
+| `EVOLUTIONARY_INFERENCE` | Based on phylogenetic, genetic or ecological models, without direct data on the taxon in question. Typical for pigmentation when no ancient DNA is available, or for behaviours inferred by analogy with closely related species. |
+| `MEDIA_NARRATIVE` | The interpretation circulates mainly through press releases, public lectures, videos or social media rather than robust scientific syntheses. Flagging this value documents the gap between popular narrative and the actual state of the literature. It is not necessarily factually wrong — it is a question of proportionality and nuance. |
 
 ---
 

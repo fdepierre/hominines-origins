@@ -162,12 +162,12 @@
         }
       ],
       "hominin:migrations": [],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_MODERE",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+      "hominin:taxonomyDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     },
     {
       "@type": "Species",
@@ -294,12 +294,12 @@
         }
       ],
       "hominin:migrations": [],
-      "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     },
     {
       "@type": "Species",
@@ -523,12 +523,12 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
-      "hominin:pigmentationEvidenceType": "DONNEES_INDIRECTES"
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "INDIRECT_DATA"
     },
     {
       "@type": "Species",
@@ -711,12 +711,12 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
-      "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     },
     {
       "@type": "Species",
@@ -943,12 +943,12 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
-      "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+      "hominin:taxonomyDebateLevel": "STRONG_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
     },
     {
       "@type": "Species",
@@ -1129,12 +1129,12 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_MODERE",
-      "hominin:taxonomyEvidenceType": "DONNEES_DIRECTES",
-      "hominin:behaviorDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
-      "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+      "hominin:taxonomyDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "DIRECT_DATA",
+      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
     },
     {
       "@type": "Species",
@@ -1281,12 +1281,12 @@
         }
       ],
       "hominin:migrations": [],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
-      "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+      "hominin:taxonomyDebateLevel": "STRONG_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
     },
     {
       "@type": "Species",
@@ -1432,12 +1432,12 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
-      "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+      "hominin:taxonomyDebateLevel": "STRONG_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     },
     {
       "@type": "Species",
@@ -1683,12 +1683,12 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
-      "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+      "hominin:taxonomyDebateLevel": "STRONG_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
     },
     {
       "@type": "Species",
@@ -1838,12 +1838,12 @@
         }
       ],
       "hominin:migrations": [],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
-      "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+      "hominin:taxonomyDebateLevel": "STRONG_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
     },
     {
       "@type": "Species",
@@ -2015,12 +2015,12 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_FORT",
-      "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+      "hominin:taxonomyDebateLevel": "STRONG_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
     },
     {
       "@type": "Species",
@@ -2196,12 +2196,12 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_FORT",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
-      "hominin:pigmentationEvidenceType": "DONNEES_DIRECTES"
+      "hominin:taxonomyDebateLevel": "STRONG_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
     },
     {
       "@type": "Species",
@@ -2316,12 +2316,12 @@
         }
       ],
       "hominin:migrations": [],
-      "hominin:taxonomyDebateLevel": "CONSENSUS_MODERE",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+      "hominin:taxonomyDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     },
     {
       "@type": "Species",
@@ -2436,12 +2436,12 @@
         }
       ],
       "hominin:migrations": [],
-      "hominin:taxonomyDebateLevel": "EN_DEBAT_ACTIF",
-      "hominin:taxonomyEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:behaviorDebateLevel": "CONSENSUS_MODERE",
-      "hominin:behaviorEvidenceType": "DONNEES_INDIRECTES",
-      "hominin:pigmentationDebateLevel": "CONSENSUS_MODERE",
-      "hominin:pigmentationEvidenceType": "INFERENCE_EVOLUTIVE"
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     }
   ]
 }

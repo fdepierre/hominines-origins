@@ -135,8 +135,8 @@
       "hominin:color": "#B04070",
       "hominin:dateYearsBP": -280000,
       "hominin:category": "symbolic",
-      "hominin:debateLevel": "EN_DEBAT_ACTIF",
-      "hominin:evidenceType": "DONNEES_INDIRECTES",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
       "hominin:dateReference": "eLife reviewed preprints (2025) ; J. Hum. Evol. (2024)",
       "description": {
         "fr": "Squelettes d'H. naledi dans les chambres profondes de Rising Star (Afrique du Sud). Berger et al. proposent des dépôts intentionnels de corps, foyers et gravures symboliques chez un hominine à cerveau réduit (~465–610 cm³). Contesté vigoureusement sur les plans taphonomique et stratigraphique — pas de consensus sur les sépultures intentionnelles (Martinón-Torres et al. 2024, J. Hum. Evol.).",
@@ -387,8 +387,8 @@
       "hominin:color": "#307090",
       "hominin:dateYearsBP": -120000,
       "hominin:category": "migration",
-      "hominin:debateLevel": "CONSENSUS_FORT",
-      "hominin:evidenceType": "DONNEES_DIRECTES",
+      "hominin:debateLevel": "STRONG_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
       "hominin:dateReference": "PNAS 105(4):1342–1347 (2008) ; Proc. R. Soc. B 284:20171065 (2017)",
       "description": {
         "fr": "Série de restes graciles (LB1 et associés) — Liang Bua, île de Flores, Indonésie. Stature ~1 m, volume cérébral ~426 cm³. Nanisme insulaire sur un Homo archaïque, disparu vers ~50 ka. Les hypothèses pathologiques (microcéphalie, crétinisme endémique) ont été largement réfutées par analyses morphométriques comparatives. Débat résiduel sur l'ancêtre exact (H. erectus insulaire vs lignée plus basale) et sur les modalités d'extinction.",

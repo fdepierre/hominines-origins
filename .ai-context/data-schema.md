@@ -75,17 +75,17 @@ Use bracket notation for these keys: `species['hominin:taxonomyDebateLevel']`.
 
 | `*DebateLevel` | Meaning (short) |
 |----------------|-----------------|
-| `CONSENSUS_FORT` | Strong community agreement on framing |
-| `CONSENSUS_MODERE` | Broad agreement with nuance on details |
-| `EN_DEBAT_ACTIF` | Several serious interpretations coexist |
-| `HYPOTHESE_SPECULATIVE` | Plausible but thinly tested |
+| `STRONG_CONSENSUS` | Strong community agreement on framing |
+| `MODERATE_CONSENSUS` | Broad agreement with nuance on details |
+| `ACTIVE_DEBATE` | Several serious interpretations coexist |
+| `SPECULATIVE_HYPOTHESIS` | Plausible but thinly tested |
 
 | `*EvidenceType` | Meaning (short) |
 |-----------------|-----------------|
-| `DONNEES_DIRECTES` | Direct observation (e.g. ancient DNA, tightly informative remains) |
-| `DONNEES_INDIRECTES` | Solid indirect fossil / archaeological context |
-| `INFERENCE_EVOLUTIVE` | Comparative or model-based evolutionary inference |
-| `NARRATIF_MEDIATIQUE` | Media-led narrative, weakly tied to primary literature |
+| `DIRECT_DATA` | Direct observation (e.g. ancient DNA, tightly informative remains) |
+| `INDIRECT_DATA` | Solid indirect fossil / archaeological context |
+| `EVOLUTIONARY_INFERENCE` | Comparative or model-based evolutionary inference |
+| `MEDIA_NARRATIVE` | Media-led narrative, weakly tied to primary literature |
 
 Canonical values live on each species object in [`app/data/species.json`](../app/data/species.json). Tests serve `app/` over HTTP so `fetch` works.
 

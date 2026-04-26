@@ -114,8 +114,8 @@ async function runUnitTests() {
       'hominin:pigmentationDebateLevel',
       'hominin:pigmentationEvidenceType',
     ];
-    const debateLevels = new Set(['CONSENSUS_FORT', 'CONSENSUS_MODERE', 'EN_DEBAT_ACTIF', 'HYPOTHESE_SPECULATIVE']);
-    const evidenceTypes = new Set(['DONNEES_DIRECTES', 'DONNEES_INDIRECTES', 'INFERENCE_EVOLUTIVE', 'NARRATIF_MEDIATIQUE']);
+    const debateLevels = new Set(['STRONG_CONSENSUS', 'MODERATE_CONSENSUS', 'ACTIVE_DEBATE', 'SPECULATIVE_HYPOTHESIS']);
+    const evidenceTypes = new Set(['DIRECT_DATA', 'INDIRECT_DATA', 'EVOLUTIONARY_INFERENCE', 'MEDIA_NARRATIVE']);
     const issues = await page.evaluate(({ keys: k, debateLevels: dl, evidenceTypes: et }) => {
       const bad = [];
       const dset = new Set(dl);
