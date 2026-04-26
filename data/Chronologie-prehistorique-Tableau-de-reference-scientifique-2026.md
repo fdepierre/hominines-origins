@@ -1,6 +1,8 @@
 # Chronologie préhistorique — Tableau de référence scientifique 2026
 Mise à jour intégrale des repères de la frise "Légendes Cartographie", confrontés aux publications scientifiques les plus récentes. Chaque entrée est liée à un DOI ou une référence primaire. Les conflits scientifiques actifs sont explicitement signalés.
 
+**Mise à jour avril 2026 :** ajout d'une section "Origines hominines profondes" couvrant *Sahelanthropus tchadensis* (Toumaï, ~7 Ma), *Ardipithecus* (5,8–4,4 Ma) et *Australopithecus afarensis* (~3,2 Ma). Ajout dans la section Migrations de la première sortie d'Afrique (Dmanisi, 1,77 Ma) et du peuplement d'Atapuerca par *H. antecessor* (~1,2 Ma). Ajout dans la section Évolution biologique du jalon Omo Kibish révisé (→233 ka). Couverture temporelle étendue de −7 Ma au présent.
+
 
 
 ***
@@ -21,6 +23,14 @@ Mise à jour intégrale des repères de la frise "Légendes Cartographie", confr
 
 ***
 ## Tableau complet
+### Origines hominines profondes (pré-Homo)
+| Repère chronologique | Date (2026) | Statut vs frise | Taxon / Espèce | Site / Localisation | Région | Comportement | Description synthétique | Débat | Journal | DOI |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Plus ancien préhumain connu (Toumaï) | ~7 millions d'années | Nouveau repère | *Sahelanthropus tchadensis* | Toros-Menalla, Djourab, Tchad | Afrique centrale | Bipédie précoce / Phylogénie | Crâne TM 266 ("Toumaï") découvert en 2001 par la mission franco-tchadienne MPFT. Foramen magnum centré suggérant bipédie. Position phylogénétique encore discutée : pré-hominine vs simple grand singe miocène[^A1][^A2] | Oui — statut d'hominine et bipédie contestés (Wolpoff et al. 2002 ; Macchiarelli et al. 2020) | *Nature* 418:145-151 (2002) | [10.1038/nature00879](https://doi.org/10.1038/nature00879) |
+| Hominines des forêts africaines | 5,8 à 4,4 millions d'années | Nouveau repère | *Ardipithecus kadabba* / *Ardipithecus ramidus* | Aramis, Middle Awash, Éthiopie | Afrique de l'Est | Bipédie facultative en milieu forestier | Squelette "Ardi" (ARA-VP-6/500) décrit en 2009 : 110 cm, 50 kg, gros orteil divergent, bassin mosaïque. Documente une bipédie déjà présente en milieu boisé, contredisant l'hypothèse de la savane[^A3] | Modéré — degré de bipédie et écologie débattus | *Science* 326:64-86 (2009) | [10.1126/science.1175802](https://doi.org/10.1126/science.1175802) |
+| Premier australopithèque ("Lucy" et contemporains) | ~3,2 millions d'années | Repère historique confirmé | *Australopithecus afarensis* | Hadar, dépression de l'Afar, Éthiopie | Afrique de l'Est | Bipédie habituelle | Squelette AL 288-1 "Lucy" décrit par Johanson & Taieb en 1976 ; ~40% du squelette préservé. Empreintes de Laetoli (3,7 Ma) confirment bipédie[^A4] | Non — bipédie acquise mais conservation arboricole | *Nature* 260:293-297 (1976) | [10.1038/260293a0](https://doi.org/10.1038/260293a0) |
+
+***
 ### Technologie lithique et outillage
 | Repère chronologique | Date (2026) | Statut vs frise | Taxon / Espèce | Site / Localisation | Région | Comportement | Description synthétique | Débat | Journal | DOI |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -32,8 +42,9 @@ Mise à jour intégrale des repères de la frise "Légendes Cartographie", confr
 ### Migrations et peuplements
 | Repère chronologique | Date (2026) | Statut vs frise | Taxon / Espèce | Site / Localisation | Région | Comportement | Description synthétique | Débat | Journal | DOI |
 |---|---|---|---|---|---|---|---|---|---|---|
+| Première sortie d'Afrique documentée (Dmanisi) | ~1,77 million d'années | Nouveau repère | *Homo erectus georgicus* | Dmanisi, Petite Caucase, Géorgie | Eurasie occidentale (Caucase) | Dispersion / Phylogénie | Cinq crânes (D2280, D2282, D3444, D4500, D2700) : variabilité morphologique très importante au sein d'une même population, suggérant qu'*H. ergaster*, *H. erectus* et *H. habilis* puissent appartenir à une seule espèce polymorphe. Plus anciens hominines hors d'Afrique connus[^B1] | Modéré — statut taxonomique d'*H. georgicus* | *Science* 342:326-331 (2013) | [10.1126/science.1244629](https://doi.org/10.1126/science.1244629) |
 | Peuplement de l'Eurasie orientale | 2 à 1,8 millions d'années | Confirmé | Hominidé / *Homo erectus* | Shangchen, Loess Plateau, Chine | Asie de l'Est | Dispersion | Outils à ~2,1 Ma suggèrent sortie d'Afrique antérieure aux estimations classiques | Oui — datations discutées | *Nature* 559:608-612 (2018) | [10.1038/s41586-018-0299-4](https://doi.org/10.1038/s41586-018-0299-4) |
-| Peuplement de l'Eurasie occidentale | ~1,5 million d'années | Confirmé | *Homo erectus* | Dmanisi, Géorgie ; Atapuerca, Espagne | Eurasie occidentale | Dispersion | Homo erectus de Dmanisi : 1,77 Ma, plus anciens hominines hors d'Afrique | Modéré — routes migratoires | *Science* 342:326-331 (2013) | [10.1126/science.1244629](https://doi.org/10.1126/science.1244629) |
+| Peuplement de l'Eurasie occidentale (Atapuerca) | ~1,2 million d'années | Confirmé | *Homo antecessor* | Sima del Elefante, Atapuerca, Espagne | Eurasie occidentale | Dispersion | Mandibule ATE9-1 (~1,2 Ma) puis fossiles TD6 de Gran Dolina (950-770 ka). Hublin et al. 2026 reconsidèrent le statut phylogénétique d'*H. antecessor* à la lumière de Thomas Quarry I[^B2] | Oui — position phylogénétique révisée en 2026 | *Nature* 452:465-469 (2008) | [10.1038/nature06815](https://doi.org/10.1038/nature06815) |
 | Peuplement de l'Australie (Sahul) | ~65 000 ans (archéo) / ~60 000 ans (génomique) | Révisé à la hausse (frise : 60-50 ka) | *Homo sapiens* | Madjedbebe, Territoire du Nord, Australie | Sahul | Dispersion maritime | OSL (28 500 grains de quartz) : 65 000 ans[^7][^8]. Génomique (2 456 génomes, 2025) : ~60 000 ans via deux routes depuis la Sonde[^9][^10][^11] | Modéré — divergence archéo/génomique ~5 000 ans | *Nature* 547 (2017) ; *Science Advances* (2025) | [10.1038/nature22968](https://doi.org/10.1038/nature22968) |
 | Hominines nains endémiques de Flores | ~190 000 à ~50 000 ans | Confirmé (nouveau repère) | *Homo floresiensis* | Grotte de Liang Bua, île de Flores, Indonésie | Asie du Sud-Est insulaire | Endémisme insulaire / Adaptation morphologique | Série de restes graciles (dont LB1) de stature ~1 m et volume cérébral ~426 cm³, associés à une industrie lithique simple mais persistante. Interprétés comme population insulaire dérivée d’un *Homo* archaïque ayant subi un nanisme insulaire, avec disparition vers 50 ka possiblement peu après l’arrivée d’*H. sapiens* dans la région | Oui — débat sur l’origine exacte (*H. erectus* insulaire vs lignée plus basale) et sur la nature des interactions avec *H. sapiens* ; les hypothèses pathologiques (*H. sapiens* microcéphale / crétinisme endémique) ont été largement réfutées morphométriquement mais restent encore relayées dans certains médias | *PNAS* 105(4):1342–1347 (2008) ; *Proc. R. Soc. B* 284:20171065 (2017) | [10.1073/pnas.0710041105](https://doi.org/10.1073/pnas.0710041105) ; [10.1098/rspb.2017.1065](https://doi.org/10.1098/rspb.2017.1065) |
 | Peuplement de l'Amérique | Incertain — >20 000 à ~13 000 ans | Très débattu (frise : 20 000 ans) | *Homo sapiens* | Monte Verde (Chili) ; sites pré-Clovis Mexique, Argentine | Amériques | Dispersion | Monte Verde II reclassé en Holocène moyen (~8 000-6 000 ans) par Surovell et al.[^16][^17][^18][^19]. Débat pré-Clovis non résolu[^20] | Oui — l'un des débats les plus actifs en 2026 | *Science* 391:1283-1288 (2026) | [10.1126/science.adw9217](https://doi.org/10.1126/science.adw9217) |
@@ -44,6 +55,7 @@ Mise à jour intégrale des repères de la frise "Légendes Cartographie", confr
 |---|---|---|---|---|---|---|---|---|---|---|
 | Ancêtre commun *H. sapiens* / Néandertaliens / Dénisoviens | ~773 000 ans | Nouveau repère (non dans la frise) | *Homo* sp. africain (proche de *H. antecessor*) | Thomas Quarry I, Casablanca, Maroc | Afrique du Nord | Évolution / Phylogénie | Datation via inversion magnétique Brunhes/Matuyama (±4 000 ans). Population à la base des trois lignées humaines modernes[^21][^22][^23][^24][^25] | Non — datation très robuste | *Nature* (2026) | [10.1038/s41586-025-09914-y](https://doi.org/10.1038/s41586-025-09914-y) |
 | Premier *Homo sapiens* anatomiquement moderne | ~315 000 ans | Légèrement révisé (frise : 300 000 ans) | *Homo sapiens* | Jebel Irhoud, Maroc | Afrique du Nord | Évolution / Morphologie | 5 individus avec morphologie faciale moderne. Datation TL à 315±34 ka. Infirme le modèle d'origine est-africaine unique[^26][^27][^28][^29][^30] | Modéré — traits neurocrâniens encore archaïques | *Nature* 546:289-292 (2017) | [10.1038/nature22336](https://doi.org/10.1038/nature22336) |
+| *Homo sapiens* est-africain (Omo Kibish) | ~233 000 ans | Révisé (frise : 195 000 ans) | *Homo sapiens* | Omo Kibish, vallée de l'Omo, Éthiopie | Afrique de l'Est | Évolution / Morphologie | Datation revue à la hausse via tephra Shala : 233±22 ka au lieu de 195 ka. Cohérent avec la pan-africanité de l'origine sapiens (Jebel Irhoud + Omo + Florisbad)[^B3] | Non — datation tephra robuste | *Nature* 601:579-583 (2022) | [10.1038/s41586-021-04275-8](https://doi.org/10.1038/s41586-021-04275-8) |
 
 ***
 ### Usage et maîtrise du feu
@@ -81,10 +93,10 @@ Mise à jour intégrale des repères de la frise "Légendes Cartographie", confr
 ## Récapitulatif des statuts
 | Statut | Nombre de repères | Exemples |
 |---|---|---|
-| Confirmé | 7 | Lomékwien 3,3 Ma ; Biface 1,76 Ma ; Aurignacien ; Caprins |
-| Légèrement révisé | 5 | Jebel Irhoud (300→315 ka) ; H. sapiens Europe (45→47,5 ka) ; Sépulture (100→110 ka) |
+| Confirmé | 8 | Lomékwien 3,3 Ma ; Biface 1,76 Ma ; Aurignacien ; Caprins ; Lucy 3,2 Ma |
+| Légèrement révisé | 5 | Jebel Irhoud (300→315 ka) ; H. sapiens Europe (45→47,5 ka) ; Sépulture (100→110 ka) ; Omo Kibish (195→233 ka) |
 | Révisé significativement | 4 | Feu fabrication (500→400 ka) ; Australie (50-60→65 ka) ; Art Muna (65→67,8 ka) ; Art figuratif (50→51,2 ka) |
-| Nouveau repère ajouté | 3 | Thomas Quarry I (773 ka) ; Séquence Oldowayen Namorotukunan ; H. floresiensis |
+| Nouveau repère ajouté | 7 | Thomas Quarry I (773 ka) ; Séquence Oldowayen Namorotukunan ; H. floresiensis ; Toumaï (7 Ma) ; Ardipithecus (4,4 Ma) ; Sortie d'Afrique Dmanisi (1,77 Ma) ; Atapuerca/H. antecessor (1,2 Ma) |
 | Très débattu, pas de consensus | 2 | Peuplement Amérique ; H. naledi funéraire |
 
 ***
@@ -92,6 +104,24 @@ Mise à jour intégrale des repères de la frise "Légendes Cartographie", confr
 *Le fichier CSV téléchargeable contient l'intégralité du tableau dans un format exploitable sous Excel ou tout outil de traitement de données.*
 
 ---
+
+## Références additionnelles 2026 (origines profondes & sortie d'Afrique)
+
+[^A1]: Brunet M. et al., "A new hominid from the Upper Miocene of Chad, Central Africa", *Nature* 418:145-151 (2002). DOI [10.1038/nature00879](https://doi.org/10.1038/nature00879)
+
+[^A2]: Macchiarelli R., Bergeret-Medina A., Marchi D., Wood B., "Nature and relationships of Sahelanthropus tchadensis", *Journal of Human Evolution* 149:102898 (2020). DOI [10.1016/j.jhevol.2020.102898](https://doi.org/10.1016/j.jhevol.2020.102898) — Critique sur la bipédie supposée
+
+[^A3]: White T.D. et al., "Ardipithecus ramidus and the Paleobiology of Early Hominids", *Science* 326:64-86 (2009). DOI [10.1126/science.1175802](https://doi.org/10.1126/science.1175802)
+
+[^A4]: Johanson D.C., Taieb M., "Plio-Pleistocene hominid discoveries in Hadar, Ethiopia", *Nature* 260:293-297 (1976). DOI [10.1038/260293a0](https://doi.org/10.1038/260293a0)
+
+[^B1]: Lordkipanidze D. et al., "A Complete Skull from Dmanisi, Georgia, and the Evolutionary Biology of Early Homo", *Science* 342:326-331 (2013). DOI [10.1126/science.1244629](https://doi.org/10.1126/science.1244629)
+
+[^B2]: Carbonell E. et al., "The first hominin of Europe", *Nature* 452:465-469 (2008). DOI [10.1038/nature06815](https://doi.org/10.1038/nature06815) — Statut phylogénétique d'*H. antecessor* révisé par Hublin et al. *Nature* (2026), DOI [10.1038/s41586-025-09914-y](https://doi.org/10.1038/s41586-025-09914-y)
+
+[^B3]: Vidal C.M. et al., "Age of the oldest known Homo sapiens from eastern Africa", *Nature* 601:579-583 (2022). DOI [10.1038/s41586-021-04275-8](https://doi.org/10.1038/s41586-021-04275-8)
+
+***
 
 ## References
 
