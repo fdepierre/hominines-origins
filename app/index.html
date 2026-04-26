@@ -1282,11 +1282,19 @@ html[data-map-ready="1"] #map {
   white-space: nowrap;
 }
 
-/* Play btn: absolute within #timeline, top-left, vertically over species track */
+/* #needle-wrapper: top band for time badge + Play — species track starts below (no cover) */
+#needle-wrapper {
+  position: relative;
+  box-sizing: border-box;
+  /* Year badge + Play row; mobile overrides when #play is hidden */
+  padding-top: 64px;
+}
+
+/* Play btn: absolute in the chrome band above the species track */
 #play-btn {
   position: absolute !important;
   left: var(--space-3);
-  top: 44px;   /* shifted down to clear the new title strip */
+  top: 32px; /* under the floating time label, still inside padding-top */
   z-index: 40;
 }
 /* Show the Play/Pause label alongside the icon (wrapper contains idle+busy spans) */
@@ -1299,7 +1307,7 @@ html[data-map-ready="1"] #map {
 .timeline-current-label {
   position: absolute;
   left: 0; /* overridden dynamically */
-  top: 6px;
+  top: 4px;
   pointer-events: none;
   white-space: nowrap;
   transition: left 0.08s linear;
@@ -1906,7 +1914,7 @@ html[data-map-ready="1"] #map {
   .layer-btn svg { display:none; }
   .map-legend { top:var(--space-2); left:var(--space-2); bottom:auto; padding:var(--space-2) var(--space-3); min-width:120px; }
   .timeline-needle-handle { width:32px !important; height:32px !important; }
-  #needle-wrapper { touch-action:none; cursor:ew-resize; }
+  #needle-wrapper { touch-action:none; cursor:ew-resize; padding-top: 32px; }
   #play-overlay-btn { width:56px; height:56px; }
   #btn-data-viewer { display:none; }
   .tl-tick-text { display:none !important; }
@@ -2055,7 +2063,7 @@ html[data-map-ready="1"] #map {
     </div>
 
     <!-- Needle wrapper — play btn + time label float inside as overlays -->
-    <div id="needle-wrapper" data-testid="timeline-needle-row" style="position:relative;">
+    <div id="needle-wrapper" data-testid="timeline-needle-row">
       <!-- Play/pause button — overlays left of species track -->
       <button id="play-btn" type="button" data-testid="play-toggle" data-i18n-title="ui.playTitle">
         <svg id="play-icon" width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
