@@ -13,6 +13,234 @@
   "itemListElement": [
     {
       "@type": "Species",
+      "@id": "sahelanthropus",
+      "taxon:scientificName": "Sahelanthropus tchadensis",
+      "name": {
+        "fr": "Toumaï — le plus ancien préhumain",
+        "en": "Toumaï — earliest known prehuman"
+      },
+      "hominin:periodStart": -7200000,
+      "hominin:periodEnd": -6800000,
+      "hominin:color": "#704020",
+      "hominin:lane": 0,
+      "hominin:heightM": {
+        "fr": "~110–120 cm (estimé)",
+        "en": "~110–120 cm (estimated)"
+      },
+      "hominin:heightF": {
+        "fr": "~110–120 cm (estimé)",
+        "en": "~110–120 cm (estimated)"
+      },
+      "hominin:weightM": {
+        "fr": "~35 kg (estimé)",
+        "en": "~35 kg (estimated)"
+      },
+      "hominin:brain": {
+        "fr": "320–380 cm³",
+        "en": "320–380 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Inconnu",
+        "en": "Unknown"
+      },
+      "hominin:skinDesc": {
+        "fr": "Sous fourrure : peu pigmentée",
+        "en": "Under fur: lightly pigmented"
+      },
+      "hominin:skinColor": "#c8956a",
+      "hominin:skinVariant": "fur",
+      "hominin:eyesDesc": {
+        "fr": "Bruns",
+        "en": "Brown"
+      },
+      "hominin:eyesColor": "#5c3317",
+      "hominin:hairDesc": {
+        "fr": "Fourrure sombre dense",
+        "en": "Dense dark fur"
+      },
+      "hominin:hairColor": "#1a0a00",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive",
+        "en": "⚠️ Evolutionary inference"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Aucun outil connu",
+          "en": "No known tools"
+        },
+        {
+          "fr": "Bipédie probable (foramen magnum centré)",
+          "en": "Probable bipedalism (centred foramen magnum)"
+        },
+        {
+          "fr": "Canines réduites vs grands singes contemporains",
+          "en": "Reduced canines vs contemporary great apes"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Statut d'hominine et bipédie contestés (Wolpoff 2002 ; Macchiarelli 2020). Position phylogénétique non tranchée : pré-hominine ou simple grand singe miocène ?",
+        "en": "Hominin status and bipedalism contested (Wolpoff 2002; Macchiarelli 2020). Phylogenetic position unresolved: pre-hominin or Miocene great ape?"
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Tchad (Toros-Menalla)",
+            "en": "Chad (Toros-Menalla)"
+          },
+          "lat": 16.25,
+          "lng": 17.5,
+          "radius": 500000,
+          "note": {
+            "fr": "Désert du Djourab — découverte 2001",
+            "en": "Djurab Desert — discovered 2001"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Toros-Menalla (Tchad)",
+            "en": "Toros-Menalla (Chad)"
+          },
+          "lat": 16.25,
+          "lng": 17.5,
+          "note": {
+            "fr": "Crâne TM 266 \"Toumaï\" — ~7 Ma",
+            "en": "Skull TM 266 \"Toumaï\" — ~7 Ma"
+          }
+        }
+      ],
+      "hominin:migrations": [],
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+    },
+    {
+      "@type": "Species",
+      "@id": "ardipithecus",
+      "taxon:scientificName": "Ardipithecus ramidus",
+      "name": {
+        "fr": "\"Ardi\" — hominines des forêts",
+        "en": "\"Ardi\" — woodland hominins"
+      },
+      "hominin:periodStart": -5800000,
+      "hominin:periodEnd": -4400000,
+      "hominin:color": "#8C5A2B",
+      "hominin:lane": 0,
+      "hominin:heightM": {
+        "fr": "~120 cm (estimé)",
+        "en": "~120 cm (estimated)"
+      },
+      "hominin:heightF": {
+        "fr": "~120 cm (Ardi)",
+        "en": "~120 cm (Ardi)"
+      },
+      "hominin:weightM": {
+        "fr": "~50 kg",
+        "en": "~50 kg"
+      },
+      "hominin:brain": {
+        "fr": "300–350 cm³",
+        "en": "300–350 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible (canines peu différenciées)",
+        "en": "Low (low canine dimorphism)"
+      },
+      "hominin:skinDesc": {
+        "fr": "Sous fourrure : peu pigmentée",
+        "en": "Under fur: lightly pigmented"
+      },
+      "hominin:skinColor": "#c8956a",
+      "hominin:skinVariant": "fur",
+      "hominin:eyesDesc": {
+        "fr": "Bruns",
+        "en": "Brown"
+      },
+      "hominin:eyesColor": "#5c3317",
+      "hominin:hairDesc": {
+        "fr": "Fourrure sombre",
+        "en": "Dark fur"
+      },
+      "hominin:hairColor": "#1a0a00",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive",
+        "en": "⚠️ Evolutionary inference"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Aucun outil connu",
+          "en": "No known tools"
+        },
+        {
+          "fr": "Bipédie facultative en milieu boisé",
+          "en": "Facultative bipedalism in wooded habitats"
+        },
+        {
+          "fr": "Gros orteil divergent — grimpette préservée",
+          "en": "Divergent hallux — climbing preserved"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Degré réel de bipédie discuté (Sarmiento 2010). Documente une bipédie en milieu boisé, contredisant l'hypothèse de la savane.",
+        "en": "Actual extent of bipedalism debated (Sarmiento 2010). Documents bipedalism in wooded habitats, contradicting the savannah hypothesis."
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Middle Awash (Éthiopie)",
+            "en": "Middle Awash (Ethiopia)"
+          },
+          "lat": 10.5,
+          "lng": 40.5,
+          "radius": 400000,
+          "note": {
+            "fr": "Aramis — squelette \"Ardi\" 4,4 Ma",
+            "en": "Aramis — \"Ardi\" skeleton 4.4 Ma"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Aramis (Éthiopie)",
+            "en": "Aramis (Ethiopia)"
+          },
+          "lat": 10.46,
+          "lng": 40.45,
+          "note": {
+            "fr": "\"Ardi\" ARA-VP-6/500 — 4,4 Ma",
+            "en": "\"Ardi\" ARA-VP-6/500 — 4.4 Ma"
+          }
+        },
+        {
+          "name": {
+            "fr": "Asa Koma (Éthiopie)",
+            "en": "Asa Koma (Ethiopia)"
+          },
+          "lat": 10.7,
+          "lng": 40.6,
+          "note": {
+            "fr": "A. kadabba — 5,8–5,2 Ma",
+            "en": "A. kadabba — 5.8–5.2 Ma"
+          }
+        }
+      ],
+      "hominin:migrations": [],
+      "hominin:taxonomyDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+    },
+    {
+      "@type": "Species",
       "@id": "afarensis",
       "taxon:scientificName": "Australopithecus afarensis",
       "name": {
@@ -303,6 +531,129 @@
     },
     {
       "@type": "Species",
+      "@id": "georgicus",
+      "taxon:scientificName": "Homo erectus georgicus",
+      "name": {
+        "fr": "Dmanisi — première sortie d'Afrique",
+        "en": "Dmanisi — first Out-of-Africa"
+      },
+      "hominin:periodStart": -1850000,
+      "hominin:periodEnd": -1700000,
+      "hominin:color": "#A06020",
+      "hominin:lane": 2,
+      "hominin:heightM": {
+        "fr": "~145–166 cm",
+        "en": "~145–166 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~140 cm (estimé)",
+        "en": "~140 cm (estimated)"
+      },
+      "hominin:weightM": {
+        "fr": "~40–50 kg",
+        "en": "~40–50 kg"
+      },
+      "hominin:brain": {
+        "fr": "546–775 cm³ (D4500 : 546)",
+        "en": "546–775 cm³ (D4500: 546)"
+      },
+      "hominin:dimorphism": {
+        "fr": "Marqué",
+        "en": "Marked"
+      },
+      "hominin:skinDesc": {
+        "fr": "Sombre (continuité africaine)",
+        "en": "Dark (African continuity)"
+      },
+      "hominin:skinColor": "#4a2200",
+      "hominin:skinVariant": null,
+      "hominin:eyesDesc": {
+        "fr": "Bruns",
+        "en": "Brown"
+      },
+      "hominin:eyesColor": "#5c3317",
+      "hominin:hairDesc": {
+        "fr": "Sombres, probablement crépus",
+        "en": "Dark, likely tightly coiled"
+      },
+      "hominin:hairColor": "#1a0800",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
+        "en": "⚠️ Evolutionary inference (no DNA)"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Industrie oldowayenne (galets aménagés)",
+          "en": "Oldowan industry (modified pebbles)"
+        },
+        {
+          "fr": "Pas de bifaces",
+          "en": "No handaxes"
+        },
+        {
+          "fr": "Première dispersion eurasienne documentée",
+          "en": "Earliest documented Eurasian dispersal"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Statut d'espèce contesté : H. erectus géorgien ou espèce distincte. Lordkipanidze (2013) suggère que H. ergaster, H. erectus et H. habilis appartiennent à une seule espèce polymorphe — hypothèse non largement acceptée.",
+        "en": "Species status contested: Georgian H. erectus or distinct species. Lordkipanidze (2013) suggests H. ergaster, H. erectus and H. habilis are a single polymorphic species — not widely accepted."
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Caucase (Géorgie)",
+            "en": "Caucasus (Georgia)"
+          },
+          "lat": 41.33,
+          "lng": 44.35,
+          "radius": 350000,
+          "note": {
+            "fr": "Dmanisi — 1,77 Ma",
+            "en": "Dmanisi — 1.77 Ma"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Dmanisi (Géorgie)",
+            "en": "Dmanisi (Georgia)"
+          },
+          "lat": 41.33,
+          "lng": 44.35,
+          "note": {
+            "fr": "5 crânes (D2280, D2282, D3444, D4500, D2700) — 1,77 Ma",
+            "en": "5 skulls (D2280, D2282, D3444, D4500, D2700) — 1.77 Ma"
+          }
+        }
+      ],
+      "hominin:migrations": [
+        {
+          "from": [
+            2.0,
+            38.0
+          ],
+          "to": [
+            41.33,
+            44.35
+          ],
+          "label": {
+            "fr": "Sortie d'Afrique vers le Caucase ~1,8 Ma",
+            "en": "Out of Africa to Caucasus ~1.8 Ma"
+          }
+        }
+      ],
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "DIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+    },
+    {
+      "@type": "Species",
       "@id": "erectus",
       "taxon:scientificName": "Homo erectus",
       "name": {
@@ -529,6 +880,126 @@
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
       "hominin:pigmentationEvidenceType": "INDIRECT_DATA"
+    },
+    {
+      "@type": "Species",
+      "@id": "antecessor",
+      "taxon:scientificName": "Homo antecessor",
+      "name": {
+        "fr": "Atapuerca — lignée européenne archaïque",
+        "en": "Atapuerca — archaic European lineage"
+      },
+      "hominin:periodStart": -1200000,
+      "hominin:periodEnd": -770000,
+      "hominin:color": "#B46A3A",
+      "hominin:lane": 3,
+      "hominin:heightM": {
+        "fr": "~165–175 cm",
+        "en": "~165–175 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~160 cm (estimé)",
+        "en": "~160 cm (estimated)"
+      },
+      "hominin:weightM": {
+        "fr": "~60–70 kg",
+        "en": "~60–70 kg"
+      },
+      "hominin:brain": {
+        "fr": "~1 000 cm³",
+        "en": "~1,000 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Modéré",
+        "en": "Moderate"
+      },
+      "hominin:skinDesc": {
+        "fr": "Sombre (continuité)",
+        "en": "Dark (continuity)"
+      },
+      "hominin:skinColor": "#4a2200",
+      "hominin:skinVariant": null,
+      "hominin:eyesDesc": {
+        "fr": "Bruns",
+        "en": "Brown"
+      },
+      "hominin:eyesColor": "#5c3317",
+      "hominin:hairDesc": {
+        "fr": "Sombres",
+        "en": "Dark"
+      },
+      "hominin:hairColor": "#1a0800",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
+        "en": "⚠️ Evolutionary inference (no DNA)"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Industrie sur éclats (Mode 1 tardif)",
+          "en": "Flake industry (late Mode 1)"
+        },
+        {
+          "fr": "Cannibalisme documenté à Gran Dolina (TD6)",
+          "en": "Cannibalism documented at Gran Dolina (TD6)"
+        },
+        {
+          "fr": "Dispersion européenne ancienne",
+          "en": "Early European dispersal"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Statut phylogénétique entièrement repensé en 2026 (Hublin et al., Nature) : population sœur — et non ancêtre — du clade conduisant aux hominines de Thomas Quarry I. Les traits modernes de la face seraient une convergence morphologique.",
+        "en": "Phylogenetic status fully revised in 2026 (Hublin et al., Nature): sister population — not ancestor — to the clade leading to Thomas Quarry I hominins. Modern facial traits likely a morphological convergence."
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Atapuerca (Espagne)",
+            "en": "Atapuerca (Spain)"
+          },
+          "lat": 42.36,
+          "lng": -3.52,
+          "radius": 200000,
+          "note": {
+            "fr": "Sima del Elefante + Gran Dolina TD6",
+            "en": "Sima del Elefante + Gran Dolina TD6"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Sima del Elefante (Atapuerca)",
+            "en": "Sima del Elefante (Atapuerca)"
+          },
+          "lat": 42.36,
+          "lng": -3.52,
+          "note": {
+            "fr": "Mandibule ATE9-1 — ~1,2 Ma",
+            "en": "Mandible ATE9-1 — ~1.2 Ma"
+          }
+        },
+        {
+          "name": {
+            "fr": "Gran Dolina TD6 (Atapuerca)",
+            "en": "Gran Dolina TD6 (Atapuerca)"
+          },
+          "lat": 42.36,
+          "lng": -3.52,
+          "note": {
+            "fr": "Niveau Aurora — 950–770 ka",
+            "en": "Aurora level — 950–770 ka"
+          }
+        }
+      ],
+      "hominin:migrations": [],
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "DIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     },
     {
       "@type": "Species",
@@ -1138,6 +1609,126 @@
     },
     {
       "@type": "Species",
+      "@id": "naledi",
+      "taxon:scientificName": "Homo naledi",
+      "name": {
+        "fr": "Une mosaïque anatomique tardive d'Afrique australe",
+        "en": "A late anatomical mosaic from southern Africa"
+      },
+      "hominin:periodStart": -335000,
+      "hominin:periodEnd": -236000,
+      "hominin:color": "#8C5A2B",
+      "hominin:lane": 3,
+      "hominin:heightM": {
+        "fr": "~145 cm",
+        "en": "~145 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~140 cm",
+        "en": "~140 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~45 kg",
+        "en": "~45 kg"
+      },
+      "hominin:brain": {
+        "fr": "465–610 cm³",
+        "en": "465–610 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible à modéré",
+        "en": "Low to moderate"
+      },
+      "hominin:skinDesc": {
+        "fr": "Sombre, inférée par continuité évolutive africaine",
+        "en": "Dark, inferred from African evolutionary continuity"
+      },
+      "hominin:skinColor": "#4a2200",
+      "hominin:skinVariant": null,
+      "hominin:eyesDesc": {
+        "fr": "Bruns",
+        "en": "Brown"
+      },
+      "hominin:eyesColor": "#4b2e19",
+      "hominin:hairDesc": {
+        "fr": "Sombres, probablement crépus",
+        "en": "Dark, probably coiled"
+      },
+      "hominin:hairColor": "#120800",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
+        "en": "⚠️ Evolutionary inference (no DNA)"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Outils non attribués avec certitude",
+          "en": "Tools not confidently attributed"
+        },
+        {
+          "fr": "Mains adaptées à la préhension fine",
+          "en": "Hands adapted to fine manipulation"
+        },
+        {
+          "fr": "Bipédie efficace avec capacités grimpeuses",
+          "en": "Efficient bipedalism with climbing abilities"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Débat fort sur le statut comportemental et phylogénétique : pratique funéraire, usage du feu et position dans Homo restent contestés ; plusieurs affirmations récentes ont été critiquées comme prématurées.",
+        "en": "Strong debate over behavioural and phylogenetic status: funerary practice, fire use and position within Homo remain contested; several recent claims have been criticised as premature."
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Afrique australe",
+            "en": "Southern Africa"
+          },
+          "lat": -25.9,
+          "lng": 27.8,
+          "radius": 300000,
+          "note": {
+            "fr": "Rising Star Cave et environs",
+            "en": "Rising Star Cave and surroundings"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Rising Star Cave (Afrique du Sud)",
+            "en": "Rising Star Cave (South Africa)"
+          },
+          "lat": -25.92,
+          "lng": 27.73,
+          "note": {
+            "fr": "Dinaledi Chamber — espèce décrite en 2015, datée ~335–236 ka",
+            "en": "Dinaledi Chamber — species described in 2015, dated ~335–236 ka"
+          }
+        },
+        {
+          "name": {
+            "fr": "Lesedi Chamber (Afrique du Sud)",
+            "en": "Lesedi Chamber (South Africa)"
+          },
+          "lat": -25.92,
+          "lng": 27.73,
+          "note": {
+            "fr": "Matériel supplémentaire attribué à H. naledi",
+            "en": "Additional material attributed to H. naledi"
+          }
+        }
+      ],
+      "hominin:migrations": [],
+      "hominin:taxonomyDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+    },
+    {
+      "@type": "Species",
       "@id": "sapiens-africa",
       "taxon:scientificName": "Homo sapiens",
       "name": {
@@ -1433,6 +2024,126 @@
         }
       ],
       "hominin:taxonomyDebateLevel": "STRONG_CONSENSUS",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+    },
+    {
+      "@type": "Species",
+      "@id": "floresiensis",
+      "taxon:scientificName": "Homo floresiensis",
+      "name": {
+        "fr": "\"Le Hobbit\" de Flores",
+        "en": "The Flores \"Hobbit\""
+      },
+      "hominin:periodStart": -100000,
+      "hominin:periodEnd": -50000,
+      "hominin:color": "#B46A3A",
+      "hominin:lane": 2,
+      "hominin:heightM": {
+        "fr": "~106 cm",
+        "en": "~106 cm"
+      },
+      "hominin:heightF": {
+        "fr": "~100 cm",
+        "en": "~100 cm"
+      },
+      "hominin:weightM": {
+        "fr": "~30 kg",
+        "en": "~30 kg"
+      },
+      "hominin:brain": {
+        "fr": "~380–430 cm³",
+        "en": "~380–430 cm³"
+      },
+      "hominin:dimorphism": {
+        "fr": "Faible",
+        "en": "Low"
+      },
+      "hominin:skinDesc": {
+        "fr": "Sombre, inférée pour un hominine tropical insulaire",
+        "en": "Dark, inferred for a tropical island hominin"
+      },
+      "hominin:skinColor": "#5a3010",
+      "hominin:skinVariant": null,
+      "hominin:eyesDesc": {
+        "fr": "Bruns",
+        "en": "Brown"
+      },
+      "hominin:eyesColor": "#4b2a18",
+      "hominin:hairDesc": {
+        "fr": "Sombres",
+        "en": "Dark"
+      },
+      "hominin:hairColor": "#140a00",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
+        "en": "⚠️ Evolutionary inference (no DNA)"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Outils lithiques simples",
+          "en": "Simple lithic tools"
+        },
+        {
+          "fr": "Faune insulaire chassée ou charognée",
+          "en": "Island fauna hunted or scavenged"
+        },
+        {
+          "fr": "Adaptation probable au nanisme insulaire",
+          "en": "Probable adaptation to insular dwarfism"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Le débat a opposé espèce distincte et pathologie de H. sapiens, mais l'interprétation comme espèce distincte domine aujourd'hui ; l'ascendance exacte (H. erectus insulaire ou lignée plus ancienne) reste discutée.",
+        "en": "Debate once opposed a distinct species to a pathology of H. sapiens, but the distinct-species interpretation now dominates; exact ancestry (insular H. erectus vs more basal lineage) is still discussed."
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Île de Flores (Indonésie)",
+            "en": "Flores Island (Indonesia)"
+          },
+          "lat": -8.5,
+          "lng": 121,
+          "radius": 180000,
+          "note": {
+            "fr": "Distribution connue limitée à Flores",
+            "en": "Known distribution limited to Flores"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Liang Bua (Flores, Indonésie)",
+            "en": "Liang Bua (Flores, Indonesia)"
+          },
+          "lat": -8.53,
+          "lng": 120.45,
+          "note": {
+            "fr": "LB1 et autres fossiles — ~100 à 50 ka",
+            "en": "LB1 and other fossils — ~100 to 50 ka"
+          }
+        },
+        {
+          "name": {
+            "fr": "Mata Menge (Flores, Indonésie)",
+            "en": "Mata Menge (Flores, Indonesia)"
+          },
+          "lat": -8.68,
+          "lng": 121.08,
+          "note": {
+            "fr": "Restes plus anciens attribués à des ancêtres de H. floresiensis — ~700 ka",
+            "en": "Older remains attributed to H. floresiensis ancestors — ~700 ka"
+          }
+        }
+      ],
+      "hominin:migrations": [],
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
       "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
@@ -2202,246 +2913,6 @@
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
       "hominin:pigmentationEvidenceType": "DIRECT_DATA"
-    },
-    {
-      "@type": "Species",
-      "@id": "naledi",
-      "taxon:scientificName": "Homo naledi",
-      "name": {
-        "fr": "Une mosaïque anatomique tardive d'Afrique australe",
-        "en": "A late anatomical mosaic from southern Africa"
-      },
-      "hominin:periodStart": -335000,
-      "hominin:periodEnd": -236000,
-      "hominin:color": "#8C5A2B",
-      "hominin:lane": 3,
-      "hominin:heightM": {
-        "fr": "~145 cm",
-        "en": "~145 cm"
-      },
-      "hominin:heightF": {
-        "fr": "~140 cm",
-        "en": "~140 cm"
-      },
-      "hominin:weightM": {
-        "fr": "~45 kg",
-        "en": "~45 kg"
-      },
-      "hominin:brain": {
-        "fr": "465–610 cm³",
-        "en": "465–610 cm³"
-      },
-      "hominin:dimorphism": {
-        "fr": "Faible à modéré",
-        "en": "Low to moderate"
-      },
-      "hominin:skinDesc": {
-        "fr": "Sombre, inférée par continuité évolutive africaine",
-        "en": "Dark, inferred from African evolutionary continuity"
-      },
-      "hominin:skinColor": "#4a2200",
-      "hominin:skinVariant": null,
-      "hominin:eyesDesc": {
-        "fr": "Bruns",
-        "en": "Brown"
-      },
-      "hominin:eyesColor": "#4b2e19",
-      "hominin:hairDesc": {
-        "fr": "Sombres, probablement crépus",
-        "en": "Dark, probably coiled"
-      },
-      "hominin:hairColor": "#120800",
-      "hominin:pigmentationCertainty": "inference",
-      "hominin:pigmentationCertLabel": {
-        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
-        "en": "⚠️ Evolutionary inference (no DNA)"
-      },
-      "hominin:tools": [
-        {
-          "fr": "Outils non attribués avec certitude",
-          "en": "Tools not confidently attributed"
-        },
-        {
-          "fr": "Mains adaptées à la préhension fine",
-          "en": "Hands adapted to fine manipulation"
-        },
-        {
-          "fr": "Bipédie efficace avec capacités grimpeuses",
-          "en": "Efficient bipedalism with climbing abilities"
-        }
-      ],
-      "hominin:debate": {
-        "fr": "Débat fort sur le statut comportemental et phylogénétique : pratique funéraire, usage du feu et position dans Homo restent contestés ; plusieurs affirmations récentes ont été critiquées comme prématurées.",
-        "en": "Strong debate over behavioural and phylogenetic status: funerary practice, fire use and position within Homo remain contested; several recent claims have been criticised as premature."
-      },
-      "hominin:regions": [
-        {
-          "name": {
-            "fr": "Afrique australe",
-            "en": "Southern Africa"
-          },
-          "lat": -25.9,
-          "lng": 27.8,
-          "radius": 300000,
-          "note": {
-            "fr": "Rising Star Cave et environs",
-            "en": "Rising Star Cave and surroundings"
-          }
-        }
-      ],
-      "hominin:fossilSites": [
-        {
-          "name": {
-            "fr": "Rising Star Cave (Afrique du Sud)",
-            "en": "Rising Star Cave (South Africa)"
-          },
-          "lat": -25.92,
-          "lng": 27.73,
-          "note": {
-            "fr": "Dinaledi Chamber — espèce décrite en 2015, datée ~335–236 ka",
-            "en": "Dinaledi Chamber — species described in 2015, dated ~335–236 ka"
-          }
-        },
-        {
-          "name": {
-            "fr": "Lesedi Chamber (Afrique du Sud)",
-            "en": "Lesedi Chamber (South Africa)"
-          },
-          "lat": -25.92,
-          "lng": 27.73,
-          "note": {
-            "fr": "Matériel supplémentaire attribué à H. naledi",
-            "en": "Additional material attributed to H. naledi"
-          }
-        }
-      ],
-      "hominin:migrations": [],
-      "hominin:taxonomyDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
-      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
-      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
-      "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
-    },
-    {
-      "@type": "Species",
-      "@id": "floresiensis",
-      "taxon:scientificName": "Homo floresiensis",
-      "name": {
-        "fr": "\"Le Hobbit\" de Flores",
-        "en": "The Flores \"Hobbit\""
-      },
-      "hominin:periodStart": -100000,
-      "hominin:periodEnd": -50000,
-      "hominin:color": "#B46A3A",
-      "hominin:lane": 2,
-      "hominin:heightM": {
-        "fr": "~106 cm",
-        "en": "~106 cm"
-      },
-      "hominin:heightF": {
-        "fr": "~100 cm",
-        "en": "~100 cm"
-      },
-      "hominin:weightM": {
-        "fr": "~30 kg",
-        "en": "~30 kg"
-      },
-      "hominin:brain": {
-        "fr": "~380–430 cm³",
-        "en": "~380–430 cm³"
-      },
-      "hominin:dimorphism": {
-        "fr": "Faible",
-        "en": "Low"
-      },
-      "hominin:skinDesc": {
-        "fr": "Sombre, inférée pour un hominine tropical insulaire",
-        "en": "Dark, inferred for a tropical island hominin"
-      },
-      "hominin:skinColor": "#5a3010",
-      "hominin:skinVariant": null,
-      "hominin:eyesDesc": {
-        "fr": "Bruns",
-        "en": "Brown"
-      },
-      "hominin:eyesColor": "#4b2a18",
-      "hominin:hairDesc": {
-        "fr": "Sombres",
-        "en": "Dark"
-      },
-      "hominin:hairColor": "#140a00",
-      "hominin:pigmentationCertainty": "inference",
-      "hominin:pigmentationCertLabel": {
-        "fr": "⚠️ Inférence évolutive (pas d'ADN)",
-        "en": "⚠️ Evolutionary inference (no DNA)"
-      },
-      "hominin:tools": [
-        {
-          "fr": "Outils lithiques simples",
-          "en": "Simple lithic tools"
-        },
-        {
-          "fr": "Faune insulaire chassée ou charognée",
-          "en": "Island fauna hunted or scavenged"
-        },
-        {
-          "fr": "Adaptation probable au nanisme insulaire",
-          "en": "Probable adaptation to insular dwarfism"
-        }
-      ],
-      "hominin:debate": {
-        "fr": "Le débat a opposé espèce distincte et pathologie de H. sapiens, mais l'interprétation comme espèce distincte domine aujourd'hui ; l'ascendance exacte (H. erectus insulaire ou lignée plus ancienne) reste discutée.",
-        "en": "Debate once opposed a distinct species to a pathology of H. sapiens, but the distinct-species interpretation now dominates; exact ancestry (insular H. erectus vs more basal lineage) is still discussed."
-      },
-      "hominin:regions": [
-        {
-          "name": {
-            "fr": "Île de Flores (Indonésie)",
-            "en": "Flores Island (Indonesia)"
-          },
-          "lat": -8.5,
-          "lng": 121,
-          "radius": 180000,
-          "note": {
-            "fr": "Distribution connue limitée à Flores",
-            "en": "Known distribution limited to Flores"
-          }
-        }
-      ],
-      "hominin:fossilSites": [
-        {
-          "name": {
-            "fr": "Liang Bua (Flores, Indonésie)",
-            "en": "Liang Bua (Flores, Indonesia)"
-          },
-          "lat": -8.53,
-          "lng": 120.45,
-          "note": {
-            "fr": "LB1 et autres fossiles — ~100 à 50 ka",
-            "en": "LB1 and other fossils — ~100 to 50 ka"
-          }
-        },
-        {
-          "name": {
-            "fr": "Mata Menge (Flores, Indonésie)",
-            "en": "Mata Menge (Flores, Indonesia)"
-          },
-          "lat": -8.68,
-          "lng": 121.08,
-          "note": {
-            "fr": "Restes plus anciens attribués à des ancêtres de H. floresiensis — ~700 ka",
-            "en": "Older remains attributed to H. floresiensis ancestors — ~700 ka"
-          }
-        }
-      ],
-      "hominin:migrations": [],
-      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
-      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
-      "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
-      "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     }
   ]
 }

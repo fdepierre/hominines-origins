@@ -13,7 +13,10 @@
     {
       "@type": "Event",
       "@id": "lomekwi",
-      "name": { "fr": "Outils Lomékwien", "en": "Lomekwian tools" },
+      "name": {
+        "fr": "Outils Lomékwien",
+        "en": "Lomekwian tools"
+      },
       "hominin:icon": "🪨",
       "hominin:color": "#8B6914",
       "hominin:dateYearsBP": -3300000,
@@ -26,13 +29,46 @@
       "location": {
         "@type": "Place",
         "name": "Lomekwi 3, Kenya",
-        "geo": { "@type": "GeoCoordinates", "latitude": 3.38, "longitude": 35.83 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 3.38,
+          "longitude": 35.83
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "lucy",
+      "name": {
+        "fr": "Découverte de \"Lucy\" (A. afarensis)",
+        "en": "Discovery of \"Lucy\" (A. afarensis)"
+      },
+      "hominin:icon": "🦴",
+      "hominin:color": "#8B6914",
+      "hominin:dateYearsBP": -3200000,
+      "hominin:category": "phylo",
+      "hominin:dateReference": "Nature 260:293 (1976)",
+      "description": {
+        "fr": "Squelette AL 288-1 \"Lucy\" daté ~3,2 Ma, découvert à Hadar (Éthiopie) par Johanson & Taieb. ~40% du squelette préservé. Empreintes de Laetoli (3,7 Ma) confirment la bipédie habituelle.",
+        "en": "AL 288-1 \"Lucy\" skeleton dated ~3.2 Ma, discovered at Hadar (Ethiopia) by Johanson & Taieb. ~40% of skeleton preserved. Laetoli footprints (3.7 Ma) confirm habitual bipedalism."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Hadar, Afar, Ethiopia",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 11.1,
+          "longitude": 40.6
+        }
       }
     },
     {
       "@type": "Event",
       "@id": "oldowayen",
-      "name": { "fr": "Oldowayen continu 2,75–2,44 Ma", "en": "Continuous Oldowan 2.75–2.44 Ma" },
+      "name": {
+        "fr": "Oldowayen continu 2,75–2,44 Ma",
+        "en": "Continuous Oldowan 2.75–2.44 Ma"
+      },
       "hominin:icon": "⚒",
       "hominin:color": "#A07820",
       "hominin:dateYearsBP": -2600000,
@@ -45,13 +81,72 @@
       "location": {
         "@type": "Place",
         "name": "Koobi Fora, Kenya",
-        "geo": { "@type": "GeoCoordinates", "latitude": 3.94, "longitude": 36.17 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 3.94,
+          "longitude": 36.17
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "shangchen",
+      "name": {
+        "fr": "Outils en Asie de l'Est (Shangchen)",
+        "en": "Tools in East Asia (Shangchen)"
+      },
+      "hominin:icon": "⚒",
+      "hominin:color": "#A06020",
+      "hominin:dateYearsBP": -2100000,
+      "hominin:category": "tools",
+      "hominin:dateReference": "Nature 559:608 (2018)",
+      "description": {
+        "fr": "Outils lithiques sur le Plateau de Lœss (Chine) datés ~2,1 Ma. Suggèrent une sortie d'Afrique antérieure aux estimations classiques. Datations encore discutées.",
+        "en": "Stone tools on the Loess Plateau (China) dated ~2.1 Ma. Suggest an Out-of-Africa earlier than classic estimates. Datings still debated."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Shangchen, Loess Plateau, China",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 34.0,
+          "longitude": 109.5
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "out-of-africa-1",
+      "name": {
+        "fr": "Première sortie d'Afrique (Dmanisi)",
+        "en": "First Out-of-Africa (Dmanisi)"
+      },
+      "hominin:icon": "🗺",
+      "hominin:color": "#A06020",
+      "hominin:dateYearsBP": -1770000,
+      "hominin:category": "migration",
+      "hominin:dateReference": "Science 342:326 (2013)",
+      "description": {
+        "fr": "Plus anciens hominines connus hors d'Afrique. 5 crânes d'H. erectus georgicus à Dmanisi (Géorgie). Variabilité morphologique exceptionnelle au sein d'une seule population.",
+        "en": "Earliest known hominins outside Africa. 5 H. erectus georgicus skulls at Dmanisi (Georgia). Exceptional morphological variability within a single population."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Dmanisi, Georgia",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 41.33,
+          "longitude": 44.35
+        }
       }
     },
     {
       "@type": "Event",
       "@id": "acheulean",
-      "name": { "fr": "Premier biface (Acheuléen)", "en": "First handaxe (Acheulean)" },
+      "name": {
+        "fr": "Premier biface (Acheuléen)",
+        "en": "First handaxe (Acheulean)"
+      },
       "hominin:icon": "🗿",
       "hominin:color": "#C04010",
       "hominin:dateYearsBP": -1760000,
@@ -64,13 +159,20 @@
       "location": {
         "@type": "Place",
         "name": "Kokiselei 4, West Turkana, Kenya",
-        "geo": { "@type": "GeoCoordinates", "latitude": 3.5, "longitude": 35.7 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 3.5,
+          "longitude": 35.7
+        }
       }
     },
     {
       "@type": "Event",
       "@id": "fire-use",
-      "name": { "fr": "Usage du feu (>1 Ma)", "en": "Fire use (>1 Ma)" },
+      "name": {
+        "fr": "Usage du feu (>1 Ma)",
+        "en": "Fire use (>1 Ma)"
+      },
       "hominin:icon": "🔥",
       "hominin:color": "#D05010",
       "hominin:dateYearsBP": -1000000,
@@ -83,32 +185,20 @@
       "location": {
         "@type": "Place",
         "name": "Wonderwerk Cave, South Africa",
-        "geo": { "@type": "GeoCoordinates", "latitude": -27.85, "longitude": 23.55 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "fire-make",
-      "name": { "fr": "Fabrication intentionnelle du feu", "en": "Intentional fire-making" },
-      "hominin:icon": "🔥",
-      "hominin:color": "#E06020",
-      "hominin:dateYearsBP": -400000,
-      "hominin:category": "fire",
-      "hominin:dateReference": "Nature (déc. 2025)",
-      "description": {
-        "fr": "Pyrite de fer + argile cuite >750°C — Barnham, Suffolk, Angleterre. Repousse le record de 350 000 ans.",
-        "en": "Iron pyrite + clay fired >750°C — Barnham, Suffolk, England. Pushes record back 350,000 years."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Barnham, Suffolk, England",
-        "geo": { "@type": "GeoCoordinates", "latitude": 52.28, "longitude": 0.9 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -27.85,
+          "longitude": 23.55
+        }
       }
     },
     {
       "@type": "Event",
       "@id": "thomas-quarry",
-      "name": { "fr": "Ancêtre commun Sapiens / Néandertal / Dénisovien", "en": "Common ancestor Sapiens / Neanderthal / Denisovan" },
+      "name": {
+        "fr": "Ancêtre commun Sapiens / Néandertal / Dénisovien",
+        "en": "Common ancestor Sapiens / Neanderthal / Denisovan"
+      },
       "hominin:icon": "🦴",
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -773000,
@@ -121,7 +211,63 @@
       "location": {
         "@type": "Place",
         "name": "Thomas Quarry I, Casablanca, Morocco",
-        "geo": { "@type": "GeoCoordinates", "latitude": 33.59, "longitude": -7.62 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 33.59,
+          "longitude": -7.62
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "fire-make",
+      "name": {
+        "fr": "Fabrication intentionnelle du feu",
+        "en": "Intentional fire-making"
+      },
+      "hominin:icon": "🔥",
+      "hominin:color": "#E06020",
+      "hominin:dateYearsBP": -400000,
+      "hominin:category": "fire",
+      "hominin:dateReference": "Nature (déc. 2025)",
+      "description": {
+        "fr": "Pyrite de fer + argile cuite >750°C — Barnham, Suffolk, Angleterre. Repousse le record de 350 000 ans.",
+        "en": "Iron pyrite + clay fired >750°C — Barnham, Suffolk, England. Pushes record back 350,000 years."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Barnham, Suffolk, England",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 52.28,
+          "longitude": 0.9
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "jebel-irhoud",
+      "name": {
+        "fr": "Premier H. sapiens moderne (Jebel Irhoud)",
+        "en": "First modern H. sapiens (Jebel Irhoud)"
+      },
+      "hominin:icon": "🦴",
+      "hominin:color": "#C04010",
+      "hominin:dateYearsBP": -315000,
+      "hominin:category": "phylo",
+      "hominin:dateReference": "Nature 546:289 (2017)",
+      "description": {
+        "fr": "5 individus H. sapiens à Jebel Irhoud (Maroc), datation TL 315±34 ka. Mosaïque de traits modernes (face plate) et archaïques (neurocrâne allongé). Infirme le modèle d'origine est-africaine unique.",
+        "en": "5 H. sapiens individuals at Jebel Irhoud (Morocco), TL dating 315±34 ka. Mosaic of modern (flat face) and archaic (elongated neurocranium) traits. Refutes the single East-African origin model."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Jebel Irhoud, Morocco",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 31.85,
+          "longitude": -8.87
+        }
       }
     },
     {
@@ -145,13 +291,46 @@
       "location": {
         "@type": "Place",
         "name": "Rising Star Cave System, Dinaledi Chamber, South Africa",
-        "geo": { "@type": "GeoCoordinates", "latitude": -26.02, "longitude": 27.71 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -26.02,
+          "longitude": 27.71
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "omo-kibish",
+      "name": {
+        "fr": "H. sapiens est-africain révisé (Omo Kibish)",
+        "en": "Revised East African H. sapiens (Omo Kibish)"
+      },
+      "hominin:icon": "🦴",
+      "hominin:color": "#C04010",
+      "hominin:dateYearsBP": -233000,
+      "hominin:category": "phylo",
+      "hominin:dateReference": "Nature 601:579 (2022)",
+      "description": {
+        "fr": "Omo I (Éthiopie) re-daté à 233±22 ka via tephra Shala (Vidal et al. 2022). Cohérent avec une origine pan-africaine de H. sapiens (Jebel Irhoud + Omo + Florisbad).",
+        "en": "Omo I (Ethiopia) re-dated to 233±22 ka via Shala tephra (Vidal et al. 2022). Consistent with a pan-African origin of H. sapiens (Jebel Irhoud + Omo + Florisbad)."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Omo Kibish, Ethiopia",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 5.4,
+          "longitude": 35.9
+        }
       }
     },
     {
       "@type": "Event",
       "@id": "bruniquel",
-      "name": { "fr": "Structures rituelles Néandertal", "en": "Neanderthal ritual structures" },
+      "name": {
+        "fr": "Structures rituelles Néandertal",
+        "en": "Neanderthal ritual structures"
+      },
       "hominin:icon": "🗺",
       "hominin:color": "#2070B0",
       "hominin:dateYearsBP": -176500,
@@ -164,13 +343,20 @@
       "location": {
         "@type": "Place",
         "name": "Bruniquel Cave, France",
-        "geo": { "@type": "GeoCoordinates", "latitude": 44.17, "longitude": 1.66 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 44.17,
+          "longitude": 1.66
+        }
       }
     },
     {
       "@type": "Event",
       "@id": "beads-nassarius",
-      "name": { "fr": "Coquillages perforés (parures)", "en": "Perforated shells (ornaments)" },
+      "name": {
+        "fr": "Coquillages perforés (parures)",
+        "en": "Perforated shells (ornaments)"
+      },
       "hominin:icon": "📿",
       "hominin:color": "#C0A000",
       "hominin:dateYearsBP": -130000,
@@ -183,197 +369,11 @@
       "location": {
         "@type": "Place",
         "name": "Skhul, Israel",
-        "geo": { "@type": "GeoCoordinates", "latitude": 32.67, "longitude": 35.07 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "burial-tinshemet",
-      "name": { "fr": "1ère sépulture intentionnelle (révisé)", "en": "1st intentional burial (revised)" },
-      "hominin:icon": "⚰",
-      "hominin:color": "#D07010",
-      "hominin:dateYearsBP": -110000,
-      "hominin:category": "symbolic",
-      "hominin:dateReference": "Nature Human Behaviour (2025)",
-      "description": {
-        "fr": "5 individus en position fœtale + ocre + objets rituels — Tinshemet Cave, Israël. Révisé de 100 000 à 110 000 ans (Nature Human Behaviour 2025).",
-        "en": "5 individuals in foetal position + ochre + ritual objects — Tinshemet Cave, Israel. Revised from 100,000 to 110,000 years (Nature Human Behaviour 2025)."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Tinshemet Cave, Israel",
-        "geo": { "@type": "GeoCoordinates", "latitude": 32.6, "longitude": 34.97 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "blombos-beads",
-      "name": { "fr": "Perles Blombos Cave", "en": "Blombos Cave beads" },
-      "hominin:icon": "📿",
-      "hominin:color": "#E08020",
-      "hominin:dateYearsBP": -75000,
-      "hominin:category": "symbolic",
-      "hominin:dateReference": "J. Hum. Evol. 48:3 (2005)",
-      "description": {
-        "fr": "41+ perles Nassarius kraussianus — Blombos Cave, Afrique du Sud. 75 000 ans (OSL/TL).",
-        "en": "41+ Nassarius kraussianus beads — Blombos Cave, South Africa. 75,000 years (OSL/TL)."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Blombos Cave, South Africa",
-        "geo": { "@type": "GeoCoordinates", "latitude": -34.42, "longitude": 21.22 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "art-sulawesi-old",
-      "name": { "fr": "Plus ancien art rupestre mondial (≥67 800 ans)", "en": "World's oldest rock art (≥67,800 years)" },
-      "hominin:icon": "🎨",
-      "hominin:color": "#8050C0",
-      "hominin:dateYearsBP": -67800,
-      "hominin:category": "art",
-      "hominin:dateReference": "Nature (janv. 2026)",
-      "description": {
-        "fr": "Empreintes de main — Liang Metanduno, île de Muna, Sulawesi. ≥67 800 ans. Dépasse de 16 600 ans le précédent record (Nature 2026).",
-        "en": "Hand stencils — Liang Metanduno, Muna Island, Sulawesi. ≥67,800 years. Exceeds previous record by 16,600 years (Nature 2026)."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Liang Metanduno, Muna Island, Sulawesi, Indonesia",
-        "geo": { "@type": "GeoCoordinates", "latitude": -4.9, "longitude": 122.5 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "art-sulawesi-fig",
-      "name": { "fr": "Plus ancienne scène narrative (51 200 ans)", "en": "Oldest narrative scene (51,200 years)" },
-      "hominin:icon": "🎨",
-      "hominin:color": "#9060D0",
-      "hominin:dateYearsBP": -51200,
-      "hominin:category": "art",
-      "hominin:dateReference": "Nature 631 (2024)",
-      "description": {
-        "fr": "Figures anthropomorphes + cochon sauvage — Leang Karampuang, Sulawesi. Première scène avec interaction connue.",
-        "en": "Anthropomorphic figures + wild pig — Leang Karampuang, Sulawesi. First known scene with interaction."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Leang Karampuang, Sulawesi, Indonesia",
-        "geo": { "@type": "GeoCoordinates", "latitude": -4.55, "longitude": 119.55 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "aurignacian",
-      "name": { "fr": "Culture Aurignacienne", "en": "Aurignacian culture" },
-      "hominin:icon": "⚒",
-      "hominin:color": "#E08020",
-      "hominin:dateYearsBP": -43000,
-      "hominin:category": "tools",
-      "hominin:dateReference": "Nature Commun. (2024)",
-      "description": {
-        "fr": "1ère grande culture matérielle H. sapiens en Europe (43–28 ka). Deux vagues de dispersion confirmées par génomique (2024).",
-        "en": "First major H. sapiens material culture in Europe (43–28 ka). Two dispersal waves confirmed by genomics (2024)."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Aurignac, France",
-        "geo": { "@type": "GeoCoordinates", "latitude": 44.93, "longitude": 1.27 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "art-chauvet",
-      "name": { "fr": "Grotte Chauvet (art pariétal)", "en": "Chauvet Cave (cave art)" },
-      "hominin:icon": "🎨",
-      "hominin:color": "#A070D0",
-      "hominin:dateYearsBP": -36000,
-      "hominin:category": "art",
-      "hominin:dateReference": "PNAS 113:4670 (2016)",
-      "description": {
-        "fr": "Ardèche, France — 37–33 500 ans (phase 1). Débat actif sur attribution culturelle Aurignacien vs Gravettien.",
-        "en": "Ardèche, France — 37–33,500 years (phase 1). Active debate on cultural attribution Aurignacian vs Gravettian."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Grotte Chauvet, Ardèche, France",
-        "geo": { "@type": "GeoCoordinates", "latitude": 44.38, "longitude": 4.42 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "art-altamira",
-      "name": { "fr": "Altamira (bisons, ~35 ka)", "en": "Altamira (bison, ~35 ka)" },
-      "hominin:icon": "🎨",
-      "hominin:color": "#A070D0",
-      "hominin:dateYearsBP": -35000,
-      "hominin:category": "art",
-      "hominin:dateReference": "",
-      "description": {
-        "fr": "Peintures rupestres bisons — Altamira, Espagne. ~35 000 ans.",
-        "en": "Bison cave paintings — Altamira, Spain. ~35,000 years."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Altamira, Spain",
-        "geo": { "@type": "GeoCoordinates", "latitude": 43.38, "longitude": -4.1 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "art-lascaux",
-      "name": { "fr": "Lascaux (~17 000 ans)", "en": "Lascaux (~17,000 years)" },
-      "hominin:icon": "🎨",
-      "hominin:color": "#B080E0",
-      "hominin:dateYearsBP": -17000,
-      "hominin:category": "art",
-      "hominin:dateReference": "",
-      "description": {
-        "fr": "Chef-d'œuvre pariétal — Lascaux, Dordogne, France. ~17 000 ans.",
-        "en": "Cave painting masterpiece — Lascaux, Dordogne, France. ~17,000 years."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Lascaux, Dordogne, France",
-        "geo": { "@type": "GeoCoordinates", "latitude": 45.05, "longitude": 1.07 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "sapiens-europe",
-      "name": { "fr": "H. sapiens en Europe (47 500 ans)", "en": "H. sapiens in Europe (47,500 years)" },
-      "hominin:icon": "●",
-      "hominin:color": "#E08020",
-      "hominin:dateYearsBP": -47500,
-      "hominin:category": "migration",
-      "hominin:dateReference": "Nature 626:341 (2024)",
-      "description": {
-        "fr": "Ossements + industrie LRJ — Grotte de Ranis, Thuringe, Allemagne. Légèrement révisé de 45 000 à 47 500 ans (Nature 2024).",
-        "en": "Bones + LRJ industry — Ranis Cave, Thuringia, Germany. Revised from 45,000 to 47,500 years (Nature 2024)."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Ranis Cave, Thuringia, Germany",
-        "geo": { "@type": "GeoCoordinates", "latitude": 50.67, "longitude": 11.57 }
-      }
-    },
-    {
-      "@type": "Event",
-      "@id": "peuplement-australie",
-      "name": { "fr": "Peuplement Australie (65 000 ans)", "en": "Peopling of Australia (65,000 years)" },
-      "hominin:icon": "●",
-      "hominin:color": "#208060",
-      "hominin:dateYearsBP": -65000,
-      "hominin:category": "migration",
-      "hominin:dateReference": "Nature 547 (2017)",
-      "description": {
-        "fr": "OSL 65 000 ans — Madjedbebe, Territoire du Nord. Génomique (2025) : ~60 000 ans, deux routes depuis la Sonde.",
-        "en": "OSL 65,000 years — Madjedbebe, Northern Territory. Genomics (2025): ~60,000 years, two routes from Sundaland."
-      },
-      "location": {
-        "@type": "Place",
-        "name": "Madjedbebe, Northern Territory, Australia",
-        "geo": { "@type": "GeoCoordinates", "latitude": -12.55, "longitude": 132.97 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 32.67,
+          "longitude": 35.07
+        }
       }
     },
     {
@@ -397,13 +397,280 @@
       "location": {
         "@type": "Place",
         "name": "Liang Bua, Flores Island, Indonesia",
-        "geo": { "@type": "GeoCoordinates", "latitude": -8.53, "longitude": 120.44 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -8.53,
+          "longitude": 120.44
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "burial-tinshemet",
+      "name": {
+        "fr": "1ère sépulture intentionnelle (révisé)",
+        "en": "1st intentional burial (revised)"
+      },
+      "hominin:icon": "⚰",
+      "hominin:color": "#D07010",
+      "hominin:dateYearsBP": -110000,
+      "hominin:category": "symbolic",
+      "hominin:dateReference": "Nature Human Behaviour (2025)",
+      "description": {
+        "fr": "5 individus en position fœtale + ocre + objets rituels — Tinshemet Cave, Israël. Révisé de 100 000 à 110 000 ans (Nature Human Behaviour 2025).",
+        "en": "5 individuals in foetal position + ochre + ritual objects — Tinshemet Cave, Israel. Revised from 100,000 to 110,000 years (Nature Human Behaviour 2025)."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Tinshemet Cave, Israel",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 32.6,
+          "longitude": 34.97
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "blombos-beads",
+      "name": {
+        "fr": "Perles Blombos Cave",
+        "en": "Blombos Cave beads"
+      },
+      "hominin:icon": "📿",
+      "hominin:color": "#E08020",
+      "hominin:dateYearsBP": -75000,
+      "hominin:category": "symbolic",
+      "hominin:dateReference": "J. Hum. Evol. 48:3 (2005)",
+      "description": {
+        "fr": "41+ perles Nassarius kraussianus — Blombos Cave, Afrique du Sud. 75 000 ans (OSL/TL).",
+        "en": "41+ Nassarius kraussianus beads — Blombos Cave, South Africa. 75,000 years (OSL/TL)."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Blombos Cave, South Africa",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -34.42,
+          "longitude": 21.22
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "art-sulawesi-old",
+      "name": {
+        "fr": "Plus ancien art rupestre mondial (≥67 800 ans)",
+        "en": "World's oldest rock art (≥67,800 years)"
+      },
+      "hominin:icon": "🎨",
+      "hominin:color": "#8050C0",
+      "hominin:dateYearsBP": -67800,
+      "hominin:category": "art",
+      "hominin:dateReference": "Nature (janv. 2026)",
+      "description": {
+        "fr": "Empreintes de main — Liang Metanduno, île de Muna, Sulawesi. ≥67 800 ans. Dépasse de 16 600 ans le précédent record (Nature 2026).",
+        "en": "Hand stencils — Liang Metanduno, Muna Island, Sulawesi. ≥67,800 years. Exceeds previous record by 16,600 years (Nature 2026)."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Liang Metanduno, Muna Island, Sulawesi, Indonesia",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -4.9,
+          "longitude": 122.5
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "peuplement-australie",
+      "name": {
+        "fr": "Peuplement Australie (65 000 ans)",
+        "en": "Peopling of Australia (65,000 years)"
+      },
+      "hominin:icon": "●",
+      "hominin:color": "#208060",
+      "hominin:dateYearsBP": -65000,
+      "hominin:category": "migration",
+      "hominin:dateReference": "Nature 547 (2017)",
+      "description": {
+        "fr": "OSL 65 000 ans — Madjedbebe, Territoire du Nord. Génomique (2025) : ~60 000 ans, deux routes depuis la Sonde.",
+        "en": "OSL 65,000 years — Madjedbebe, Northern Territory. Genomics (2025): ~60,000 years, two routes from Sundaland."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Madjedbebe, Northern Territory, Australia",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -12.55,
+          "longitude": 132.97
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "art-sulawesi-fig",
+      "name": {
+        "fr": "Plus ancienne scène narrative (51 200 ans)",
+        "en": "Oldest narrative scene (51,200 years)"
+      },
+      "hominin:icon": "🎨",
+      "hominin:color": "#9060D0",
+      "hominin:dateYearsBP": -51200,
+      "hominin:category": "art",
+      "hominin:dateReference": "Nature 631 (2024)",
+      "description": {
+        "fr": "Figures anthropomorphes + cochon sauvage — Leang Karampuang, Sulawesi. Première scène avec interaction connue.",
+        "en": "Anthropomorphic figures + wild pig — Leang Karampuang, Sulawesi. First known scene with interaction."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Leang Karampuang, Sulawesi, Indonesia",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -4.55,
+          "longitude": 119.55
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "sapiens-europe",
+      "name": {
+        "fr": "H. sapiens en Europe (47 500 ans)",
+        "en": "H. sapiens in Europe (47,500 years)"
+      },
+      "hominin:icon": "●",
+      "hominin:color": "#E08020",
+      "hominin:dateYearsBP": -47500,
+      "hominin:category": "migration",
+      "hominin:dateReference": "Nature 626:341 (2024)",
+      "description": {
+        "fr": "Ossements + industrie LRJ — Grotte de Ranis, Thuringe, Allemagne. Légèrement révisé de 45 000 à 47 500 ans (Nature 2024).",
+        "en": "Bones + LRJ industry — Ranis Cave, Thuringia, Germany. Revised from 45,000 to 47,500 years (Nature 2024)."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Ranis Cave, Thuringia, Germany",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 50.67,
+          "longitude": 11.57
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "aurignacian",
+      "name": {
+        "fr": "Culture Aurignacienne",
+        "en": "Aurignacian culture"
+      },
+      "hominin:icon": "⚒",
+      "hominin:color": "#E08020",
+      "hominin:dateYearsBP": -43000,
+      "hominin:category": "tools",
+      "hominin:dateReference": "Nature Commun. (2024)",
+      "description": {
+        "fr": "1ère grande culture matérielle H. sapiens en Europe (43–28 ka). Deux vagues de dispersion confirmées par génomique (2024).",
+        "en": "First major H. sapiens material culture in Europe (43–28 ka). Two dispersal waves confirmed by genomics (2024)."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Aurignac, France",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 44.93,
+          "longitude": 1.27
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "art-chauvet",
+      "name": {
+        "fr": "Grotte Chauvet (art pariétal)",
+        "en": "Chauvet Cave (cave art)"
+      },
+      "hominin:icon": "🎨",
+      "hominin:color": "#A070D0",
+      "hominin:dateYearsBP": -36000,
+      "hominin:category": "art",
+      "hominin:dateReference": "PNAS 113:4670 (2016)",
+      "description": {
+        "fr": "Ardèche, France — 37–33 500 ans (phase 1). Débat actif sur attribution culturelle Aurignacien vs Gravettien.",
+        "en": "Ardèche, France — 37–33,500 years (phase 1). Active debate on cultural attribution Aurignacian vs Gravettian."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Grotte Chauvet, Ardèche, France",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 44.38,
+          "longitude": 4.42
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "art-altamira",
+      "name": {
+        "fr": "Altamira (bisons, ~35 ka)",
+        "en": "Altamira (bison, ~35 ka)"
+      },
+      "hominin:icon": "🎨",
+      "hominin:color": "#A070D0",
+      "hominin:dateYearsBP": -35000,
+      "hominin:category": "art",
+      "hominin:dateReference": "",
+      "description": {
+        "fr": "Peintures rupestres bisons — Altamira, Espagne. ~35 000 ans.",
+        "en": "Bison cave paintings — Altamira, Spain. ~35,000 years."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Altamira, Spain",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 43.38,
+          "longitude": -4.1
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "art-lascaux",
+      "name": {
+        "fr": "Lascaux (~17 000 ans)",
+        "en": "Lascaux (~17,000 years)"
+      },
+      "hominin:icon": "🎨",
+      "hominin:color": "#B080E0",
+      "hominin:dateYearsBP": -17000,
+      "hominin:category": "art",
+      "hominin:dateReference": "",
+      "description": {
+        "fr": "Chef-d'œuvre pariétal — Lascaux, Dordogne, France. ~17 000 ans.",
+        "en": "Cave painting masterpiece — Lascaux, Dordogne, France. ~17,000 years."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Lascaux, Dordogne, France",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 45.05,
+          "longitude": 1.07
+        }
       }
     },
     {
       "@type": "Event",
       "@id": "americas",
-      "name": { "fr": "Peuplement des Amériques (très débattu)", "en": "Peopling of the Americas (highly debated)" },
+      "name": {
+        "fr": "Peuplement des Amériques (très débattu)",
+        "en": "Peopling of the Americas (highly debated)"
+      },
       "hominin:icon": "●",
       "hominin:color": "#E04040",
       "hominin:dateYearsBP": -16000,
@@ -416,13 +683,20 @@
       "location": {
         "@type": "Place",
         "name": "Monte Verde, Chile",
-        "geo": { "@type": "GeoCoordinates", "latitude": -41.5, "longitude": -73.0 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -41.5,
+          "longitude": -73.0
+        }
       }
     },
     {
       "@type": "Event",
       "@id": "domestication",
-      "name": { "fr": "Domestication caprins", "en": "Goat domestication" },
+      "name": {
+        "fr": "Domestication caprins",
+        "en": "Goat domestication"
+      },
       "hominin:icon": "🐑",
       "hominin:color": "#60A040",
       "hominin:dateYearsBP": -10400,
@@ -435,7 +709,11 @@
       "location": {
         "@type": "Place",
         "name": "Aşıklı Höyük, Anatolia, Turkey",
-        "geo": { "@type": "GeoCoordinates", "latitude": 38.35, "longitude": 34.17 }
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 38.35,
+          "longitude": 34.17
+        }
       }
     }
   ]

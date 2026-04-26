@@ -51,8 +51,8 @@ W3C JSON-LD files derived from the Markdown sources above. These are what the ap
 
 | File | Contents |
 |------|----------|
-| [`app/data/species.json`](app/data/species.json) | 14 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Narrative fields use `fr` as the canonical language in the running app (parallel `en` is often present in the file for reuse and tooling). |
-| [`app/data/events.json`](app/data/events.json) | **22** milestones in JSON-LD: GeoCoordinates, `hominin:dateYearsBP`, DOI references. Same pattern: French-first in the UI, optional `en` in the data. |
+| [`app/data/species.json`](app/data/species.json) | 18 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Narrative fields use `fr` as the canonical language in the running app (parallel `en` is often present in the file for reuse and tooling). |
+| [`app/data/events.json`](app/data/events.json) | **27** milestones in JSON-LD: GeoCoordinates, `hominin:dateYearsBP`, DOI references. Same pattern: French-first in the UI, optional `en` in the data. |
 
 ### The relationship between the two
 

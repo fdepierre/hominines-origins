@@ -21,8 +21,8 @@ hominines-origins/
 ├── app/
 │   ├── index.html              ← THE ENTIRE APPLICATION (single file; JS/CSS/HTML inline)
 │   └── data/
-│       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (14 entries; includes six hominin certainty keys per species)
-│       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA (22 milestones)
+│       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (18 entries; includes six hominin certainty keys per species)
+│       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA (27 milestones)
 ├── data/
 │   ├── Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md
 │   │   └── Human-readable species tables (12 named hominine rows in the source doc; JSON may split *H. sapiens* into phases — keep MD + JSON aligned by policy)

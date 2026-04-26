@@ -30,9 +30,9 @@ async function runUnitTests() {
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ DATA INTEGRITY${RESET}`);
 
-  await test('SPECIES_DATA has exactly 14 species', async () => {
+  await test('SPECIES_DATA has exactly 18 species', async () => {
     const count = await page.evaluate(() => SPECIES_DATA?.length);
-    assert(count === 14, `SPECIES_DATA.length === 14 (got ${count})`);
+    assert(count === 18, `SPECIES_DATA.length === 18 (got ${count})`);
   });
 
   await test('Stable data-testid hooks exist for automation', async () => {
