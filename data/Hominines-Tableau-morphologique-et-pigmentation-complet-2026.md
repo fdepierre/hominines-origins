@@ -1,5 +1,7 @@
 # Hominines — Tableau morphologique et pigmentation complet 2026
-Tableau de référence scientifique intégrant données ostéologiques, génomiques et inférences évolutives pour chaque taxon ou période clé. Les 19 colonnes couvrent : phylogénie, biométrie, morphologie, pigmentation, niveau de certitude, débats actifs et DOI. Le fichier CSV téléchargeable est disponible en bas de page.
+Tableau de référence scientifique intégrant données ostéologiques, génomiques et inférences évolutives pour chaque taxon ou période clé. Les 19 colonnes couvrent : phylogénie, biométrie, morphologie, pigmentation, niveau de certitude, débats actifs et DOI.
+
+**Mise à jour avril 2026 :** ajout des taxons complémentaires *Sahelanthropus tchadensis* (Toumaï), *Ardipithecus ramidus*, *Homo erectus georgicus* (Dmanisi), *Homo antecessor*, *Homo naledi* et *Homo floresiensis* pour assurer la cohérence avec le transcript de la vidéo "Passé sauvage" et l'application web. Couverture taxonomique étendue de −7 Ma au présent. Révisions phylogénétiques intégrant Hublin et al. *Nature* (2026) sur Thomas Quarry I.
 
 ***
 ## Convention de lecture
@@ -9,6 +11,50 @@ Tableau de référence scientifique intégrant données ostéologiques, génomiq
 | 🔬 Génétique indirecte | Inférence via sélection moléculaire (ex: sweep MC1R) sans séquence directe |
 | ⚠️ Inférence évolutive | Raisonnement phylogénétique, aucun ADN disponible |
 | ❓ Débat ouvert | Résultats contradictoires entre équipes, non tranchés |
+
+***
+## 0a. Sahelanthropus tchadensis (Toumaï) — ~7 millions d'années
+**Phylogénie :** Plus ancien préhumain connu, découvert en 2001 à Toros-Menalla (désert du Djourab, Tchad) par la mission franco-tchadienne MPFT dirigée par Michel Brunet. Cité explicitement dans le transcript de la vidéo.[^T1]
+### Biométrie
+| Mesure | Valeur | Source |
+|---|---|---|
+| Volume crânien | 320–380 cm³ | Crâniotomie sur TM 266 |
+| Taille estimée | ~110–120 cm | Inférence sur fémur TM 266-01-063 |
+| Poids estimé | ~35 kg | Inférence ostéologique |
+### Morphologie
+Face courte et plate (rare à cette ancienneté), arcades sourcilières très prononcées, canines réduites par rapport aux grands singes contemporains. Le foramen magnum centré suggère une bipédie habituelle, mais la position du fémur découvert tardivement reste contestée (Macchiarelli et al. 2020).[^T1][^T2]
+### Pigmentation ⚠️ Inférence évolutive
+Aucun ADN récupérable à cette profondeur. Population probablement entièrement couverte de pelage avec peau sous-jacente peu pigmentée, comme les chimpanzés actuels.
+
+| Trait | Estimation | Certitude |
+|---|---|---|
+| Peau | Sous fourrure : peu pigmentée | ⚠️ Inférence évolutive |
+| Yeux | Bruns | ⚠️ Inférence |
+| Pelage | Fourrure sombre dense | ⚠️ Inférence |
+
+**Débat :** Statut d'hominine véritablement bipède contesté (Wolpoff et al. 2002 ; Macchiarelli et al. 2020). Position phylogénétique exacte non tranchée — pré-hominine ou simple grand singe miocène ?
+
+***
+## 0b. Ardipithecus ramidus — ~4,4 millions d'années
+**Phylogénie :** Hominine boisé décrit en 2009 par Tim White et al. Squelette "Ardi" (ARA-VP-6/500) provenant d'Aramis (Middle Awash, Éthiopie). Précédé par *Ardipithecus kadabba* (5,8–5,2 Ma).[^T3]
+### Biométrie
+| Mesure | Valeur | Source |
+|---|---|---|
+| Taille femelle (Ardi) | ~120 cm | Squelette ARA-VP-6/500 |
+| Poids femelle | ~50 kg | Squelette ARA-VP-6/500 |
+| Volume crânien | 300–350 cm³ | Crâniotomie |
+### Morphologie
+Mosaïque évolutive remarquable : bassin court et large adapté à la bipédie mais gros orteil divergent (en opposition, comme chez les singes), permettant la grimpette. Bras longs, mains à doigts longs et flexibles. Canines à dimorphisme sexuel réduit (signe d'une socialité moins compétitive que chez les chimpanzés). Vit en milieu boisé, contredisant l'hypothèse de la savane comme moteur de la bipédie.
+### Pigmentation ⚠️ Inférence évolutive
+Même logique que pour Toumaï : pelage intégral, peau sous-jacente peu pigmentée.
+
+| Trait | Estimation | Certitude |
+|---|---|---|
+| Peau | Sous fourrure : peu pigmentée | ⚠️ Inférence |
+| Yeux | Bruns | ⚠️ Inférence |
+| Pelage | Fourrure sombre | ⚠️ Inférence |
+
+**Débat :** Degré réel de bipédie discuté (Sarmiento 2010) ; rattachement à la lignée humaine non universellement accepté.
 
 ***
 ## 1. Australopithecus afarensis — 4,1 à 2,7 millions d'années
@@ -80,6 +126,28 @@ La transition vers une **peau noire** chez *Homo erectus* est appuyée par l'ana
 **Débat :** *H. erectus* sensu lato est probablement un groupement polyphylétique (Rogers et al. 2020) ; variations régionales importantes.
 
 ***
+## 3b. Homo erectus georgicus (Dmanisi) — ~1,77 million d'années
+**Phylogénie :** Population d'*Homo erectus* archaïque trouvée à Dmanisi (Géorgie). Plus anciens hominines connus hors d'Afrique. Cinq crânes décrits par Lordkipanidze et al. (2013) montrent une variabilité morphologique exceptionnellement large au sein d'une même population synchrone.[^T4]
+### Biométrie
+| Mesure | Valeur | Source |
+|---|---|---|
+| Taille mâle | ~145–166 cm | Squelettes post-crâniens |
+| Poids mâle | ~40–50 kg | Ostéologie |
+| Volume crânien | 546–775 cm³ (crâne D4500 : 546 cm³) | Crâniotomie |
+### Morphologie
+Crâne D4500 ("Skull 5") : neurocrâne très petit + face massive et prognathe — combinaison sans équivalent. Stature gracile, proportions des membres modernes. Pas de menton, arcade sourcilière marquée mais variable.
+### Pigmentation ⚠️ Inférence évolutive
+Population issue d'Afrique sub-saharienne récemment dispersée — peau probablement sombre, héritée du sweep MC1R à ~1,2 Ma chez *H. erectus* africain. Aucun ADN récupérable.
+
+| Trait | Estimation | Certitude |
+|---|---|---|
+| Peau | Sombre | ⚠️ Inférence par continuité |
+| Yeux | Bruns | ⚠️ Inférence |
+| Cheveux | Sombres, probablement crépus | ⚠️ Inférence |
+
+**Débat :** La forte variabilité intra-population conduit Lordkipanidze à suggérer que *H. ergaster*, *H. erectus* et *H. habilis* puissent appartenir à une seule espèce polymorphe ("hypothèse uni-spécifique"). Hypothèse non largement acceptée — la majorité des paléoanthropologues conservent la séparation habilis / erectus.
+
+***
 ## 4. Homo heidelbergensis — 700 000 à 200 000 ans
 **Phylogénie :** Ancêtre probable des Néandertaliens en Eurasie et possiblement des *H. sapiens* en Afrique. Statut d'espèce cohérente très débattu. Les fossiles de Thomas Quarry I (Casablanca, 773 000 ans) s'insèrent dans la lignée africaine conduisant à cette espèce.[^16][^17][^18][^19]
 ### Biométrie
@@ -133,6 +201,27 @@ Séquençage du gène MC1R sur deux spécimens (El Sidrón, Espagne ; Monti Less
 **Débat :** Hawks (2023) souligne les limites méthodologiques de l'inférence phénotypique à partir des génomes néandertaliens. L'introgression de pigmentation Néandertal → *H. sapiens* reste discutée (Iasi et al., *Science* 2024).[^33][^24]
 
 ***
+## 5b. Homo antecessor — ~1,2 million à 770 000 ans
+**Phylogénie :** Découvert en 1994-1997 à Atapuerca (Espagne, Sima del Elefante et Gran Dolina TD6). Long considéré comme candidat à l'ancêtre commun Néandertaliens / *Sapiens*. Cette interprétation est **révisée en 2026** par Hublin et al. à la lumière des fossiles de Thomas Quarry I (Maroc, 773 ka) qui occupent désormais cette position basale.[^T5][^T6]
+### Biométrie
+| Mesure | Valeur | Source |
+|---|---|---|
+| Taille mâle | ~165–175 cm | Ostéologie TD6 |
+| Volume crânien | ~1 000 cm³ | Crâniotomie |
+### Morphologie
+Face remarquablement moderne (fossette canine, projection sous-nasale verticale) chez certains individus juvéniles, contrastant avec un neurocrâne archaïque. Os malaire "angulaire". Cannibalisme documenté sur les ossements TD6.
+### Pigmentation ⚠️ Inférence
+Aucun ADN récupérable. Population eurasienne pré-néandertalienne, probablement encore à peau pigmentée (pas de marqueurs de peau claire à cette période).
+
+| Trait | Estimation | Certitude |
+|---|---|---|
+| Peau | Sombre | ⚠️ Inférence |
+| Yeux | Bruns | ⚠️ Inférence |
+| Cheveux | Sombres | ⚠️ Inférence |
+
+**Débat :** Statut phylogénétique entièrement repensé en 2026 : population sœur (et non ancêtre) du clade conduisant aux hominines de Thomas Quarry I et au-delà. Les traits modernes de la face seraient une convergence morphologique.
+
+***
 ## 6. Dénisoviens — ~400 000 à ~30 000 ans
 **Phylogénie :** Espèce sœur des Néandertaliens ; 3 à 5% d'ADN dénisovien dans les populations asiatiques et océaniennes actuelles. Jusqu'en 2025, connus uniquement par fragments minuscules (doigt, dents). En **juin 2025**, Fu Qiaomei et al. (*Science* et *Cell*, Beijing) ont identifié le crâne de "Dragon Man" (Harbin, Chine, ~146 000 ans) comme dénisovien via protéomique ancienne et ADN mitochondrial.[^34][^35][^36][^37][^38][^39]
 ### Biométrie
@@ -173,6 +262,38 @@ Deux convergences probantes :[^43][^44][^45]
 | Peau | **Très sombre / noire**[^43][^47] | ✅ ADN ancien africain |
 | Yeux | **Bruns foncés**[^43] | ✅ ADN ancien africain |
 | Cheveux | Noirs, probablement crépus | ✅ ADN + ⚠️ inférence morphologique |
+
+***
+## 7b. Homo naledi — ~335 000 à ~236 000 ans
+**Phylogénie :** Découvert en 2013 par Lee Berger et al. dans le système Rising Star (Afrique du Sud). Plus de 1 500 fragments d'au moins 15 individus dans la chambre Dinaledi. Mosaïque anatomique déroutante : traits archaïques (cerveau ~465–610 cm³) + traits modernes (mains, pieds), à une période tardive incompatible avec son anatomie primitive.[^T7]
+### Biométrie
+| Mesure | Valeur | Source |
+|---|---|---|
+| Taille mâle | ~144–147 cm | Squelettes "Neo" et autres |
+| Poids estimé | ~40 kg | Ostéologie |
+| Volume crânien | 465–610 cm³ | Crâniotomie |
+### Morphologie
+Crâne petit avec crêtes osseuses, dents réduites, cage thoracique en cloche, périmètre humain pour les pieds. Mains très courbées évoquant une grimpette persistante. Combinaison anatomique unique, considérée comme une lignée relictuelle préservée en Afrique australe.
+### Pigmentation ⚠️ Inférence
+Aucun ADN récupérable. Population africaine à peau probablement sombre.
+
+**Débat critique :** Berger et al. (2023, *eLife* preprints) revendiquent **sépultures intentionnelles + gravures pariétales + foyers** chez *H. naledi* malgré son petit cerveau. Ces revendications sont **vigoureusement contestées** par Martinón-Torres et al. (*J. Hum. Evol.* 2024) qui ne trouvent pas de preuves convaincantes de comportement funéraire intentionnel ni d'attribution sûre des gravures à *H. naledi*. Consensus très réservé.[^T8]
+
+***
+## 7c. Homo floresiensis — ~190 000 à ~50 000 ans
+**Phylogénie :** Découvert en 2003 à Liang Bua (île de Flores, Indonésie). Squelette LB1 ("Hobbit") + restes graciles plus anciens à Mata Menge (~700 ka). Probablement issu d'une population insulaire ayant subi un nanisme insulaire à partir d'un *Homo* ancestral (erectus ou plus basal).[^T9][^T10]
+### Biométrie
+| Mesure | Valeur | Source |
+|---|---|---|
+| Taille femelle (LB1) | ~106 cm | Squelette LB1 |
+| Poids estimé | ~25 kg | Ostéologie |
+| Volume crânien | ~426 cm³ | Crâniotomie LB1 |
+### Morphologie
+Nanisme extrême, cerveau remarquablement petit (~chimpanzé), pieds longs, poignets primitifs, absence de menton. Industrie lithique simple mais persistante associée. Disparition vers 50 ka, possiblement peu après l'arrivée d'*H. sapiens* dans la région.
+### Pigmentation ⚠️ Inférence
+Aucun ADN récupérable (climat tropical destructeur). Peau probablement sombre, par continuité évolutive avec les ancestres tropicaux.
+
+**Débat :** Origine exacte non tranchée — *H. erectus* insulaire (Brown et al. 2004) vs lignée plus basale, possiblement pré-erectus (Argue et al. 2017). Les hypothèses pathologiques (microcéphalie, crétinisme endocrinien) ont été réfutées morphométriquement mais persistent dans certains médias.
 
 ***
 ## 8. Homo sapiens — Proche-Orient / Levant — 130 000 à 90 000 ans
@@ -263,10 +384,16 @@ Résultats :
 ## Tableau récapitulatif synthétique
 | Taxon | Période | Taille M/F (cm) | Poids M/F (kg) | Cerveau (cm³) | Peau | Yeux | Cheveux | Certitude |
 |---|---|---|---|---|---|---|---|---|
+| *S. tchadensis* (Toumaï) | ~7 Ma | ~115 / nc | ~35 / nc | 320–380 | Sous fourrure : peu pigmentée | Bruns | Fourrure dense | ⚠️ |
+| *Ardipithecus ramidus* | 5,8–4,4 Ma | nc / ~120 | nc / ~50 | 300–350 | Sous fourrure : peu pigmentée | Bruns | Fourrure | ⚠️ |
 | *A. afarensis* | 4,1–2,7 Ma | 150 / 105[^1] | 42 / 29[^1] | 385–550[^1] | Fourrure + peau peu pigmentée | Bruns | Fourrure | ⚠️ |
 | *H. habilis* | 2,4–1,4 Ma | 130–135 / 100–120[^8] | 37 / 32 | 500–900[^7] | Transition pelage → sombre | Bruns | Transition | ⚠️ |
 | *H. erectus* | 1,8 Ma–250 ka | 145–185 / 130–160[^11] | 40–68 / 30–50[^11] | 600–1100[^12] | **Noire/très sombre** depuis ~1,2 Ma | Bruns | Noirs crépus | 🔬 MC1R |
+| *H. e. georgicus* (Dmanisi) | ~1,77 Ma | 145–166 / nc | 40–50 / nc | 546–775 | Sombre | Bruns | Sombres crépus | ⚠️ |
+| *H. antecessor* | 1,2 Ma–770 ka | 165–175 / nc | nc | ~1 000 | Sombre | Bruns | Sombres | ⚠️ |
 | *H. heidelbergensis* | 700–200 ka | 175 / 157[^20] | 62 / 51[^20] | 1100–1400[^18] | Sombre | Bruns | Sombres | ⚠️ |
+| *H. naledi* | 335–236 ka | 145 / nc | 40 / nc | 465–610 | Sombre | Bruns | Sombres | ⚠️ |
+| *H. floresiensis* | 190–50 ka | nc / 106 | nc / 25 | ~426 | Sombre | Bruns | Sombres | ⚠️ |
 | *H. neanderthalensis* | 400–28 ka | ~164 / ~155[^25] | ~65 / ~54[^25] | 1200–1750[^22] | **Variable** : sombre majorité ; pâle/rousse ~1%[^29] | Bruns ; bleus possibles minorité[^33][^23] | Bruns-châtain ; roux minorité[^31] | ✅ ADN ❓ |
 | Dénisoviens | ~400–30 ka | > 180 / nc[^40] | ~100 / nc[^40] | ≥ H. sap. (estimé) | **Sombre**[^34] | **Sombres**[^34] | **Sombres**[^34] | ✅ ADN |
 | *H. sapiens* Afrique | 315–100 ka | ~185 / ~170[^17] | ~70 / ~60 | 1200–1600 | **Très sombre/noire**[^43] | **Bruns foncés**[^43] | Noirs crépus | ✅ ADN africain |
@@ -292,6 +419,30 @@ Protéomique et ADNmt confirment l'appartenance dénisovienne (Fu Qiaomei et al.
 Ghirotto et al. (PNAS 2025) et Ju & Kelleher (PNAS 2021) s'accordent sur le caractère récent (~3 000 ans) mais divergent sur les rythmes précis de sélection positive vs. dérive vs. migration.[^56][^60]
 
 ---
+
+## Références additionnelles 2026 — taxons complémentaires
+
+[^T1]: Brunet M., Guy F., Pilbeam D. et al., "A new hominid from the Upper Miocene of Chad, Central Africa", *Nature* 418:145-151 (2002). DOI [10.1038/nature00879](https://doi.org/10.1038/nature00879)
+
+[^T2]: Macchiarelli R., Bergeret-Medina A., Marchi D., Wood B., "Nature and relationships of *Sahelanthropus tchadensis*", *Journal of Human Evolution* 149:102898 (2020). DOI [10.1016/j.jhevol.2020.102898](https://doi.org/10.1016/j.jhevol.2020.102898) — Critique du caractère bipède
+
+[^T3]: White T.D., Asfaw B., Beyene Y. et al., "Ardipithecus ramidus and the Paleobiology of Early Hominids", *Science* 326:64-86 (2009). DOI [10.1126/science.1175802](https://doi.org/10.1126/science.1175802)
+
+[^T4]: Lordkipanidze D. et al., "A Complete Skull from Dmanisi, Georgia, and the Evolutionary Biology of Early Homo", *Science* 342:326-331 (2013). DOI [10.1126/science.1244629](https://doi.org/10.1126/science.1244629)
+
+[^T5]: Carbonell E., Bermúdez de Castro J.M. et al., "The first hominin of Europe", *Nature* 452:465-469 (2008). DOI [10.1038/nature06815](https://doi.org/10.1038/nature06815)
+
+[^T6]: Hublin J.-J. et al., "Early hominins from Morocco basal to the Homo sapiens lineage", *Nature* (2026). DOI [10.1038/s41586-025-09914-y](https://doi.org/10.1038/s41586-025-09914-y) — Révision phylogénétique d'*H. antecessor*
+
+[^T7]: Berger L.R., Hawks J. et al., "Homo naledi, a new species of the genus Homo from the Dinaledi Chamber, South Africa", *eLife* 4:e09560 (2015). DOI [10.7554/eLife.09560](https://doi.org/10.7554/eLife.09560)
+
+[^T8]: Martinón-Torres M. et al., "No scientific evidence that Homo naledi buried their dead and produced rock art", *Journal of Human Evolution* 195:103464 (2024). DOI [10.1016/j.jhevol.2023.103507](https://doi.org/10.1016/j.jhevol.2023.103507)
+
+[^T9]: Brown P., Sutikna T., Morwood M.J. et al., "A new small-bodied hominin from the Late Pleistocene of Flores, Indonesia", *Nature* 431:1055-1061 (2004). DOI [10.1038/nature02999](https://doi.org/10.1038/nature02999)
+
+[^T10]: Argue D., Groves C.P., Lee M.S.Y., Jungers W.L., "The affinities of Homo floresiensis based on phylogenetic analyses of cranial, dental, and postcranial characters", *Journal of Human Evolution* 107:107-133 (2017). DOI [10.1016/j.jhevol.2017.02.006](https://doi.org/10.1016/j.jhevol.2017.02.006)
+
+***
 
 ## References
 
