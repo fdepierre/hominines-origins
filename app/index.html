@@ -2676,12 +2676,22 @@ function updateMapLibreLabels() {
     const dataAttr = p.kind === 'continent'
       ? 'data-continent-code="' + bandTipEscapeHtml(p.code) + '"'
       : 'data-country-code="' + bandTipEscapeHtml(p.code) + '"';
-    const html = '<span class="' + className + '" ' + dataAttr + ' lang="' + bandTipEscapeHtml(labelLocale) + '" dir="auto">' + bandTipEscapeHtml(p.label) + '</span>';
+    // data-source: canonical i18n string. If it still matches, do not replace innerHTML so browser
+    // "Translate this page" output (e.g. Greek) survives zoomend / event flyTo re-renders.
+    const html = '<span class="' + className + '" ' + dataAttr
+      + ' data-source="' + bandTipEscapeHtml(p.label) + '" translate="yes" lang="'
+      + bandTipEscapeHtml(labelLocale) + '" dir="auto">' + bandTipEscapeHtml(p.label) + '</span>';
     const existing = mapLibreLabelMarkers.get(p.id);
     if (existing) {
       existing.setLngLat(p.lngLat);
-      const el = existing.getElement && existing.getElement();
-      if (el) el.innerHTML = html;
+      const root = existing.getElement && existing.getElement();
+      if (root) {
+        const inner = root.querySelector('span');
+        if (inner && inner.getAttribute('data-source') === p.label) {
+          return;
+        }
+        root.innerHTML = html;
+      }
       return;
     }
     const el = document.createElement('div');
