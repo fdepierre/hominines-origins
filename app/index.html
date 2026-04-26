@@ -790,13 +790,17 @@ html[data-map-ready="1"] #map {
   border-radius: 4px;
   cursor: pointer;
   opacity: 0.85;
-  transition: opacity 0.15s, filter 0.15s;
+  transition: height 0.1s ease-out, top 0.1s ease-out, opacity 0.15s, filter 0.15s, box-shadow 0.1s ease-out;
   touch-action: manipulation;
 }
 .species-lane:hover, .species-lane.active {
   opacity: 1;
   filter: brightness(1.3);
   z-index: 5;
+}
+.species-lane.active {
+  z-index: 6;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
 }
 /* Lane label — always visible inside the bar */
 .species-lane-label {
@@ -809,17 +813,27 @@ html[data-map-ready="1"] #map {
   text-shadow: 0 1px 3px rgba(0,0,0,0.85);
   top: 50%;
   transform: translateY(-50%);
-  left: 6px;
+  left: 5px;
   pointer-events: none;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc(100% - 10px);
+  max-width: calc(100% - 8px);
   letter-spacing: 0.01em;
+  transition: font-size 0.1s ease-out;
+}
+.species-lane.active .species-lane-label {
+  font-size: 12px;
+  max-width: calc(100% - 6px);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.95), 0 0 1px rgba(0,0,0,0.8);
 }
 /* Light mode: texte noir pour contraste sur barres claires */
 [data-theme="light"] .species-lane-label {
   color: #1a1208;
   text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+}
+[data-theme="light"] .species-lane.active .species-lane-label {
+  text-shadow: 0 1px 2px rgba(255,255,255,0.85);
 }
 
 /* === NEEDLE wrapper — spans ALL rows of the footer === */
@@ -3284,6 +3298,45 @@ function getLaneTop(laneIndex, totalRows, lm) {
   return invertedIndex * (lm.h + lm.gap);
 }
 
+let _lastLaneLayoutKey = '';
+
+/**
+ * Taller bar + larger label for species that exist at currentTime (needle “on” the bar);
+ * recompute row tops so rows never overlap.
+ */
+function layoutSpeciesLanesForCurrentTime() {
+  if (!SPECIES_DATA || !SPECIES_DATA.length) return;
+  const base = getLaneMetrics();
+  const h0 = base.h;
+  const gap = base.gap;
+  const h1 = Math.max(h0 + 6, Math.round(h0 * 1.8));
+  const rowOrder = buildRowOrder(SPECIES_DATA);
+  const activeSig = rowOrder
+    .map((sp) => (sp.start <= currentTime && sp.end >= currentTime ? '1' : '0'))
+    .join('');
+  const layoutKey = h0 + '/' + gap + '/' + activeSig;
+  if (layoutKey === _lastLaneLayoutKey) return;
+  _lastLaneLayoutKey = layoutKey;
+  const track = document.getElementById('timeline-species-track');
+  let y = gap;
+  rowOrder.forEach((sp) => {
+    const lane = document.getElementById('lane-' + sp.id);
+    if (!lane) return;
+    const isActive = sp.start <= currentTime && sp.end >= currentTime;
+    lane.classList.toggle('active', isActive);
+    lane.style.opacity = isActive ? '1' : '0.35';
+    const h = isActive ? h1 : h0;
+    lane.style.height = h + 'px';
+    lane.style.top = y + 'px';
+    const br = Math.max(3, Math.round(h / 2)) + 'px';
+    lane.style.borderRadius = br;
+    y += h + gap;
+  });
+  if (track) track.style.height = y + 'px';
+  if (typeof scheduleMobileTimelineReserve === 'function') scheduleMobileTimelineReserve();
+  if (typeof scheduleTimelineBandSync === 'function') scheduleTimelineBandSync();
+}
+
 /** Mobile: measure real #timeline height so #main reserve fits all species rows (was a fixed guess). */
 function updateMobileTimelineReserve() {
   try {
@@ -3319,13 +3372,11 @@ function initTimeline() {
   const ticksRow = document.getElementById('timeline-ticks-row');
   if (lanesEl) lanesEl.innerHTML = '';
   if (ticksRow) ticksRow.innerHTML = '';
+  _lastLaneLayoutKey = '';
 
   // --- One row per species, oldest at bottom ---
   const rowOrder = buildRowOrder(SPECIES_DATA); // index 0 = oldest = bottom
-  const rowCount = rowOrder.length;
   const lm = getLaneMetrics();
-  const trackH = rowCount * (lm.h + lm.gap) + lm.gap;
-  if (track) track.style.height = trackH + 'px';
 
   // --- Species lanes (every entry in SPECIES_DATA gets one row) ---
   SPECIES_DATA.forEach(species => {
@@ -3337,17 +3388,16 @@ function initTimeline() {
       console.warn('[Hominines timeline] No row slot for species id:', species && species.id);
       return;
     }
-    const topPx = lm.gap + getLaneTop(laneIdx, rowCount, lm);
-    const laneRadius = Math.max(4, Math.round(lm.h / 2)) + 'px';
 
     const lane = document.createElement('div');
     lane.className = 'species-lane';
     lane.id = 'lane-' + species.id;
     lane.style.left = x1pct + '%';
     lane.style.width = widthPct + '%';
-    lane.style.top = topPx + 'px';
+    // top/height: layoutSpeciesLanesForCurrentTime() after all lanes exist
+    lane.style.top = '0px';
     lane.style.height = lm.h + 'px';
-    lane.style.borderRadius = laneRadius;
+    lane.style.borderRadius = Math.max(3, Math.round(lm.h / 2)) + 'px';
     lane.style.background = species.color;
     lane.setAttribute('data-id', species.id);
     lane.setAttribute('aria-label', species.name + ' (' + formatTime(species.start) + ' ' + formatPeriodSeparator() + ' ' + formatTime(species.end) + ')');
@@ -3397,6 +3447,8 @@ function initTimeline() {
     });
     lanesEl.appendChild(lane);
   });
+
+  layoutSpeciesLanesForCurrentTime();
 
   // --- Date ticks ---
   const keyTimes = [
@@ -4015,6 +4067,7 @@ function resetMapToWorldView() {
 function setTime(time) {
   currentTime = Math.max(TIMELINE_MIN, Math.min(TIMELINE_MAX, time));
   document.getElementById('timeline-current-label').textContent = formatTime(currentTime);
+  if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
   updateNeedlePosition();
   if (typeof syncFigureVisibility === 'function') syncFigureVisibility();
 
@@ -4033,16 +4086,6 @@ function setTime(time) {
   } else {
     updateMap(); // manual scrub — always full refresh
   }
-
-  // Highlight active species lanes
-  document.querySelectorAll('.species-lane').forEach(lane => {
-    const sp = SPECIES_DATA.find(s => s.id === lane.dataset.id);
-    if (sp) {
-      const isActive = sp.start <= currentTime && sp.end >= currentTime;
-      lane.classList.toggle('active', isActive);
-      lane.style.opacity = isActive ? '1' : '0.35';
-    }
-  });
 
   // Panel update logic
   const visible = getVisibleSpecies();
@@ -4663,6 +4706,7 @@ function checkAndSpawnFigures() {
 function bootApp() {
   initTimeline();
   window.addEventListener('resize', function () {
+    if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
     scheduleMobileTimelineReserve();
     scheduleTimelineBandSync();
   });
