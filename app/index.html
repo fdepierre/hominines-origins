@@ -774,10 +774,17 @@ html[data-map-ready="1"] #map {
 }
 
 /* === MAIN SPECIES TRACK === */
+/* Fixed vertical size (compact row grid) — active lanes grow in z-index and can overlap / clip, no layout jump */
 .timeline-species-track {
   position: relative;
   height: 240px; /* fallback — overridden by JS (one row per species) */
   margin-bottom: var(--space-1);
+  overflow: hidden;
+}
+#timeline-lanes {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
 }
 /* The rail underneath */
 .timeline-rail {
@@ -3301,8 +3308,9 @@ function getLaneTop(laneIndex, totalRows, lm) {
 let _lastLaneLayoutKey = '';
 
 /**
- * Taller bar + larger label for species that exist at currentTime (needle “on” the bar);
- * recompute row tops so rows never overlap.
+ * Taller bar + larger label for species at currentTime. Row tops follow the
+ * fixed compact grid so #timeline height stays stable; thick bars overlap / clip
+ * (overflow hidden on track) instead of pushing the map.
  */
 function layoutSpeciesLanesForCurrentTime() {
   if (!SPECIES_DATA || !SPECIES_DATA.length) return;
@@ -3311,28 +3319,30 @@ function layoutSpeciesLanesForCurrentTime() {
   const gap = base.gap;
   const h1 = Math.max(h0 + 6, Math.round(h0 * 1.8));
   const rowOrder = buildRowOrder(SPECIES_DATA);
+  const n = rowOrder.length;
   const activeSig = rowOrder
     .map((sp) => (sp.start <= currentTime && sp.end >= currentTime ? '1' : '0'))
     .join('');
   const layoutKey = h0 + '/' + gap + '/' + activeSig;
   if (layoutKey === _lastLaneLayoutKey) return;
   _lastLaneLayoutKey = layoutKey;
+  const compactLm = { h: h0, gap: gap };
+  const trackH = n * (h0 + gap) + gap;
   const track = document.getElementById('timeline-species-track');
-  let y = gap;
-  rowOrder.forEach((sp) => {
+  if (track) track.style.height = trackH + 'px';
+  rowOrder.forEach((sp, laneIdx) => {
     const lane = document.getElementById('lane-' + sp.id);
     if (!lane) return;
     const isActive = sp.start <= currentTime && sp.end >= currentTime;
     lane.classList.toggle('active', isActive);
     lane.style.opacity = isActive ? '1' : '0.35';
     const h = isActive ? h1 : h0;
+    const topPx = gap + getLaneTop(laneIdx, n, compactLm);
     lane.style.height = h + 'px';
-    lane.style.top = y + 'px';
+    lane.style.top = topPx + 'px';
     const br = Math.max(3, Math.round(h / 2)) + 'px';
     lane.style.borderRadius = br;
-    y += h + gap;
   });
-  if (track) track.style.height = y + 'px';
   if (typeof scheduleMobileTimelineReserve === 'function') scheduleMobileTimelineReserve();
   if (typeof scheduleTimelineBandSync === 'function') scheduleTimelineBandSync();
 }
