@@ -292,6 +292,14 @@ async function runUnitTests() {
     assert(nLanes === nSpecies, `Lane count ${nLanes} === SPECIES_DATA.length ${nSpecies}`);
   });
 
+  await test('2026 catalogue taxa have timeline lane elements', async () => {
+    const missing = await page.evaluate(() => {
+      const ids = ['sahelanthropus', 'ardipithecus', 'georgicus', 'antecessor'];
+      return ids.filter((id) => !document.getElementById('lane-' + id));
+    });
+    assert(missing.length === 0, `Expected lane-* for 2026 additions (missing: ${missing.join(', ') || 'none'})`);
+  });
+
   // ─── close ────────────────────────────────────────────────────────────────
   await browser.close();
   return errors;

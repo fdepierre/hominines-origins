@@ -67,7 +67,7 @@ If `fetch` fails (`file://`, missing files, strict offline), the same **`_EMBEDD
 ### Other script-scope values (not on `window`)
 
 ```js
-let SPECIES_DATA   // Filled by loadData(); length 14 (catalogue entries)
+let SPECIES_DATA   // Filled by loadData(); length 18 (catalogue entries)
 let EVENTS_DATA    // Filled by loadData(); length 22 (milestones)
 SKIN_PERIODS       // const — skin tone segments for the timeline band (see data-schema.md)
 TIMELINE_MIN       // const — -4200000 (years BP, negative)
