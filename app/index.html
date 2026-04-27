@@ -3,6 +3,9 @@
 <html lang="en" data-theme="light" translate="yes">
 <head>
 <meta charset="UTF-8">
+<!-- Ask browsers not to serve a stale copy while iterating locally (file is single-page inline CSS+JS). -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Hominines Origins">
 <meta name="author" content="fdepierre">
@@ -63,8 +66,8 @@
   --font-body: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'Space Mono', monospace;
 
-  /* Aligner bandes « Peau » / « Jalons » sur la même échelle que la piste espèces (60px + 4px padding) */
-  --timeline-band-label-w: 64px;
+  /* Largeur colonne « Peau » / « Jalons » (piste = flex 1) */
+  --timeline-band-label-w: 76px;
 }
 
 /* Palette inspirée de l'archéologie : terre, os, obsidienne */
@@ -453,12 +456,15 @@ ul.uncertainty-level-list {
 /* ===== MAIN CONTENT ===== */
 #main {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr 300px;
   /* x: clip wide panes; y: visible so map tooltips can extend slightly above the map without being cut off */
   overflow-x: hidden;
   overflow-y: visible;
   position: relative;
   min-height: 0;
+}
+@media (min-width: 1200px) {
+  #main { grid-template-columns: 1fr 340px; }
 }
 
 /* ===== MAP ===== */
@@ -755,7 +761,6 @@ html[data-map-ready="1"] #map {
 #timeline {
   background: var(--color-surface);
   border-top: 1px solid var(--color-divider);
-  padding: var(--space-3) var(--space-5) var(--space-3);
   z-index: 200;
   overflow: visible;
   position: relative;
@@ -763,10 +768,10 @@ html[data-map-ready="1"] #map {
 
 .timeline-current-label {
   font-family: var(--font-mono);
-  font-size: var(--text-base);
+  font-size: 12px;
   color: var(--color-primary);
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 .timeline-hint {
   font-size: var(--text-xs);
@@ -778,7 +783,7 @@ html[data-map-ready="1"] #map {
 .timeline-species-track {
   position: relative;
   height: 240px; /* fallback — overridden by JS (one row per species) */
-  margin-bottom: var(--space-1);
+  margin-bottom: 0;
   overflow: hidden;
 }
 #timeline-lanes {
@@ -790,10 +795,10 @@ html[data-map-ready="1"] #map {
 .timeline-rail {
   display: none;
 }
-/* Each species gets its own horizontal lane */
+/* Each species gets its own horizontal lane (height set by layoutSpeciesLanesForCurrentTime) */
 .species-lane {
   position: absolute;
-  height: 8px;
+  height: 10px;
   border-radius: 4px;
   cursor: pointer;
   opacity: 0.85;
@@ -809,15 +814,18 @@ html[data-map-ready="1"] #map {
   z-index: 6;
   box-shadow: 0 1px 4px rgba(0,0,0,0.35);
 }
-/* Lane label — always visible inside the bar */
+/* Lane label — clair sur toutes les barres (lisible comme le bouton Play : clair + halo) */
 .species-lane-label {
   position: absolute;
   white-space: nowrap;
   font-size: 10px;
   font-family: var(--font-mono);
   font-weight: 700;
-  color: #fff;                          /* dark mode: blanc */
-  text-shadow: 0 1px 3px rgba(0,0,0,0.85);
+  color: #faf6ee;
+  text-shadow:
+    0 0 2px rgba(0,0,0,0.9),
+    0 1px 2px rgba(0,0,0,0.95),
+    0 0 8px rgba(0,0,0,0.45);
   top: 50%;
   transform: translateY(-50%);
   left: 5px;
@@ -832,15 +840,11 @@ html[data-map-ready="1"] #map {
   font-size: 12px;
   max-width: calc(100% - 6px);
   letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.95), 0 0 1px rgba(0,0,0,0.8);
-}
-/* Light mode: texte noir pour contraste sur barres claires */
-[data-theme="light"] .species-lane-label {
-  color: #1a1208;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.6);
-}
-[data-theme="light"] .species-lane.active .species-lane-label {
-  text-shadow: 0 1px 2px rgba(255,255,255,0.85);
+  color: #fff;
+  text-shadow:
+    0 0 2px #000,
+    0 1px 3px rgba(0,0,0,0.95),
+    0 0 10px rgba(0,0,0,0.5);
 }
 
 /* === NEEDLE wrapper — spans ALL rows of the footer === */
@@ -857,10 +861,10 @@ html[data-map-ready="1"] #map {
   /* left = abscisse du temps (JS) ; centrage comme les jalons (translate -50%) */
   transform: translateX(-50%);
 }
-/* The round handle at the TOP of the needle */
+/* The round handle at the TOP of the needle (less negative = less overlap on title row) */
 .timeline-needle-handle {
   position: absolute;
-  top: -14px;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
   width: 26px;
@@ -955,10 +959,10 @@ html[data-map-ready="1"] #map {
   stroke-dasharray: 10 6;
 }
 
-/* === DATE TICKS === */
+/* === DATE TICKS (desktop / tablet : lisible) === */
 .timeline-ticks-row {
   position: relative;
-  height: 18px;
+  height: 28px;
   margin-bottom: 2px;
 }
 .tl-tick {
@@ -968,39 +972,42 @@ html[data-map-ready="1"] #map {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
 }
 .tl-tick-line {
-  width: 1px;
-  height: 6px;
+  width: 2px;
+  height: 10px;
   background: var(--color-border);
+  border-radius: 1px;
 }
 .tl-tick-text {
-  font-size: 11px;
+  font-size: 12px;
   font-family: var(--font-mono);
-  color: var(--color-text-faint);
+  color: var(--color-text-muted);
+  font-weight: 600;
   white-space: nowrap;
 }
 
-/* === SKIN BAND === */
+/* === SKIN BAND (piste fine) === */
 .timeline-band {
   position: relative;
-  height: 20px;
-  margin-bottom: 3px;
+  height: 18px;
+  margin-bottom: 1px;
   display: flex;
   align-items: center;
 }
 .timeline-band-label {
-  font-size: 11px;
+  font-size: 10px;
   font-family: var(--font-mono);
-  color: var(--color-text-faint);
+  color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  width: 60px;
+  letter-spacing: 0.05em;
+  width: var(--timeline-band-label-w);
   flex-shrink: 0;
-  padding-right: 4px;
+  padding-right: 6px;
   text-align: right;
-  line-height: 1.2;
+  line-height: 1.1;
+  font-weight: 600;
 }
 .timeline-band-track {
   position: relative;
@@ -1011,15 +1018,15 @@ html[data-map-ready="1"] #map {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  height: 16px;
-  border-radius: 3px;
+  height: 11px;
+  border-radius: 2px;
   cursor: pointer;
 }
 
 /* === EVENTS BAND (tools, fire, art, etc.) === */
 .events-band {
   position: relative;
-  height: 22px;
+  height: 36px;
   display: flex;
   align-items: center;
 }
@@ -1032,12 +1039,12 @@ html[data-map-ready="1"] #map {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 13px;
+  font-size: 19px;
   line-height: 1;
   cursor: pointer;
   z-index: 5;
   transition: transform 0.15s, filter 0.15s;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.65));
 }
 .event-marker:hover {
   transform: translate(-50%, -50%) scale(1.85);
@@ -1098,11 +1105,10 @@ html[data-map-ready="1"] #map {
   text-align: left;
 }
 
-/* Touch target enlargement on mobile */
+/* Touch target enlargement on narrow viewports (tick labels: show; mobile refines in ≤768) */
 @media (max-width: 900px) {
   .timeline-needle-handle { width: 28px; height: 28px; }
   .event-marker { font-size: 16px; }
-  .tl-tick-text { display: none; }
   #timeline { padding: var(--space-2) var(--space-3); }
 }
 
@@ -1250,52 +1256,64 @@ html[data-map-ready="1"] #map {
 
 /* ===== TIMELINE: play button + label float at left of species track ===== */
 
-/* #timeline is the positioning context */
-#timeline { position: relative; padding: var(--space-1) var(--space-3) var(--space-1); }
+/* #timeline is the positioning context (tight top: gap title → bars = #needle-wrapper padding-top) */
+#timeline { position: relative; padding: 0 var(--space-2) 0; }
 
-/* App title strip — small permanent header row */
+/* App title strip — small permanent header row (keep reading room before needle / Play) */
 #tl-title-strip {
   display: flex;
   align-items: baseline;
-  gap: var(--space-3);
-  padding: 2px 0 4px;
+  gap: var(--space-2);
+  padding: 2px 0 8px;
+  line-height: 1.2;
   border-bottom: 1px solid var(--color-divider);
-  margin-bottom: var(--space-1);
+  margin-bottom: 0;
+  position: relative;
+  z-index: 6;
+  background: var(--color-surface);
 }
 #tl-app-name {
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--color-text);
   white-space: nowrap;
+  line-height: 1.15;
 }
 #tl-app-name em {
   color: var(--color-primary);
   font-style: normal;
 }
 #tl-app-desc {
-  font-size: var(--text-xs);
+  font-size: 11px;
   color: var(--color-text-muted);
   font-family: var(--font-mono);
+  line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* #needle-wrapper: top band for time badge + Play — species track starts below (no cover) */
+/* #needle-wrapper: margin-top pushes *all* layers (needle/Play abs. included); padding-top only affects in-flow rows */
 #needle-wrapper {
   position: relative;
   box-sizing: border-box;
-  /* Year badge + Play row; mobile overrides when #play is hidden */
-  padding-top: 64px;
+  margin-top: 6px;
+  padding-top: 8px;
+}
+/* PC / tablette: clear band title → contrôles (sinon rond + Play recouvrent le titre) */
+@media (min-width: 769px) {
+  #tl-title-strip {
+    padding: 2px 0 12px;
+  }
+  #needle-wrapper { margin-top: 12px; padding-top: 6px; }
+  .timeline-needle-handle { top: -6px; }
 }
 
-/* Play btn: absolute in the chrome band above the species track */
+/* Play: position set by updatePlayButtonPosition() — same row as the needle round, left/right of handle */
 #play-btn {
   position: absolute !important;
-  left: var(--space-3);
-  top: 32px; /* under the floating time label, still inside padding-top */
-  z-index: 40;
+  z-index: 50;
 }
 /* Show the Play/Pause label alongside the icon (wrapper contains idle+busy spans) */
 #play-btn #play-label { display: inline !important; }
@@ -1303,19 +1321,33 @@ html[data-map-ready="1"] #map {
 .play-toggle-label .play-txt--busy { display: none; }
 .play-toggle-label.is-playing .play-txt--idle { display: none; }
 .play-toggle-label.is-playing .play-txt--busy { display: inline; }
-/* Time label: follows the needle cursor (left updated by updateNeedlePosition) */
+/* Time label: left + top set by updateTimelineValueLabelPosition (alignée au rond) */
 .timeline-current-label {
   position: absolute;
   left: 0; /* overridden dynamically */
-  top: 4px;
+  top: 0; /* overridden dynamically */
   pointer-events: none;
   white-space: nowrap;
-  transition: left 0.08s linear;
+  transition: left 0.08s linear, top 0.08s linear;
   background: var(--color-surface);
-  padding: 1px 5px;
-  border-radius: 3px;
+  padding: 2px 6px;
+  border-radius: 2px;
   border: 1px solid var(--color-border);
-  z-index: 45;
+  z-index: 24;
+  line-height: 1.2;
+}
+/* Ligne d’unité : segment JS entre le centre de l’élément le plus à gauche et le centre du plus à droite */
+#needle-control-rail {
+  position: absolute;
+  left: 0;
+  width: 0;
+  right: auto;
+  height: 2px;
+  border-radius: 99px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
+  background: var(--color-border);
 }
 /* needle-wrapper starts right after timeline padding — no extra padding needed */
 
@@ -1484,19 +1516,26 @@ html[data-map-ready="1"] #map {
   }
 }
 
-/* Play/pause button with label */
+/* Play/pause label — taille de base; mobile: surcharges touch ci-dessous */
 #play-btn {
   order: -1;
   height: 32px;
-  min-width: 70px;
-  padding: 0 10px;
+  min-width: 58px;
+  padding: 0 7px;
   border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.03em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
+  border-width: 1px;
+}
+#play-btn svg,
+#play-btn #play-icon {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
 }
 /* Pulse highlight when waiting for first interaction */
 @keyframes playPulse {
@@ -1693,7 +1732,7 @@ html[data-map-ready="1"] #map {
 }
 .maplibre-migration-cue {
   pointer-events: none;
-  z-index: 4;
+  z-index: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1712,7 +1751,15 @@ html[data-map-ready="1"] #map {
 }
 .maplibre-walking-figure {
   pointer-events: none;
-  z-index: 8;
+  z-index: 1;
+}
+
+/* MapLibre: HTML popups (sites, jalons) must stack above all .maplibregl-marker (flèches / points de migration) */
+.maplibregl-map .maplibregl-popup {
+  z-index: 2000 !important;
+}
+.maplibregl-map .maplibregl-marker {
+  z-index: 1 !important;
 }
 
 /* Speed selector — hidden, speed is fixed */
@@ -1792,18 +1839,7 @@ html[data-map-ready="1"] #map {
 .pig-label { color: var(--color-text) !important; font-weight: 600; }
 .pig-desc  { color: var(--color-text-muted); font-size: 10px; }
 
-/* ==============================================================
-   TIMELINE — compact heights
-   ============================================================== */
 /* .timeline-species-track height is set dynamically by JS */
-.timeline-ticks-row     { height: 14px !important; }
-.timeline-band          { height: 16px !important; }
-.events-band            { height: 20px !important; }
-.band-segment           { height: 12px !important; }
-/* Better contrast on timeline labels */
-.tl-tick-text           { color: var(--color-text-muted) !important; font-size: 8px; }
-.timeline-band-label    { color: var(--color-text-muted) !important; font-size: 8px; }
-.timeline-hint          { color: var(--color-text-muted) !important; }
 
 /* ==============================================================
    MOBILE TAB BAR
@@ -1816,7 +1852,8 @@ html[data-map-ready="1"] #map {
   box-sizing: content-box;
   background: var(--color-surface); border-top: 1px solid var(--color-border);
   z-index: 1500;
-  grid-template-columns: 1fr auto 1fr;
+  /* 2 colonnes: Carte | Détail (Play = même #play-btn flottant que le PC) */
+  grid-template-columns: 1fr 1fr;
   align-items: stretch;
   justify-items: center;
   box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
@@ -1913,24 +1950,54 @@ html[data-map-ready="1"] #map {
   .layer-btn { padding:4px 8px; font-size:10px; }
   .layer-btn svg { display:none; }
   .map-legend { top:var(--space-2); left:var(--space-2); bottom:auto; padding:var(--space-2) var(--space-3); min-width:120px; }
-  .timeline-needle-handle { width:32px !important; height:32px !important; }
-  #needle-wrapper { touch-action:none; cursor:ew-resize; padding-top: 32px; }
+  .timeline-needle-handle {
+    width: 32px !important;
+    height: 32px !important;
+    top: -4px !important;
+  }
+  /* margin-top separates abs. needle+Play from title; modest padding-top = in-flow lanes only */
+  #needle-wrapper {
+    touch-action: none;
+    cursor: ew-resize;
+    margin-top: 14px;
+    padding-top: 12px;
+  }
   #play-overlay-btn { width:56px; height:56px; }
   #btn-data-viewer { display:none; }
-  .tl-tick-text { display:none !important; }
   /* More map: compact footer + narrative (species / story) stays readable */
   #tl-app-desc { display: none; }
-  #tl-title-strip { padding: 0 0 2px; margin-bottom: 2px; }
-  /* Lecture / pause : uniquement la barre du bas (#mobile-play-btn) */
-  #play-btn { display: none !important; }
-  .timeline-current-label { font-size: 11px; top: 2px; padding: 0 4px; }
+  #tl-title-strip {
+    padding: 4px 0 10px;
+    margin-bottom: 0;
+  }
+  /* Play/Pause: même logique que PC (#play-btn à côté du rond) */
+  #mobile-play-btn { display: none !important; }
+  #play-btn {
+    display: flex !important;
+    height: 32px;
+    min-width: 64px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+  #play-btn svg,
+  #play-btn #play-icon { width: 14px; height: 14px; }
+  .timeline-current-label { font-size: 11px; padding: 2px 6px; }
   #timeline { padding: var(--space-1) var(--space-2) var(--space-1); }
-  .timeline-ticks-row { height: 11px !important; margin-bottom: 1px; }
-  .timeline-band { height: 14px !important; margin-bottom: 2px; }
+  .timeline-ticks-row { height: 26px !important; margin-bottom: 2px; }
+  .tl-tick-line { height: 5px; }
+  .tl-tick-text {
+    display: block !important;
+    font-size: 8px !important;
+    font-weight: 600;
+    line-height: 1.1;
+    max-width: 40px;
+    text-align: center;
+  }
+  .timeline-band { height: 16px !important; margin-bottom: 1px; }
   .events-band { height: 17px !important; }
   .timeline-band-label { width: 44px !important; font-size: 8px !important; padding-right: 2px; }
-  .band-segment { height: 12px !important; }
-  .species-lane-label { font-size: 10px; left: 4px; max-width: calc(100% - 8px); }
+  .band-segment { height: 9px !important; }
+  .species-lane-label { font-size: 11px; left: 4px; max-width: calc(100% - 8px); }
   .events-band-track .event-marker {
     display: flex;
     align-items: center;
@@ -2064,6 +2131,7 @@ html[data-map-ready="1"] #map {
 
     <!-- Needle wrapper — play btn + time label float inside as overlays -->
     <div id="needle-wrapper" data-testid="timeline-needle-row">
+      <div id="needle-control-rail" aria-hidden="true"></div>
       <!-- Play/pause button — overlays left of species track -->
       <button id="play-btn" type="button" data-testid="play-toggle" data-i18n-title="ui.playTitle">
         <svg id="play-icon" width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
@@ -3297,8 +3365,8 @@ function isMobileViewport() {
 /** Tighter species rows on small viewports — shorter track, more room for the map. */
 function getLaneMetrics() {
   return isMobileViewport()
-    ? { h: 7, gap: 2 }
-    : { h: 8, gap: 2 };
+    ? { h: 11, gap: 2 }
+    : { h: 10, gap: 2 };
 }
 
 function buildRowOrder(speciesList) {
@@ -3971,6 +4039,149 @@ function buildEventsBand() {
   syncTimelineBandsToSpeciesTrack();
 }
 
+/** Place Play next to the scrubber round — right of handle when needle is left, left when right (PC + mobile). */
+function updatePlayButtonPosition() {
+  const btn = document.getElementById('play-btn');
+  const wrapper = document.getElementById('needle-wrapper');
+  const scrub = document.getElementById('timeline-scrubber');
+  if (!btn || !wrapper || !scrub) return;
+  const wRect = wrapper.getBoundingClientRect();
+  const hRect = scrub.getBoundingClientRect();
+  if (hRect.width < 1 || wRect.width < 1) return;
+  const btnW = btn.offsetWidth;
+  const btnH = btn.offsetHeight;
+  const handleLeft = hRect.left - wRect.left;
+  const handleCx = handleLeft + hRect.width / 2;
+  const gap = typeof isMobileViewport === 'function' && isMobileViewport() ? 12 : 10;
+  /* Compare to the species track (same as the needle), not the full wrapper — avoids wrong side on wide layout */
+  const trackEl = document.getElementById('timeline-species-track');
+  const tr = trackEl ? trackEl.getBoundingClientRect() : null;
+  const trackLeftRel = tr && tr.width > 0 ? (tr.left - wRect.left) : 0;
+  const trackW = tr && tr.width > 0 ? tr.width : wRect.width;
+  const trackMidX = trackLeftRel + trackW * 0.5;
+  const inLeftHalf = handleCx < trackMidX;
+  let leftPx;
+  if (inLeftHalf) {
+    leftPx = handleLeft + hRect.width + gap;
+  } else {
+    leftPx = handleLeft - gap - btnW;
+  }
+  const pad = 2;
+  leftPx = Math.max(pad, Math.min(leftPx, wRect.width - btnW - pad));
+  const topPx = hRect.top - wRect.top + hRect.height / 2 - btnH / 2;
+  btn.style.left = leftPx + 'px';
+  btn.style.top = Math.round(topPx) + 'px';
+}
+/** Ligne d’unité : segment du centre (axe X) du contrôle le plus à gauche au centre du plus à droite. */
+function updateNeedleControlRailPosition() {
+  const rail = document.getElementById('needle-control-rail');
+  const wrapper = document.getElementById('needle-wrapper');
+  const scrub = document.getElementById('timeline-scrubber');
+  const play = document.getElementById('play-btn');
+  const label = document.getElementById('timeline-current-label');
+  if (!rail || !wrapper || !scrub) return;
+  const wRect = wrapper.getBoundingClientRect();
+  const hRect = scrub.getBoundingClientRect();
+  if (hRect.width < 0.5 || wRect.width < 0.5) return;
+
+  function centerX(el) {
+    if (!el) return null;
+    const cs = window.getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return null;
+    const r = el.getBoundingClientRect();
+    if (r.width < 0.25 && r.height < 0.25) return null;
+    return r.left + r.width / 2;
+  }
+  const xs = [centerX(scrub), centerX(play), centerX(label)].filter(function (v) { return v != null && isFinite(v); });
+  if (xs.length < 1) return;
+  const minCx = Math.min.apply(null, xs);
+  const maxCx = Math.max.apply(null, xs);
+  var leftPx = minCx - wRect.left;
+  var widthPx = maxCx - minCx;
+  if (widthPx < 0.5) {
+    leftPx = leftPx - 1;
+    widthPx = 2;
+  }
+  leftPx = Math.max(0, Math.min(leftPx, wRect.width - 1));
+  widthPx = Math.max(1, Math.min(widthPx, wRect.width - leftPx));
+
+  const cy = hRect.top - wRect.top + hRect.height / 2;
+  const L = Math.round(leftPx);
+  const W = Math.round(widthPx);
+  const T = Math.round(cy - 1);
+  if (rail._ctl === L && rail._ctw === W && rail._ctt === T) return;
+  rail._ctl = L; rail._ctw = W; rail._ctt = T;
+  rail.style.left = L + 'px';
+  rail.style.width = W + 'px';
+  rail.style.right = 'auto';
+  rail.style.top = T + 'px';
+}
+
+/** Time value label: right of needle, but never over the Play pill (runs after Play is laid out). */
+function updateTimelineValueLabelPosition() {
+  const wrapper = document.getElementById('needle-wrapper');
+  const label = document.getElementById('timeline-current-label');
+  const play = document.getElementById('play-btn');
+  const scrub = document.getElementById('timeline-scrubber');
+  if (!wrapper || !label) return;
+  const wrapperRect = wrapper.getBoundingClientRect();
+  const w = wrapperRect.width;
+  const labelGap = typeof isMobileViewport === 'function' && isMobileViewport() ? 14 : 12;
+  const speciesTrackEl = document.getElementById('timeline-species-track');
+  const speciesTrackRect = speciesTrackEl ? speciesTrackEl.getBoundingClientRect() : null;
+  const trackLeft = speciesTrackRect ? (speciesTrackRect.left - wrapperRect.left) : 0;
+  const trackWidth = speciesTrackRect ? speciesTrackRect.width : w;
+  const xpct = timeToLinear(currentTime) * 100;
+  const cx = trackLeft + (xpct / 100) * trackWidth;
+  const needleCx = Math.max(0, Math.min(w, cx));
+
+  const labelW = label.offsetWidth || 80;
+  let playL = 0;
+  let playR = 0;
+  let playVis = false;
+  if (play) {
+    const cs = window.getComputedStyle(play);
+    if (cs.display !== 'none' && cs.visibility !== 'hidden') {
+      const pb = play.getBoundingClientRect();
+      if (pb.width > 1) {
+        playL = pb.left - wrapperRect.left;
+        playR = pb.right - wrapperRect.left;
+        playVis = true;
+      }
+    }
+  }
+
+  let scrubR = 0;
+  if (scrub) {
+    const sr = scrub.getBoundingClientRect();
+    if (sr.width > 0.5) scrubR = sr.right - wrapperRect.left;
+  }
+  /* Bord droit du rond + gap (évite collage quand Play est à gauche; needleCx seul est le centre) */
+  let x;
+  if (scrubR > 0) {
+    x = Math.max(scrubR + labelGap, playR + labelGap);
+  } else {
+    x = needleCx + labelGap;
+    if (playVis) x = Math.max(x, playR + labelGap);
+  }
+
+  if (x + labelW <= w) {
+    label.style.left = x + 'px';
+  } else {
+    x = Math.max(0, needleCx - labelGap - labelW);
+    if (playVis && x + labelW > playL - 2) {
+      x = Math.max(0, playL - labelGap - labelW);
+    }
+    label.style.left = x + 'px';
+  }
+  if (scrub) {
+    const hRect = scrub.getBoundingClientRect();
+    const labelH = label.offsetHeight || 22;
+    const topPx = hRect.top - wrapperRect.top + hRect.height / 2 - labelH / 2;
+    label.style.top = Math.round(topPx) + 'px';
+  }
+}
+
 function updateNeedlePosition() {
   const fullNeedle = document.getElementById('timeline-full-needle');
   if (!fullNeedle) return;
@@ -3993,14 +4204,16 @@ function updateNeedlePosition() {
   const needleCx = Math.max(0, Math.min(wrapperW, cx));
   fullNeedle.style.left = needleCx + 'px';
 
-  // Move time label: prefer right of needle, flip to left near right edge
-  const label = document.getElementById('timeline-current-label');
-  if (label) {
-    const labelW = label.offsetWidth || 80;
-    const gap = 10;
-    const rightPos = needleCx + gap;
-    const finalLeft = (rightPos + labelW < wrapperW) ? rightPos : Math.max(0, needleCx - gap - labelW);
-    label.style.left = finalLeft + 'px';
+  if (typeof updatePlayButtonPosition === 'function') {
+    requestAnimationFrame(function () {
+      updatePlayButtonPosition();
+      if (typeof updateTimelineValueLabelPosition === 'function') {
+        updateTimelineValueLabelPosition();
+      }
+      if (typeof updateNeedleControlRailPosition === 'function') {
+        updateNeedleControlRailPosition();
+      }
+    });
   }
 }
 
@@ -4725,6 +4938,7 @@ function bootApp() {
   initTimeline();
   window.addEventListener('resize', function () {
     if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
+    if (typeof updateNeedlePosition === 'function') updateNeedlePosition();
     scheduleMobileTimelineReserve();
     scheduleTimelineBandSync();
   });
@@ -4788,11 +5002,8 @@ function bootApp() {
 
   // UX: after 3s of idle, pulse the play button + show welcome hint
   let autoPlayTimer = setTimeout(() => {
-    const onMobile = typeof isMobileViewport === 'function' && isMobileViewport();
     const btn = document.getElementById('play-btn');
-    if (btn && !isPlaying && !onMobile) btn.classList.add('pulse');
-    const mpb = document.getElementById('mobile-play-btn');
-    if (mpb && !isPlaying && onMobile) mpb.classList.add('pulse');
+    if (btn && !isPlaying) btn.classList.add('pulse');
   }, 3000);
 
   setTimeout(() => {

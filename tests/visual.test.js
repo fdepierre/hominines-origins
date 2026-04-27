@@ -59,7 +59,8 @@ async function runVisualTests(options = {}) {
     const ids = ['main', 'burger-btn', 'map', 'side-panel', 'timeline', 'play-btn',
                   'timeline-full-needle', 'timeline-scrubber',
                   'skin-band', 'events-band', 'timeline-lanes',
-                  'legend-content', 'welcome-hint', 'lang-select'];
+                  'legend-content', 'lang-select'];
+    /* #welcome-hint is removed after ~8s or first play interaction — not stable for this check */
     const testids = ['map', 'burger-menu-button', 'side-panel', 'timeline', 'play-toggle',
       'theme-toggle', 'lang-select', 'timeline-needle-row'];
     const { missingId, missingTid } = await page.evaluate(({ ids, testids }) => ({
@@ -81,26 +82,27 @@ async function runVisualTests(options = {}) {
     assert(visible, 'Timeline needle (#timeline-full-needle) is visible');
   });
 
-  // Play button sits in the needle row (below the title strip inside #timeline)
-  await test('Play button is top-left of timeline needle row', async () => {
+  // Play is aligned with the round scrubber handle, left or right of it (not the full wrapper height)
+  await test('Play is vertically aligned with handle and adjacent horizontally', async () => {
     const pos = await page.evaluate(() => {
       const btn = document.querySelector('[data-testid="play-toggle"]');
+      const handle = document.getElementById('timeline-scrubber');
       const row = document.querySelector('[data-testid="timeline-needle-row"]');
-      if (!btn || !row) return null;
+      if (!btn || !handle || !row) return null;
       const bBtn = btn.getBoundingClientRect();
+      const bH = handle.getBoundingClientRect();
       const bRow = row.getBoundingClientRect();
-      return {
-        btnLeft: bBtn.left,
-        rowLeft: bRow.left,
-        btnTop: bBtn.top,
-        rowTop: bRow.top,
-        isLeftAligned: (bBtn.left - bRow.left) < 50,
-        isTopOfRow: (bBtn.top - bRow.top) < 80,
-      };
+      const cy = (a) => a.top + a.height / 2;
+      const dY = Math.abs(cy(bBtn) - cy(bH));
+      const noOverlapL = bBtn.left > bH.right - 1;
+      const noOverlapR = bBtn.right < bH.left + 1;
+      const inRowW = bBtn.left >= bRow.left - 4 && bBtn.right <= bRow.right + 4;
+      return { dY, adjacent: noOverlapL || noOverlapR, inRowW };
     });
-    assert(pos !== null, 'Play button and timeline needle row ([data-testid]) found');
-    assert(pos.isLeftAligned, `Play button is left-aligned in needle row (left offset: ${Math.round(pos.btnLeft - pos.rowLeft)}px)`);
-    assert(pos.isTopOfRow, `Play button is in upper part of needle row (top offset: ${Math.round(pos.btnTop - pos.rowTop)}px)`);
+    assert(pos !== null, 'Play, scrubber handle, and timeline needle row found');
+    assert(pos.dY < 16, `Play vertically centered on handle (Δy=${pos.dY.toFixed(1)}px)`);
+    assert(pos.adjacent, 'Play is left or right of the handle (not on top of it)');
+    assert(pos.inRowW, 'Play stays within the timeline wrapper');
   });
 
   // Language selector is visible
