@@ -21,11 +21,11 @@ const UPDATE_MODE   = process.env.UPDATE_SNAPSHOTS === '1';
 // ─── reference snapshots ──────────────────────────────────────────────────────
 // Keyed by name → { time, theme, viewportW, viewportH }
 const SNAPSHOT_SCENARIOS = [
-  { name: 'timeline-start-dark',  time: -4100000, theme: 'dark',  w: 1440, h: 900 },
+  { name: 'timeline-start-dark',  time: -7500000, theme: 'dark',  w: 1440, h: 900 },
   { name: 'homo-erectus-dark',    time: -438000,  theme: 'dark',  w: 1440, h: 900 },
   { name: 'homo-sapiens-dark',    time: -100000,  theme: 'dark',  w: 1440, h: 900 },
   { name: 'timeline-end-dark',    time: -2000,    theme: 'dark',  w: 1440, h: 900 },
-  { name: 'timeline-start-light', time: -4100000, theme: 'light', w: 1440, h: 900 },
+  { name: 'timeline-start-light', time: -7500000, theme: 'light', w: 1440, h: 900 },
   { name: 'homo-erectus-light',   time: -438000,  theme: 'light', w: 1440, h: 900 },
   { name: 'tablet-dark',          time: -438000,  theme: 'dark',  w: 768,  h: 1024 },
   { name: 'tablet-light',         time: -438000,  theme: 'light', w: 768,  h: 1024 },

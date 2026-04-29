@@ -210,6 +210,19 @@ async function runUnitTests() {
     assert(result, 'Round-trip linearToTime <-> timeToLinear is stable');
   });
 
+  await test('timeToLinear(-7500000) ≈ 0 (timeline left bound)', async () => {
+    const d = await page.evaluate(() => {
+      const v = timeToLinear(-7500000);
+      return Math.abs(v);
+    });
+    assert(d < 0.001, `timeToLinear(-7500000) ≈ 0 (got |v| = ${d})`);
+  });
+
+  await test('timeToLinear(-7200000) > 0 (Sahelanthropus window)', async () => {
+    const v = await page.evaluate(() => timeToLinear(-7200000));
+    assert(v > 0, `timeToLinear(-7200000) > 0 (got ${v})`);
+  });
+
   await test('formatTime(-4100000) contains "4,1 Ma" or "4.1 Ma"', async () => {
     const formatted = await page.evaluate(() => formatTime(-4100000));
     assert(/4[,.]1\s*Ma/i.test(formatted), `formatTime(-4100000) = "${formatted}" contains "4,1 Ma"`);

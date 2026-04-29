@@ -5,7 +5,7 @@
 [![Live app](https://img.shields.io/badge/Live%20app-open%20now-orange)](https://ho.lookingforanswers.eu/)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-blue)](https://creativecommons.org/licenses/by/4.0/)
-[![Tests](https://img.shields.io/badge/Tests-57%20passing-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/Tests-58%20passing-brightgreen)](#tests)
 [![Fork this](https://img.shields.io/badge/Fork%20this-please-blueviolet)](https://github.com/fdepierre/hominines-origins/fork)
 
 ---
@@ -20,10 +20,10 @@ The goal is to keep the data traceable, correctable, and reusable. Factual claim
 
 ## What this project shows
 
-Hominines Origins is an interactive web application that visualises the full story of human evolution — from *Australopithecus afarensis* 4.1 million years ago to *Homo sapiens* today.
+Hominines Origins is an interactive web application that visualises the full story of human evolution — from the oldest hominins in the catalogue (Miocene, ~7 Ma) through *Homo sapiens* today.
 
 - **Where** each hominine species appeared and lived (fossil sites, geographic ranges)
-- **When** — a logarithmic timeline spanning 4.1 million years, the only scale that makes both timescales visible at once
+- **When** — a logarithmic timeline spanning 7.5 million years, the only scale that makes both timescales visible at once
 - **How they looked** — skin, eye and hair pigmentation based on genetic and fossil evidence
 - **How they moved** — directional migration arrows, animated in real time
 - **What they invented** — fire, tools, symbolic art, intentional burial, agriculture
@@ -148,7 +148,7 @@ The app auto-selects **FR** or **EN** from the browser language and keeps the bu
 
 ## Tests
 
-**56** automated non-regression checks (named `test` cases across the three suites). They run in about 35–60 seconds.
+**58** automated non-regression checks (named `test` cases across the three suites). They run in about 35–60 seconds.
 
 ```bash
 npx playwright install chromium   # once
