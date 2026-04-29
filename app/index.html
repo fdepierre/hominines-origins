@@ -2258,7 +2258,7 @@ function formatPeriodSeparator() {
 // =====================================================================
 // APPLICATION STATE
 // =====================================================================
-let currentTime = -4100000;
+let currentTime = TIMELINE_MIN;
 let selectedSpecies = null;
 let layerStates = { sites: true, migrations: true, range: true };
 let mapMarkers = {};
@@ -4948,7 +4948,7 @@ function bootApp() {
   initThemeToggle();
 
   function afterMapInited() {
-    setTime(-4100000);
+    setTime(TIMELINE_MIN);
     updateMap();
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
