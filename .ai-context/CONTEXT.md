@@ -8,7 +8,7 @@ Read this file before making any changes.
 
 ## What this project is
 
-An interactive single-page web application that visualises human evolution from 4.1 million years ago to 2 000 years ago. It runs entirely in the browser — no server and **no build step for the app**.
+An interactive single-page web application that visualises human evolution from 7.5 million years ago to 2 000 years ago. It runs entirely in the browser — no server and **no build step for the app**.
 
 **Mission:** Make the science of human origins accessible to everyone on Earth, in their own language. The core message is that all humans share a common African ancestor — a scientific fact that, when understood, makes the concept of racial hierarchy impossible to sustain.
 
@@ -70,7 +70,7 @@ If `fetch` fails (`file://`, missing files, strict offline), the same **`_EMBEDD
 let SPECIES_DATA   // Filled by loadData(); length 18 (catalogue entries)
 let EVENTS_DATA    // Filled by loadData(); length 22 (milestones)
 SKIN_PERIODS       // const — skin tone segments for the timeline band (see data-schema.md)
-TIMELINE_MIN       // const — -4200000 (years BP, negative)
+TIMELINE_MIN       // const — -7500000 (years BP, negative)
 TIMELINE_MAX       // const — -1500 (years BP, negative)
 ```
 
@@ -80,7 +80,7 @@ Full field lists: `.ai-context/data-schema.md`.
 
 ### Timeline scale
 
-The timeline uses a **logarithmic scale** (log10 of absolute year value). This is not a bug. It is the only way to show both "4.1 million years ago" and "3 000 years ago" on the same screen in a meaningful way.
+The timeline uses a **logarithmic scale** (log10 of absolute year value). This is not a bug. It is the only way to show both "7.5 million years ago" and "3 000 years ago" on the same screen in a meaningful way.
 
 Functions: `linearToTime(t)` and `timeToLinear(time)` — do not change these without updating all tests.
 

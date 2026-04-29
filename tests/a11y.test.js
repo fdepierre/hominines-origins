@@ -131,7 +131,7 @@ async function runA11yTests(options = {}) {
   });
 
   await test('Timeline needle moves when time changes', async () => {
-    await setTime(page, -4100000); // far left
+    await setTime(page, -7500000); // far left (TIMELINE_MIN)
     const leftPos = await page.evaluate(() => {
       const n = document.getElementById('timeline-full-needle');
       return n ? parseFloat(n.style.left || '0') : null;
@@ -166,7 +166,7 @@ async function runA11yTests(options = {}) {
   console.log(`\n${BOLD}◆ PLAY / PAUSE INTERACTION${RESET}`);
 
   await test('Clicking Play starts playback', async () => {
-    await setTime(page, -4100000);
+    await setTime(page, -7500000);
     const playBtn = await page.$('[data-testid="play-toggle"]');
     assert(playBtn !== null, 'Play button found');
     await playBtn.click();
@@ -181,7 +181,7 @@ async function runA11yTests(options = {}) {
   });
 
   await test('Clicking Pause stops playback', async () => {
-    await setTime(page, -4100000);
+    await setTime(page, -7500000);
     const playBtn = await page.$('[data-testid="play-toggle"]');
     await playBtn.click(); // start
     await page.waitForTimeout(200);
