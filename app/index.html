@@ -1923,10 +1923,25 @@ html[data-map-ready="1"] #map {
   }
   #mobile-tab-bar { display: grid !important; }
   #app { padding-bottom: calc(var(--mobile-tab-bar-h) + env(safe-area-inset-bottom, 0px)); }
+  /* Footer scrolls if content is tall — keeps the map from shrinking to a slither on phones */
+  #timeline {
+    max-height: min(42dvh, 380px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    min-height: 0;
+  }
+  /* Keep app title readable while scrolling the timeline footer */
+  #tl-title-strip {
+    position: sticky;
+    top: 0;
+    z-index: 7;
+  }
   #main {
     grid-template-columns: 1fr !important;
-    /* Reserve space for the real #timeline height (set via --mobile-timeline-reserve after layout; fallback for first paint) */
-    height: calc(100dvh - var(--mobile-timeline-reserve, 360px) - var(--mobile-tab-bar-h) - env(safe-area-inset-bottom, 0px));
+    /* Reserve matches measured #timeline height (capped on mobile for scrollable footer) */
+    height: calc(100dvh - var(--mobile-timeline-reserve, 280px) - var(--mobile-tab-bar-h) - env(safe-area-inset-bottom, 0px));
     position: relative;
     overflow-x: hidden;
     overflow-y: visible;
@@ -2487,6 +2502,7 @@ function initMapLibre() {
     minZoom: 0.5,
     maxZoom: 7,
     attributionControl: false,
+    renderWorldCopies: false,
   });
   window.__mapLibreMap = mapLibreMap;
   mapLibreMap.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
@@ -3365,7 +3381,7 @@ function isMobileViewport() {
 /** Tighter species rows on small viewports — shorter track, more room for the map. */
 function getLaneMetrics() {
   return isMobileViewport()
-    ? { h: 11, gap: 2 }
+    ? { h: 9, gap: 1 }
     : { h: 10, gap: 2 };
 }
 
