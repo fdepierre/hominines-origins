@@ -1476,6 +1476,8 @@ html[data-map-ready="1"] #map {
 .human-figure-container {
   display: grid;
   grid-template-columns: auto fit-content(11.75rem) minmax(0, 1fr);
+  /* Lignes biométriques explicites — sans elles 1 / -1 ne span qu’une ligne et les mesures se tassent */
+  grid-template-rows: repeat(4, auto);
   column-gap: var(--space-3);
   row-gap: 5px;
   align-items: start;
@@ -1490,12 +1492,13 @@ html[data-map-ready="1"] #map {
 /* Colonne 1 : silhouette(s) sur toute la hauteur des lignes biométriques */
 .human-figure-col {
   grid-column: 1;
-  grid-row: 1 / -1;
-  align-self: start;
+  grid-row: 1 / span 4;
+  align-self: stretch;
   justify-self: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   min-width: 0;
 }
 
@@ -3713,11 +3716,11 @@ function renderPanel(species) {
     [T('weightM', 'Poids ♂'), bio.weightM],
     [T('brainVol', 'Cerveau'), bio.brain],
   ];
-  const morphoBioHtml = bioMorphoRows.map(function (pair) {
+  const morphoBioHtml = bioMorphoRows.map(function (pair, i) {
     const lab = bandTipEscapeHtml(String(pair[0]));
     const val = bandTipEscapeHtml(String(pair[1] == null ? '' : pair[1]));
     return (
-      '<div class="figure-bio-row">' +
+      '<div class="figure-bio-row" style="grid-row: ' + (i + 1) + '">' +
       '<span class="figure-bio-label">' + lab + '</span>' +
       '<span class="figure-bio-val">' + val + '</span>' +
       '</div>'
