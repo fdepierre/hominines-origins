@@ -1472,12 +1472,13 @@ html[data-map-ready="1"] #map {
 }
 /* needle-wrapper starts right after timeline padding — no extra padding needed */
 
-/* ===== HUMAN FIGURE ===== */
+/* ===== HUMAN FIGURE — grille 3 colonnes : silhouettes | libellés | valeurs ===== */
 .human-figure-container {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns: auto fit-content(11.75rem) minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: 5px;
+  align-items: start;
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-divider);
   background: var(--color-surface-offset);
@@ -1485,40 +1486,78 @@ html[data-map-ready="1"] #map {
   margin: 0 var(--space-4) var(--space-2);
   overflow: visible;
 }
-/* Trois silhouettes (+ légende) : centrer les mesures morpho sur la hauteur du bloc figurines */
-.human-figure-container:has(.human-figure-spectrum-wrap) {
+
+/* Colonne 1 : silhouette(s) sur toute la hauteur des lignes biométriques */
+.human-figure-col {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: start;
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  min-width: 0;
 }
-.human-figure-container > svg.human-figure-svg {
-  flex-shrink: 0;
-  align-self: flex-start;
+
+.human-figure-col > .human-figure-svg {
   display: block;
-  object-fit: contain;
   width: 72px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 120 / 172;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+/* Spectre H. sapiens : trois silhouettes empilées + légende */
+.human-figure-spectrum-wrap--stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  max-width: 4.75rem;
+}
+
+.human-figure-stack-cell {
+  line-height: 0;
+}
+
+.human-figure-spectrum-wrap--stacked .human-figure-svg--stack-slot {
+  display: block;
+  width: 52px;
+  max-width: 100%;
   height: auto;
   aspect-ratio: 120 / 172;
 }
-.figure-bio-mini {
-  flex: 1;
-  min-width: 0;
-  display: grid;
-  /* Libellés jusqu’à ~11.75rem ; valeurs dans le reste (minmax(0,1fr)) pour éviter colonne écrasée */
-  grid-template-columns: fit-content(11.75rem) minmax(0, 1fr);
-  column-gap: var(--space-3);
-  row-gap: 5px;
-  align-items: start;
+
+.human-figure-one-species-label {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  opacity: 0.55;
+  text-align: center;
+  line-height: 1.25;
+  margin-top: 4px;
+  max-width: 6.5rem;
+  pointer-events: none;
 }
 
-.figure-bio-item {
+/* Colonnes 2–3 : une ligne = libellé + valeur (sous-grille interne) */
+.figure-bio-row {
+  grid-column: 2 / span 2;
   display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
+  grid-template-columns: fit-content(11.75rem) minmax(0, 1fr);
+  column-gap: var(--space-3);
   align-items: baseline;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--color-divider);
 }
 
-.figure-bio-item:last-child { border-bottom: none; padding-bottom: 0; }
+.figure-bio-row:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
 
 .figure-bio-label {
   font-size: 11px;
@@ -1535,35 +1574,9 @@ html[data-map-ready="1"] #map {
   color: var(--color-text);
   text-align: start;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
-@supports not (grid-template-columns: subgrid) {
-  .figure-bio-mini {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .figure-bio-item {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: baseline;
-    column-gap: var(--space-3);
-    row-gap: 4px;
-  }
-
-  .figure-bio-label {
-    flex: 1 1 7rem;
-    max-width: 11.75rem;
-  }
-
-  .figure-bio-val {
-    flex: 1 1 min(13rem, 100%);
-    text-align: start;
-  }
-}
 /* Screen-reader + browser-translate friendly text inside icon-only controls */
 .sr-only {
   position: absolute;
@@ -1575,27 +1588,6 @@ html[data-map-ready="1"] #map {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-.human-figure-spectrum-wrap {
-  flex-shrink: 0;
-  width: 140px;
-  max-width: 100%;
-}
-.human-figure-spectrum-wrap .human-figure-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 360 / 172;
-}
-.human-figure-one-species-label {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--color-text);
-  opacity: 0.55;
-  text-align: center;
-  line-height: 1.25;
-  margin-top: 2px;
-  pointer-events: none;
 }
 [data-theme="light"] .human-figure-container { background: #c8bfb0; }
 
@@ -3600,13 +3592,20 @@ function drawHumanFigure(pigmentation) {
       ? i18next.t('ui.oneSpecies')
       : 'Homo sapiens — une seule espèce';
     return (
-      '<div class="human-figure-spectrum-wrap">' +
-      '<svg class="human-figure-svg" viewBox="0 0 360 172" fill="none" ' +
-      'xmlns="http://www.w3.org/2000/svg" aria-label="Diversité de l\'espèce Homo sapiens">' +
-      '<g transform="translate(0,5)">' + humanFigureSVG(dark, '#2a1400', '#080400', 60) + '</g>' +
-      '<g transform="translate(120,5)">' + humanFigureSVG(mid, '#5c3317', '#4a2000', 60) + '</g>' +
-      '<g transform="translate(240,5)">' + humanFigureSVG(light, eyeLight, hairLight, 60) + '</g>' +
-      '</svg>' +
+      '<div class="human-figure-spectrum-wrap human-figure-spectrum-wrap--stacked" role="group" ' +
+      'aria-label="Diversité de l\'espèce Homo sapiens">' +
+      '<div class="human-figure-stack-cell"><svg class="human-figure-svg human-figure-svg--stack-slot" ' +
+      'viewBox="0 0 120 172" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      humanFigureSVG(dark, '#2a1400', '#080400', 60) +
+      '</svg></div>' +
+      '<div class="human-figure-stack-cell"><svg class="human-figure-svg human-figure-svg--stack-slot" ' +
+      'viewBox="0 0 120 172" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      humanFigureSVG(mid, '#5c3317', '#4a2000', 60) +
+      '</svg></div>' +
+      '<div class="human-figure-stack-cell"><svg class="human-figure-svg human-figure-svg--stack-slot" ' +
+      'viewBox="0 0 120 172" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      humanFigureSVG(light, eyeLight, hairLight, 60) +
+      '</svg></div>' +
       '<div class="human-figure-one-species-label" translate="yes">' + bandTipEscapeHtml(oneSpeciesLbl) + '</div>' +
       '</div>'
     );
@@ -3708,6 +3707,22 @@ function renderPanel(species) {
     ? i18next.t('ui.' + key, { defaultValue: fb }) : fb;
 
   const hasTri = !!species['hominin:taxonomyDebateLevel'];
+  const bioMorphoRows = [
+    [T('heightM', 'Taille ♂'), bio.heightM],
+    [T('heightF', 'Taille ♀'), bio.heightF],
+    [T('weightM', 'Poids ♂'), bio.weightM],
+    [T('brainVol', 'Cerveau'), bio.brain],
+  ];
+  const morphoBioHtml = bioMorphoRows.map(function (pair) {
+    const lab = bandTipEscapeHtml(String(pair[0]));
+    const val = bandTipEscapeHtml(String(pair[1] == null ? '' : pair[1]));
+    return (
+      '<div class="figure-bio-row">' +
+      '<span class="figure-bio-label">' + lab + '</span>' +
+      '<span class="figure-bio-val">' + val + '</span>' +
+      '</div>'
+    );
+  }).join('');
   const html = `
     <div class="animate-in" lang="${currentDataLang()}" dir="auto" translate="yes">
       <div class="side-panel-header${hasTri ? ' side-panel-header--certainty' : ''}">
@@ -3719,27 +3734,12 @@ function renderPanel(species) {
         ${renderCertaintyTriIcon(species, T)}
       </div>
 
-      <!-- Human figure + quick biometrics -->
+      <!-- Human figure + quick biometrics (3 colonnes : silhouettes | libellés | valeurs) -->
       <div class="human-figure-container">
-        ${drawHumanFigure(pig)}
-        <div class="figure-bio-mini">
-          <div class="figure-bio-item">
-            <span class="figure-bio-label">${T('heightM','Taille ♂')}</span>
-            <span class="figure-bio-val">${bio.heightM}</span>
-          </div>
-          <div class="figure-bio-item">
-            <span class="figure-bio-label">${T('heightF','Taille ♀')}</span>
-            <span class="figure-bio-val">${bio.heightF}</span>
-          </div>
-          <div class="figure-bio-item">
-            <span class="figure-bio-label">${T('weightM','Poids ♂')}</span>
-            <span class="figure-bio-val">${bio.weightM}</span>
-          </div>
-          <div class="figure-bio-item">
-            <span class="figure-bio-label">${T('brainVol','Cerveau')}</span>
-            <span class="figure-bio-val">${bio.brain}</span>
-          </div>
+        <div class="human-figure-col">
+          ${drawHumanFigure(pig)}
         </div>
+        ${morphoBioHtml}
       </div>
 
       <!-- Pigmentation -->
