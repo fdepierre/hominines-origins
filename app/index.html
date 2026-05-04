@@ -320,20 +320,23 @@ a { color: var(--color-primary); }
 
 /* Panel — compact scientific certainty (tri-icon in header) */
 .side-panel-header--certainty {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
 }
 .side-panel-header-text {
-  flex: 1;
+  max-width: 100%;
+}
+.side-panel-header--certainty .side-panel-header-text {
+  /* minmax(0,1fr) côté grid + min-width ici : évite une colonne titre quasi nulle (affichage lettre à lettre) */
   min-width: 0;
 }
 .certainty-tri-slot {
   position: relative;
-  flex-shrink: 0;
   margin-top: 2px;
+  justify-self: end;
 }
 .certainty-tri-hit {
   display: block;
@@ -605,12 +608,18 @@ html[data-map-ready="1"] #map {
   font-style: italic;
   line-height: 1.2;
   margin-bottom: var(--space-1);
+  max-width: 100%;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 .species-name-common {
   font-size: 11px;
   line-height: 1.35;
   color: var(--color-text-muted);
   font-style: normal;
+  max-width: 100%;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 /* Pigmentation showcase */
