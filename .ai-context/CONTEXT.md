@@ -71,7 +71,7 @@ let SPECIES_DATA   // Filled by loadData(); length 18 (catalogue entries)
 let EVENTS_DATA    // Filled by loadData(); length 22 (milestones)
 SKIN_PERIODS       // const — skin tone segments for the timeline band (see data-schema.md)
 TIMELINE_MIN       // const — -7500000 (years BP, negative)
-TIMELINE_MAX       // const — -1500 (years BP, negative)
+TIMELINE_MAX       // const — -2000 (years BP — alignée repère « 2 ka », fin dernier segment catalogue / peau)
 ```
 
 **Timeline rows:** The UI renders **one horizontal row per species** in `SPECIES_DATA`, ordered by **`buildRowOrder()`** (sort by `start` descending — oldest at the bottom). There is **no** `LANE_ASSIGNMENTS` object in code. JSON may still contain **`hominin:lane`** on items; **`adaptSpecies` does not copy it** into the runtime object — treat it as legacy / documentation-only unless you extend the adapter.

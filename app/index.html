@@ -2415,7 +2415,7 @@ const HOMININ_CERTAINTY_KEYS = [
 // TIMELINE — LOG SCALE (years BP)
 // =====================================================================
 const TIMELINE_MIN = -7500000;
-const TIMELINE_MAX = -1500;
+const TIMELINE_MAX = -2000;
 
 // Log scale mapping for timeline
 function linearToTime(t) {
@@ -5060,8 +5060,7 @@ function startPlay() {
     const newLinear = currentLinear + stepPerTick;
 
     if (newLinear >= 1) {
-      setTime(TIMELINE_MAX);
-      stopPlay();
+      setTime(TIMELINE_MIN);
       return;
     }
     setTime(linearToTime(newLinear));
