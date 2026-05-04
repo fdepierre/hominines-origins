@@ -297,15 +297,37 @@ async function runUnitTests() {
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ TIMELINE LANES${RESET}`);
 
-  await test('Rendered species lane count matches SPECIES_DATA', async () => {
+  await test('Rendered species lane count matches buildTimelineLaneModels()', async () => {
+    const { nLanes, nExpected } = await page.evaluate(() => ({
+      nLanes: document.querySelectorAll('#timeline-lanes .species-lane').length,
+      nExpected: typeof buildTimelineLaneModels === 'function' ? buildTimelineLaneModels().length : 0,
+    }));
+    assert(nLanes === nExpected, `Lane count ${nLanes} === buildTimelineLaneModels().length ${nExpected}`);
+  });
+
+  await test('Detailed timeline restores one lane per catalogue species', async () => {
+    await page.evaluate(() => {
+      if (typeof setTimelineViewMode === 'function') setTimelineViewMode('detailed');
+    });
     const { nLanes, nSpecies } = await page.evaluate(() => ({
       nLanes: document.querySelectorAll('#timeline-lanes .species-lane').length,
       nSpecies: (SPECIES_DATA || []).length,
     }));
-    assert(nLanes === nSpecies, `Lane count ${nLanes} === SPECIES_DATA.length ${nSpecies}`);
+    assert(nLanes === nSpecies, `Detailed: lane count ${nLanes} === SPECIES_DATA.length ${nSpecies}`);
+  });
+
+  await test('Simple mode exposes merged erectus group lane', async () => {
+    await page.evaluate(() => {
+      if (typeof setTimelineViewMode === 'function') setTimelineViewMode('simple');
+    });
+    const ok = await page.evaluate(() => !!document.getElementById('lane-grp-erectus-sl'));
+    assert(ok, 'Expected #lane-grp-erectus-sl in simple timeline mode');
   });
 
   await test('2026 catalogue taxa have timeline lane elements', async () => {
+    await page.evaluate(() => {
+      if (typeof setTimelineViewMode === 'function') setTimelineViewMode('detailed');
+    });
     const missing = await page.evaluate(() => {
       const ids = ['sahelanthropus', 'ardipithecus', 'georgicus', 'antecessor'];
       return ids.filter((id) => !document.getElementById('lane-' + id));

@@ -462,6 +462,7 @@ ul.uncertainty-level-list {
   overflow-y: visible;
   position: relative;
   min-height: 0;
+  align-items: stretch;
 }
 @media (min-width: 1200px) {
   #main { grid-template-columns: 1fr 340px; }
@@ -574,6 +575,9 @@ html[data-map-ready="1"] #map {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  scroll-padding-top: var(--space-2);
+  scroll-padding-bottom: var(--space-6);
 }
 
 .side-panel-header {
@@ -603,7 +607,8 @@ html[data-map-ready="1"] #map {
   margin-bottom: var(--space-1);
 }
 .species-name-common {
-  font-size: var(--text-sm);
+  font-size: 11px;
+  line-height: 1.35;
   color: var(--color-text-muted);
   font-style: normal;
 }
@@ -612,6 +617,7 @@ html[data-map-ready="1"] #map {
 .pigmentation-section {
   padding: var(--space-3) var(--space-6);
   border-bottom: 1px solid var(--color-divider);
+  scroll-margin-bottom: var(--space-6);
 }
 .pigmentation-title {
   font-size: var(--text-xs);
@@ -782,6 +788,7 @@ html[data-map-ready="1"] #map {
 /* Fixed vertical size (compact row grid) — active lanes grow in z-index and can overlap / clip, no layout jump */
 .timeline-species-track {
   position: relative;
+  z-index: 26; /* Above needle shaft (#timeline-full-needle) so lane text isn’t clipped by it */
   height: 240px; /* fallback — overridden by JS (one row per species) */
   margin-bottom: 0;
   overflow: hidden;
@@ -817,6 +824,7 @@ html[data-map-ready="1"] #map {
 /* Lane label — clair sur toutes les barres (lisible comme le bouton Play : clair + halo) */
 .species-lane-label {
   position: absolute;
+  z-index: 2;
   white-space: nowrap;
   font-size: 10px;
   font-family: var(--font-mono);
@@ -850,6 +858,7 @@ html[data-map-ready="1"] #map {
 /* === NEEDLE wrapper — spans ALL rows of the footer === */
 /* This is placed in a separate absolute container that covers
    species-track + ticks + skin-band + events-band */
+/* Needle shaft only (handle is a sibling below; lower z-index so species lane labels paint on top) */
 .timeline-full-needle {
   position: absolute;
   top: 0; bottom: 0;
@@ -857,15 +866,15 @@ html[data-map-ready="1"] #map {
   background: var(--color-primary);
   opacity: 0.9;
   pointer-events: none;
-  z-index: 30;
+  z-index: 18;
   /* left = abscisse du temps (JS) ; centrage comme les jalons (translate -50%) */
   transform: translateX(-50%);
 }
-/* The round handle at the TOP of the needle (less negative = less overlap on title row) */
+/* Draggable knob — sibling of shaft (not nested); JS sets left px + translate centers on seam */
 .timeline-needle-handle {
   position: absolute;
   top: -8px;
-  left: 50%;
+  left: 0;
   transform: translateX(-50%);
   width: 26px;
   height: 26px;
@@ -875,7 +884,7 @@ html[data-map-ready="1"] #map {
   box-shadow: 0 0 0 2px var(--color-primary), 0 2px 8px rgba(0,0,0,0.5);
   cursor: grab;
   pointer-events: all;
-  z-index: 31;
+  z-index: 40;
   touch-action: none;
   transition: box-shadow 0.15s;
 }
@@ -962,6 +971,7 @@ html[data-map-ready="1"] #map {
 /* === DATE TICKS (desktop / tablet : lisible) === */
 .timeline-ticks-row {
   position: relative;
+  z-index: 21;
   height: 28px;
   margin-bottom: 2px;
 }
@@ -991,6 +1001,7 @@ html[data-map-ready="1"] #map {
 /* === SKIN BAND (piste fine) === */
 .timeline-band {
   position: relative;
+  z-index: 21;
   height: 18px;
   margin-bottom: 1px;
   display: flex;
@@ -1026,6 +1037,7 @@ html[data-map-ready="1"] #map {
 /* === EVENTS BAND (tools, fire, art, etc.) === */
 .events-band {
   position: relative;
+  z-index: 21;
   height: 36px;
   display: flex;
   align-items: center;
@@ -1259,18 +1271,109 @@ html[data-map-ready="1"] #map {
 /* #timeline is the positioning context (tight top: gap title → bars = #needle-wrapper padding-top) */
 #timeline { position: relative; padding: 0 var(--space-2) 0; }
 
-/* App title strip — small permanent header row (keep reading room before needle / Play) */
-#tl-title-strip {
+/* Timeline strip: title left, view segmented control right (syncTimelineViewToggleUI in JS) */
+#tl-title-strip.timeline-header {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  padding: 2px 0 8px;
-  line-height: 1.2;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 5px 0;
+  line-height: 1.25;
   border-bottom: 1px solid var(--color-divider);
   margin-bottom: 0;
   position: relative;
   z-index: 6;
   background: var(--color-surface);
+}
+.timeline-header__title.tl-title-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1 1 auto;
+  align-self: center;
+}
+.timeline-view-switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  align-self: center;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+/* Single cohesive track: inner segments have square corners — outer rounding via overflow:hidden */
+.timeline-segmented {
+  display: inline-flex;
+  align-items: stretch;
+  vertical-align: middle;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface-offset);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.timeline-segmented__button {
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  border: 0 none !important;
+  margin: 0 !important;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-text);
+  outline: none;
+  border-radius: 0 !important;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 0;
+  box-sizing: border-box;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    font-weight 0.08s ease;
+  position: relative;
+}
+.timeline-segmented__button + .timeline-segmented__button {
+  box-shadow: inset 1px 0 0 var(--color-border);
+  border-left: 0 none !important;
+}
+.timeline-segmented__button:hover:not(.is-active) {
+  background: var(--color-primary-highlight);
+}
+.timeline-segmented__button:active:not(.is-active) {
+  background: color-mix(in srgb, var(--color-primary-highlight) 75%, transparent);
+}
+.timeline-segmented__button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  z-index: 2;
+}
+/* Active pill inside one track — no per-button outer outline */
+.timeline-segmented__button.is-active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 700;
+}
+.timeline-segmented__button.is-active:hover {
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-text-muted) 6%);
+}
+.timeline-segmented__button:not(.is-active) {
+  color: color-mix(in srgb, var(--color-text) 88%, var(--color-text-muted) 12%);
+}
+[data-theme="light"] .timeline-segmented__button:not(.is-active) {
+  color: color-mix(in srgb, var(--color-text) 82%, transparent 18%);
 }
 #tl-app-name {
   font-size: var(--text-xs);
@@ -1279,12 +1382,15 @@ html[data-map-ready="1"] #map {
   color: var(--color-text);
   white-space: nowrap;
   line-height: 1.15;
+  flex-shrink: 0;
 }
 #tl-app-name em {
   color: var(--color-primary);
   font-style: normal;
 }
 #tl-app-desc {
+  flex: 1;
+  min-width: 0;
   font-size: 11px;
   color: var(--color-text-muted);
   font-family: var(--font-mono);
@@ -1292,6 +1398,12 @@ html[data-map-ready="1"] #map {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.species-lane--group:not(.active) {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.species-lane--group-subtle:not(.active) {
+  opacity: 0.5 !important;
 }
 
 /* #needle-wrapper: margin-top pushes *all* layers (needle/Play abs. included); padding-top only affects in-flow rows */
@@ -1303,10 +1415,10 @@ html[data-map-ready="1"] #map {
 }
 /* PC / tablette: clear band title → contrôles (sinon rond + Play recouvrent le titre) */
 @media (min-width: 769px) {
-  #tl-title-strip {
-    padding: 2px 0 12px;
+  #tl-title-strip.timeline-header {
+    padding: 6px 0;
   }
-  #needle-wrapper { margin-top: 12px; padding-top: 6px; }
+  #needle-wrapper { margin-top: 8px; padding-top: 6px; }
   .timeline-needle-handle { top: -6px; }
 }
 
@@ -1355,25 +1467,40 @@ html[data-map-ready="1"] #map {
 .human-figure-container {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-4);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-divider);
   background: var(--color-surface-offset);
   border-radius: var(--radius-md);
   margin: 0 var(--space-4) var(--space-2);
+  overflow: visible;
+}
+/* Trois silhouettes (+ légende) : centrer les mesures morpho sur la hauteur du bloc figurines */
+.human-figure-container:has(.human-figure-spectrum-wrap) {
+  align-items: center;
+}
+.human-figure-container > svg.human-figure-svg {
+  flex-shrink: 0;
+  align-self: flex-start;
+  display: block;
+  object-fit: contain;
+  width: 72px;
+  height: auto;
+  aspect-ratio: 120 / 172;
 }
 .figure-bio-mini {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
 }
 .figure-bio-item {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: baseline;
-  gap: var(--space-2);
+  gap: var(--space-3);
   padding-bottom: 4px;
   border-bottom: 1px solid var(--color-divider);
 }
@@ -1384,13 +1511,17 @@ html[data-map-ready="1"] #map {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-muted);
-  flex-shrink: 0;
+  flex: 0 0 11.5rem;
+  width: 11.5rem;
+  min-width: 0;
 }
 .figure-bio-val {
+  flex: 1;
   font-size: var(--text-xs);
   font-weight: 600;
   color: var(--color-text);
-  text-align: right;
+  text-align: end;
+  min-width: 0;
 }
 /* Screen-reader + browser-translate friendly text inside icon-only controls */
 .sr-only {
@@ -1413,6 +1544,7 @@ html[data-map-ready="1"] #map {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 360 / 172;
 }
 .human-figure-one-species-label {
   font-size: 10px;
@@ -1425,11 +1557,6 @@ html[data-map-ready="1"] #map {
   pointer-events: none;
 }
 [data-theme="light"] .human-figure-container { background: #c8bfb0; }
-
-.human-figure-svg {
-  width: 72px;
-  height: 96px;
-}
 
 /* RTL: no bundled Arabic/Hebrew UI yet — enabling [dir="rtl"] would require a dedicated pass on map controls, timeline flex, and panel layout. */
 
@@ -1481,6 +1608,7 @@ html[data-map-ready="1"] #map {
 .map-container {
   position: relative;
   overflow: visible;
+  min-height: 0;
 }
 .map-container .maplibregl-map {
   overflow: visible;
@@ -1970,20 +2098,24 @@ html[data-map-ready="1"] #map {
     height: 32px !important;
     top: -4px !important;
   }
-  /* margin-top separates abs. needle+Play from title; modest padding-top = in-flow lanes only */
+  /* margin-top separates abs. needle+Play from title; tighter gap under compact header */
   #needle-wrapper {
     touch-action: none;
     cursor: ew-resize;
-    margin-top: 14px;
-    padding-top: 12px;
+    margin-top: 10px;
+    padding-top: 10px;
   }
   #play-overlay-btn { width:56px; height:56px; }
   #btn-data-viewer { display:none; }
   /* More map: compact footer + narrative (species / story) stays readable */
   #tl-app-desc { display: none; }
-  #tl-title-strip {
-    padding: 4px 0 10px;
+  #tl-title-strip.timeline-header {
+    padding: 6px 0;
     margin-bottom: 0;
+  }
+  .timeline-segmented__button {
+    padding: 4px 8px;
+    font-size: 10px;
   }
   /* Play/Pause: même logique que PC (#play-btn à côté du rond) */
   #mobile-play-btn { display: none !important; }
@@ -2138,10 +2270,19 @@ html[data-map-ready="1"] #map {
     <select id="play-speed" style="display:none"><option value="1" selected>×1</option></select>
     <span id="tl-hint-desktop" style="display:none"></span>
 
-    <!-- App title strip — always visible above timeline -->
-    <div id="tl-title-strip">
-      <span id="tl-app-name">Hominin<em>es</em> Origins</span>
-      <span id="tl-app-desc" data-i18n="ui.appSubtitle">Explorez 4 millions d'années de migrations humaines</span>
+    <!-- Timeline header — title left, view mode segmented control right (see syncTimelineViewToggleUI) -->
+    <div id="tl-title-strip" class="timeline-header">
+      <div class="timeline-header__title tl-title-brand">
+        <span id="tl-app-name">Hominin<em>es</em> Origins</span>
+        <span id="tl-app-desc" data-i18n="ui.appSubtitle">Explorez près de 7,5&nbsp;millions d'années de migrations humaines</span>
+      </div>
+      <div class="timeline-view-switch" id="timeline-view-mode-group" role="group">
+        <div class="timeline-segmented" role="presentation"><button type="button" id="timeline-view-mode-simple" class="timeline-segmented__button is-active"
+            data-testid="timeline-view-simple" data-timeline-mode="simple" aria-pressed="true" tabindex="0"
+            data-i18n="ui.timelineViewSimple">Vue simple</button><button type="button" id="timeline-view-mode-detailed" class="timeline-segmented__button"
+            data-testid="timeline-view-detailed" data-timeline-mode="detailed" aria-pressed="false" tabindex="-1"
+            data-i18n="ui.timelineViewDetailed">Vue détaillée</button></div>
+      </div>
     </div>
 
     <!-- Needle wrapper — play btn + time label float inside as overlays -->
@@ -2159,6 +2300,9 @@ html[data-map-ready="1"] #map {
       </button>
       <!-- Time label floats next to play btn -->
       <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
+
+      <!-- Vertical needle shaft UNDER species lanes so lane labels aren't covered; handle is sibling below -->
+      <div class="timeline-full-needle" id="timeline-full-needle" aria-hidden="true"></div>
 
       <!-- Row 2: species lanes track -->
       <div class="timeline-species-track" id="timeline-species-track">
@@ -2181,10 +2325,8 @@ html[data-map-ready="1"] #map {
         <div class="events-band-track" id="events-band-track"></div>
       </div>
 
-      <!-- THE NEEDLE — full height, round handle on top -->
-      <div class="timeline-full-needle" id="timeline-full-needle">
-        <div class="timeline-needle-handle" id="timeline-scrubber" data-i18n-title="ui.scrubberTitle"></div>
-      </div>
+      <!-- Draggable scrubber knob — sibling after bands, paints above lanes + shaft -->
+      <div class="timeline-needle-handle" id="timeline-scrubber" data-i18n-title="ui.scrubberTitle"></div>
 
     </div><!-- /needle-wrapper -->
 
@@ -2268,6 +2410,279 @@ function formatTime(t) {
 
 function formatPeriodSeparator() {
   return currentDataLang() === 'en' ? 'to' : 'à';
+}
+
+// =====================================================================
+// TIMELINE ROW VIEW — "simple" (grouped pedagogical lanes) vs "detailed"
+// (one DOM lane per catalogue row). timelineViewMode is the UI state.
+// SIMPLE_TIMELINE_GROUPS + resolveSimpleTimelineGroups() define merges;
+// buildTimelineLaneModels() turns that into rows for layout + initTimeline().
+// =====================================================================
+const TIMELINE_VIEW_MODE_STORAGE_KEY = 'ho_timeline_view_mode';
+
+/** `'simple'` | `'detailed'` — default simple; sessionStorage restores last choice when set via loadTimelineViewModeFromStorage(). */
+let timelineViewMode = 'simple';
+
+/**
+ * Base merge rules for simple mode. `memberIds` are SPECIES_DATA[].id values.
+ * H. erectus s.l.: no separate ergaster row in current data (African form is folded in `erectus`).
+ */
+const SIMPLE_TIMELINE_GROUPS = [
+  {
+    id: 'grp-erectus-sl',
+    /* catalogue has georgicus + erectus only; regional "ergaster" is intended within erectus entries */
+    memberIds: ['georgicus', 'erectus'],
+    laneLabel: { fr: 'H. erectus s.l.', en: 'H. erectus s.l.' },
+    tooltipExtra: {
+      fr: 'Lecture simplifiée : réunit géorgicus + erectus du catalogue (pas un consensus taxonomique figé ; débat voir données détaillées).',
+      en: 'Simplified row: merges catalogue georgicus + erectus (not fixed taxonomy; check detailed rows for debates).'
+    },
+  },
+  {
+    id: 'grp-sapiens',
+    memberIds: ['sapiens-africa', 'sapiens-levant', 'sapiens-upper-paleo', 'sapiens-mesolithic', 'sapiens-neolithic', 'sapiens-bronze'],
+    laneLabel: { fr: 'Homo sapiens', en: 'Homo sapiens' },
+    tooltipExtra: {
+      fr: 'Lecture simplifiée : phases chronologiques du même taxon sur une ligne (vue détaillée = segments du catalogue).',
+      en: 'Simplified: chronological phases of the same species on one row (detailed = catalogue segments).'
+    },
+  },
+];
+
+function resolveSimpleTimelineGroups() {
+  const dynSapiensIds = (SPECIES_DATA || [])
+    .map(function (s) { return s.id; })
+    .filter(function (id) { return /^sapiens-/i.test(String(id)); });
+  return SIMPLE_TIMELINE_GROUPS.map(function (g) {
+    if (g.id !== 'grp-sapiens') return g;
+    var seen = Object.create(null);
+    var out = [];
+    (g.memberIds || []).concat(dynSapiensIds).forEach(function (id) {
+      if (id && !seen[id]) { seen[id] = true; out.push(id); }
+    });
+    return Object.assign({}, g, { memberIds: out });
+  });
+}
+
+function loadTimelineViewModeFromStorage() {
+  try {
+    var v = sessionStorage.getItem(TIMELINE_VIEW_MODE_STORAGE_KEY);
+    if (v === 'simple' || v === 'detailed') timelineViewMode = v;
+  } catch (e) { /* ignore */ }
+  document.documentElement.setAttribute('data-timeline-view', timelineViewMode);
+}
+
+function setTimelineViewMode(mode) {
+  if (mode !== 'simple' && mode !== 'detailed') return;
+  if (mode === timelineViewMode) {
+    syncTimelineViewToggleUI();
+    return;
+  }
+  timelineViewMode = mode;
+  try { sessionStorage.setItem(TIMELINE_VIEW_MODE_STORAGE_KEY, mode); } catch (e2) { /* ignore */ }
+  document.documentElement.setAttribute('data-timeline-view', timelineViewMode);
+  syncTimelineViewToggleUI();
+  _lastLaneLayoutKey = '';
+  initTimeline();
+}
+
+function speciesRecordByCatalogueId(id) {
+  return (SPECIES_DATA || []).find(function (s) { return s.id === id; });
+}
+
+/** Row list for timeline DOM + vertical layout — see timelineViewMode and SIMPLE_TIMELINE_GROUPS above. */
+function buildTimelineLaneModels() {
+  if (!SPECIES_DATA || !SPECIES_DATA.length) return [];
+  if (timelineViewMode === 'detailed') {
+    return buildRowOrder(SPECIES_DATA).map(function (sp) {
+      return { kind: 'species', species: sp };
+    });
+  }
+  var configs = resolveSimpleTimelineGroups();
+  var inGrouped = Object.create(null);
+  configs.forEach(function (cfg) {
+    cfg.memberIds.forEach(function (id) { inGrouped[id] = true; });
+  });
+  var merged = [];
+  configs.forEach(function (g) {
+    var members = g.memberIds.map(speciesRecordByCatalogueId).filter(Boolean)
+      .sort(function (a, b) { return b.start - a.start; });
+    if (!members.length) return;
+    merged.push({
+      kind: 'group',
+      id: g.id,
+      laneLabel: g.laneLabel,
+      tooltipExtra: g.tooltipExtra,
+      members: members,
+      start: Math.min.apply(null, members.map(function (m) { return m.start; })),
+      end: Math.max.apply(null, members.map(function (m) { return m.end; })),
+      color: members[Math.floor(members.length / 2)].color,
+    });
+  });
+  SPECIES_DATA.forEach(function (sp) {
+    if (!inGrouped[sp.id]) {
+      merged.push({ kind: 'species', species: sp });
+    }
+  });
+  merged.sort(function (a, b) {
+    var sa = a.kind === 'group' ? a.start : a.species.start;
+    var sb = b.kind === 'group' ? b.start : b.species.start;
+    return sb - sa;
+  });
+  return merged;
+}
+
+function representativeSpeciesFromGroupMembers(members, t) {
+  var vis = members.filter(function (sp) { return sp.start <= t && sp.end >= t; });
+  if (vis.length) return vis[0];
+  return members[Math.floor(members.length / 2)];
+}
+
+function speciesForGroupedLaneClick(model, t) {
+  var members = model.members;
+  if (typeof selectedSpecies !== 'undefined' && selectedSpecies &&
+      members.some(function (m) { return m.id === selectedSpecies.id; })) {
+    return selectedSpecies;
+  }
+  return representativeSpeciesFromGroupMembers(members, t);
+}
+
+function groupLaneTimelineLabel(model) {
+  var lang = currentDataLang() === 'en' ? 'en' : 'fr';
+  var L = model.laneLabel || {};
+  return L[lang] || L.fr || model.id;
+}
+
+/** Maps an absolute geological time within [gs, ge] → 0–100% bar position (timeline linear scale). */
+function groupTimelinePositionPercent(tAbsolute, gs, ge) {
+  var Lgs = timeToLinear(gs), Lge = timeToLinear(ge), Lt = timeToLinear(tAbsolute);
+  var lo = Math.min(Lgs, Lge), hi = Math.max(Lgs, Lge);
+  var span = hi - lo;
+  if (!(span > 1e-15) || !isFinite(Lt)) return 0;
+  var pct = ((Lt - lo) / span) * 100;
+  return Math.max(0, Math.min(100, pct));
+}
+
+/**
+ * Simple-mode grouped rows: gradient across the union interval using each member’s catalogue colour
+ * on its chronological span inside the bar (aligns hues with arrows / markers in detailed mode).
+ */
+function buildGroupedSpeciesLaneBackground(gs, ge, members) {
+  if (!members || !members.length) return '#888';
+  var clips = [];
+  members.forEach(function (m) {
+    var cs = Math.max(m.start, gs), ce = Math.min(m.end, ge);
+    var col = (m.color && typeof m.color === 'string') ? m.color : '#888';
+    if (cs < ce) clips.push({ start: cs, end: ce, color: col });
+  });
+  if (!clips.length) return '#888';
+  clips.sort(function (a, b) { return a.start - b.start; });
+  var brkSet = Object.create(null);
+  clips.forEach(function (c) { brkSet[c.start] = true; brkSet[c.end] = true; });
+  brkSet[gs] = true;
+  brkSet[ge] = true;
+  var brk = Object.keys(brkSet).map(Number).sort(function (a, b) { return a - b; });
+  var gradientParts = [];
+  for (var i = 0; i < brk.length - 1; i++) {
+    var t0 = brk[i], t1 = brk[i + 1];
+    if (t0 >= t1) continue;
+    var mid = (t0 + t1) / 2;
+    var active = clips.filter(function (c) { return c.start <= mid && c.end >= mid; });
+    var pLo = groupTimelinePositionPercent(Math.min(t0, t1), gs, ge);
+    var pHi = groupTimelinePositionPercent(Math.max(t0, t1), gs, ge);
+    var low = Math.min(pLo, pHi), high = Math.max(pLo, pHi);
+    if (high - low < 0.05) continue;
+    if (active.length === 1) {
+      gradientParts.push(active[0].color + ' ' + low.toFixed(3) + '%');
+      gradientParts.push(active[0].color + ' ' + high.toFixed(3) + '%');
+    } else if (active.length >= 2) {
+      var midPct = (low + high) / 2;
+      gradientParts.push(active[0].color + ' ' + low.toFixed(3) + '%');
+      gradientParts.push(active[0].color + ' ' + midPct.toFixed(3) + '%');
+      gradientParts.push(active[1].color + ' ' + midPct.toFixed(3) + '%');
+      gradientParts.push(active[1].color + ' ' + high.toFixed(3) + '%');
+    } else {
+      gradientParts.push(clips[0].color + ' ' + low.toFixed(3) + '%');
+      gradientParts.push(clips[0].color + ' ' + high.toFixed(3) + '%');
+    }
+  }
+  if (!gradientParts.length) return clips[Math.floor(clips.length / 2)].color;
+  return 'linear-gradient(to right, ' + gradientParts.join(', ') + ')';
+}
+
+function groupLaneTooltipHtml(model) {
+  var extra = pickLang(model.tooltipExtra, '');
+  var membersLines = model.members.map(function (sp) {
+    return '&nbsp;&nbsp;' + scientificNameHtml(sp.name) +
+      '<span style="color:var(--color-text-muted);font-size:10px;margin-left:4px;font-family:var(--font-mono)">' +
+      bandTipEscapeHtml(formatTime(sp.start)) + ' → ' + bandTipEscapeHtml(formatTime(sp.end)) + '</span>';
+  }).join('<br>');
+  return (
+    '<strong style="color:var(--color-text)">' + bandTipEscapeHtml(groupLaneTimelineLabel(model)) + '</strong>' +
+    (extra ? '<br><span style="color:var(--color-text-muted);font-size:11px">' + bandTipEscapeHtml(extra) + '</span>' : '') +
+    '<br><span style="color:var(--color-text-muted);font-size:10px;font-family:var(--font-mono)">' +
+    bandTipEscapeHtml(formatTime(model.start)) + ' → ' + bandTipEscapeHtml(formatTime(model.end)) + '</span>' +
+    '<br><span style="color:var(--color-text);font-size:11px">' +
+    '<span translate="yes">' + (currentDataLang() === 'en' ? 'Includes:' : 'Comprend :') + '</span><br>' + membersLines + '</span>'
+  );
+}
+
+/** Timeline view segmented control — active state + group aria-label (labels via data-i18n). */
+function syncTimelineViewToggleUI() {
+  var simpleBtn = document.getElementById('timeline-view-mode-simple');
+  var detailedBtn = document.getElementById('timeline-view-mode-detailed');
+  var grp = document.getElementById('timeline-view-mode-group');
+  if (grp && typeof i18next !== 'undefined' && i18next.isInitialized) {
+    grp.setAttribute('aria-label', i18next.t('ui.timelineViewGroupAria'));
+  } else if (grp) {
+    var alFr = 'Niveau de détail affiché sur la chronologie';
+    var alEn = 'How timeline rows are grouped: merged catalogue view or every lineage.';
+    try {
+      if (localStorage.getItem('ho_ui_lang') === 'en') grp.setAttribute('aria-label', alEn);
+      else grp.setAttribute('aria-label', alFr);
+    } catch (e) {
+      grp.setAttribute('aria-label', alFr);
+    }
+  }
+  if (!simpleBtn || !detailedBtn) return;
+  var isSimple = timelineViewMode === 'simple';
+  simpleBtn.classList.toggle('is-active', isSimple);
+  detailedBtn.classList.toggle('is-active', !isSimple);
+  simpleBtn.setAttribute('aria-pressed', isSimple ? 'true' : 'false');
+  detailedBtn.setAttribute('aria-pressed', (!isSimple) ? 'true' : 'false');
+  simpleBtn.tabIndex = isSimple ? 0 : -1;
+  detailedBtn.tabIndex = !isSimple ? 0 : -1;
+}
+
+function initTimelineViewControls() {
+  var simpleBtn = document.getElementById('timeline-view-mode-simple');
+  var detailedBtn = document.getElementById('timeline-view-mode-detailed');
+  if (simpleBtn && detailedBtn && !simpleBtn.dataset.boundHo) {
+    simpleBtn.dataset.boundHo = '1';
+    detailedBtn.dataset.boundHo = '1';
+    simpleBtn.addEventListener('click', function () {
+      setTimelineViewMode('simple');
+    });
+    detailedBtn.addEventListener('click', function () {
+      setTimelineViewMode('detailed');
+    });
+    function onSegKeydown(e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      var t = e.currentTarget;
+      if (t === simpleBtn && e.key === 'ArrowRight') {
+        e.preventDefault();
+        setTimelineViewMode('detailed');
+        detailedBtn.focus();
+      } else if (t === detailedBtn && e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setTimelineViewMode('simple');
+        simpleBtn.focus();
+      }
+    }
+    simpleBtn.addEventListener('keydown', onSegKeydown);
+    detailedBtn.addEventListener('keydown', onSegKeydown);
+  }
+  syncTimelineViewToggleUI();
 }
 
 // =====================================================================
@@ -3145,7 +3560,7 @@ function drawHumanFigure(pigmentation) {
       : 'Homo sapiens — une seule espèce';
     return (
       '<div class="human-figure-spectrum-wrap">' +
-      '<svg class="human-figure-svg" viewBox="0 0 360 158" fill="none" ' +
+      '<svg class="human-figure-svg" viewBox="0 0 360 172" fill="none" ' +
       'xmlns="http://www.w3.org/2000/svg" aria-label="Diversité de l\'espèce Homo sapiens">' +
       '<g transform="translate(0,5)">' + humanFigureSVG(dark, '#2a1400', '#080400', 60) + '</g>' +
       '<g transform="translate(120,5)">' + humanFigureSVG(mid, '#5c3317', '#4a2000', 60) + '</g>' +
@@ -3158,7 +3573,7 @@ function drawHumanFigure(pigmentation) {
 
   // Default: single figure
   return `
-    <svg class="human-figure-svg" viewBox="0 0 120 160" fill="none"
+    <svg class="human-figure-svg" viewBox="0 0 120 172" fill="none"
          xmlns="http://www.w3.org/2000/svg" aria-label="Silhouette morphologique">
       ${humanFigureSVG(skin.color, eyeColor, hairColor, 60)}
     </svg>
@@ -3243,6 +3658,7 @@ function renderCertaintyTriIcon(species, T) {
     '</div></div>'
   );
 }
+
 
 function renderPanel(species) {
   const pig = species.pigmentation;
@@ -3365,9 +3781,10 @@ function renderPanel(species) {
   const panelContent = document.getElementById('panel-content');
   panelContent.setAttribute('lang', currentDataLang());
   panelContent.innerHTML = html;
-  document.getElementById('side-panel').scrollTop = 0;
+  const panelEl = document.getElementById('side-panel');
+  /* Ne pas défiler vers le bas automatiquement : priorité à la silhouette pendant le défilement du temps. */
+  panelEl.scrollTop = 0;
 }
-
 // =====================================================================
 // TIMELINE
 // =====================================================================
@@ -3381,8 +3798,8 @@ function isMobileViewport() {
 /** Tighter species rows on small viewports — shorter track, more room for the map. */
 function getLaneMetrics() {
   return isMobileViewport()
-    ? { h: 9, gap: 1 }
-    : { h: 10, gap: 2 };
+    ? { h: 8, gap: 1 }
+    : { h: 7, gap: 1 };
 }
 
 function buildRowOrder(speciesList) {
@@ -3398,37 +3815,73 @@ function getLaneTop(laneIndex, totalRows, lm) {
 }
 
 let _lastLaneLayoutKey = '';
+let _timelineTrackListenersWired = false;
+/** Scrub drag state — document listeners wired once via initTimeline. */
+let _timelineScrubDragging = false;
+
+function getTimelineSpeciesTrackEl() {
+  return document.getElementById('timeline-species-track');
+}
+
+function onTimelineScrubPointerMove(e) {
+  if (!_timelineScrubDragging) return;
+  var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  var tr = getTimelineSpeciesTrackEl();
+  if (!tr) return;
+  var trackRect = tr.getBoundingClientRect();
+  var x = (clientX - trackRect.left) / trackRect.width;
+  setTime(linearToTime(Math.max(0, Math.min(1, x))));
+}
 
 /**
  * Taller bar + larger label for species at currentTime. Row tops follow the
  * fixed compact grid so #timeline height stays stable; thick bars overlap / clip
  * (overflow hidden on track) instead of pushing the map.
+ * Row list comes from buildTimelineLaneModels() (simple vs detailed — see timelineViewMode).
  */
 function layoutSpeciesLanesForCurrentTime() {
   if (!SPECIES_DATA || !SPECIES_DATA.length) return;
   const base = getLaneMetrics();
   const h0 = base.h;
   const gap = base.gap;
-  const h1 = Math.max(h0 + 6, Math.round(h0 * 1.8));
-  const rowOrder = buildRowOrder(SPECIES_DATA);
-  const n = rowOrder.length;
-  const activeSig = rowOrder
-    .map((sp) => (sp.start <= currentTime && sp.end >= currentTime ? '1' : '0'))
+  const h1 = Math.max(h0 + 4, Math.round(h0 * 1.5));
+  const laneModels = buildTimelineLaneModels();
+  const n = laneModels.length;
+  const ct = currentTime;
+  const activeSig = laneModels
+    .map(function (row) {
+      if (row.kind === 'species') {
+        return row.species.start <= ct && row.species.end >= ct ? '1' : '0';
+      }
+      return row.members.some(function (sp) { return sp.start <= ct && sp.end >= ct; }) ? '1' : '0';
+    })
     .join('');
-  const layoutKey = h0 + '/' + gap + '/' + activeSig;
+  const layoutKey = h0 + '/' + gap + '/' + timelineViewMode + '/' + n + '/' + activeSig;
   if (layoutKey === _lastLaneLayoutKey) return;
   _lastLaneLayoutKey = layoutKey;
   const compactLm = { h: h0, gap: gap };
   const trackH = n * (h0 + gap) + gap;
   const track = document.getElementById('timeline-species-track');
   if (track) track.style.height = trackH + 'px';
-  rowOrder.forEach((sp, laneIdx) => {
-    const lane = document.getElementById('lane-' + sp.id);
+  laneModels.forEach(function (row, laneIdx) {
+    const domId = row.kind === 'species' ? row.species.id : row.id;
+    const lane = document.getElementById('lane-' + domId);
     if (!lane) return;
-    const isActive = sp.start <= currentTime && sp.end >= currentTime;
+    var isActive = false;
+    if (row.kind === 'species') {
+      isActive = row.species.start <= ct && row.species.end >= ct;
+    } else {
+      isActive = row.members.some(function (sp) { return sp.start <= ct && sp.end >= ct; });
+    }
+    var isGroup = row.kind === 'group';
+    var selInside = isGroup && typeof selectedSpecies !== 'undefined' && selectedSpecies &&
+      row.members.some(function (m) { return m.id === selectedSpecies.id; });
     lane.classList.toggle('active', isActive);
+    lane.classList.toggle('species-lane--group', isGroup);
+    lane.classList.toggle('species-lane--group-subtle', isGroup && !isActive && !!selInside);
     lane.style.opacity = isActive ? '1' : '0.35';
-    const h = isActive ? h1 : h0;
+    var baseRowH = isGroup ? h0 + 1 : h0;
+    const h = isActive ? h1 : baseRowH;
     const topPx = gap + getLaneTop(laneIdx, n, compactLm);
     lane.style.height = h + 'px';
     lane.style.top = topPx + 'px';
@@ -3476,39 +3929,57 @@ function initTimeline() {
   if (ticksRow) ticksRow.innerHTML = '';
   _lastLaneLayoutKey = '';
 
-  // --- One row per species, oldest at bottom ---
-  const rowOrder = buildRowOrder(SPECIES_DATA); // index 0 = oldest = bottom
+  /* Row models: one catalogue species or one merged group per row (see buildTimelineLaneModels). */
+  const laneModels = buildTimelineLaneModels();
   const lm = getLaneMetrics();
 
-  // --- Species lanes (every entry in SPECIES_DATA gets one row) ---
-  SPECIES_DATA.forEach(species => {
-    const x1pct = timeToLinear(species.start) * 100;
-    const x2pct = timeToLinear(species.end) * 100;
-    const widthPct = Math.abs(x2pct - x1pct);
-    const laneIdx = rowOrder.findIndex(s => s.id === species.id);
-    if (laneIdx < 0) {
-      console.warn('[Hominines timeline] No row slot for species id:', species && species.id);
-      return;
+  laneModels.forEach(function (model) {
+    let x1pct, x2pct, widthPct, laneDomId, laneBg, dataId, ariaT, labelTxt, tipHtml, onClickSpecies;
+
+    if (model.kind === 'species') {
+      const species = model.species;
+      x1pct = timeToLinear(species.start) * 100;
+      x2pct = timeToLinear(species.end) * 100;
+      widthPct = Math.abs(x2pct - x1pct);
+      laneDomId = species.id;
+      laneBg = species.color;
+      dataId = species.id;
+      ariaT = species.name + ' (' + formatTime(species.start) + ' ' + formatPeriodSeparator() + ' ' + formatTime(species.end) + ')';
+      labelTxt = species.name.replace('Homo sapiens — ', 'H.s. ');
+      tipHtml = speciesLaneTooltipHtml(species);
+      onClickSpecies = species;
+    } else {
+      x1pct = timeToLinear(model.start) * 100;
+      x2pct = timeToLinear(model.end) * 100;
+      widthPct = Math.abs(x2pct - x1pct);
+      laneDomId = model.id;
+      laneBg = buildGroupedSpeciesLaneBackground(model.start, model.end, model.members);
+      dataId = model.id;
+      ariaT = groupLaneTimelineLabel(model) + ' (' + formatTime(model.start) + ' ' + formatPeriodSeparator() + ' ' + formatTime(model.end) + ')';
+      labelTxt = groupLaneTimelineLabel(model);
+      tipHtml = groupLaneTooltipHtml(model);
+      onClickSpecies = speciesForGroupedLaneClick(model, currentTime);
     }
 
     const lane = document.createElement('div');
-    lane.className = 'species-lane';
-    lane.id = 'lane-' + species.id;
+    lane.className = 'species-lane' + (model.kind === 'group' ? ' species-lane--group' : '');
+    lane.id = 'lane-' + laneDomId;
     lane.style.left = x1pct + '%';
     lane.style.width = widthPct + '%';
-    // top/height: layoutSpeciesLanesForCurrentTime() after all lanes exist
     lane.style.top = '0px';
-    lane.style.height = lm.h + 'px';
+    lane.style.height = lm.h + (model.kind === 'group' ? 1 : 0) + 'px';
     lane.style.borderRadius = Math.max(3, Math.round(lm.h / 2)) + 'px';
-    lane.style.background = species.color;
-    lane.setAttribute('data-id', species.id);
-    lane.setAttribute('aria-label', species.name + ' (' + formatTime(species.start) + ' ' + formatPeriodSeparator() + ' ' + formatTime(species.end) + ')');
+    lane.style.background = laneBg;
+    lane.setAttribute('data-id', dataId);
+    if (model.kind === 'group') {
+      lane.setAttribute('data-group-ids', model.members.map(function (m) { return m.id; }).join(','));
+    }
+    lane.setAttribute('aria-label', ariaT);
 
-    // Inline label (Latin taxon — do not feed page-translate)
     const lbl = document.createElement('span');
     lbl.className = 'species-lane-label';
     lbl.setAttribute('translate', 'no');
-    lbl.textContent = species.name.replace('Homo sapiens — ', 'H.s. ');
+    lbl.textContent = labelTxt;
     lane.appendChild(lbl);
 
     lane.addEventListener('mouseenter', function () {
@@ -3517,7 +3988,7 @@ function initTimeline() {
       if (!tipEl) return;
       tipEl.classList.remove('band-tooltip--skin');
       tipEl.classList.add('band-tooltip--species');
-      tipEl.innerHTML = speciesLaneTooltipHtml(species);
+      tipEl.innerHTML = tipHtml;
       tipEl.style.display = 'block';
       requestAnimationFrame(function () { positionBandTipNearIcon(lane); });
     });
@@ -3527,24 +3998,25 @@ function initTimeline() {
       if (tipEl) tipEl.style.display = 'none';
     });
 
-    lane.addEventListener('click', () => {
+    lane.addEventListener('click', function () {
+      const sp = model.kind === 'group' ? speciesForGroupedLaneClick(model, currentTime) : onClickSpecies;
       if (isMobileViewport()) {
         const tipEl = document.getElementById('band-tooltip');
         if (tipEl) {
           tipEl.classList.remove('band-tooltip--skin');
           tipEl.classList.add('band-tooltip--species');
-          tipEl.innerHTML = speciesLaneTooltipHtml(species);
+          tipEl.innerHTML = model.kind === 'group' ? groupLaneTooltipHtml(model) : speciesLaneTooltipHtml(sp);
           tipEl.style.display = 'block';
-          _bandTipPinKey = 'species:' + species.id;
+          _bandTipPinKey = model.kind === 'group' ? 'group:' + model.id : 'species:' + sp.id;
           requestAnimationFrame(function () {
             requestAnimationFrame(function () { positionBandTipNearIcon(lane); });
           });
         }
       }
-      const midTime = (species.start + species.end) / 2;
+      const midTime = (sp.start + sp.end) / 2;
       setTime(midTime);
       window._userPickedSpecies = true;
-      selectSpecies(species);
+      selectSpecies(sp);
       window._userPickedSpecies = false;
     });
     lanesEl.appendChild(lane);
@@ -3597,48 +4069,33 @@ function initTimeline() {
     });
   });
 
-  // --- Drag scrubber ---
+  // --- Drag scrubber / track jump (bind once — initTimeline also runs from relocaliseData) ---
   const scrubber = document.getElementById('timeline-scrubber');
-  let isDragging = false;
-  let startX, startLinear;
+  if (!_timelineTrackListenersWired && scrubber && track) {
+    _timelineTrackListenersWired = true;
+    scrubber.addEventListener('mousedown', (e) => {
+      _timelineScrubDragging = true;
+      e.preventDefault();
+    });
+    scrubber.addEventListener('touchstart', (e) => {
+      _timelineScrubDragging = true;
+      e.preventDefault();
+    }, { passive: false });
 
-  function getTrackRef() {
-    return document.getElementById('timeline-species-track');
+    document.addEventListener('mousemove', onTimelineScrubPointerMove);
+    document.addEventListener('touchmove', onTimelineScrubPointerMove, { passive: false });
+    document.addEventListener('mouseup', () => { _timelineScrubDragging = false; });
+    document.addEventListener('touchend', () => { _timelineScrubDragging = false; });
+
+    track.addEventListener('click', (e) => {
+      if (e.target.closest('#timeline-scrubber')) return;
+      var trEl = getTimelineSpeciesTrackEl();
+      if (!trEl) return;
+      const rect = trEl.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      setTime(linearToTime(Math.max(0, Math.min(1, x))));
+    });
   }
-
-  const onMove = (e) => {
-    if (!isDragging) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const trackRect = getTrackRef().getBoundingClientRect();
-    const x = (clientX - trackRect.left) / trackRect.width;
-    setTime(linearToTime(Math.max(0, Math.min(1, x))));
-  };
-
-  scrubber.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startX = e.clientX;
-    startLinear = timeToLinear(currentTime);
-    e.preventDefault();
-  });
-  scrubber.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    startX = e.touches[0].clientX;
-    startLinear = timeToLinear(currentTime);
-    e.preventDefault();
-  }, { passive: false });
-
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('touchmove', onMove, { passive: false });
-  document.addEventListener('mouseup', () => { isDragging = false; });
-  document.addEventListener('touchend', () => { isDragging = false; });
-
-  // Click anywhere on track to jump
-  track.addEventListener('click', (e) => {
-    if (e.target.closest('#timeline-scrubber')) return;
-    const rect = getTrackRef().getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    setTime(linearToTime(Math.max(0, Math.min(1, x))));
-  });
 }
 
 // =====================================================================
@@ -3918,11 +4375,15 @@ function closeMobileBandTooltip() {
   _bandTipPinKey = null;
 }
 
-/** Pin #band-tooltip near the jalons icon (mobile) so it does not cover the map centre. */
+/**
+ * Positions #band-tooltip next to markerEl (.skin / .species-lane / .event-marker …).
+ * Species lanes stack vertically — prefer BELOW the bar so the panel does not crush labels on rows above.
+ */
 function positionBandTipNearIcon(markerEl) {
   const tip = document.getElementById('band-tooltip');
   if (!tip || !markerEl) return;
   const pad = 8;
+  const vh = window.innerHeight;
   const rect = markerEl.getBoundingClientRect();
   const tw = tip.offsetWidth || Math.min(300, window.innerWidth - 24);
   const th = tip.offsetHeight || 100;
@@ -3930,9 +4391,18 @@ function positionBandTipNearIcon(markerEl) {
   let x = cx - tw / 2;
   if (x < pad) x = pad;
   if (x + tw > window.innerWidth - pad) x = window.innerWidth - tw - pad;
-  let y = rect.top - th - pad;
-  if (y < pad) y = rect.bottom + pad;
-  if (y + th > window.innerHeight - pad) y = window.innerHeight - th - pad;
+  let y;
+  const isSpeciesLane = markerEl.classList && markerEl.classList.contains('species-lane');
+  if (isSpeciesLane) {
+    y = rect.bottom + pad;
+    if (y + th > vh - pad) y = rect.top - th - pad;
+    if (y < pad) y = pad;
+    if (y + th > vh - pad) y = Math.max(pad, vh - th - pad);
+  } else {
+    y = rect.top - th - pad;
+    if (y < pad) y = rect.bottom + pad;
+    if (y + th > vh - pad) y = Math.max(pad, vh - th - pad);
+  }
   tip.style.position = 'fixed';
   tip.style.left = x + 'px';
   tip.style.top = y + 'px';
@@ -4221,6 +4691,8 @@ function updateNeedlePosition() {
   const cx = trackLeft + (xpct / 100) * trackWidth;
   const needleCx = Math.max(0, Math.min(wrapperW, cx));
   fullNeedle.style.left = needleCx + 'px';
+  const scrub = document.getElementById('timeline-scrubber');
+  if (scrub) scrub.style.left = needleCx + 'px';
 
   if (typeof updatePlayButtonPosition === 'function') {
     requestAnimationFrame(function () {
@@ -4817,6 +5289,8 @@ function relocaliseData() {
       switchDataTab(_dv.tab);
     }
   } catch (e) { /* ignore */ }
+
+  if (typeof syncTimelineViewToggleUI === 'function') syncTimelineViewToggleUI();
 }
 
 // =====================================================================
@@ -4953,7 +5427,9 @@ function checkAndSpawnFigures() {
 // BOOT
 // =====================================================================
 function bootApp() {
+  loadTimelineViewModeFromStorage();
   initTimeline();
+  initTimelineViewControls();
   window.addEventListener('resize', function () {
     if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
     if (typeof updateNeedlePosition === 'function') updateNeedlePosition();
@@ -5108,7 +5584,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: 'Basculer mode clair/sombre',
         play: 'Play', pause: 'Pause',
-        appSubtitle: 'Explorez 4 millions d\'années de migrations humaines',
+        appSubtitle: 'Explorez près de 7,5 millions d\'années de migrations humaines',
         language: 'Langue',
         mapLayers: 'Couches carte',
         displayBurgerSection: 'Affichage',
@@ -5189,6 +5665,9 @@ const TRANSLATIONS = {
         uncertaintyEvid_INDIRECT_DATA: 'Preuves solides mais indirectes pour ce trait précis.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Déduit par comparaison évolutive ou modélisation.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Surtout relais médiatique, peu ancré dans les sources primaires.',
+        timelineViewGroupAria: 'Contrôle du niveau de lecture sur la chronologie (vue fusionnée ou toutes les lignées).',
+        timelineViewSimple: 'Vue simple',
+        timelineViewDetailed: 'Vue détaillée',
       }
     }
   },
@@ -5197,7 +5676,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: 'Toggle light/dark mode',
         play: 'Play', pause: 'Pause',
-        appSubtitle: 'Explore four million years of human migrations',
+        appSubtitle: 'Explore nearly seven and a half million years of human migrations',
         language: 'Language',
         mapLayers: 'Map layers',
         displayBurgerSection: 'Display',
@@ -5278,6 +5757,9 @@ const TRANSLATIONS = {
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        timelineViewGroupAria: 'Control how timeline rows are grouped (merged view or full catalogue rows).',
+        timelineViewSimple: 'Simple view',
+        timelineViewDetailed: 'Detailed view',
       }
     }
   },
@@ -5286,7 +5768,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: 'Cambiar modo claro/oscuro',
         play: 'Play', pause: 'Pausa',
-        appSubtitle: 'Explora cuatro millones de años de migraciones humanas',
+        appSubtitle: 'Explora casi siete millones y medio de años de migraciones humanas',
         language: 'Idioma',
         mapLayers: 'Capas del mapa',
         displayBurgerSection: 'Visualización',
@@ -5373,7 +5855,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: 'Hell-/Dunkelmodus umschalten',
         play: 'Play', pause: 'Pause',
-        appSubtitle: 'Erkunden Sie vier Millionen Jahre menschlicher Migrationen',
+        appSubtitle: 'Erkunden Sie fast 7,5 Millionen Jahre menschlicher Migrationen',
         language: 'Sprache',
         mapLayers: 'Kartenebenen',
         displayBurgerSection: 'Anzeige',
@@ -5460,7 +5942,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: '切换亮色/暗色模式',
         play: '播放', pause: '暂停',
-        appSubtitle: '探索四百万年的人类迁徙',
+        appSubtitle: '探索约750万年的人类迁徙',
         language: '语言',
         mapLayers: '地图图层',
         displayBurgerSection: '显示',
@@ -5547,7 +6029,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: 'تبديل الوضع الفاتح/الداكن',
         play: 'تشغيل', pause: 'توقف',
-        appSubtitle: 'استكشف أربعة ملايين سنة من هجرات البشر',
+        appSubtitle: 'استكشف نحو 7.5 مليون سنة من هجرات البشر',
         language: 'اللغة',
         mapLayers: 'طبقات الخريطة',
         displayBurgerSection: 'العرض',
@@ -5634,7 +6116,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: 'Alternar modo claro/escuro',
         play: 'Play', pause: 'Pausar',
-        appSubtitle: 'Explore quatro milhões de anos de migrações humanas',
+        appSubtitle: 'Explore quase sete milhões e meio de anos de migrações humanas',
         language: 'Idioma',
         mapLayers: 'Camadas do mapa',
         displayBurgerSection: 'Visualização',
@@ -5721,7 +6203,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: 'Passa modalità chiara/scura',
         play: 'Play', pause: 'Pausa',
-        appSubtitle: 'Esplora quattro milioni di anni di migrazioni umane',
+        appSubtitle: 'Esplora quasi sette milioni e mezzo di anni di migrazioni umane',
         language: 'Lingua',
         mapLayers: 'Livelli mappa',
         displayBurgerSection: 'Schermo',
@@ -5808,7 +6290,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: 'ライト/ダーク切替',
         play: '再生', pause: '一時停止',
-        appSubtitle: '400万年にわたる人類の移動を探る',
+        appSubtitle: '約750万年にわたる人類の移動を探る',
         language: '言語',
         mapLayers: '地図のレイヤー',
         displayBurgerSection: '表示',
@@ -5895,7 +6377,7 @@ const TRANSLATIONS = {
       ui: {
         toggleTheme: '라이트/다크 모드 전환',
         play: '재생', pause: '일시정지',
-        appSubtitle: '400만 년 인류 이동 탐색',
+        appSubtitle: '약 750만 년에 걸친 인류 이동 탐색',
         language: '언어',
         mapLayers: '지도 레이어',
         displayBurgerSection: '표시',
@@ -6116,6 +6598,8 @@ function applyTranslations() {
   }
 
   if (typeof syncMobilePlayBarState === 'function') syncMobilePlayBarState();
+
+  if (typeof syncTimelineViewToggleUI === 'function') syncTimelineViewToggleUI();
 }
 
 // =====================================================================
@@ -6381,7 +6865,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   function setWelcomeCopy(lang, browserLang) {
     if (lang === 'fr') {
       setHtml('welcome-tagline', 'Des origines africaines à la conquête du monde');
-      setHtml('welcome-body', 'Depuis l\'<strong>Afrique orientale</strong>, il y a plus de 4 millions d\'années, différentes espèces d\'hominines — nos ancêtres et leurs cousins — ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.');
+      setHtml('welcome-body', 'À partir des premières lignées en <strong>Afrique orientale</strong>, soit il y a près de <strong>7,5&nbsp;millions d\'années</strong>, différentes espèces d\'hominines&nbsp;— nos ancêtres et leurs cousins&nbsp;— ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.');
       setHtml('tip-cursor', 'Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.');
       setHtml('tip-marker', 'Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d\'une espèce.');
       setHtml('tip-play', 'Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.');
@@ -6390,7 +6874,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
     }
 
     setHtml('welcome-tagline', 'From African origins to the peopling of the world');
-    setHtml('welcome-body', 'From <strong>East Africa</strong>, more than 4 million years ago, different hominin species — our ancestors and their cousins — gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.');
+    setHtml('welcome-body', 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.');
     setHtml('tip-cursor', 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.');
     setHtml('tip-marker', 'Click a <strong>marker</strong> on the map to show details for a species.');
     setHtml('tip-play', 'Press <strong>Play</strong> to animate migrations through time.');
@@ -6551,7 +7035,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
         <div class="welcome-tagline" id="welcome-tagline">Des origines africaines à la conquête du monde</div>
       </div>
       <div class="welcome-body" id="welcome-body">
-        Depuis l'<strong>Afrique orientale</strong>, il y a plus de 4 millions d'années, différentes espèces d'hominines — nos ancêtres et leurs cousins — ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.
+        À partir des premières lignées en <strong>Afrique orientale</strong>, soit il y a près de <strong>7,5&nbsp;millions d'années</strong>, différentes espèces d'hominines&nbsp;— nos ancêtres et leurs cousins&nbsp;— ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.
       </div>
       <div class="welcome-tips">
         <div class="welcome-tip">

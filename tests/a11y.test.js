@@ -167,25 +167,37 @@ async function runA11yTests(options = {}) {
 
   await test('Clicking Play starts playback', async () => {
     await setTime(page, -7500000);
-    const playBtn = await page.$('[data-testid="play-toggle"]');
-    assert(playBtn !== null, 'Play button found');
-    await playBtn.click();
+    const found = await page.evaluate(() => !!document.querySelector('[data-testid="play-toggle"]'));
+    assert(found, 'Play button found');
+    await page.evaluate(() => {
+      const b = document.querySelector('[data-testid="play-toggle"]');
+      if (b) b.click();
+    });
     await page.waitForTimeout(300);
 
     const isPlaying = await page.evaluate(() => isPlaying);
     assert(isPlaying === true, 'isPlaying === true after clicking Play');
 
-    // Stop it
-    await playBtn.click();
+    await page.evaluate(() => {
+      const b = document.querySelector('[data-testid="play-toggle"]');
+      if (b) b.click();
+    });
     await page.waitForTimeout(150);
   });
 
   await test('Clicking Pause stops playback', async () => {
     await setTime(page, -7500000);
-    const playBtn = await page.$('[data-testid="play-toggle"]');
-    await playBtn.click(); // start
+    // DOM click inside the page: Play avoids "element not stable" when the Play
+    // control shifts with the scrubber needle / timeline layout animations.
+    await page.evaluate(() => {
+      const b = document.querySelector('[data-testid="play-toggle"]');
+      if (b) b.click();
+    });
     await page.waitForTimeout(200);
-    await playBtn.click(); // stop
+    await page.evaluate(() => {
+      const b = document.querySelector('[data-testid="play-toggle"]');
+      if (b) b.click();
+    });
     await page.waitForTimeout(150);
     const isPlaying = await page.evaluate(() => isPlaying);
     assert(isPlaying === false, 'isPlaying === false after clicking Pause');

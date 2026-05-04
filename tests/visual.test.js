@@ -125,12 +125,16 @@ async function runVisualTests(options = {}) {
     assert(count >= 10, `Events band has ${count} markers (expected ≥ 10)`);
   });
 
-  // Species lanes rendered
-  await test('Timeline lanes has one row per species', async () => {
-    const count = await page.evaluate(() =>
-      document.querySelectorAll('#timeline-lanes .species-lane').length);
-    const n = await page.evaluate(() => (SPECIES_DATA || []).length);
-    assert(count >= n, `Timeline has ${count} species lanes (expected ≥ ${n})`);
+  // Species lanes rendered (simple mode merges rows — count follows buildTimelineLaneModels)
+  await test('Timeline lanes match active view mode', async () => {
+    const ok = await page.evaluate(() => {
+      const lanes = document.querySelectorAll('#timeline-lanes .species-lane').length;
+      const exp = typeof buildTimelineLaneModels === 'function'
+        ? buildTimelineLaneModels().length
+        : (SPECIES_DATA || []).length;
+      return lanes === exp && lanes >= 8;
+    });
+    assert(ok, 'Timeline lane count must equal buildTimelineLaneModels().length (simple or detailed)');
   });
 
   // ─── CONTRAST checks in dark mode ─────────────────────────────────────────
