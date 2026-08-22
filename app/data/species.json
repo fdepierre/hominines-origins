@@ -307,8 +307,8 @@
         }
       ],
       "hominin:debate": {
-        "fr": "Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées.",
-        "en": "Bipedalism vs arboreality (Lovejoy vs Stern & Susman); date and mode of body-hair loss still discussed."
+        "fr": "Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées. Villmoare et al. 2025 (Ledi-Geraru) compliquent le modèle cladogénétique simple A. afarensis → Homo + Paranthropus : ≥3 lignées dans l'Afar entre 3,0 et 2,5 Ma.",
+        "en": "Bipedalism vs arboreality (Lovejoy vs Stern & Susman); date and mode of body-hair loss still discussed. Villmoare et al. 2025 (Ledi-Geraru) complicate the simple cladogenetic model A. afarensis → Homo + Paranthropus: ≥3 lineages in the Afar between 3.0 and 2.5 Ma."
       },
       "hominin:regions": [
         {
@@ -405,7 +405,7 @@
         "fr": "\"L'homme habile\" — 1er genre Homo",
         "en": "\"Handy Man\" — first Homo genus"
       },
-      "hominin:periodStart": -2400000,
+      "hominin:periodStart": -2780000,
       "hominin:periodEnd": -1400000,
       "hominin:color": "#A07820",
       "hominin:lane": 1,
@@ -465,8 +465,8 @@
         }
       ],
       "hominin:debate": {
-        "fr": "Statut d'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces.",
-        "en": "Coherence as a single species debated (Wood & Collard 1999). Probably a grouping of several species."
+        "fr": "Statut d'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces. Dents Homo à Ledi-Geraru ~2,78 Ma (Villmoare et al. 2025) remontent le genre près de la dernière apparition d'A. afarensis.",
+        "en": "Coherence as a single species debated (Wood & Collard 1999). Probably a grouping of several species. Homo teeth at Ledi-Geraru ~2.78 Ma (Villmoare et al. 2025) push the genus near the last appearance of A. afarensis."
       },
       "hominin:regions": [
         {
@@ -518,6 +518,18 @@
           "note": {
             "fr": "Fossiles mixtes H. habilis / Au.",
             "en": "Mixed H. habilis / Australopithecus fossils"
+          }
+        },
+        {
+          "name": {
+            "fr": "Ledi-Geraru (Éthiopie)",
+            "en": "Ledi-Geraru (Ethiopia)"
+          },
+          "lat": 11.3,
+          "lng": 40.65,
+          "note": {
+            "fr": "Dents Homo ~2,78 Ma (Villmoare et al. 2025)",
+            "en": "Homo teeth ~2.78 Ma (Villmoare et al. 2025)"
           }
         }
       ],
@@ -1426,8 +1438,8 @@
       "@id": "denisovan",
       "taxon:scientificName": "Homo denisova",
       "name": {
-        "fr": "\"Dragon Man\" et ses cousins — mystère résolu en 2025",
-        "en": "\"Dragon Man\" and cousins — mystery solved 2025"
+        "fr": "Dénisoviens / clade Homo longi — débat taxonomique actif",
+        "en": "Denisovans / Homo longi clade — active taxonomic debate"
       },
       "hominin:periodStart": -400000,
       "hominin:periodEnd": -30000,
@@ -1489,8 +1501,8 @@
         }
       ],
       "hominin:debate": {
-        "fr": "Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (Fu Qiaomei et al., 2025). ADN nucléaire pas encore disponible — certains paléoanthropologues attendent confirmation définitive.",
-        "en": "Dragon Man = Denisovan identification confirmed by proteomics + mtDNA (Fu Qiaomei et al., 2025). Nuclear DNA not yet available — some palaeoanthropologists await definitive confirmation."
+        "fr": "Harbin = Dénisovien confirmé (protéomique + ADNmt, Fu et al. 2025). Débat actif sur le clade asiatique : H. longi (Ni 2021 ; Yunxian 2, Feng et al. 2025) vs proposition H. juluensis (Bae & Wu 2024, Xujiayao/Xuchang/Penghu). Pas d'ADN nucléaire hors Harbin/Denisova — taxonomie non tranchée.",
+        "en": "Harbin = Denisovan confirmed (proteomics + mtDNA, Fu et al. 2025). Active debate on the Asian clade: H. longi (Ni 2021; Yunxian 2, Feng et al. 2025) vs H. juluensis proposal (Bae & Wu 2024, Xujiayao/Xuchang/Penghu). No nuclear DNA outside Harbin/Denisova — taxonomy unresolved."
       },
       "hominin:regions": [
         {
@@ -1565,8 +1577,32 @@
           "lat": 23.57,
           "lng": 119.57,
           "note": {
-            "fr": "Mâchoire de Penghu — Dénisovien probable",
-            "en": "Penghu mandible — probable Denisovan"
+            "fr": "Mâchoire de Penghu — Dénisovien probable / paratype H. juluensis (débattu)",
+            "en": "Penghu mandible — probable Denisovan / H. juluensis paratype (debated)"
+          }
+        },
+        {
+          "name": {
+            "fr": "Yunxian (Hubei)",
+            "en": "Yunxian (Hubei)"
+          },
+          "lat": 32.83,
+          "lng": 110.58,
+          "note": {
+            "fr": "Yunxian 2 ~1 Ma — membre précoce clade H. longi (Feng et al. 2025)",
+            "en": "Yunxian 2 ~1 Ma — early H. longi clade member (Feng et al. 2025)"
+          }
+        },
+        {
+          "name": {
+            "fr": "Xujiayao (Shanxi)",
+            "en": "Xujiayao (Shanxi)"
+          },
+          "lat": 40.1,
+          "lng": 113.98,
+          "note": {
+            "fr": "Holotype proposé H. juluensis (Bae & Wu 2024) — attribution contestée",
+            "en": "Proposed H. juluensis holotype (Bae & Wu 2024) — contested attribution"
           }
         }
       ],
@@ -1600,8 +1636,8 @@
           }
         }
       ],
-      "hominin:taxonomyDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:taxonomyEvidenceType": "DIRECT_DATA",
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",

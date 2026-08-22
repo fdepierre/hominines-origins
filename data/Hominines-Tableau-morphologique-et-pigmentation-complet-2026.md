@@ -1,6 +1,8 @@
 # Hominines — Tableau morphologique et pigmentation complet 2026
 Tableau de référence scientifique intégrant données ostéologiques, génomiques et inférences évolutives pour chaque taxon ou période clé. Les 19 colonnes couvrent : phylogénie, biométrie, morphologie, pigmentation, niveau de certitude, débats actifs et DOI.
 
+**Mise à jour août 2026 (audit scientifique) :** ajout de la section *6b. Homo longi / Homo juluensis* documentant le débat taxonomique actif sur les fossiles chinois du Pléistocène moyen (Bae & Wu vs Stringer vs position prudente de Ni Xijun), intégration de la reconstruction du crâne de Yunxian 2 (Feng et al., *Science* 2025), nuance ajoutée sur Thomas Quarry I, et deux nouveaux conflits scientifiques actifs (n° 5 et 6). Toutes les références de cet ajout ont été vérifiées à la source primaire (DOI contrôlés).
+
 **Mise à jour avril 2026 :** ajout des taxons complémentaires *Sahelanthropus tchadensis* (Toumaï), *Ardipithecus ramidus*, *Homo erectus georgicus* (Dmanisi), *Homo antecessor*, *Homo naledi* et *Homo floresiensis* pour assurer la cohérence avec le transcript de la vidéo "Passé sauvage" et l'application web. Couverture taxonomique étendue de −7 Ma au présent. Révisions phylogénétiques intégrant Hublin et al. *Nature* (2026) sur Thomas Quarry I.
 
 ***
@@ -242,6 +244,52 @@ Grand crâne massif ; arcades sourcilières proéminentes ; nez rond ; pommettes
 **Débat :** Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (2025) ; l'ADN nucléaire n'est pas encore disponible — plusieurs paléoanthropologues attendent cette confirmation avant de conclure définitivement.[^37][^38][^40]
 
 ***
+## 6b. *Homo longi* / *Homo juluensis* — Pléistocène moyen chinois — ~1 million à ~50 000 ans
+> **Statut taxonomique : ❓ Débat ouvert (ACTIVE_DEBATE)** — trois positions concurrentes, toutes défendues par des équipes établies. Aucune ne fait consensus en 2026.
+
+**Phylogénie :** La classification des *Homo* du Pléistocène moyen en Asie de l'Est est traditionnellement appelée « the muddle in the middle » (le brouillon du milieu). Deux propositions rivales structurent aujourd'hui le débat. En 2021, Ni Xijun et al. décrivent le crâne de Harbin comme *Homo longi*. En novembre 2024, Bae Christopher J. (Université d'Hawaï) et Wu Xiujie (Académie chinoise des sciences) proposent un taxon distinct, *Homo juluensis* (« grosse tête »), regroupant Xujiayao (holotype), Xuchang (paratype), Penghu 1 et possiblement les Dénisoviens.[^HJ1] En septembre 2025, la reconstruction numérique du crâne de Yunxian 2 (~1 Ma) place ce fossile comme membre précoce d'un clade *H. longi* asiatique incluant les Dénisoviens.[^HJ2]
+
+### Les trois positions en présence
+| Position | Auteurs | Argument central | Ce qui manque pour trancher |
+|---|---|---|---|
+| *Homo juluensis* = espèce distincte | Bae C.J. & Wu X. (Univ. Hawaï / Académie chinoise des sciences), *Nature Communications* 2024[^HJ1] | Crâne bas et large, volume cérébral > 1 000 cm³, mastoïde réduite et tournée vers l'intérieur, dépression pariétale, labyrinthe osseux de type néandertalien, grandes dents, incisives en pelle, ramus mandibulaire large | Aucun ADN nucléaire pour les fossiles de Xujiayao et Xuchang ; l'article a fait l'objet d'une correction éditoriale un mois après publication[^HJ3] |
+| *Homo longi* suffit (regroupement) | Stringer C. (Natural History Museum, Londres), co-auteur de Feng et al. 2025[^HJ2] | La majorité de ces fossiles (Yunxian, Dali, Jinniushan, Hualongdong, Harbin) forment un seul clade *H. longi* ; le nom *longi* a la priorité de nomenclature (2021) | La position phylogénétique repose sur la morphométrie, non sur la génomique |
+| Prudence — données insuffisantes | Ni X. (Académie chinoise des sciences), auteur de la description initiale d'*H. longi* | La variabilité inter-sites et l'absence d'ADN nucléaire ne permettent pas de valider formellement un taxon supplémentaire | — |
+
+> **Pourquoi ce conflit est intéressant :** l'auteur qui a nommé *Homo longi* en 2021 (Ni Xijun) est aussi celui qui appelle à la prudence sur la multiplication des espèces. Et Ni et Stringer — issus d'écoles différentes — co-signent ensemble l'étude Yunxian 2 de 2025.[^HJ2] Ce n'est pas une querelle nationale « Chine contre Occident », contrairement à ce que suggèrent parfois les vulgarisations en ligne.
+
+### Biométrie des fossiles concernés
+| Fossile | Site | Âge | Volume crânien | Statut |
+|---|---|---|---|---|
+| Harbin (crâne « Dragon Man ») | Harbin, Heilongjiang | ~146 000 ans | Élevé (≥ *H. sapiens*) | ✅ Dénisovien confirmé par protéomique + ADNmt (Fu Qiaomei et al. 2025) — voir section 6 |
+| Yunxian 2 | Yunxian, Hubei | ~1 million d'années | nc dans la publication primaire | ⚠️ Membre précoce du clade *H. longi* d'après la reconstruction 2025[^HJ2] |
+| Xujiayao (holotype *H. juluensis*) | Xujiayao, Shanxi | Pléistocène moyen tardif | > 1 000 cm³ (« grande taille »)[^HJ1] | ❓ Attribution contestée |
+| Xuchang (paratype *H. juluensis*) | Xuchang, Henan | Pléistocène moyen tardif | Grand[^HJ1] | ❓ Attribution contestée |
+| Penghu 1 (mandibule) | Détroit de Penghu, Taïwan | Pléistocène tardif | — (mandibule seule) | ❓ Attribution contestée |
+
+### Ce que dit précisément l'étude Yunxian 2 (Feng et al., *Science* 2025)
+Le crâne, fortement déformé, a été restauré numériquement. Il présente une mosaïque de traits primitifs et dérivés. Les analyses morphométriques et phylogénétiques le placent comme membre précoce du clade asiatique *H. longi*, lequel inclut les Dénisoviens et constitue le groupe frère principal du clade *H. sapiens*. Conséquence : les deux clades auraient des racines profondes antérieures au Pléistocène moyen, avec une diversification précoce rapide.[^HJ2] Les auteurs eux-mêmes rappellent que le statut d'espèce ou de clade de ces fossiles reste débattu.
+
+### Pigmentation ⚠️ Non reconstituable
+Aucun ADN nucléaire disponible pour Yunxian 2, Xujiayao, Xuchang ou Penghu 1. Seul Harbin dispose de données moléculaires (protéomique + ADNmt), traitées en section 6.
+| Trait | Estimation | Certitude |
+|---|---|---|
+| Peau | Inconnue — inférence par continuité avec les Dénisoviens (sombre) | ⚠️ Inférence évolutive |
+| Yeux | Bruns (probable) | ⚠️ Inférence évolutive |
+| Cheveux | Sombres (probable) | ⚠️ Inférence évolutive |
+
+### Notion fausse à signaler
+Plusieurs contenus de vulgarisation présentent *Homo juluensis* comme une « nouvelle espèce humaine découverte », voire comme un fossile nouvellement mis au jour. C'est inexact sur deux points : les fossiles concernés sont connus depuis des décennies (Xujiayao a été fouillé dans les années 1970), et il s'agit d'une proposition de reclassement taxonomique, pas d'une découverte de terrain. De même, l'équivalence « *H. juluensis* = les Dénisoviens » est une hypothèse de Bae & Wu, pas un résultat établi.
+
+### Recommandation pour `app/data/species.json`
+- `hominin:taxonomyDebateLevel` : `ACTIVE_DEBATE`
+- `hominin:taxonomyEvidenceType` : `INDIRECT_DATA` (morphométrie) — `DIRECT_DATA` uniquement pour Harbin (protéomique)
+- `hominin:pigmentationDebateLevel` : `SPECULATIVE_HYPOTHESIS`
+- `hominin:pigmentationEvidenceType` : `EVOLUTIONARY_INFERENCE`
+
+**Débat :** actif et non résolu. Le point de blocage est identique dans les trois positions : absence d'ADN nucléaire pour les fossiles chinois hors Harbin.
+
+***
 ## 7. Homo sapiens — Afrique précoce — 315 000 à 100 000 ans
 **Phylogénie :** Fossiles de Jebel Irhoud (315 000 ans) : mosaïque de traits modernes (face plate) et archaïques (neurocrane allongé). Fossiles d'Omo Kibish (195 000 ans) et Herto (160 000 ans) : plus proches des humains actuels.[^42]
 ### Biométrie (Skhul / Qafzeh, ~100–130 ka)
@@ -396,6 +444,7 @@ Résultats :
 | *H. floresiensis* | 190–50 ka | nc / 106 | nc / 25 | ~426 | Sombre | Bruns | Sombres | ⚠️ |
 | *H. neanderthalensis* | 400–28 ka | ~164 / ~155[^25] | ~65 / ~54[^25] | 1200–1750[^22] | **Variable** : sombre majorité ; pâle/rousse ~1%[^29] | Bruns ; bleus possibles minorité[^33][^23] | Bruns-châtain ; roux minorité[^31] | ✅ ADN ❓ |
 | Dénisoviens | ~400–30 ka | > 180 / nc[^40] | ~100 / nc[^40] | ≥ H. sap. (estimé) | **Sombre**[^34] | **Sombres**[^34] | **Sombres**[^34] | ✅ ADN |
+| *H. longi* / *H. juluensis* (débaté) | ~1 Ma–50 ka | nc | nc | > 1 000 (Xujiayao) | Inconnue — sombre par inférence | Bruns (probable) | Sombres (probable) | ❓ Taxonomie non tranchée |
 | *H. sapiens* Afrique | 315–100 ka | ~185 / ~170[^17] | ~70 / ~60 | 1200–1600 | **Très sombre/noire**[^43] | **Bruns foncés**[^43] | Noirs crépus | ✅ ADN africain |
 | *H. sapiens* Levant | 130–90 ka | ~185 / ~170[^17] | ~70 / ~58 | ~1450–1550 | Très sombre | Bruns foncés | Noirs | ⚠️ continuité |
 | *H. sapiens* Paléo. sup. | 45–14 ka | ~170–185 / ~158–168 | ~70 / ~57 | ~1400 | **Sombre** (347/348)[^54][^55] | Sombres ; pic clairs ~14–4 ka[^54] | Sombres | ✅ 348 génomes[^56] |
@@ -417,6 +466,10 @@ Les yeux clairs apparaissent plusieurs millénaires **avant** la peau claire. Le
 Protéomique et ADNmt confirment l'appartenance dénisovienne (Fu Qiaomei et al., 2025). Plusieurs équipes attendent l'ADN nucléaire avant de conclure définitivement.[^37][^38]
 ### 4. Date d'éclaircissement de la peau en Europe
 Ghirotto et al. (PNAS 2025) et Ju & Kelleher (PNAS 2021) s'accordent sur le caractère récent (~3 000 ans) mais divergent sur les rythmes précis de sélection positive vs. dérive vs. migration.[^56][^60]
+### 5. *Homo juluensis* : espèce valide ou regroupement excessif ?
+Bae & Wu (*Nature Communications* 2024) défendent un taxon nouveau sur base morphologique.[^HJ1] Stringer préfère regrouper la plupart de ces fossiles sous *H. longi*, nom antérieur. Ni Xijun — pourtant auteur de la description d'*H. longi* — juge les données insuffisantes pour valider un taxon supplémentaire. La reconstruction de Yunxian 2 (Feng et al., *Science* 2025, co-signée Stringer et Ni) renforce l'hypothèse d'un clade *H. longi* unique et profond, sans clore le débat.[^HJ2] Voir section 6b.
+### 6. Thomas Quarry I : population basale ou *H. erectus* en divergence ?
+Hublin et al. (*Nature* 2026) décrivent les hominines marocains de ~773 000 ans comme basaux à la lignée *H. sapiens*.[^T6] La datation par inversion Brunhes/Matuyama est solide. En revanche, l'interprétation phylogénétique admet une alternative : il pourrait s'agir d'une population d'*Homo erectus* en cours d'isolement et de divergence plutôt que d'une population strictement basale aux trois lignées. Cette nuance est peu reprise dans les résumés de presse, qui présentent souvent le résultat comme définitif. Statut à retenir : consensus modéré sur l'interprétation, consensus fort sur la datation.
 
 ---
 
@@ -439,6 +492,12 @@ Ghirotto et al. (PNAS 2025) et Ju & Kelleher (PNAS 2021) s'accordent sur le cara
 [^T8]: Martinón-Torres M. et al., "No scientific evidence that Homo naledi buried their dead and produced rock art", *Journal of Human Evolution* 195:103464 (2024). DOI [10.1016/j.jhevol.2023.103507](https://doi.org/10.1016/j.jhevol.2023.103507)
 
 [^T9]: Brown P., Sutikna T., Morwood M.J. et al., "A new small-bodied hominin from the Late Pleistocene of Flores, Indonesia", *Nature* 431:1055-1061 (2004). DOI [10.1038/nature02999](https://doi.org/10.1038/nature02999)
+
+[^HJ1]: Bae C.J. & Wu X., "Making sense of eastern Asian Late Quaternary hominin variability", *Nature Communications* 15:9479 (2 novembre 2024). DOI [10.1038/s41467-024-53918-7](https://doi.org/10.1038/s41467-024-53918-7) — proposition de *Homo juluensis*
+
+[^HJ2]: Feng X., Yin Q., Gao F., Lu D. et al., avec Stringer C. & Ni X., "The phylogenetic position of the Yunxian cranium elucidates the origin of *Homo longi* and the Denisovans", *Science* 389(6767):1320-1324 (25 septembre 2025). DOI [10.1126/science.ado9202](https://doi.org/10.1126/science.ado9202)
+
+[^HJ3]: "Author Correction: Making sense of eastern Asian Late Quaternary hominin variability", *Nature Communications* 15:10697 (19 décembre 2024). DOI [10.1038/s41467-024-55313-8](https://doi.org/10.1038/s41467-024-55313-8)
 
 [^T10]: Argue D., Groves C.P., Lee M.S.Y., Jungers W.L., "The affinities of Homo floresiensis based on phylogenetic analyses of cranial, dental, and postcranial characters", *Journal of Human Evolution* 107:107-133 (2017). DOI [10.1016/j.jhevol.2017.02.006](https://doi.org/10.1016/j.jhevol.2017.02.006)
 
