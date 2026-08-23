@@ -430,10 +430,10 @@
         "en": "Marked"
       },
       "hominin:skinDesc": {
-        "fr": "Transition pelage → peau sombre émergente",
-        "en": "Transition fur → emerging dark skin"
+        "fr": "Peau claire sous pelage encore présent (début de mélanisation)",
+        "en": "Light skin under residual fur (onset of melanisation)"
       },
-      "hominin:skinColor": "#8B4513",
+      "hominin:skinColor": "#c8956a",
       "hominin:skinVariant": "partial-fur",
       "hominin:eyesDesc": {
         "fr": "Bruns",
@@ -574,11 +574,11 @@
         "en": "Marked"
       },
       "hominin:skinDesc": {
-        "fr": "Sombre (continuité africaine)",
-        "en": "Dark (African continuity)"
+        "fr": "Peau claire sous pelage encore partiel",
+        "en": "Light skin under residual partial fur"
       },
-      "hominin:skinColor": "#4a2200",
-      "hominin:skinVariant": null,
+      "hominin:skinColor": "#c8956a",
+      "hominin:skinVariant": "partial-fur",
       "hominin:eyesDesc": {
         "fr": "Bruns",
         "en": "Brown"
@@ -697,11 +697,11 @@
         "en": "Moderate"
       },
       "hominin:skinDesc": {
-        "fr": "Noire ou très sombre (depuis ~1,2 Ma)",
-        "en": "Black or very dark (since ~1.2 Ma)"
+        "fr": "Peau claire sous pelage partiel (puis sombre après MC1R ~1,2 Ma)",
+        "en": "Light skin under partial fur (then dark after MC1R ~1.2 Ma)"
       },
-      "hominin:skinColor": "#3a1800",
-      "hominin:skinVariant": null,
+      "hominin:skinColor": "#c8956a",
+      "hominin:skinVariant": "partial-fur",
       "hominin:eyesDesc": {
         "fr": "Bruns",
         "en": "Brown"
