@@ -1111,13 +1111,111 @@ html[data-map-ready="1"] #map {
   line-height: 1;
   cursor: pointer;
   z-index: 5;
-  transition: transform 0.15s, filter 0.15s;
+  transition: filter 0.15s;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,0.65));
 }
-.event-marker:hover {
-  transform: translate(-50%, -50%) scale(1.85);
-  z-index: 10;
-  filter: drop-shadow(0 0 7px rgba(212,130,10,0.55)) drop-shadow(0 1px 2px rgba(0,0,0,0.72));
+
+/* Desktop local peek — unpacks nearby jalons without a per-icon zoom */
+#events-peek {
+  display: none;
+  position: fixed;
+  z-index: 9000;
+  width: 300px;
+  height: 80px;
+  pointer-events: auto;
+  color: var(--tooltip-color);
+  font-family: var(--tooltip-font);
+}
+#events-peek.is-open { display: block; }
+.events-peek-chrome {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
+  border-radius: var(--tooltip-radius);
+  box-shadow: var(--tooltip-shadow);
+  overflow: visible;
+}
+.events-peek-rail {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 50%;
+  height: 1px;
+  background: var(--color-border);
+  opacity: 0.4;
+  pointer-events: none;
+}
+.events-peek-focus {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  width: 40px;
+  transform: translateX(-50%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  pointer-events: none;
+  transition: left 0.12s ease;
+}
+.events-peek-items { position: absolute; inset: 0; }
+.events-peek-item {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45));
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+}
+.events-peek-item svg { width: 22px; height: 31px; display: block; }
+.events-peek-item.is-pinned { z-index: 2; }
+.events-peek-pin {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 42%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  pointer-events: none;
+}
+.events-peek-caret {
+  position: absolute;
+  bottom: -8px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid var(--tooltip-border);
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: left 0.12s ease;
+}
+.events-peek-caret::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: -9px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--tooltip-bg);
+}
+.events-peek-bridge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 0;
+  pointer-events: auto;
 }
 
 @keyframes eventMapMarkerPulse {
@@ -2224,6 +2322,7 @@ html[data-map-ready="1"] #map {
     min-width: 34px;
     min-height: 34px;
   }
+  #events-peek { display: none !important; }
   #band-tooltip {
     max-width: calc(100vw - 16px) !important;
     max-height: min(36vh, 260px);
@@ -4327,6 +4426,7 @@ function syncTimelineBandsToSpeciesTrack() {
       el.style.left = (xAbs - br.left) + 'px';
     });
   }
+  if (typeof refreshEventsPeekIfOpen === 'function') refreshEventsPeekIfOpen();
 
   const skinTrack = document.getElementById('skin-band-track');
   if (skinTrack) {
@@ -4573,19 +4673,112 @@ function positionBandTipNearIcon(markerEl) {
   tip.style.bottom = 'auto';
 }
 
+function eventPeekItemById(id) {
+  if (!id) return null;
+  const esc = (typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(id) : id;
+  return document.querySelector('#events-peek .events-peek-item[data-event-id="' + esc + '"]');
+}
+
 function installBandTooltipGlobalCloserIfNeeded() {
   if (window._hoBandTipCloserInstalled) return;
   window._hoBandTipCloserInstalled = true;
   document.addEventListener('pointerdown', function (e) {
-    if (!isMobileViewport() || !_bandTipPinKey) return;
     const tip = document.getElementById('band-tooltip');
     if (!tip || tip.style.display !== 'block') return;
     if (tip.contains(e.target)) return;
     if (e.target.closest && e.target.closest('.event-marker')) return;
+    if (e.target.closest && e.target.closest('.events-peek-item')) return;
     if (e.target.closest && e.target.closest('.band-segment')) return;
     if (e.target.closest && e.target.closest('.species-lane')) return;
-    closeMobileBandTooltip();
+    if (isMobileViewport() && _bandTipPinKey) {
+      closeMobileBandTooltip();
+      return;
+    }
+    if (_eventsPeek.pinnedTipId) {
+      tip.style.display = 'none';
+      _eventsPeek.ownsTip = false;
+      _eventsPeek.pinnedTipId = null;
+    }
   }, false);
+}
+
+function eventTooltipHtml(ev) {
+  const catLabel = getCategoryLabel(ev.category);
+  const srcHtml  = ev.source
+    ? '<br><span style="color:var(--color-text-faint);font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>'
+    : '';
+  return (
+    '<strong style="color:' + bandTipEscapeHtml(ev.color) + '">' + bandTipEscapeHtml(ev.label) + '</strong><br>' +
+    '<em style="color:var(--color-text-muted)">' + bandTipEscapeHtml(catLabel) + '</em><br>' +
+    bandTipEscapeHtml(ev.desc) + srcHtml
+  );
+}
+
+function positionBandTipAtCursor(cx, cy) {
+  const tip = document.getElementById('band-tooltip');
+  if (!tip) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = cx + 14;
+  let y = cy - th - 10;
+  if (x + tw > vw - 4) x = cx - tw - 14;
+  if (x < 4)            x = 4;
+  if (y < 4)            y = cy + 20;
+  if (y + th > vh - 4)  y = vh - th - 4;
+  tip.style.left = x + 'px';
+  tip.style.top  = y + 'px';
+}
+
+function showEventTooltipPinned(ev, markerEl) {
+  const tip = document.getElementById('band-tooltip');
+  if (!tip || !ev) return;
+  tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
+  tip.innerHTML = eventTooltipHtml(ev);
+  tip.style.display = 'block';
+  const place = function () {
+    const anchor = eventPeekItemById(ev.id) || markerEl;
+    positionBandTipNearIcon(anchor);
+  };
+  requestAnimationFrame(function () {
+    requestAnimationFrame(place);
+  });
+  return place;
+}
+
+function activateEventFromBand(ev, markerEl) {
+  const tip = document.getElementById('band-tooltip');
+  stopPlay();
+  suppressMobileNarrativeFit(2000);
+  let place = null;
+  if (tip) {
+    if (isMobileViewport()) {
+      const pinKey = 'event:' + ev.id;
+      if (_bandTipPinKey === pinKey) {
+        closeMobileBandTooltip();
+        return;
+      }
+      _bandTipPinKey = pinKey;
+    } else {
+      _eventsPeek.ownsTip = true;
+      _eventsPeek.pinnedTipId = ev.id;
+    }
+    place = showEventTooltipPinned(ev, markerEl);
+  }
+  if (typeof showEvents !== 'undefined' && !showEvents) {
+    showEvents = true;
+    document.querySelectorAll('.layer-btn[data-layer="events"]').forEach(function (btn) {
+      btn.classList.add('active');
+    });
+  }
+  if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
+  if (typeof focusEventOnMap === 'function') focusEventOnMap(ev.id);
+  setTime(ev.time);
+  scheduleTimelineBandSync();
+  requestAnimationFrame(function () { scheduleTimelineBandSync(); });
+  if (place) {
+    requestAnimationFrame(place);
+    if (isMobileViewport()) setTimeout(place, 420);
+  }
 }
 
 function buildEventsBand() {
@@ -4593,28 +4786,14 @@ function buildEventsBand() {
   const track = document.getElementById('events-band-track');
   if (!band || !track) return;
   band.querySelectorAll('.event-marker').forEach(function (n) { n.remove(); });
-
-  // Shared JS tooltip — desktop: hover near cursor. Mobile: tap toggles panel anchored to icon.
-  const tip = document.getElementById('band-tooltip');
-  function positionTip(cx, cy) {
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const tw = tip.offsetWidth,  th = tip.offsetHeight;
-    // Prefer above-right of cursor; flip as needed to stay inside viewport
-    let x = cx + 14;
-    let y = cy - th - 10;
-    if (x + tw > vw - 4) x = cx - tw - 14;   // flip left
-    if (x < 4)            x = 4;              // clamp left
-    if (y < 4)            y = cy + 20;        // flip below
-    if (y + th > vh - 4)  y = vh - th - 4;   // clamp bottom
-    tip.style.left = x + 'px';
-    tip.style.top  = y + 'px';
-  }
+  if (typeof hideEventsPeek === 'function') hideEventsPeek();
 
   EVENTS_DATA.forEach(ev => {
     const tLin = timeToLinear(ev.time);
     const el = document.createElement('div');
     el.className = 'event-marker';
     el.setAttribute('data-t-linear', String(tLin));
+    el.setAttribute('data-event-id', ev.id);
     el.style.left = '0px';
 
     // Human/migration markers use data-driven SVG; other milestones keep their compact pictogram.
@@ -4625,69 +4804,378 @@ function buildEventsBand() {
       el.style.color = ev.color;
     }
 
-    // JS-driven tooltip matching shared tooltip HTML style
-    const catLabel = getCategoryLabel(ev.category);
-    const srcHtml  = ev.source
-      ? '<br><span style="color:var(--color-text-faint);font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>'
-      : '';
-    const tipHtml =
-      '<strong style="color:' + bandTipEscapeHtml(ev.color) + '">' + bandTipEscapeHtml(ev.label) + '</strong><br>' +
-      '<em style="color:var(--color-text-muted)">' + bandTipEscapeHtml(catLabel) + '</em><br>' +
-      bandTipEscapeHtml(ev.desc) + srcHtml;
-
-    el.addEventListener('mouseenter', function(e) {
-      if (isMobileViewport()) return;
-      if (!tip) return;
-      tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
-      tip.innerHTML = tipHtml;
-      tip.style.display = 'block';
-      requestAnimationFrame(function() { positionTip(e.clientX, e.clientY); });
-    });
-    el.addEventListener('mousemove', function(e) {
-      if (isMobileViewport()) return;
-      if (tip && tip.style.display === 'block') positionTip(e.clientX, e.clientY);
-    });
-    el.addEventListener('mouseleave', function() {
-      if (isMobileViewport()) return;
-      if (tip) tip.style.display = 'none';
-    });
     el.addEventListener('click', function (e) {
       e.stopPropagation();
-      stopPlay();
-      suppressMobileNarrativeFit(2000);
-      if (isMobileViewport() && tip) {
-        const pinKey = 'event:' + ev.id;
-        if (_bandTipPinKey === pinKey) {
-          closeMobileBandTooltip();
-          return;
-        }
-        tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
-        _bandTipPinKey = pinKey;
-        tip.innerHTML = tipHtml;
-        tip.style.display = 'block';
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () { positionBandTipNearIcon(el); });
-        });
-      }
-      if (typeof showEvents !== 'undefined' && !showEvents) {
-        showEvents = true;
-        document.querySelectorAll('.layer-btn[data-layer="events"]').forEach(function (btn) {
-          btn.classList.add('active');
-        });
-      }
-      if (isMobileViewport() && typeof switchMobileTabToMap === 'function') switchMobileTabToMap();
-      if (typeof focusEventOnMap === 'function') focusEventOnMap(ev.id);
-      setTime(ev.time);
-      scheduleTimelineBandSync();
-      requestAnimationFrame(function () { scheduleTimelineBandSync(); });
-      if (isMobileViewport() && tip && tip.style.display === 'block') {
-        setTimeout(function () { positionBandTipNearIcon(el); }, 420);
-      }
+      activateEventFromBand(ev, el);
     });
     track.appendChild(el);
   });
   installBandTooltipGlobalCloserIfNeeded();
+  installEventsPeekLayer();
   syncTimelineBandsToSpeciesTrack();
+}
+
+const EVENTS_PEEK_W = 300;
+const EVENTS_PEEK_H = 80;
+const EVENTS_PEEK_CARET = 8;
+const EVENTS_PEEK_BAND_GAP = 2;
+const EVENTS_PEEK_NEAR = 64;
+const EVENTS_PEEK_WINDOW = 120;
+const EVENTS_PEEK_GAP = 28;
+const EVENTS_PEEK_CAP = 8;
+const EVENTS_PEEK_PAD = 22;
+
+const _eventsPeek = {
+  installed: false,
+  open: false,
+  armed: false,
+  raf: 0,
+  x: 0,
+  y: 0,
+  ownsTip: false,
+  pinnedTipId: null,
+  tipEvId: null,
+  ids: '',
+  frozen: null,
+  lastPinnedId: null,
+};
+
+function hideEventsPeek() {
+  const peek = document.getElementById('events-peek');
+  if (peek) {
+    peek.classList.remove('is-open');
+    peek.setAttribute('aria-hidden', 'true');
+  }
+  _eventsPeek.open = false;
+  _eventsPeek.armed = false;
+  _eventsPeek.ids = '';
+  _eventsPeek.frozen = null;
+  _eventsPeek.lastPinnedId = null;
+  if (_eventsPeek.ownsTip) {
+    const tip = document.getElementById('band-tooltip');
+    if (tip && !tip.classList.contains('band-tooltip--skin') && !tip.classList.contains('band-tooltip--species')) {
+      tip.style.display = 'none';
+    }
+    _eventsPeek.ownsTip = false;
+    _eventsPeek.pinnedTipId = null;
+    _eventsPeek.tipEvId = null;
+  }
+}
+
+function refreshEventsPeekIfOpen() {
+  if (!_eventsPeek.open) return;
+  scheduleEventsPeekFrame();
+}
+
+function eventsPeekRectContains(el, x, y) {
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+}
+
+function eventsPeekCollectMarkers() {
+  const track = document.getElementById('events-band-track');
+  if (!track) return [];
+  const out = [];
+  track.querySelectorAll('.event-marker').forEach(function (el) {
+    const id = el.getAttribute('data-event-id');
+    if (!id) return;
+    const ev = EVENTS_DATA.find(function (item) { return item.id === id; });
+    if (!ev) return;
+    const r = el.getBoundingClientRect();
+    if (r.width < 1 && r.height < 1) return;
+    out.push({ el: el, ev: ev, x: r.left + r.width / 2 });
+  });
+  return out;
+}
+
+function eventsPeekResolveXs(items, pinIdx, pinX, minX, maxX, gap) {
+  const xs = items.map(function (item, i) {
+    return i === pinIdx ? pinX : pinX + (item.x - items[pinIdx].x);
+  });
+  for (let i = pinIdx + 1; i < xs.length; i++) {
+    xs[i] = Math.max(xs[i], xs[i - 1] + gap);
+  }
+  for (let i = pinIdx - 1; i >= 0; i--) {
+    xs[i] = Math.min(xs[i], xs[i + 1] - gap);
+  }
+  if (xs[xs.length - 1] > maxX) {
+    const shift = xs[xs.length - 1] - maxX;
+    for (let i = 0; i < xs.length; i++) xs[i] -= shift;
+  }
+  if (xs[0] < minX) {
+    const shift = minX - xs[0];
+    for (let i = 0; i < xs.length; i++) xs[i] += shift;
+  }
+  return xs;
+}
+
+function eventsPeekInnerHtml(ev) {
+  if (eventUsesPigmentedHumanSvg(ev)) return eventMapMarkerInnerContent(ev);
+  return '';
+}
+
+function showEventsPeekTooltip(ev, cx, cy) {
+  const tip = document.getElementById('band-tooltip');
+  if (!tip || isMobileViewport()) return;
+  tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
+  tip.innerHTML = eventTooltipHtml(ev);
+  tip.style.display = 'block';
+  _eventsPeek.ownsTip = true;
+  _eventsPeek.pinnedTipId = null;
+  _eventsPeek.tipEvId = ev.id;
+  requestAnimationFrame(function () { positionBandTipAtCursor(cx, cy); });
+}
+
+function syncEventsPeekTargetTooltip(ev) {
+  const tip = document.getElementById('band-tooltip');
+  if (!tip || isMobileViewport() || !ev) return;
+  if (_eventsPeek.pinnedTipId && _eventsPeek.pinnedTipId !== ev.id) return;
+  if (_eventsPeek.tipEvId !== ev.id) {
+    tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
+    tip.innerHTML = eventTooltipHtml(ev);
+    _eventsPeek.tipEvId = ev.id;
+  }
+  tip.style.display = 'block';
+  _eventsPeek.ownsTip = true;
+  const peekItem = eventPeekItemById(ev.id);
+  if (peekItem) positionBandTipNearIcon(peekItem);
+  else positionBandTipAtCursor(_eventsPeek.x, _eventsPeek.y);
+}
+
+function bindEventsPeekItem(itemEl) {
+  if (itemEl._hoPeekBound) return;
+  itemEl._hoPeekBound = true;
+  itemEl.addEventListener('mouseenter', function (e) {
+    if (isMobileViewport()) return;
+    const id = itemEl.getAttribute('data-event-id');
+    const ev = EVENTS_DATA.find(function (item) { return item.id === id; });
+    if (ev) showEventsPeekTooltip(ev, e.clientX, e.clientY);
+  });
+  itemEl.addEventListener('mousemove', function (e) {
+    if (isMobileViewport() || !_eventsPeek.ownsTip) return;
+    positionBandTipAtCursor(e.clientX, e.clientY);
+  });
+  itemEl.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const id = itemEl.getAttribute('data-event-id');
+    const ev = EVENTS_DATA.find(function (item) { return item.id === id; });
+    if (!ev) return;
+    const esc = (typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(id) : id;
+    const source = document.querySelector('#events-band-track .event-marker[data-event-id="' + esc + '"]');
+    activateEventFromBand(ev, source || itemEl);
+  });
+}
+
+function renderEventsPeekItems(cluster, xs, pinnedId) {
+  const host = document.getElementById('events-peek-items');
+  if (!host) return;
+  const nextIds = cluster.map(function (item) { return item.ev.id; }).join('|');
+  if (_eventsPeek.ids !== nextIds) {
+    host.innerHTML = '';
+    cluster.forEach(function (item) {
+      const node = document.createElement('button');
+      node.type = 'button';
+      node.className = 'events-peek-item';
+      node.setAttribute('data-event-id', item.ev.id);
+      node.setAttribute('aria-label', item.ev.label || item.ev.id);
+      if (eventUsesPigmentedHumanSvg(item.ev)) {
+        node.innerHTML = '<span class="events-peek-pin" hidden></span>' + eventsPeekInnerHtml(item.ev);
+      } else {
+        node.innerHTML = '<span class="events-peek-pin" hidden></span>';
+        const glyph = document.createElement('span');
+        glyph.textContent = item.ev.icon || '•';
+        glyph.style.color = item.ev.color || '';
+        node.appendChild(glyph);
+      }
+      bindEventsPeekItem(node);
+      host.appendChild(node);
+    });
+    _eventsPeek.ids = nextIds;
+  }
+  host.querySelectorAll('.events-peek-item').forEach(function (node, i) {
+    const localX = xs[i];
+    node.style.left = localX + 'px';
+    const pinned = node.getAttribute('data-event-id') === pinnedId;
+    node.classList.toggle('is-pinned', pinned);
+    const pin = node.querySelector('.events-peek-pin');
+    if (pin) pin.hidden = !pinned;
+  });
+}
+
+function updateEventsPeekFrame() {
+  _eventsPeek.raf = 0;
+  const peek = document.getElementById('events-peek');
+  const track = document.getElementById('events-band-track');
+  if (!peek || !track) return hideEventsPeek();
+  if (isMobileViewport()) return hideEventsPeek();
+  if (typeof _timelineScrubDragging !== 'undefined' && _timelineScrubDragging) return hideEventsPeek();
+
+  const x = _eventsPeek.x;
+  const y = _eventsPeek.y;
+  if (eventsPeekRectContains(document.getElementById('play-btn'), x, y)) return hideEventsPeek();
+  if (eventsPeekRectContains(document.getElementById('timeline-scrubber'), x, y)) return hideEventsPeek();
+
+  const overTrack = eventsPeekRectContains(track, x, y);
+  const overPeek = _eventsPeek.open && eventsPeekRectContains(peek, x, y);
+  const overBridge = _eventsPeek.open && eventsPeekRectContains(document.getElementById('events-peek-bridge'), x, y);
+  if (!overTrack && !overPeek && !overBridge) return hideEventsPeek();
+
+  const markers = eventsPeekCollectMarkers();
+  if (!markers.length) return hideEventsPeek();
+
+  let nearest = markers[0];
+  let nearestDist = Math.abs(nearest.x - x);
+  for (let i = 1; i < markers.length; i++) {
+    const d = Math.abs(markers[i].x - x);
+    if (d < nearestDist) {
+      nearest = markers[i];
+      nearestDist = d;
+    }
+  }
+  const insidePeek = overPeek || overBridge;
+  if (!insidePeek && nearestDist > EVENTS_PEEK_NEAR) return hideEventsPeek();
+
+  const hoverItem = document.elementFromPoint(x, y);
+  const peekHover = hoverItem && hoverItem.closest ? hoverItem.closest('#events-peek .events-peek-item') : null;
+
+  let cluster;
+  let peekW;
+  let peekH;
+  let left;
+  let top;
+  let xs;
+  const band = document.getElementById('events-band') || track;
+  const br = band.getBoundingClientRect();
+  const tr = track.getBoundingClientRect();
+
+  if (insidePeek && _eventsPeek.frozen) {
+    peekW = _eventsPeek.frozen.w;
+    peekH = _eventsPeek.frozen.h;
+    left = _eventsPeek.frozen.left;
+    top = _eventsPeek.frozen.top;
+    xs = _eventsPeek.frozen.xs;
+    cluster = _eventsPeek.frozen.ids.map(function (id) {
+      return markers.find(function (item) { return item.ev.id === id; });
+    }).filter(Boolean);
+    if (!cluster.length) return hideEventsPeek();
+  } else {
+    cluster = markers
+      .filter(function (item) { return Math.abs(item.x - x) <= EVENTS_PEEK_WINDOW; })
+      .sort(function (a, b) { return Math.abs(a.x - x) - Math.abs(b.x - x); })
+      .slice(0, EVENTS_PEEK_CAP)
+      .sort(function (a, b) { return a.x - b.x || a.ev.time - b.ev.time; });
+    if (!cluster.length) return hideEventsPeek();
+
+    peekW = Math.min(EVENTS_PEEK_W, Math.max(240, window.innerWidth - 16));
+    const anchorTop = Math.min(br.top, tr.top);
+    const attach = EVENTS_PEEK_CARET + EVENTS_PEEK_BAND_GAP;
+    peekH = EVENTS_PEEK_H;
+    if (anchorTop - attach - peekH < 8) {
+      peekH = Math.max(64, anchorTop - attach - 8);
+    }
+    left = x - peekW / 2;
+    if (left < 8) left = 8;
+    if (left + peekW > window.innerWidth - 8) left = window.innerWidth - peekW - 8;
+    top = anchorTop - peekH - attach;
+
+    const pinForLayout = cluster.findIndex(function (item) { return item.ev.id === nearest.ev.id; });
+    const layoutIdx = pinForLayout < 0 ? 0 : pinForLayout;
+    const pinX = Math.max(EVENTS_PEEK_PAD, Math.min(peekW - EVENTS_PEEK_PAD, x - left));
+    xs = eventsPeekResolveXs(cluster, layoutIdx, pinX, EVENTS_PEEK_PAD, peekW - EVENTS_PEEK_PAD, EVENTS_PEEK_GAP);
+    _eventsPeek.frozen = {
+      w: peekW,
+      h: peekH,
+      left: left,
+      top: top,
+      xs: xs,
+      ids: cluster.map(function (item) { return item.ev.id; }),
+    };
+  }
+
+  peek.style.width = peekW + 'px';
+  peek.style.height = peekH + 'px';
+  peek.style.left = left + 'px';
+  peek.style.top = top + 'px';
+  peek.classList.add('is-open');
+  peek.setAttribute('aria-hidden', 'false');
+  _eventsPeek.open = true;
+  _eventsPeek.armed = true;
+
+  const bridge = document.getElementById('events-peek-bridge');
+  if (bridge) {
+    const gap = Math.max(0, tr.top - (top + peekH));
+    bridge.style.height = (gap + 6) + 'px';
+  }
+
+  let pinnedId = nearest.ev.id;
+  if (peekHover) pinnedId = peekHover.getAttribute('data-event-id') || pinnedId;
+  else if (insidePeek && _eventsPeek.lastPinnedId) pinnedId = _eventsPeek.lastPinnedId;
+
+  let pinIdx = cluster.findIndex(function (item) { return item.ev.id === pinnedId; });
+  if (pinIdx < 0) pinIdx = cluster.findIndex(function (item) { return item.ev.id === nearest.ev.id; });
+  if (pinIdx < 0) pinIdx = 0;
+  pinnedId = cluster[pinIdx].ev.id;
+  _eventsPeek.lastPinnedId = pinnedId;
+
+  renderEventsPeekItems(cluster, xs, pinnedId);
+
+  const focus = document.getElementById('events-peek-focus');
+  if (focus) focus.style.left = xs[pinIdx] + 'px';
+  const caret = document.getElementById('events-peek-caret');
+  if (caret) {
+    const realX = cluster[pinIdx].x - left;
+    caret.style.left = Math.max(10, Math.min(peekW - 10, realX)) + 'px';
+  }
+  syncEventsPeekTargetTooltip(cluster[pinIdx].ev);
+}
+
+function scheduleEventsPeekFrame() {
+  if (_eventsPeek.raf) return;
+  _eventsPeek.raf = requestAnimationFrame(updateEventsPeekFrame);
+}
+
+function installEventsPeekLayer() {
+  const track = document.getElementById('events-band-track');
+  const peek = document.getElementById('events-peek');
+  if (!track || !peek || _eventsPeek.installed) return;
+  _eventsPeek.installed = true;
+
+  function onPtr(e) {
+    if (e.pointerType === 'touch') return;
+    _eventsPeek.x = e.clientX;
+    _eventsPeek.y = e.clientY;
+    _eventsPeek.armed = true;
+    scheduleEventsPeekFrame();
+  }
+
+  track.addEventListener('pointerenter', onPtr);
+  track.addEventListener('pointermove', onPtr);
+  peek.addEventListener('pointerenter', onPtr);
+  peek.addEventListener('pointermove', onPtr);
+  peek.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+
+  track.addEventListener('pointerleave', function (e) {
+    if (e.relatedTarget && peek.contains(e.relatedTarget)) return;
+    scheduleEventsPeekFrame();
+  });
+  peek.addEventListener('pointerleave', function (e) {
+    if (e.relatedTarget && track.contains(e.relatedTarget)) return;
+    scheduleEventsPeekFrame();
+  });
+
+  document.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'touch') return;
+    if (!_eventsPeek.open && !_eventsPeek.armed) return;
+    _eventsPeek.x = e.clientX;
+    _eventsPeek.y = e.clientY;
+    scheduleEventsPeekFrame();
+  }, { passive: true });
+
+  window.addEventListener('resize', function () {
+    if (_eventsPeek.open) scheduleEventsPeekFrame();
+  });
 }
 
 /** Place Play next to the scrubber round — right of handle when needle is left, left when right (PC + mobile). */
@@ -10984,6 +11472,17 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
         <span id="welcome-start-label">Commencer l'exploration</span>
       </button>
+    </div>
+  </div>
+
+  <!-- Desktop jalon peek (hidden on mobile; JS-driven) -->
+  <div id="events-peek" aria-hidden="true">
+    <div class="events-peek-chrome">
+      <div class="events-peek-focus" id="events-peek-focus"></div>
+      <div class="events-peek-rail"></div>
+      <div class="events-peek-items" id="events-peek-items"></div>
+      <div class="events-peek-caret" id="events-peek-caret"></div>
+      <div class="events-peek-bridge" id="events-peek-bridge"></div>
     </div>
   </div>
 
