@@ -399,6 +399,206 @@
     },
     {
       "@type": "Species",
+      "@id": "stw573",
+      "taxon:scientificName": "Australopithecus sp. (StW 573)",
+      "name": {
+        "fr": "« Little Foot » — un squelette sans nom d'espèce",
+        "en": "“Little Foot” — a skeleton without a species name"
+      },
+      "hominin:periodStart": -3830000,
+      "hominin:periodEnd": -3510000,
+      "hominin:color": "#7A6A2F",
+      "hominin:lane": 1,
+      "hominin:heightM": {
+        "fr": "Non documenté",
+        "en": "Not documented"
+      },
+      "hominin:heightF": {
+        "fr": "Non documenté — squelette > 90 % complet, estimations en discussion",
+        "en": "Not documented — skeleton > 90% complete, estimates under discussion"
+      },
+      "hominin:weightM": {
+        "fr": "Non documenté",
+        "en": "Not documented"
+      },
+      "hominin:brain": {
+        "fr": "≥ 408 cm³ (estimation minimale ; endocrâne écrasé et déformé)",
+        "en": "≥ 408 cm³ (minimum estimate; endocast crushed and deformed)"
+      },
+      "hominin:dimorphism": {
+        "fr": "Inconnu — un seul individu",
+        "en": "Unknown — a single individual"
+      },
+      "hominin:skinDesc": {
+        "fr": "Fourrure + peau peu pigmentée (sous couverture)",
+        "en": "Fur + lightly pigmented skin (beneath cover)"
+      },
+      "hominin:skinColor": "#c8956a",
+      "hominin:skinVariant": "fur",
+      "hominin:eyesDesc": {
+        "fr": "Bruns",
+        "en": "Brown"
+      },
+      "hominin:eyesColor": "#5c3317",
+      "hominin:hairDesc": {
+        "fr": "Fourrure sombre",
+        "en": "Dark fur"
+      },
+      "hominin:hairColor": "#1a0a00",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (aucun ADN)",
+        "en": "⚠️ Evolutionary inference (no DNA)"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Aucun outil associé au squelette (Silberberg Grotto)",
+          "en": "No tools associated with the skeleton (Silberberg Grotto)"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Deux débats distincts, tous deux ouverts. Sur le taxon : Clarke & Kuman (2019) attribuent StW 573 à Australopithecus prometheus, avec MLD 1 comme spécimen type. Martin J.M., Morris-Obst L., Leece A.B., Baker S., Herries A.I.R. & Strait D.S. (American Journal of Biological Anthropology 188:e70177, 2025, DOI 10.1002/ajpa.70177) rejettent cette attribution : StW 573 diffère de MLD 1 par une protubérance occipitale externe plus marquée, une crête sagittale au lambda, une encoche astérionique, un plan nuchal long et plus horizontal, et une capacité crânienne plus faible ; MLD 1 ressemble davantage à Sts 5 et MLD 37/38, membres consensuels d'A. africanus. Sur la datation : 3,67 ± 0,16 Ma par nucléides cosmogéniques (Granger D.E. et al., Nature 522:85-88, 2015, DOI 10.1038/nature14268), contre ~3,6 Ma par biochronologie et des âges nettement plus jeunes selon les zones de sédimentation du Member 2. Notion fausse à corriger : le résultat de Martin et al. est négatif — il écarte A. prometheus sans nommer d'espèce nouvelle. Le « Little Foot est une troisième espèce » relayé en ligne est une lecture journalistique, pas la conclusion de l'article.",
+        "en": "Two separate debates, both open. On the taxon: Clarke & Kuman (2019) assign StW 573 to Australopithecus prometheus, with MLD 1 as type specimen. Martin J.M., Morris-Obst L., Leece A.B., Baker S., Herries A.I.R. & Strait D.S. (American Journal of Biological Anthropology 188:e70177, 2025, DOI 10.1002/ajpa.70177) reject that assignment: StW 573 differs from MLD 1 in a more pronounced external occipital protuberance, a sagittal crest at lambda, an asterionic notch, a long and more horizontal nuchal plane, and a smaller cranial capacity; MLD 1 more closely resembles Sts 5 and MLD 37/38, consensus members of A. africanus. On dating: 3.67 ± 0.16 Ma by cosmogenic nuclides (Granger D.E. et al., Nature 522:85-88, 2015, DOI 10.1038/nature14268), against ~3.6 Ma by biochronology and markedly younger ages depending on Member 2 sedimentation zones. False notion to correct: the Martin et al. result is negative — it rules out A. prometheus without naming a new species. The online claim that “Little Foot is a third species” is a journalistic reading, not the paper's conclusion."
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Cradle of Humankind",
+            "en": "Cradle of Humankind"
+          },
+          "lat": -26.0157,
+          "lng": 27.7346,
+          "radius": 120000,
+          "note": {
+            "fr": "Système karstique de Sterkfontein, Afrique du Sud",
+            "en": "Sterkfontein karst system, South Africa"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Sterkfontein — Silberberg Grotto (Afrique du Sud)",
+            "en": "Sterkfontein — Silberberg Grotto (South Africa)"
+          },
+          "lat": -26.0157,
+          "lng": 27.7346,
+          "note": {
+            "fr": "StW 573, Member 2 — squelette > 90 % complet, seul hominine de la grotte",
+            "en": "StW 573, Member 2 — skeleton > 90% complete, only hominin from the grotto"
+          }
+        }
+      ],
+      "hominin:migrations": [],
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "SPECULATIVE_HYPOTHESIS",
+      "hominin:behaviorEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+    },
+    {
+      "@type": "Species",
+      "@id": "australopithecus-ledi-geraru",
+      "taxon:scientificName": "Australopithecus sp. (Ledi-Geraru)",
+      "name": {
+        "fr": "Une espèce non encore nommée — Ledi-Geraru",
+        "en": "An as-yet unnamed species — Ledi-Geraru"
+      },
+      "hominin:periodStart": -2800000,
+      "hominin:periodEnd": -2600000,
+      "hominin:color": "#9B7A2E",
+      "hominin:lane": 1,
+      "hominin:heightM": {
+        "fr": "Non documenté (13 dents seulement)",
+        "en": "Not documented (13 teeth only)"
+      },
+      "hominin:heightF": {
+        "fr": "Non documenté (13 dents seulement)",
+        "en": "Not documented (13 teeth only)"
+      },
+      "hominin:weightM": {
+        "fr": "Non documenté",
+        "en": "Not documented"
+      },
+      "hominin:brain": {
+        "fr": "Non documenté — aucun crâne associé",
+        "en": "Not documented — no associated cranium"
+      },
+      "hominin:dimorphism": {
+        "fr": "Inconnu",
+        "en": "Unknown"
+      },
+      "hominin:skinDesc": {
+        "fr": "Fourrure + peau peu pigmentée (sous couverture)",
+        "en": "Fur + lightly pigmented skin (beneath cover)"
+      },
+      "hominin:skinColor": "#c8956a",
+      "hominin:skinVariant": "fur",
+      "hominin:eyesDesc": {
+        "fr": "Bruns",
+        "en": "Brown"
+      },
+      "hominin:eyesColor": "#5c3317",
+      "hominin:hairDesc": {
+        "fr": "Fourrure sombre",
+        "en": "Dark fur"
+      },
+      "hominin:hairColor": "#1a0a00",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (aucun ADN, dents seules)",
+        "en": "⚠️ Evolutionary inference (no DNA, teeth only)"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Aucun outil associé aux fossiles décrits",
+          "en": "No tools associated with the described fossils"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Villmoare B. et al. (Nature 650:374-380, 2025, DOI 10.1038/s41586-025-09390-4) décrivent 13 dents attribuées à Homo et à une nouvelle espèce d'Australopithecus non encore nommée formellement. Les auteurs concluent à « au moins 3 lignées dans la région Afar entre 3,0 et 2,5 Ma » : Homo, A. garhi et cette nouvelle espèce. Un spécimen de Homo remonte le genre à 2,78 Ma, très près de la dernière apparition connue d'A. afarensis (2,95 Ma), ce qui complique le modèle cladogénétique simple. La coexistence stratigraphique est solide ; le rattachement phylogénétique reste à établir. Deux notions fausses à corriger : la presse a parlé de « quatre lignées à Ledi-Geraru » alors que les auteurs écrivent « au moins 3 dans la région Afar », et l'idée d'un Paranthropus découvert plus au nord que sa zone connue est l'inverse de l'article, qui précise qu'aucun Paranthropus n'a été enregistré dans l'Afar à ce jour — le genre est documenté dans le bassin Omo-Turkana, à Nyayanga (~2,7 Ma) et à Laetoli (~2,66 Ma), donc plus au sud.",
+        "en": "Villmoare B. et al. (Nature 650:374-380, 2025, DOI 10.1038/s41586-025-09390-4) describe 13 teeth attributed to Homo and to a new, not-yet formally named Australopithecus species. The authors conclude there were “at least 3 lineages in the Afar Region between 3.0 and 2.5 Ma”: Homo, A. garhi and this new species. A Homo specimen pushes the genus back to 2.78 Ma, very close to the last known appearance of A. afarensis (2.95 Ma), which complicates the simple cladogenetic model. Stratigraphic coexistence is solid; phylogenetic placement is not yet settled. Two false notions to correct: the press reported “four lineages at Ledi-Geraru” whereas the authors write “at least 3 in the Afar Region”, and the claim of a Paranthropus found further north than its known range is the opposite of the paper, which states that no Paranthropus has been recorded in the Afar to date — the genus is documented in the Omo-Turkana Basin, at Nyayanga (~2.7 Ma) and Laetoli (~2.66 Ma), so further south."
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Dépression de l'Afar",
+            "en": "Afar Depression"
+          },
+          "lat": 11.25,
+          "lng": 40.7,
+          "radius": 250000,
+          "note": {
+            "fr": "Bassin de Ledi-Geraru, Éthiopie",
+            "en": "Ledi-Geraru basin, Ethiopia"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Ledi-Geraru (Éthiopie)",
+            "en": "Ledi-Geraru (Ethiopia)"
+          },
+          "lat": 11.25,
+          "lng": 40.7,
+          "note": {
+            "fr": "13 dents, 2,6–2,8 Ma — Homo + nouvelle espèce d'Australopithecus (Nature 2025)",
+            "en": "13 teeth, 2.6–2.8 Ma — Homo + new Australopithecus species (Nature 2025)"
+          }
+        }
+      ],
+      "hominin:migrations": [],
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "SPECULATIVE_HYPOTHESIS",
+      "hominin:behaviorEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+    },
+    {
+      "@type": "Species",
       "@id": "habilis",
       "taxon:scientificName": "Homo habilis",
       "name": {
@@ -949,8 +1149,8 @@
         }
       ],
       "hominin:debate": {
-        "fr": "Statut phylogénétique entièrement repensé en 2026 (Hublin et al., Nature) : population sœur — et non ancêtre — du clade conduisant aux hominines de Thomas Quarry I. Les traits modernes de la face seraient une convergence morphologique.",
-        "en": "Phylogenetic status fully revised in 2026 (Hublin et al., Nature): sister population — not ancestor — to the clade leading to Thomas Quarry I hominins. Modern facial traits likely a morphological convergence."
+        "fr": "Statut phylogénétique entièrement repensé en 2026 (Hublin et al., Nature) : population sœur — et non ancêtre — du clade conduisant aux hominines de Thomas Quarry I. Les traits modernes de la face seraient une convergence morphologique. Nuance à conserver : Hublin et al. admettent une hypothèse alternative — le groupe de Thomas Quarry I pourrait représenter une population d'Homo erectus en cours d'isolement et de divergence plutôt qu'une population strictement basale aux trois lignées. La datation à ~773 ka (inversion Brunhes/Matuyama) est solide ; c'est l'interprétation phylogénétique qui reste discutée.",
+        "en": "Phylogenetic status fully revised in 2026 (Hublin et al., Nature): sister population — not ancestor — to the clade leading to Thomas Quarry I hominins. Modern facial traits likely a morphological convergence. Nuance worth keeping: Hublin et al. allow an alternative reading — the Thomas Quarry I group could represent an Homo erectus population undergoing isolation and divergence rather than a strictly basal population to the three lineages. The ~773 ka date (Brunhes/Matuyama reversal) is solid; it is the phylogenetic interpretation that remains debated."
       },
       "hominin:regions": [
         {
@@ -999,6 +1199,158 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+    },
+    {
+      "@type": "Species",
+      "@id": "longi",
+      "taxon:scientificName": "Homo longi",
+      "name": {
+        "fr": "Le clade asiatique — H. longi ou H. juluensis ?",
+        "en": "The Asian clade — H. longi or H. juluensis?"
+      },
+      "hominin:periodStart": -1000000,
+      "hominin:periodEnd": -50000,
+      "hominin:color": "#A03070",
+      "hominin:lane": 3,
+      "hominin:heightM": {
+        "fr": "Non documenté",
+        "en": "Not documented"
+      },
+      "hominin:heightF": {
+        "fr": "Non documenté",
+        "en": "Not documented"
+      },
+      "hominin:weightM": {
+        "fr": "Non documenté",
+        "en": "Not documented"
+      },
+      "hominin:brain": {
+        "fr": "> 1 000 cm³ (Xujiayao : parmi les plus grands connus)",
+        "en": "> 1,000 cm³ (Xujiayao: among the largest known)"
+      },
+      "hominin:dimorphism": {
+        "fr": "Inconnu",
+        "en": "Unknown"
+      },
+      "hominin:skinDesc": {
+        "fr": "Inconnue — sombre par inférence, aucun ADN nucléaire disponible",
+        "en": "Unknown — dark by inference, no nuclear DNA available"
+      },
+      "hominin:skinColor": "#4a2200",
+      "hominin:skinVariant": null,
+      "hominin:eyesDesc": {
+        "fr": "Bruns (probable)",
+        "en": "Brown (probable)"
+      },
+      "hominin:eyesColor": "#4b2e19",
+      "hominin:hairDesc": {
+        "fr": "Sombres (probable)",
+        "en": "Dark (probable)"
+      },
+      "hominin:hairColor": "#120800",
+      "hominin:pigmentationCertainty": "inference",
+      "hominin:pigmentationCertLabel": {
+        "fr": "⚠️ Inférence évolutive (aucun ADN nucléaire)",
+        "en": "⚠️ Evolutionary inference (no nuclear DNA)"
+      },
+      "hominin:tools": [
+        {
+          "fr": "Industrie lithique associée à Xujiayao",
+          "en": "Lithic industry associated with Xujiayao"
+        },
+        {
+          "fr": "Attribution des outils incertaine sur les autres sites",
+          "en": "Tool attribution uncertain at the other sites"
+        }
+      ],
+      "hominin:debate": {
+        "fr": "Trois positions concurrentes, aucune consensuelle. Bae C.J. & Wu X. (Nature Communications 15:9479, 2024, DOI 10.1038/s41467-024-53918-7) proposent une espèce distincte, Homo juluensis, regroupant Xujiayao (holotype), Xuchang (paratype), Penghu 1 et possiblement les Dénisoviens. Chris Stringer préfère regrouper la plupart de ces fossiles sous Homo longi, nom qui a la priorité de nomenclature (2021). Ni Xijun — auteur de la description initiale d'H. longi — juge les données insuffisantes pour valider un taxon supplémentaire. La reconstruction numérique du crâne de Yunxian 2 par Feng et al. (Science 389:1320-1324, 2025, DOI 10.1126/science.ado9202), co-signée par Stringer et Ni, place ce fossile de ~1 Ma comme membre précoce du clade asiatique H. longi incluant les Dénisoviens, sans clore le débat. Le point de blocage est commun aux trois positions : aucun ADN nucléaire hors Harbin. À corriger dans la vulgarisation : H. juluensis n'est pas une découverte de terrain mais une proposition de reclassement (Xujiayao est fouillé depuis les années 1970), et le clivage n'oppose pas la Chine à l'Occident — Ni et Wu appartiennent à la même académie et défendent des positions opposées.",
+        "en": "Three competing positions, none consensual. Bae C.J. & Wu X. (Nature Communications 15:9479, 2024, DOI 10.1038/s41467-024-53918-7) propose a distinct species, Homo juluensis, grouping Xujiayao (holotype), Xuchang (paratype), Penghu 1 and possibly the Denisovans. Chris Stringer prefers to group most of these fossils under Homo longi, which has nomenclatural priority (2021). Ni Xijun — who authored the original H. longi description — considers the data insufficient to validate an additional taxon. The digital reconstruction of the Yunxian 2 cranium by Feng et al. (Science 389:1320-1324, 2025, DOI 10.1126/science.ado9202), co-signed by Stringer and Ni, places this ~1 Ma fossil as an early member of the Asian H. longi clade including the Denisovans, without settling the debate. All three positions face the same limit: no nuclear DNA outside Harbin. To correct in popular accounts: H. juluensis is not a field discovery but a reclassification proposal (Xujiayao has been excavated since the 1970s), and the split is not China versus the West — Ni and Wu belong to the same academy and hold opposing views."
+      },
+      "hominin:regions": [
+        {
+          "name": {
+            "fr": "Asie de l'Est continentale",
+            "en": "Mainland East Asia"
+          },
+          "lat": 33.0,
+          "lng": 112.0,
+          "radius": 1500000,
+          "note": {
+            "fr": "Fossiles du Pléistocène moyen et tardif de Chine",
+            "en": "Middle and Late Pleistocene fossils from China"
+          }
+        }
+      ],
+      "hominin:fossilSites": [
+        {
+          "name": {
+            "fr": "Yunxian / Xuetangliangzi (Hubei)",
+            "en": "Yunxian / Xuetangliangzi (Hubei)"
+          },
+          "lat": 32.834,
+          "lng": 110.585,
+          "note": {
+            "fr": "Yunxian 2, ~1 Ma — membre précoce du clade H. longi (Science 2025)",
+            "en": "Yunxian 2, ~1 Ma — early member of the H. longi clade (Science 2025)"
+          }
+        },
+        {
+          "name": {
+            "fr": "Xujiayao (Shanxi)",
+            "en": "Xujiayao (Shanxi)"
+          },
+          "lat": 40.1006,
+          "lng": 113.9775,
+          "note": {
+            "fr": "Holotype proposé d'H. juluensis — crâne > 1 000 cm³",
+            "en": "Proposed H. juluensis holotype — cranium > 1,000 cm³"
+          }
+        },
+        {
+          "name": {
+            "fr": "Lingjing, Xuchang (Henan)",
+            "en": "Lingjing, Xuchang (Henan)"
+          },
+          "lat": 34.0691,
+          "lng": 113.6799,
+          "note": {
+            "fr": "Paratype proposé d'H. juluensis",
+            "en": "Proposed H. juluensis paratype"
+          }
+        },
+        {
+          "name": {
+            "fr": "Penghu (Taïwan)",
+            "en": "Penghu (Taiwan)"
+          },
+          "lat": 23.57,
+          "lng": 119.57,
+          "note": {
+            "fr": "Mandibule Penghu 1 — attribution contestée",
+            "en": "Penghu 1 mandible — contested attribution"
+          }
+        },
+        {
+          "name": {
+            "fr": "Harbin (Heilongjiang)",
+            "en": "Harbin (Heilongjiang)"
+          },
+          "lat": 45.8,
+          "lng": 126.53,
+          "note": {
+            "fr": "Crâne « Dragon Man » ~146 ka — Dénisovien confirmé (protéomique + ADNmt)",
+            "en": "“Dragon Man” cranium ~146 ka — confirmed Denisovan (proteomics + mtDNA)"
+          }
+        }
+      ],
+      "hominin:migrations": [],
+      "hominin:taxonomyDebateLevel": "ACTIVE_DEBATE",
+      "hominin:taxonomyEvidenceType": "INDIRECT_DATA",
+      "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
+      "hominin:behaviorEvidenceType": "INDIRECT_DATA",
+      "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
     },
     {
@@ -1489,8 +1841,8 @@
         }
       ],
       "hominin:debate": {
-        "fr": "Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (Fu Qiaomei et al., 2025). ADN nucléaire pas encore disponible — certains paléoanthropologues attendent confirmation définitive.",
-        "en": "Dragon Man = Denisovan identification confirmed by proteomics + mtDNA (Fu Qiaomei et al., 2025). Nuclear DNA not yet available — some palaeoanthropologists await definitive confirmation."
+        "fr": "Identification Dragon Man = Dénisovien confirmée par protéomique + ADNmt (Fu Qiaomei et al., 2025). ADN nucléaire pas encore disponible — certains paléoanthropologues attendent confirmation définitive. Second front ouvert depuis 2024 : le rattachement des autres fossiles chinois du Pléistocène moyen est contesté entre Homo longi (Stringer), Homo juluensis (Bae & Wu) et une position de prudence (Ni Xijun) — voir l'entrée « longi » du catalogue.",
+        "en": "Dragon Man = Denisovan identification confirmed by proteomics + mtDNA (Fu Qiaomei et al., 2025). Nuclear DNA not yet available — some palaeoanthropologists await definitive confirmation. A second front has opened since 2024: the placement of the other Middle Pleistocene Chinese fossils is contested between Homo longi (Stringer), Homo juluensis (Bae & Wu) and a cautious position (Ni Xijun) — see the “longi” catalogue entry."
       },
       "hominin:regions": [
         {
