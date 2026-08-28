@@ -6,10 +6,36 @@
   "@type": "ItemList",
   "name": "Hominines Key Events",
   "description": {
-    "fr": "Jalons culturels, technologiques et phylogénétiques de l'évolution des hominines, de -3,3 Ma à -10 400 ans.",
-    "en": "Cultural, technological and phylogenetic milestones in hominin evolution, from 3.3 Ma to 10,400 years BP."
+    "fr": "Jalons culturels, technologiques et phylogénétiques de l'évolution des hominines, de -3,67 Ma à -10 400 ans.",
+    "en": "Cultural, technological and phylogenetic milestones in hominin evolution, from 3.67 Ma to 10,400 years BP."
   },
   "itemListElement": [
+    {
+      "@type": "Event",
+      "@id": "little-foot",
+      "name": {
+        "fr": "« Little Foot » (StW 573) — taxon et datation débattus",
+        "en": "\"Little Foot\" (StW 573) — taxonomy and dating debated"
+      },
+      "hominin:icon": "🦴",
+      "hominin:color": "#805090",
+      "hominin:dateYearsBP": -3670000,
+      "hominin:category": "phylo",
+      "hominin:dateReference": "Am. J. Biol. Anthropol. 188:e70177 (2025); Nature 522:85 (2015)",
+      "description": {
+        "fr": "Squelette quasi complet de Sterkfontein (Silberberg Grotto). Datation cosmogénique ~3,67 Ma ; attribution à A. prometheus rejetée par Martin et al. 2025 — ni prometheus ni clairement africanus. Débat actif taxon + datation.",
+        "en": "Near-complete Sterkfontein skeleton (Silberberg Grotto). Cosmogenic dating ~3.67 Ma; A. prometheus attribution rejected by Martin et al. 2025 — neither prometheus nor clearly africanus. Active debate on taxon and dating."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Sterkfontein, Silberberg Grotto, South Africa",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -26.02,
+          "longitude": 27.73
+        }
+      }
+    },
     {
       "@type": "Event",
       "@id": "lomekwi",
@@ -59,6 +85,32 @@
           "@type": "GeoCoordinates",
           "latitude": 11.1,
           "longitude": 40.6
+        }
+      }
+    },
+    {
+      "@type": "Event",
+      "@id": "ledi-geraru",
+      "name": {
+        "fr": "Au moins 3 lignées hominines dans l'Afar",
+        "en": "At least 3 hominin lineages in the Afar"
+      },
+      "hominin:icon": "🦴",
+      "hominin:color": "#805090",
+      "hominin:dateYearsBP": -2780000,
+      "hominin:category": "phylo",
+      "hominin:dateReference": "Nature 650:374 (2025) DOI 10.1038/s41586-025-09390-4",
+      "description": {
+        "fr": "Ledi-Geraru (Éthiopie) : dents attribuées à Homo (~2,78 Ma) et à une nouvelle espèce d'Australopithecus. Villmoare et al. concluent à ≥3 lignées dans l'Afar entre 3,0 et 2,5 Ma — modèle cladogénétique simple remis en cause.",
+        "en": "Ledi-Geraru (Ethiopia): teeth attributed to Homo (~2.78 Ma) and a new Australopithecus species. Villmoare et al. conclude ≥3 lineages in the Afar between 3.0 and 2.5 Ma — simple cladogenetic model challenged."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Ledi-Geraru, Afar, Ethiopia",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 11.3,
+          "longitude": 40.65
         }
       }
     },
@@ -194,6 +246,32 @@
     },
     {
       "@type": "Event",
+      "@id": "yunxian-longi",
+      "name": {
+        "fr": "Racine profonde du clade Homo longi / Dénisoviens",
+        "en": "Deep root of the Homo longi / Denisovan clade"
+      },
+      "hominin:icon": "🦴",
+      "hominin:color": "#805090",
+      "hominin:dateYearsBP": -1000000,
+      "hominin:category": "phylo",
+      "hominin:dateReference": "Science 389:1320 (2025) DOI 10.1126/science.ado9202",
+      "description": {
+        "fr": "Reconstruction numérique de Yunxian 2 (Hubei) : membre précoce du clade asiatique H. longi (incl. Dénisoviens), groupe frère de H. sapiens. Débat concurrent H. juluensis (Bae & Wu 2024) ; pas d'ADN nucléaire.",
+        "en": "Digital reconstruction of Yunxian 2 (Hubei): early member of the Asian H. longi clade (incl. Denisovans), sister to H. sapiens. Competing H. juluensis proposal (Bae & Wu 2024); no nuclear DNA."
+      },
+      "location": {
+        "@type": "Place",
+        "name": "Yunxian, Hubei, China",
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 32.83,
+          "longitude": 110.58
+        }
+      }
+    },
+    {
+      "@type": "Event",
       "@id": "thomas-quarry",
       "name": {
         "fr": "Ancêtre commun Sapiens / Néandertal / Dénisovien",
@@ -203,10 +281,10 @@
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -773000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature (2026)",
+      "hominin:dateReference": "Nature (2026) DOI 10.1038/s41586-025-09914-y",
       "description": {
-        "fr": "Thomas Quarry I, Casablanca — 773 000 ans. Inversion magnétique Brunhes/Matuyama. Population à la base des 3 lignées (Nature 2026).",
-        "en": "Thomas Quarry I, Casablanca — 773,000 years. Brunhes/Matuyama magnetic reversal. Population at the base of 3 lineages (Nature 2026)."
+        "fr": "Thomas Quarry I, Casablanca — 773 ka (Brunhes/Matuyama, datation robuste). Population souvent présentée comme basale aux 3 lignées ; alternative : H. erectus en divergence. Datation = consensus fort ; phylogénie = consensus modéré.",
+        "en": "Thomas Quarry I, Casablanca — 773 ka (Brunhes/Matuyama, robust dating). Often framed as basal to the 3 lineages; alternative: diverging H. erectus. Dating = strong consensus; phylogeny = moderate consensus."
       },
       "location": {
         "@type": "Place",

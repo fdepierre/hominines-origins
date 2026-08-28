@@ -307,8 +307,8 @@
         }
       ],
       "hominin:debate": {
-        "fr": "Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées.",
-        "en": "Bipedalism vs arboreality (Lovejoy vs Stern & Susman); date and mode of body-hair loss still discussed."
+        "fr": "Bipédie vs arboricolarité (Lovejoy vs Stern & Susman) ; date et modalités de perte du pelage discutées. Villmoare et al. 2025 (Ledi-Geraru) compliquent le modèle cladogénétique simple A. afarensis → Homo + Paranthropus : ≥3 lignées dans l'Afar entre 3,0 et 2,5 Ma.",
+        "en": "Bipedalism vs arboreality (Lovejoy vs Stern & Susman); date and mode of body-hair loss still discussed. Villmoare et al. 2025 (Ledi-Geraru) complicate the simple cladogenetic model A. afarensis → Homo + Paranthropus: ≥3 lineages in the Afar between 3.0 and 2.5 Ma."
       },
       "hominin:regions": [
         {
@@ -584,8 +584,8 @@
           "lat": 11.25,
           "lng": 40.7,
           "note": {
-            "fr": "13 dents, 2,6–2,8 Ma — Homo + nouvelle espèce d'Australopithecus (Nature 2025)",
-            "en": "13 teeth, 2.6–2.8 Ma — Homo + new Australopithecus species (Nature 2025)"
+            "fr": "Dents d’Australopithecus non nommé, 2,6–2,8 Ma — même gisement que les dents Homo (fiche habilis)",
+            "en": "Unnamed Australopithecus teeth, 2.6–2.8 Ma — same locality as the Homo teeth (see habilis entry)"
           }
         }
       ],
@@ -605,7 +605,7 @@
         "fr": "\"L'homme habile\" — 1er genre Homo",
         "en": "\"Handy Man\" — first Homo genus"
       },
-      "hominin:periodStart": -2400000,
+      "hominin:periodStart": -2780000,
       "hominin:periodEnd": -1400000,
       "hominin:color": "#A07820",
       "hominin:lane": 1,
@@ -630,10 +630,10 @@
         "en": "Marked"
       },
       "hominin:skinDesc": {
-        "fr": "Transition pelage → peau sombre émergente",
-        "en": "Transition fur → emerging dark skin"
+        "fr": "Peau claire sous pelage encore présent (début de mélanisation)",
+        "en": "Light skin under residual fur (onset of melanisation)"
       },
-      "hominin:skinColor": "#8B4513",
+      "hominin:skinColor": "#c8956a",
       "hominin:skinVariant": "partial-fur",
       "hominin:eyesDesc": {
         "fr": "Bruns",
@@ -665,8 +665,8 @@
         }
       ],
       "hominin:debate": {
-        "fr": "Statut d'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces.",
-        "en": "Coherence as a single species debated (Wood & Collard 1999). Probably a grouping of several species."
+        "fr": "Statut d'espèce cohérente débattu (Wood & Collard 1999). Probablement un groupement de plusieurs espèces. Dents Homo à Ledi-Geraru ~2,78 Ma (Villmoare et al. 2025) remontent le genre près de la dernière apparition d'A. afarensis.",
+        "en": "Coherence as a single species debated (Wood & Collard 1999). Probably a grouping of several species. Homo teeth at Ledi-Geraru ~2.78 Ma (Villmoare et al. 2025) push the genus near the last appearance of A. afarensis."
       },
       "hominin:regions": [
         {
@@ -719,6 +719,18 @@
             "fr": "Fossiles mixtes H. habilis / Au.",
             "en": "Mixed H. habilis / Australopithecus fossils"
           }
+        },
+        {
+          "name": {
+            "fr": "Ledi-Geraru (Éthiopie)",
+            "en": "Ledi-Geraru (Ethiopia)"
+          },
+          "lat": 11.3,
+          "lng": 40.65,
+          "note": {
+            "fr": "Dents Homo ~2,78 Ma (Villmoare et al. 2025)",
+            "en": "Homo teeth ~2.78 Ma (Villmoare et al. 2025)"
+          }
         }
       ],
       "hominin:migrations": [],
@@ -762,11 +774,11 @@
         "en": "Marked"
       },
       "hominin:skinDesc": {
-        "fr": "Sombre (continuité africaine)",
-        "en": "Dark (African continuity)"
+        "fr": "Peau claire sous pelage encore partiel",
+        "en": "Light skin under residual partial fur"
       },
-      "hominin:skinColor": "#4a2200",
-      "hominin:skinVariant": null,
+      "hominin:skinColor": "#c8956a",
+      "hominin:skinVariant": "partial-fur",
       "hominin:eyesDesc": {
         "fr": "Bruns",
         "en": "Brown"
@@ -885,11 +897,11 @@
         "en": "Moderate"
       },
       "hominin:skinDesc": {
-        "fr": "Noire ou très sombre (depuis ~1,2 Ma)",
-        "en": "Black or very dark (since ~1.2 Ma)"
+        "fr": "Peau claire sous pelage partiel (puis sombre après MC1R ~1,2 Ma)",
+        "en": "Light skin under partial fur (then dark after MC1R ~1.2 Ma)"
       },
-      "hominin:skinColor": "#3a1800",
-      "hominin:skinVariant": null,
+      "hominin:skinColor": "#c8956a",
+      "hominin:skinVariant": "partial-fur",
       "hominin:eyesDesc": {
         "fr": "Bruns",
         "en": "Brown"
@@ -1917,8 +1929,8 @@
           "lat": 23.57,
           "lng": 119.57,
           "note": {
-            "fr": "Mâchoire de Penghu — Dénisovien probable",
-            "en": "Penghu mandible — probable Denisovan"
+            "fr": "Mâchoire de Penghu — Dénisovien probable / paratype H. juluensis (débattu)",
+            "en": "Penghu mandible — probable Denisovan / H. juluensis paratype (debated)"
           }
         }
       ],

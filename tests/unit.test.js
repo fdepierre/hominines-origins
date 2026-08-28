@@ -316,12 +316,16 @@ async function runUnitTests() {
     assert(nLanes === nSpecies, `Detailed: lane count ${nLanes} === SPECIES_DATA.length ${nSpecies}`);
   });
 
-  await test('Simple mode exposes merged erectus group lane', async () => {
+  await test('Simple mode exposes merged erectus and Asian-clade group lanes', async () => {
     await page.evaluate(() => {
       if (typeof setTimelineViewMode === 'function') setTimelineViewMode('simple');
     });
-    const ok = await page.evaluate(() => !!document.getElementById('lane-grp-erectus-sl'));
-    assert(ok, 'Expected #lane-grp-erectus-sl in simple timeline mode');
+    const ok = await page.evaluate(() => ({
+      erectus: !!document.getElementById('lane-grp-erectus-sl'),
+      asian: !!document.getElementById('lane-grp-asian-clade'),
+    }));
+    assert(ok.erectus, 'Expected #lane-grp-erectus-sl in simple timeline mode');
+    assert(ok.asian, 'Expected #lane-grp-asian-clade in simple timeline mode');
   });
 
   await test('2026 catalogue taxa have timeline lane elements', async () => {
@@ -329,7 +333,7 @@ async function runUnitTests() {
       if (typeof setTimelineViewMode === 'function') setTimelineViewMode('detailed');
     });
     const missing = await page.evaluate(() => {
-      const ids = ['sahelanthropus', 'ardipithecus', 'georgicus', 'antecessor'];
+      const ids = ['sahelanthropus', 'ardipithecus', 'georgicus', 'antecessor', 'stw573', 'australopithecus-ledi-geraru', 'longi'];
       return ids.filter((id) => !document.getElementById('lane-' + id));
     });
     assert(missing.length === 0, `Expected lane-* for 2026 additions (missing: ${missing.join(', ') || 'none'})`);
