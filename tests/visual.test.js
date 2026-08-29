@@ -18,6 +18,19 @@ const { launch, loadApp, setTime, screenshot, pixelDiff,
 const SNAPSHOT_DIR  = path.resolve(__dirname, 'snapshots');
 const UPDATE_MODE   = process.env.UPDATE_SNAPSHOTS === '1';
 
+// The app picks its UI language from navigator.language, which Chromium inherits
+// from the host machine unless pinned. Without this every string in a snapshot
+// depends on the developer's system locale, so a French desktop and an English
+// CI runner can never agree. Snapshots are French because the catalogue
+// narrative is French-first; the a11y suite covers the other locales.
+const SNAPSHOT_LOCALE = 'fr-FR';
+
+// Text rasterisation (hinting, antialiasing, font fallback) differs per OS, so a
+// single set of reference PNGs cannot be shared across platforms. Keep one
+// baseline per platform, as Playwright's own toHaveScreenshot() does. A platform
+// with no baseline yet generates one on first run.
+const PLATFORM = process.platform;
+
 // ─── reference snapshots ──────────────────────────────────────────────────────
 // Keyed by name → { time, theme, viewportW, viewportH }
 const SNAPSHOT_SCENARIOS = [
@@ -224,40 +237,41 @@ async function runVisualTests(options = {}) {
     const snapshotName = scenario.name;
     process.stdout.write(`\n  ${CYAN}Snapshot: ${snapshotName}${RESET}\n`);
 
-    const { browser: b2, page: p2 } = await launch({ width: scenario.w, height: scenario.h });
+    const { browser: b2, page: p2 } = await launch({
+      width: scenario.w, height: scenario.h, locale: SNAPSHOT_LOCALE,
+    });
     await loadApp(p2, { theme: scenario.theme });
     await setTime(p2, scenario.time);
     await p2.waitForTimeout(400); // let map tiles and animations settle
 
     const currentPath  = path.join(SNAPSHOT_DIR, `${snapshotName}-current.png`);
-    const referencePath = path.join(SNAPSHOT_DIR, `${snapshotName}-reference.png`);
+    const referencePath = path.join(SNAPSHOT_DIR, `${snapshotName}-reference-${PLATFORM}.png`);
 
     await p2.screenshot({ path: currentPath, fullPage: false });
     await b2.close();
 
     if (UPDATE_MODE || !fs.existsSync(referencePath)) {
       fs.copyFileSync(currentPath, referencePath);
-      console.log(`  ${GREEN}✓${RESET} Reference snapshot saved: ${snapshotName}`);
+      console.log(`  ${GREEN}✓${RESET} Reference snapshot saved: ${snapshotName} (${PLATFORM})`);
     } else {
-      // Compare
+      // Compare. A comparison that cannot run is a failure, not a warning:
+      // silently skipping it turns the whole snapshot gate into a no-op.
       try {
         const diff = await pixelDiff(referencePath, currentPath);
-        const ratio = diff.ratio;
-        const pct   = (ratio * 100).toFixed(2);
+        const pct  = (diff.ratio * 100).toFixed(2);
 
-        if (diff.method === 'filesize-proxy') {
-          assertSoft(ratio < 0.05,
-            `Snapshot ${snapshotName}: file-size diff ${pct}% (threshold 5%) [pixel-diff unavailable]`);
+        if (diff.sizeMismatch) {
+          console.log(`  ${RED}✗${RESET} ${RED}Snapshot ${snapshotName}: viewport size differs from reference${RESET}`);
+          errors.push({ name: `snapshot:${snapshotName}`, error: 'screenshot dimensions differ from reference' });
+        } else if (diff.ratio <= DIFF_THRESHOLD) {
+          console.log(`  ${GREEN}✓${RESET} Snapshot ${snapshotName}: ${pct}% diff (≤ ${DIFF_THRESHOLD*100}%)`);
         } else {
-          if (ratio <= DIFF_THRESHOLD) {
-            console.log(`  ${GREEN}✓${RESET} Snapshot ${snapshotName}: ${pct}% diff (≤ ${DIFF_THRESHOLD*100}%)`);
-          } else {
-            console.log(`  ${RED}✗${RESET} ${RED}Snapshot ${snapshotName}: ${pct}% diff (threshold ${DIFF_THRESHOLD*100}%)${RESET}`);
-            errors.push({ name: `snapshot:${snapshotName}`, error: `${pct}% pixel diff exceeds threshold ${DIFF_THRESHOLD*100}%` });
-          }
+          console.log(`  ${RED}✗${RESET} ${RED}Snapshot ${snapshotName}: ${pct}% diff (threshold ${DIFF_THRESHOLD*100}%)${RESET}`);
+          errors.push({ name: `snapshot:${snapshotName}`, error: `${pct}% pixel diff exceeds threshold ${DIFF_THRESHOLD*100}%` });
         }
       } catch (e) {
-        console.log(`  ${YELLOW}⚠${RESET} Could not compare snapshot ${snapshotName}: ${e.message}`);
+        console.log(`  ${RED}✗${RESET} ${RED}Could not compare snapshot ${snapshotName}: ${e.message}${RESET}`);
+        errors.push({ name: `snapshot:${snapshotName}`, error: `comparison failed: ${e.message}` });
       }
     }
   }

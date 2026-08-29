@@ -69,9 +69,14 @@ node tests/run-all.js
 
 If you change the visual layout intentionally, update the snapshots:
 ```bash
-UPDATE_SNAPSHOTS=1 node tests/visual.test.js
-git add tests/snapshots/*-reference.png
+npm run test:update-snapshots
+git add tests/snapshots/*-reference-*.png
 ```
+
+Reference snapshots are **per operating system** (`…-reference-linux.png`,
+`…-reference-win32.png`) because text rasterisation differs between platforms.
+Update the baseline for the platform you run on and leave the others alone; a
+platform with no baseline yet generates one on its first run.
 
 ### 4. Issues and feedback
 

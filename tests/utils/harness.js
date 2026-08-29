@@ -22,6 +22,7 @@ const path  = require('path');
 const fs    = require('fs');
 const http  = require('http');
 const urlp  = require('url');
+const { decodePNGFile } = require('./png');
 
 const APP_DIR  = path.resolve(__dirname, '..', '..', 'app');
 const APP_PATH = path.join(APP_DIR, 'index.html');
@@ -202,50 +203,43 @@ async function setTime(page, timeValue) {
 
 // Take a screenshot and return the Buffer
 async function screenshot(page, name, opts = {}) {
-  const dir = path.resolve(__dirname, 'snapshots');
+  const dir = path.resolve(__dirname, '..', 'snapshots');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const filePath = path.join(dir, `${name}.png`);
   await page.screenshot({ path: filePath, fullPage: false, ...opts });
   return filePath;
 }
 
-// Pixel-diff two PNG files using raw Buffer comparison (no native deps needed)
-// Returns { diffPixels, totalPixels, ratio }
+// Pixel-diff two PNG files. Uses the bundled pure-JS decoder so the result is
+// identical on Windows, Linux and CI with no native dependency to install.
+// Returns { diffPixels, totalPixels, ratio, method, sizeMismatch }
 async function pixelDiff(pathA, pathB) {
-  const { createCanvas, loadImage } = await (async () => {
-    try { return require('canvas'); } catch { return null; }
-  })();
+  const imgA = decodePNGFile(pathA);
+  const imgB = decodePNGFile(pathB);
 
-  if (!createCanvas) {
-    // Fallback: basic file size diff as proxy
-    const sizeA = fs.statSync(pathA).size;
-    const sizeB = fs.statSync(pathB).size;
-    const ratio = Math.abs(sizeA - sizeB) / Math.max(sizeA, sizeB);
-    return { diffPixels: null, totalPixels: null, ratio, method: 'filesize-proxy' };
-  }
-
-  const [imgA, imgB] = await Promise.all([loadImage(pathA), loadImage(pathB)]);
   const w = Math.min(imgA.width, imgB.width);
   const h = Math.min(imgA.height, imgB.height);
-  const canvas = createCanvas(w, h);
-  const ctx = canvas.getContext('2d');
-
-  ctx.drawImage(imgA, 0, 0);
-  const dataA = ctx.getImageData(0, 0, w, h).data;
-
-  ctx.clearRect(0, 0, w, h);
-  ctx.drawImage(imgB, 0, 0);
-  const dataB = ctx.getImageData(0, 0, w, h).data;
+  const sizeMismatch = imgA.width !== imgB.width || imgA.height !== imgB.height;
 
   let diff = 0;
-  for (let i = 0; i < dataA.length; i += 4) {
-    const dr = Math.abs(dataA[i]   - dataB[i]);
-    const dg = Math.abs(dataA[i+1] - dataB[i+1]);
-    const db = Math.abs(dataA[i+2] - dataB[i+2]);
-    if (dr + dg + db > 30) diff++;
+  for (let y = 0; y < h; y++) {
+    const rowA = y * imgA.width * 4;
+    const rowB = y * imgB.width * 4;
+    for (let x = 0; x < w; x++) {
+      const ia = rowA + x * 4;
+      const ib = rowB + x * 4;
+      const dr = Math.abs(imgA.data[ia]     - imgB.data[ib]);
+      const dg = Math.abs(imgA.data[ia + 1] - imgB.data[ib + 1]);
+      const db = Math.abs(imgA.data[ia + 2] - imgB.data[ib + 2]);
+      if (dr + dg + db > 30) diff++;
+    }
   }
-  const total = w * h;
-  return { diffPixels: diff, totalPixels: total, ratio: diff / total, method: 'pixel' };
+
+  // Pixels outside the common area cannot match, so count them as differing.
+  const total = Math.max(imgA.width * imgA.height, imgB.width * imgB.height);
+  diff += total - w * h;
+
+  return { diffPixels: diff, totalPixels: total, ratio: diff / total, method: 'pixel', sizeMismatch };
 }
 
 module.exports = {

@@ -4,9 +4,8 @@ This file describes **(1)** JSON-LD fields in `app/data/*.json` and **(2)** the 
 
 Use it when adding or editing catalogue data or tests.
 
-Despite living under `.ai-context/`, this is **the data dictionary for humans too**
-— it is the only field-by-field reference in the repository. For the scientific
-side of the same data, see [`data/README.md`](../data/README.md).
+This is the only field-by-field reference in the repository. For the scientific
+side of the same data, see [`README.md`](README.md).
 
 ---
 
@@ -92,7 +91,7 @@ Use bracket notation for these keys: `species['hominin:taxonomyDebateLevel']`.
 | `EVOLUTIONARY_INFERENCE` | Comparative or model-based evolutionary inference |
 | `MEDIA_NARRATIVE` | Media-led narrative, weakly tied to primary literature |
 
-Canonical values live on each species object in [`app/data/species.json`](../app/data/species.json). Tests serve `app/` over HTTP so `fetch` works.
+Canonical values live on each species object in [`../app/data/species.json`](../app/data/species.json). Tests serve `app/` over HTTP so `fetch` works.
 
 ### Pigmentation certainty (`pigmentation.certainty`)
 

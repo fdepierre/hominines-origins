@@ -87,8 +87,7 @@ sections above it**, not as an independent dataset:
 
 The Markdown here is prose. The structured schema — every JSON-LD key, its
 runtime counterpart, and the allowed values of every enum — lives in
-[`../.ai-context/data-schema.md`](../.ai-context/data-schema.md). Despite the
-folder name, that file is the reference for humans too.
+[`data-schema.md`](data-schema.md).
 
 The two uncertainty axes carried by every species entry are documented at length
 in the [project README](../README.md#scientific-uncertainty-framework):

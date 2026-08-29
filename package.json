@@ -11,7 +11,7 @@
     "test:visual": "node tests/visual.test.js",
     "test:a11y": "node tests/a11y.test.js",
     "test:maplibre": "node tests/maplibre.test.js",
-    "test:update-snapshots": "UPDATE_SNAPSHOTS=1 node tests/visual.test.js",
+    "test:update-snapshots": "node -e \"const r=require('child_process').spawnSync('node',['tests/visual.test.js'],{stdio:'inherit',env:{...process.env,UPDATE_SNAPSHOTS:'1'}});process.exit(r.status===null?1:r.status);\"",
     "test:ci": "node tests/run-all.js --ci",
     "setup": "npx playwright install chromium"
   },

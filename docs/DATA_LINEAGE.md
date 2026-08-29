@@ -3,8 +3,7 @@
 How scientific knowledge travels through this repository, and which layer is
 authoritative for what.
 
-Living document. A pre-migration audit snapshot lives in
-[`docs/DATA_LINEAGE_AUDIT.md`](DATA_LINEAGE_AUDIT.md) (historical only).
+Living document.
 
 ---
 

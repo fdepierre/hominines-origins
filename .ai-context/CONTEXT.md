@@ -25,21 +25,19 @@ hominines-origins/
 │       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA
 ├── data/
 │   ├── README.md               ← START HERE for the science: reading order, table layout, which layer wins
+│   ├── data-schema.md          ← Field-by-field dictionary: JSON-LD keys vs runtime objects
 │   ├── Hominins-Morphology-Pigmentation.md
 │   │   └── English scientific reference (morphology, pigmentation, debates, DOI; filename has no year — update in place)
 │   └── Prehistoric-Chronology-Scientific-Reference.md
 │       └── English scientific reference (milestones, evidence, debate, DOI; JSON is what the app loads)
 ├── docs/
-│   ├── README.md               ← Documentation index: which docs are current, which are historical
+│   ├── README.md               ← Documentation index
 │   ├── DATA_LINEAGE.md         ← LIVING policy: the three data layers, flow direction, safeguards
-│   ├── DATA_LINEAGE_AUDIT.md   ← Historical pre-migration snapshot; not current policy
 │   ├── scientific-references.md ← Curated bibliography; every DOI verified
 │   └── ROADMAP.md
 ├── scripts/
 │   ├── sync_embedded.py        ← JSON → embedded mirrors in app/index.html (one-way); --check for CI
-│   ├── check_dois.py           ← Resolves every cited DOI against Crossref; --quiet for CI
-│   ├── translate_species.py    ← Maintenance: French strings → {fr, en} pairs
-│   └── rename_certainty_enums.py ← One-off migration: French enum tokens → English
+│   └── check_dois.py           ← Resolves every cited DOI against Crossref; --quiet for CI
 ├── tests/
 │   ├── run-all.js              ← Run all tests: node tests/run-all.js
 │   ├── unit.test.js            ← Data integrity, maths, arrow bearings, embedded-fallback parity
@@ -49,8 +47,7 @@ hominines-origins/
 │   ├── utils/harness.js        ← Shared Playwright setup
 │   └── snapshots/              ← Reference PNGs for visual regression
 ├── .ai-context/
-│   ├── CONTEXT.md              ← This file
-│   └── data-schema.md          ← JSON-LD source vs runtime objects (SPECIES_DATA, etc.)
+│   └── CONTEXT.md              ← This file (AI / contributor orientation — not human data docs)
 ├── package.json                ← Dev/test only: Playwright; `npm test` → run-all.js
 ├── README.md
 ├── CONTRIBUTING.md
@@ -94,7 +91,7 @@ TIMELINE_MAX       // const — -2000 (years BP — alignée repère « 2 ka »,
 
 **Timeline rows:** The UI renders **one horizontal row per species** in `SPECIES_DATA`, ordered by **`buildRowOrder()`** (sort by `start` descending — oldest at the bottom). There is **no** `LANE_ASSIGNMENTS` object in code. JSON may still contain **`hominin:lane`** on items; **`adaptSpecies` does not copy it** into the runtime object — treat it as legacy / documentation-only unless you extend the adapter.
 
-Full field lists: `.ai-context/data-schema.md`.
+Full field lists: [`data/data-schema.md`](../data/data-schema.md).
 
 ### Timeline scale
 

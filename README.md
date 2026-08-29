@@ -164,14 +164,25 @@ Four automated non-regression suites. The runner prints the authoritative case
 count and per-suite result; a full run takes about three minutes.
 
 ```bash
-npx playwright install chromium   # once
+npm ci                            # once — installs Playwright
+npx playwright install chromium   # once — downloads the browser
 node tests/run-all.js             # run all four suites
 ```
+
+The suites drive a real browser against the app served over HTTP, and the app
+loads MapLibre, i18next and its fonts from CDNs — so **an internet connection is
+required**. A dropped connection shows up as `ERR_NETWORK_CHANGED` browser errors
+and a blank map, not as a code defect.
+
+On Linux (including WSL) Chromium needs a few system libraries. If it fails to
+start, install them once with `npx playwright install --with-deps chromium`
+(needs sudo), which is what CI does. The Python gates below are plain standard
+library and work on any Python ≥ 3.9.
 
 | Suite | What it catches |
 |-------|-----------------|
 | Unit | Broken species/events data, exact catalogue counts, embedded-fallback parity, wrong arrow direction, timeline math, skin periods |
-| Visual | Missing UI elements, WCAG contrast, layout; PNG diff against 8 reference tiles |
+| Visual | Missing UI elements, WCAG contrast, layout; PNG diff against 8 reference tiles (per-OS baselines, `npm run test:update-snapshots` to refresh) |
 | A11y | Play/pause, FR/EN i18n, welcome hints (`locale` es/fr/en), touch targets, tablet layout |
 | MapLibre | Map sources and layers, neutral basemap, app-managed labels, walking figures, event markers |
 
@@ -204,7 +215,7 @@ A complete context file for contributors lives at [`.ai-context/CONTEXT.md`](.ai
 
 It covers the architecture, data structures, what not to change and why, and a set of ready-to-use task templates. Use it to make safe, consistent changes to this repository.
 
-The documentation index is [`docs/README.md`](docs/README.md); it says which documents are current policy and which are historical. The data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). Runtime data is loaded from `app/data/*.json` via `loadData()` in `app/index.html`, with embedded fallbacks when `fetch` fails — keep those mirrors in sync when you change JSON. The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not invent or guess citation identifiers.
+The documentation index is [`docs/README.md`](docs/README.md). The data schema is in [`data/data-schema.md`](data/data-schema.md). Runtime data is loaded from `app/data/*.json` via `loadData()` in `app/index.html`, with embedded fallbacks when `fetch` fails — keep those mirrors in sync when you change JSON. The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not invent or guess citation identifiers.
 
 ---
 
