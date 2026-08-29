@@ -15,7 +15,6 @@ const { runA11yTests } = require('./a11y.test');
 const { runMapLibreTests } = require('./maplibre.test');
 const { resetStats, BOLD, CYAN, GREEN, RED, YELLOW, RESET } = require('./utils/harness');
 
-const CI = process.argv.includes('--ci');
 const start = Date.now();
 
 const SUITES = [
@@ -69,7 +68,7 @@ async function main() {
       console.log(`    ${RED}✗${RESET} ${e.name}: ${e.error}`);
     });
     console.log('');
-    process.exit(CI ? 1 : 0);
+    process.exit(1);
   }
 }
 

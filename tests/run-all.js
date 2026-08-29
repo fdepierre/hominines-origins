@@ -3,8 +3,10 @@
  * Runs all three test suites in sequence and prints a summary report.
  *
  * Run: node tests/run-all.js
- * CI mode: node tests/run-all.js --ci
+ * CI mode: node tests/run-all.js --ci  (same exit behaviour; --ci kept for CI workflows)
  * Smoke (faster): node tests/run-smoke.js   or   node tests/run-all.js --smoke
+ *
+ * Exit status: always non-zero when any suite fails (local and CI).
  */
 
 'use strict';
@@ -14,7 +16,6 @@ const { runA11yTests }   = require('./a11y.test');
 const { runMapLibreTests } = require('./maplibre.test');
 const { BOLD, CYAN, GREEN, RED, YELLOW, RESET, resetStats } = require('./utils/harness');
 
-const CI = process.argv.includes('--ci');
 const SMOKE = process.argv.includes('--smoke');
 const start = Date.now();
 
@@ -80,7 +81,7 @@ async function main() {
       console.log(`    ${RED}✗${RESET} ${e.name}: ${e.error}`);
     });
     console.log('');
-    process.exit(CI ? 1 : 0);
+    process.exit(1);
   }
 }
 

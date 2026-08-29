@@ -27,6 +27,9 @@ jobs:
       - name: Install Playwright chromium browser
         run: npx playwright install chromium --with-deps
 
+      - name: Check JSON-to-embedded data lineage
+        run: python3 scripts/sync_embedded.py --check
+
       - name: Run non-regression tests
         run: node tests/run-all.js --ci
 

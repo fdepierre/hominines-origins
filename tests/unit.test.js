@@ -7,8 +7,23 @@
  */
 
 'use strict';
+const fs = require('fs');
+const path = require('path');
 const { launch, loadApp, setTime, assert, assertSoft, getStats, resetStats,
         BOLD, CYAN, GREEN, RED, RESET } = require('./utils/harness');
+
+const SPECIES_JSON_PATH = path.resolve(__dirname, '..', 'app', 'data', 'species.json');
+const EVENTS_JSON_PATH = path.resolve(__dirname, '..', 'app', 'data', 'events.json');
+
+const SPECIES_CERTAINTY_KEYS = [
+  'hominin:taxonomyDebateLevel',
+  'hominin:taxonomyEvidenceType',
+  'hominin:behaviorDebateLevel',
+  'hominin:behaviorEvidenceType',
+  'hominin:pigmentationDebateLevel',
+  'hominin:pigmentationEvidenceType',
+];
+const EVENT_CERTAINTY_KEYS = ['hominin:debateLevel', 'hominin:evidenceType'];
 
 async function runUnitTests() {
   const { browser, page } = await launch();
@@ -161,6 +176,85 @@ async function runUnitTests() {
   await test('EVENTS_DATA has at least 15 events', async () => {
     const count = await page.evaluate(() => EVENTS_DATA?.length);
     assert(count >= 15, `EVENTS_DATA.length >= 15 (got ${count})`);
+  });
+
+  await test('Embedded fallback matches JSON species/event IDs and certainty fields', async () => {
+    const speciesFile = JSON.parse(fs.readFileSync(SPECIES_JSON_PATH, 'utf8'));
+    const eventsFile = JSON.parse(fs.readFileSync(EVENTS_JSON_PATH, 'utf8'));
+    const expectedSpeciesIds = speciesFile.itemListElement.map((s) => s['@id']).sort();
+    const expectedEventIds = eventsFile.itemListElement.map((e) => e['@id']).sort();
+    assert(expectedSpeciesIds.length === 21, `species.json has 21 items (got ${expectedSpeciesIds.length})`);
+    assert(expectedEventIds.length === 30, `events.json has 30 items (got ${expectedEventIds.length})`);
+
+    const expectedSpeciesCert = {};
+    speciesFile.itemListElement.forEach((s) => {
+      const row = {};
+      SPECIES_CERTAINTY_KEYS.forEach((k) => {
+        if (s[k] !== undefined && s[k] !== null) row[k] = s[k];
+      });
+      expectedSpeciesCert[s['@id']] = row;
+    });
+    const expectedEventCert = {};
+    eventsFile.itemListElement.forEach((e) => {
+      const row = {};
+      EVENT_CERTAINTY_KEYS.forEach((k) => {
+        if (e[k] !== undefined && e[k] !== null) row[k] = e[k];
+      });
+      if (Object.keys(row).length) expectedEventCert[e['@id']] = row;
+    });
+
+    const { browser: embBrowser, page: embPage } = await launch();
+    try {
+      await embPage.route('**/data/species.json**', (route) => route.abort('failed'));
+      await embPage.route('**/data/events.json**', (route) => route.abort('failed'));
+      await loadApp(embPage);
+
+      const runtime = await embPage.evaluate(({ speciesKeys, eventKeys }) => {
+        const speciesIds = (SPECIES_DATA || []).map((s) => s.id).sort();
+        const eventIds = (EVENTS_DATA || []).map((e) => e.id).sort();
+        const rawSpecies = window._RAW_SPECIES_JSON;
+        const rawEvents = window._RAW_EVENTS_JSON;
+        const speciesCert = {};
+        (rawSpecies.itemListElement || []).forEach((s) => {
+          const row = {};
+          speciesKeys.forEach((k) => {
+            if (s[k] !== undefined && s[k] !== null) row[k] = s[k];
+          });
+          speciesCert[s['@id']] = row;
+        });
+        const eventCert = {};
+        (rawEvents.itemListElement || []).forEach((e) => {
+          const row = {};
+          eventKeys.forEach((k) => {
+            if (e[k] !== undefined && e[k] !== null) row[k] = e[k];
+          });
+          if (Object.keys(row).length) eventCert[e['@id']] = row;
+        });
+        // Reference equality: loadData assigns the embedded consts on fetch failure.
+        const usedEmbedded = rawSpecies === _EMBEDDED_SPECIES && rawEvents === _EMBEDDED_EVENTS;
+        return { speciesIds, eventIds, speciesCert, eventCert, usedEmbedded };
+      }, { speciesKeys: SPECIES_CERTAINTY_KEYS, eventKeys: EVENT_CERTAINTY_KEYS });
+
+      assert(runtime.usedEmbedded, 'loadData used embedded fallback after fetch abort');
+      assert(
+        JSON.stringify(runtime.speciesIds) === JSON.stringify(expectedSpeciesIds),
+        `Embedded species IDs match JSON (got ${runtime.speciesIds.length}, expected ${expectedSpeciesIds.length})`
+      );
+      assert(
+        JSON.stringify(runtime.eventIds) === JSON.stringify(expectedEventIds),
+        `Embedded event IDs match JSON (got ${runtime.eventIds.length}, expected ${expectedEventIds.length})`
+      );
+      assert(
+        JSON.stringify(runtime.speciesCert) === JSON.stringify(expectedSpeciesCert),
+        'Embedded species certainty fields match species.json where present'
+      );
+      assert(
+        JSON.stringify(runtime.eventCert) === JSON.stringify(expectedEventCert),
+        'Embedded event certainty fields match events.json where present'
+      );
+    } finally {
+      await embBrowser.close();
+    }
   });
 
   await test('Every event has id, time, label, icon, lat, lng', async () => {
