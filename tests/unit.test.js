@@ -45,9 +45,11 @@ async function runUnitTests() {
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ DATA INTEGRITY${RESET}`);
 
-  await test('SPECIES_DATA has exactly 21 species', async () => {
+  await test('SPECIES_DATA loads every species declared in species.json', async () => {
+    const expected = JSON.parse(fs.readFileSync(SPECIES_JSON_PATH, 'utf8')).itemListElement.length;
     const count = await page.evaluate(() => SPECIES_DATA?.length);
-    assert(count === 21, `SPECIES_DATA.length === 21 (got ${count})`);
+    assert(expected > 0, `species.json is not empty (got ${expected} items)`);
+    assert(count === expected, `SPECIES_DATA.length === ${expected} from species.json (got ${count})`);
   });
 
   await test('Stable data-testid hooks exist for automation', async () => {
@@ -173,9 +175,11 @@ async function runUnitTests() {
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ EVENTS DATA${RESET}`);
 
-  await test('EVENTS_DATA has at least 15 events', async () => {
+  await test('EVENTS_DATA loads every milestone declared in events.json', async () => {
+    const expected = JSON.parse(fs.readFileSync(EVENTS_JSON_PATH, 'utf8')).itemListElement.length;
     const count = await page.evaluate(() => EVENTS_DATA?.length);
-    assert(count >= 15, `EVENTS_DATA.length >= 15 (got ${count})`);
+    assert(expected > 0, `events.json is not empty (got ${expected} items)`);
+    assert(count === expected, `EVENTS_DATA.length === ${expected} from events.json (got ${count})`);
   });
 
   await test('Embedded fallback matches JSON species/event IDs and certainty fields', async () => {
@@ -183,8 +187,8 @@ async function runUnitTests() {
     const eventsFile = JSON.parse(fs.readFileSync(EVENTS_JSON_PATH, 'utf8'));
     const expectedSpeciesIds = speciesFile.itemListElement.map((s) => s['@id']).sort();
     const expectedEventIds = eventsFile.itemListElement.map((e) => e['@id']).sort();
-    assert(expectedSpeciesIds.length === 21, `species.json has 21 items (got ${expectedSpeciesIds.length})`);
-    assert(expectedEventIds.length === 30, `events.json has 30 items (got ${expectedEventIds.length})`);
+    assert(expectedSpeciesIds.length > 0, `species.json has items (got ${expectedSpeciesIds.length})`);
+    assert(expectedEventIds.length > 0, `events.json has items (got ${expectedEventIds.length})`);
 
     const expectedSpeciesCert = {};
     speciesFile.itemListElement.forEach((s) => {

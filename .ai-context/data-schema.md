@@ -4,6 +4,10 @@ This file describes **(1)** JSON-LD fields in `app/data/*.json` and **(2)** the 
 
 Use it when adding or editing catalogue data or tests.
 
+Despite living under `.ai-context/`, this is **the data dictionary for humans too**
+— it is the only field-by-field reference in the repository. For the scientific
+side of the same data, see [`data/README.md`](../data/README.md).
+
 ---
 
 ## JSON-LD source — `app/data/species.json`
@@ -32,7 +36,8 @@ Each `itemListElement` entry is a `Species`-shaped node (custom `hominin:` and `
 
 ## SPECIES_DATA — runtime array (after `adaptSpecies`)
 
-One object per catalogue entry (currently **14**). Shape:
+One object per catalogue entry in `app/data/species.json` — that file states the
+count, this document does not. Shape:
 
 ```js
 {
@@ -108,7 +113,7 @@ Each `itemListElement` is an `Event` with `hominin:*` fields and `location.geo` 
 
 ## EVENTS_DATA — runtime array (after `adaptEvent`)
 
-**22** milestones. Shape:
+One object per milestone in `app/data/events.json`. Shape:
 
 ```js
 {
@@ -169,14 +174,16 @@ There is **no** shared multi-species “lane” map in code.
 
 ## Adding a new species — checklist
 
-- [ ] Add or extend the section(s) in `data/Hominins-Morphology-Pigmentation.md` with DOI, evidence type, and debate notes.
+- [ ] Add or extend the section(s) in `data/Hominins-Morphology-Pigmentation.md` with DOI, evidence type, and debate notes, **and add a row to its consolidated summary table** — that table is expected to cover every catalogue entry.
 - [ ] Add a new `Species` object to `app/data/species.json` (`@id`, periods, regions, sites, migrations as `[lat,lng]`, the six `hominin:*DebateLevel` / `hominin:*EvidenceType` keys, etc.).
-- [ ] Update **`_EMBEDDED_SPECIES`** in `app/index.html` if offline parity matters.
-- [ ] Run `node tests/run-all.js`.
+- [ ] Regenerate the offline mirror: `python scripts/sync_embedded.py`.
+- [ ] Verify citations: `python scripts/check_dois.py`.
+- [ ] Run `node tests/run-all.js`. No count needs updating — the tests read the catalogue size from `app/data/species.json`.
 
 ## Adding a new milestone — checklist
 
-- [ ] Add the milestone to `data/Prehistoric-Chronology-Scientific-Reference.md` with DOI, evidence type, and debate notes.
+- [ ] Add the milestone to `data/Prehistoric-Chronology-Scientific-Reference.md` with DOI, evidence type, and debate notes. Name the first author in the reference cell — `check_dois.py` compares it against Crossref.
 - [ ] Add a new `Event` to `app/data/events.json` (`@id`, `hominin:dateYearsBP`, `location`, `description`, …).
-- [ ] Update **`_EMBEDDED_EVENTS`** in `app/index.html` if offline parity matters.
-- [ ] Run `node tests/run-all.js`.
+- [ ] Regenerate the offline mirror: `python scripts/sync_embedded.py`.
+- [ ] Verify citations: `python scripts/check_dois.py`.
+- [ ] Run `node tests/run-all.js`. No count needs updating — the tests read the catalogue size from `app/data/events.json`.

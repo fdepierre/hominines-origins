@@ -21,18 +21,31 @@ hominines-origins/
 ├── app/
 │   ├── index.html              ← THE ENTIRE APPLICATION (single file; JS/CSS/HTML inline)
 │   └── data/
-│       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (18 entries; includes six hominin certainty keys per species)
-│       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA (27 milestones)
+│       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (six hominin certainty keys per species)
+│       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA
 ├── data/
+│   ├── README.md               ← START HERE for the science: reading order, table layout, which layer wins
 │   ├── Hominins-Morphology-Pigmentation.md
 │   │   └── English scientific reference (morphology, pigmentation, debates, DOI; filename has no year — update in place)
 │   └── Prehistoric-Chronology-Scientific-Reference.md
 │       └── English scientific reference (milestones, evidence, debate, DOI; JSON is what the app loads)
+├── docs/
+│   ├── README.md               ← Documentation index: which docs are current, which are historical
+│   ├── DATA_LINEAGE.md         ← LIVING policy: the three data layers, flow direction, safeguards
+│   ├── DATA_LINEAGE_AUDIT.md   ← Historical pre-migration snapshot; not current policy
+│   ├── scientific-references.md ← Curated bibliography; every DOI verified
+│   └── ROADMAP.md
+├── scripts/
+│   ├── sync_embedded.py        ← JSON → embedded mirrors in app/index.html (one-way); --check for CI
+│   ├── check_dois.py           ← Resolves every cited DOI against Crossref; --quiet for CI
+│   ├── translate_species.py    ← Maintenance: French strings → {fr, en} pairs
+│   └── rename_certainty_enums.py ← One-off migration: French enum tokens → English
 ├── tests/
 │   ├── run-all.js              ← Run all tests: node tests/run-all.js
-│   ├── unit.test.js            ← Data integrity, maths, arrow bearings
+│   ├── unit.test.js            ← Data integrity, maths, arrow bearings, embedded-fallback parity
 │   ├── visual.test.js          ← Layout, contrast, pixel snapshots
 │   ├── a11y.test.js            ← ARIA, touch, i18n, play/pause
+│   ├── maplibre.test.js        ← Map sources, layers, labels, markers
 │   ├── utils/harness.js        ← Shared Playwright setup
 │   └── snapshots/              ← Reference PNGs for visual regression
 ├── .ai-context/
@@ -43,6 +56,11 @@ hominines-origins/
 ├── CONTRIBUTING.md
 └── LICENSE
 ```
+
+**Counts are deliberately absent from this file.** `app/data/*.json` is the only
+place that states how many species and milestones exist; run
+`python scripts/sync_embedded.py --check` to print the current figures. See
+[`docs/DATA_LINEAGE.md`](../docs/DATA_LINEAGE.md).
 
 ---
 
@@ -67,8 +85,8 @@ If `fetch` fails (`file://`, missing files, strict offline), the same **`_EMBEDD
 ### Other script-scope values (not on `window`)
 
 ```js
-let SPECIES_DATA   // Filled by loadData(); length 18 (catalogue entries)
-let EVENTS_DATA    // Filled by loadData(); length 22 (milestones)
+let SPECIES_DATA   // Filled by loadData(); one entry per catalogue species
+let EVENTS_DATA    // Filled by loadData(); one entry per milestone
 SKIN_PERIODS       // const — skin tone segments for the timeline band (see data-schema.md)
 TIMELINE_MIN       // const — -7500000 (years BP, negative)
 TIMELINE_MAX       // const — -2000 (years BP — alignée repère « 2 ka », fin dernier segment catalogue / peau)
@@ -114,14 +132,19 @@ The **application** has no npm dependency at runtime (CDN scripts only). The **r
 
 When new research is published:
 
-1. Update the relevant English scientific reference Markdown file in `data/`.
+1. Update the relevant English scientific reference Markdown file in `data/` (see [`data/README.md`](../data/README.md) for the reading order and table conventions).
 2. Update the corresponding JSON-LD in `app/data/` (`species.json` and/or `events.json` as appropriate). For species, keep the six certainty keys on the same object as the rest of the catalogue data.
-3. If you rely on offline / `file://` behaviour, sync **`_EMBEDDED_SPECIES`** and/or **`_EMBEDDED_EVENTS`** in `app/index.html` with the same content (or regenerate from the JSON files).
-4. Run tests: `node tests/run-all.js`.
-5. If the visual layout changed intentionally, update snapshots: `UPDATE_SNAPSHOTS=1 node tests/visual.test.js`.
-6. Open a pull request with the DOI of the new source.
+3. Regenerate the embedded mirrors: `python scripts/sync_embedded.py`. Never hand-edit **`_EMBEDDED_SPECIES`** / **`_EMBEDDED_EVENTS`** — the next sync overwrites them.
+4. Verify citations: `python scripts/check_dois.py`.
+5. Run tests: `node tests/run-all.js`.
+6. If the visual layout changed intentionally, update snapshots: `UPDATE_SNAPSHOTS=1 node tests/visual.test.js`.
+7. Open a pull request with the DOI of the new source.
 
 **Rule:** Every factual claim must have a DOI. If you cannot find a DOI, mark the claim as `debate` or `inference`. Do not strengthen or silently drop epistemic qualifications when mirroring into JSON.
+
+**A DOI that resolves is not automatically the right DOI.** `scripts/check_dois.py`
+also compares the first author recorded by Crossref against the citing text,
+because a live link to the wrong paper is harder to notice than a dead one.
 
 ---
 
@@ -130,16 +153,22 @@ When new research is published:
 Always run before committing:
 
 ```bash
-node tests/run-all.js
+python scripts/sync_embedded.py --check   # JSON ↔ embedded mirrors agree
+python scripts/check_dois.py              # every cited DOI resolves and matches
+node tests/run-all.js                     # four browser suites
 ```
 
-The tests require Node.js and Playwright Chromium. Install once with:
+The browser tests require Node.js and Playwright Chromium. Install once with:
 
 ```bash
 npx playwright install chromium
 ```
 
-Tests are written in plain Node.js — no test framework dependency. They run in about 30 seconds.
+Tests are written in plain Node.js — no test framework dependency. Four suites
+(unit, visual, a11y, MapLibre) take about three minutes; the two Python gates are
+near-instant apart from the Crossref lookups. Catalogue counts are asserted
+against `app/data/*.json` rather than hard-coded, so growing the catalogue does
+not require editing tests.
 
 ---
 
@@ -150,7 +179,8 @@ Tests are written in plain Node.js — no test framework dependency. They run in
 - Do not assume `SPECIES_DATA` / `EVENTS_DATA` live on `window` — they are `let` in script scope (some play helpers are exposed on `window` intentionally; data arrays are not).
 - Do not remove scientific debates from the data — uncertainty is part of the science.
 - Do not use the word "race" as a biological category anywhere in the codebase.
-- Do not hallucinate DOI references — always verify citations before adding them.
+- Do not hallucinate DOI references — always verify citations with `python scripts/check_dois.py` before adding them.
+- Do not write species or milestone counts into prose, badges or tests. `app/data/*.json` states them; everything else reads them.
 - Do not change the arrow rotation formula (`rotate(bearing)`) — the current formula is correct.
 
 ---

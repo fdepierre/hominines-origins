@@ -5,7 +5,7 @@
 [![Live app](https://img.shields.io/badge/Live%20app-open%20now-orange)](https://ho.lookingforanswers.eu/)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Data-CC%20BY%204.0-blue)](https://creativecommons.org/licenses/by/4.0/)
-[![Tests](https://img.shields.io/badge/Tests-58%20passing-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/Tests-passing-brightgreen)](#tests)
 [![Fork this](https://img.shields.io/badge/Fork%20this-please-blueviolet)](https://github.com/fdepierre/hominines-origins/fork)
 
 ---
@@ -40,6 +40,8 @@ This project has two layers of data, each with a distinct role.
 
 English scientific reference documents written for humans: researchers, teachers, contributors. These are the **editorial source of truth** — citable, correctable, editable without touching application code. They are syntheses from primary literature (not literal translations of prior working notes).
 
+Start at [`data/README.md`](data/README.md): it explains which document to read first, how the tables are built, and where the field-by-field data dictionary lives.
+
 | File | Contents |
 |------|----------|
 | [`Hominins-Morphology-Pigmentation.md`](data/Hominins-Morphology-Pigmentation.md) | Morphology, biometrics, pigmentation, confidence framework, active debates — with DOI |
@@ -51,8 +53,17 @@ W3C JSON-LD files derived from the English scientific reference documents above.
 
 | File | Contents |
 |------|----------|
-| [`app/data/species.json`](app/data/species.json) | 18 species in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Narrative fields use `fr` as the canonical language in the running app (parallel `en` is often present in the file for reuse and tooling). |
-| [`app/data/events.json`](app/data/events.json) | **27** milestones in JSON-LD: GeoCoordinates, `hominin:dateYearsBP`, DOI references. Same pattern: French-first in the UI, optional `en` in the data. |
+| [`app/data/species.json`](app/data/species.json) | Catalogue entries in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Narrative fields use `fr` as the canonical language in the running app (parallel `en` is often present in the file for reuse and tooling). |
+| [`app/data/events.json`](app/data/events.json) | Chronological milestones in JSON-LD: GeoCoordinates, `hominin:dateYearsBP`, DOI references. Same pattern: French-first in the UI, optional `en` in the data. |
+
+**How many entries are there?** The JSON files are the answer — no prose in this
+repository states a count, on purpose. Counts drift the moment the catalogue
+grows, so `app/data/` wins by definition (see
+[`docs/DATA_LINEAGE.md`](docs/DATA_LINEAGE.md)). To read the current figures:
+
+```bash
+python scripts/sync_embedded.py --check   # prints "N species, M events"
+```
 
 ### The relationship between the two
 
@@ -65,8 +76,9 @@ app/data/*.json    ←  app reads this (executable truth)
 When new research is published:
 1. Update the relevant English `.md` file in `data/` with the finding, evidence type, debate notes, and DOI
 2. Update the corresponding entry in `app/data/` (`species.json` and/or `events.json`) to reflect the change (species rows include the six `hominin:*DebateLevel` / `hominin:*EvidenceType` certainty fields)
-3. If you care about **offline** or **`file://`** use, update the embedded JSON mirrors (`_EMBEDDED_SPECIES`, `_EMBEDDED_EVENTS`) inside [`app/index.html`](app/index.html) so they match `app/data/` — otherwise `fetch` failures will load stale data
-4. Run `node tests/run-all.js` to verify nothing is broken
+3. Regenerate the embedded mirrors so offline and `file://` users see the same catalogue: `python scripts/sync_embedded.py`. Never hand-edit `_EMBEDDED_SPECIES` / `_EMBEDDED_EVENTS` inside [`app/index.html`](app/index.html) — the next sync overwrites them
+4. Verify the citation you added: `python scripts/check_dois.py`
+5. Run `node tests/run-all.js` to verify nothing is broken
 
 Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** switches **French and English** chrome UI strings only; for any other language, or for translating French narrative wholesale, use the browser’s page translator. Map labels are rendered as DOM markers so browser translation can see them.
 
@@ -148,18 +160,27 @@ The app auto-selects **FR** or **EN** from the browser language and keeps the bu
 
 ## Tests
 
-**58** automated non-regression checks (named `test` cases across the three suites). They run in about 35–60 seconds.
+Four automated non-regression suites. The runner prints the authoritative case
+count and per-suite result; a full run takes about three minutes.
 
 ```bash
 npx playwright install chromium   # once
-node tests/run-all.js             # run all tests
+node tests/run-all.js             # run all four suites
 ```
 
-| Suite | Cases | What it catches |
-|-------|-------|-----------------|
-| Unit | 23 | Broken species/events data, wrong arrow direction, timeline math, skin periods |
-| Visual | 9 (+ 8 PNG snapshot scenarios) | Missing UI elements, WCAG contrast, layout; PNG diff vs reference tiles |
-| A11y | 24 | Play/pause, FR/EN i18n, Playwright welcome hints (`locale` es/fr/en), touch targets, tablet layout |
+| Suite | What it catches |
+|-------|-----------------|
+| Unit | Broken species/events data, exact catalogue counts, embedded-fallback parity, wrong arrow direction, timeline math, skin periods |
+| Visual | Missing UI elements, WCAG contrast, layout; PNG diff against 8 reference tiles |
+| A11y | Play/pause, FR/EN i18n, welcome hints (`locale` es/fr/en), touch targets, tablet layout |
+| MapLibre | Map sources and layers, neutral basemap, app-managed labels, walking figures, event markers |
+
+Two data-integrity gates run in CI before the browser suites:
+
+```bash
+python scripts/sync_embedded.py --check   # JSON ↔ embedded mirrors agree
+python scripts/check_dois.py              # every cited DOI resolves and matches its text
+```
 
 ---
 
@@ -183,7 +204,7 @@ A complete context file for contributors lives at [`.ai-context/CONTEXT.md`](.ai
 
 It covers the architecture, data structures, what not to change and why, and a set of ready-to-use task templates. Use it to make safe, consistent changes to this repository.
 
-The data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). Runtime data is loaded from `app/data/*.json` via `loadData()` in `app/index.html`, with embedded fallbacks when `fetch` fails — keep those mirrors in sync when you change JSON. The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not invent or guess citation identifiers.
+The documentation index is [`docs/README.md`](docs/README.md); it says which documents are current policy and which are historical. The data schema is in [`.ai-context/data-schema.md`](.ai-context/data-schema.md). Runtime data is loaded from `app/data/*.json` via `loadData()` in `app/index.html`, with embedded fallbacks when `fetch` fails — keep those mirrors in sync when you change JSON. The non-regression tests will tell you if you broke something. Please verify any DOI you add — do not invent or guess citation identifiers.
 
 ---
 

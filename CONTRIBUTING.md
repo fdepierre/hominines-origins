@@ -10,13 +10,15 @@ Thank you for your interest in contributing. This project exists to make the sci
 
 This is not about bureaucracy. It is about trust. The power of this project is that it is scientifically grounded. A user in Jakarta, a teacher in Lagos, a student in Berlin should be able to click through to the original research.
 
+This is enforced, not merely stated. `python scripts/check_dois.py` resolves every DOI cited in `data/`, `docs/` and `app/data/` against Crossref, and fails when an identifier is dead **or** when it resolves to a paper whose first author does not appear in the citing text. The second case matters most: a DOI that points at the wrong article still looks like a working link. The check runs in CI on every pull request.
+
 ---
 
 ## Types of contribution
 
 ### 1. Scientific data updates
 
-The data lives in `data/`. The English scientific reference documents there are the editorial source of truth (syntheses from primary literature, not application UI copy). Filenames have **no year stamp** — update them in place when new papers appear, bump **Last reviewed**, then decide whether `app/data/` must change.
+The data lives in `data/` — start at [`data/README.md`](data/README.md), which explains which document to read first, how the summary table is built, and which layer wins when two disagree. The English scientific reference documents there are the editorial source of truth (syntheses from primary literature, not application UI copy). Filenames have **no year stamp** — update them in place when new papers appear, bump **Last reviewed**, then decide whether `app/data/` must change.
 
 When updating data:
 - Add or update the DOI reference and evidence / debate notes in the relevant English file under `data/`
@@ -98,6 +100,8 @@ If you see content that violates these values, open an issue.
 ## Pull request checklist
 
 - [ ] Tests pass: `node tests/run-all.js`
+- [ ] Data lineage intact: `python scripts/sync_embedded.py --check`
+- [ ] Citations verified: `python scripts/check_dois.py`
 - [ ] New data has DOI references
 - [ ] No claims about "racial" biology
 - [ ] If layout changed: snapshots updated

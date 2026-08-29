@@ -30,6 +30,9 @@ jobs:
       - name: Check JSON-to-embedded data lineage
         run: python3 scripts/sync_embedded.py --check
 
+      - name: Verify cited DOIs resolve and match their citing text
+        run: python3 scripts/check_dois.py --quiet
+
       - name: Run non-regression tests
         run: node tests/run-all.js --ci
 

@@ -4,9 +4,9 @@
 >
 > **Review rule:** a claim in this file should be checked against the cited primary publication. Do not strengthen, simplify, translate away, or silently drop its epistemic qualification when adapting it for application data or visual display.
 >
-> **Maintenance:** keep this filename stable (no year stamp). When new papers appear, update this document in place and record the review date below — then check whether `app/data/events.json` (and embedded mirrors) need a corresponding change.
+> **Maintenance:** keep this filename stable (no year stamp). When new papers appear, update this document in place and record the review date below — then check whether `app/data/events.json` (and embedded mirrors) need a corresponding change. New to this folder? Start at [`README.md`](README.md).
 >
-> **Last reviewed:** 28–29 August 2026
+> **Last reviewed:** 29 August 2026 — citation audit: every DOI re-resolved against Crossref. Corrected here: the Dmanisi identifier, the Kokiselei/Acheulean reference (wrong paper, volume and year), the Flores reference attributed to the wrong authors, and the first-author names for Monte Verde and Aşıklı Höyük.
 
 ## How to read this document
 
@@ -40,7 +40,7 @@
 |---|---:|---|---|---|---|---|
 | Lomekwian tools | ~3.3 Ma | Confirmed | Lomekwi 3, West Turkana, Kenya | Earliest widely discussed assemblage of intentionally modified stone objects, predating the Oldowan by roughly 700,000 years. | The degree and nature of intentionality have been debated. Do not equate an early stone assemblage automatically with a known species or with later Oldowan technical systems. | Harmand et al., *Nature* 521, 310–315 (2015). [10.1038/nature14464](https://doi.org/10.1038/nature14464) |
 | Continuous Oldowan sequence | 2.75–2.44 Ma | New milestone | Namorotukunan, Koobi Fora, Kenya | A long sequence indicates persistence of early Oldowan technological practice through major environmental change. | Attribution to a particular hominin taxon is not established by the lithic evidence alone. | Braun et al., *Nature Communications* 16, 9401 (2025). [10.1038/s41467-025-64244-x](https://doi.org/10.1038/s41467-025-64244-x) |
-| Early Acheulean handaxes | ~1.76 Ma | Confirmed | Kokiselei 4, West Turkana, Kenya | Early bifacial shaping documents an important technological transition relative to the Oldowan. | Taxonomic attribution at the site should remain cautious. | Lepre et al., *Nature* 460, 82–85 (2009). [10.1038/nature08187](https://doi.org/10.1038/nature08187) |
+| Early Acheulean handaxes | ~1.76 Ma | Confirmed | Kokiselei 4, West Turkana, Kenya | Early bifacial shaping documents an important technological transition relative to the Oldowan. | Taxonomic attribution at the site should remain cautious. | Lepre et al., *Nature* 477, 82–85 (2011). [10.1038/nature10372](https://doi.org/10.1038/nature10372) |
 
 ---
 
@@ -48,12 +48,12 @@
 
 | Milestone | Date | Status | Taxon / site | Evidence and synthesis | Debate / uncertainty | Primary reference |
 |---|---:|---|---|---|---|---|
-| Dmanisi hominins | ~1.77 Ma | Confirmed | D2280, D2282, D3444, D4500 and D2700 | Dmanisi documents one of the earliest secure hominin occurrences outside Africa. The five crania show extensive variation in one population. | The proposed collapse of *H. habilis*, *H. ergaster* and *H. erectus* into one highly variable species is influential but not consensus taxonomy. | Lordkipanidze et al., *Science* 342, 326–331 (2013). [10.1126/science.1244629](https://doi.org/10.1126/science.1244629) |
+| Dmanisi hominins | ~1.77 Ma | Confirmed | D2280, D2282, D3444, D4500 and D2700 | Dmanisi documents one of the earliest secure hominin occurrences outside Africa. The five crania show extensive variation in one population. | The proposed collapse of *H. habilis*, *H. ergaster* and *H. erectus* into one highly variable species is influential but not consensus taxonomy. | Lordkipanidze et al., *Science* 342, 326–331 (2013). [10.1126/science.1238484](https://doi.org/10.1126/science.1238484) |
 | Shangchen occupation | ~2.1 Ma; often summarised as 2.0–1.8 Ma | Confirmed, dating discussed | Shangchen, Loess Plateau, China | Stone artefacts imply an early hominin presence in East Asia and challenge simple later-dispersal narratives. | Dates and taxonomic attribution remain subjects of discussion. | Zhu et al., *Nature* 559, 608–612 (2018). [10.1038/s41586-018-0299-4](https://doi.org/10.1038/s41586-018-0299-4) |
 | Early European hominins | ~1.2 Ma | Confirmed | Sima del Elefante, Atapuerca, Spain | ATE9-1 and later Atapuerca material establish early Western Eurasian occupation. | The phylogenetic position of *Homo antecessor* is revisited in light of later material, including Thomas Quarry I; it should not automatically be labelled the direct common ancestor of later human groups. | Carbonell et al., *Nature* 452, 465–469 (2008). [10.1038/nature06815](https://doi.org/10.1038/nature06815) |
 | Settlement of Sahul | ~65 ka archaeology; ~60 ka genomic models | Revised | Madjedbebe, Northern Territory, Australia | OSL dating supports occupation around 65 ka. Genomic modelling can yield estimates nearer 60 ka. | Archaeological and genomic estimates are not identical; their difference should be displayed as methodological uncertainty, not framed as a contradiction resolved by one discipline alone. | Clarkson et al., *Nature* 547, 306–310 (2017). [10.1038/nature22968](https://doi.org/10.1038/nature22968) |
-| *Homo floresiensis* | ~190–50 ka | Confirmed | Liang Bua, Flores, Indonesia | Small-bodied hominins with a persistent lithic record are commonly interpreted in relation to island evolution and insular dwarfism. | Exact ancestry remains debated. Pathological-modern-human explanations have been substantially challenged by comparative morphology, but are still sometimes repeated in popular accounts. | Gordon et al., *PNAS* 105, 1342–1347 (2008). [10.1073/pnas.0710041105](https://doi.org/10.1073/pnas.0710041105); van den Bergh et al., *Proceedings of the Royal Society B* 284, 20171065 (2017). [10.1098/rspb.2017.1065](https://doi.org/10.1098/rspb.2017.1065) |
-| Peopling of the Americas | >20 ka to ~13 ka, depending on site and model | Actively debated | Multiple sites | No single site or date should be presented as a final answer for the initial peopling of the Americas. | Chronological anchors and site interpretations are actively reassessed. A 2026 reassessment of Monte Verde challenges a long-standing chronology for its MV-II component. | Suárez et al., *Science* (2026). [10.1126/science.adw9217](https://doi.org/10.1126/science.adw9217) |
+| *Homo floresiensis* | ~190–50 ka | Confirmed | Liang Bua, Flores, Indonesia | Small-bodied hominins with a persistent lithic record are commonly interpreted in relation to island evolution and insular dwarfism. | Exact ancestry remains debated. Pathological-modern-human explanations have been substantially challenged by comparative morphology, but are still sometimes repeated in popular accounts. | Gordon et al., *PNAS* 105, 1342–1347 (2008). [10.1073/pnas.0710041105](https://doi.org/10.1073/pnas.0710041105); van den Bergh et al., *Nature* 534, 245–248 (2016). [10.1038/nature17999](https://doi.org/10.1038/nature17999) |
+| Peopling of the Americas | >20 ka to ~13 ka, depending on site and model | Actively debated | Multiple sites | No single site or date should be presented as a final answer for the initial peopling of the Americas. | Chronological anchors and site interpretations are actively reassessed. A 2026 reassessment of Monte Verde challenges a long-standing chronology for its MV-II component. | Surovell et al., *Science* (2026). [10.1126/science.adw9217](https://doi.org/10.1126/science.adw9217) |
 
 ---
 
@@ -86,10 +86,10 @@
 
 | Milestone | Date | Status | Taxon / site | Evidence and synthesis | Debate / uncertainty | Primary reference |
 |---|---:|---|---|---|---|---|
-| Oldest currently reported parietal art | ≥67.8 ka | Revised | *Homo sapiens*, Liang Metanduno, Muna Island, Sulawesi | Uranium-series dating of mineral deposits provides a minimum age for painted imagery. | The date constrains the art to be at least this old; it does not establish an exact painting date. | *Nature* (2026). [10.1038/s41586-025-09968-y](https://doi.org/10.1038/s41586-025-09968-y) |
+| Oldest currently reported parietal art | ≥67.8 ka | Revised | *Homo sapiens*, Liang Metanduno, Muna Island, Sulawesi | Uranium-series dating of mineral deposits provides a minimum age for painted imagery. | The date constrains the art to be at least this old; it does not establish an exact painting date. | Oktaviana et al., *Nature* (2026). [10.1038/s41586-025-09968-y](https://doi.org/10.1038/s41586-025-09968-y) |
 | Figurative narrative scene | ~51.2 ka | Revised | *Homo sapiens*, Leang Karampuang, Sulawesi | The scene includes anthropomorphic figures and a wild pig; uranium-series dating provides the age constraint. | “First narrative scene” is an interpretive label and may change with new discoveries or revised definitions of narrative imagery. | Oktaviana et al., *Nature* 631 (2024). [10.1038/s41586-024-07541-7](https://doi.org/10.1038/s41586-024-07541-7) |
 | Chauvet-Pont d’Arc Cave art | 37–33.5 ka; later phase 31–28 ka | Revised | *Homo sapiens*, Ardèche, France | Bayesian modelling of 259 radiocarbon determinations supports multiple phases of activity. | Cultural attribution remains contested: Aurignacian versus later Gravettian/Solutrean interpretations. | Quiles et al., *PNAS* 113, 4670–4675 (2016). [10.1073/pnas.1523158113](https://doi.org/10.1073/pnas.1523158113) |
-| Aurignacian | ~43–28 ka | Confirmed | *Homo sapiens*, western and central Europe | Major early Upper Palaeolithic cultural complex associated with the dispersal and diversification of modern humans in Europe. | Cultural labels do not map perfectly onto single biological populations; genomic and archaeological histories must not be conflated. | *Nature Communications* (2024). [10.1038/s41467-024-51349-y](https://doi.org/10.1038/s41467-024-51349-y) |
+| Aurignacian | ~43–28 ka | Confirmed | *Homo sapiens*, western and central Europe | Major early Upper Palaeolithic cultural complex associated with the dispersal and diversification of modern humans in Europe. | Cultural labels do not map perfectly onto single biological populations; genomic and archaeological histories must not be conflated. | Shao et al., *Nature Communications* (2024). [10.1038/s41467-024-51349-y](https://doi.org/10.1038/s41467-024-51349-y) |
 
 ---
 
@@ -97,7 +97,7 @@
 
 | Milestone | Date | Status | Taxon / site | Evidence and synthesis | Debate / uncertainty | Primary reference |
 |---|---:|---|---|---|---|---|
-| Goat and sheep domestication | ~10.4 ka BP | Confirmed | *Homo sapiens*, *Capra hircus*, *Ovis aries*; central Anatolia | A gradual transition from capture-and-management to sustained breeding is documented in early Neolithic contexts. | Anatolia is a major centre in current models, but domestication trajectories and the relative role of multiple regions remain debated. | Arbuckle et al., *PNAS* 119, e2110930119 (2022). [10.1073/pnas.2110930119](https://doi.org/10.1073/pnas.2110930119) |
+| Goat and sheep domestication | ~10.4 ka BP | Confirmed | *Homo sapiens*, *Capra hircus*, *Ovis aries*; central Anatolia | A gradual transition from capture-and-management to sustained breeding is documented in early Neolithic contexts. | Anatolia is a major centre in current models, but domestication trajectories and the relative role of multiple regions remain debated. | Stiner et al., *PNAS* 119, e2110930119 (2022). [10.1073/pnas.2110930119](https://doi.org/10.1073/pnas.2110930119) |
 
 ---
 

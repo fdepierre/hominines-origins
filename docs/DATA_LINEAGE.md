@@ -54,8 +54,12 @@ references became primary; they remain reachable only via git history if needed.
 # After editing app/data/species.json or app/data/events.json:
 python scripts/sync_embedded.py
 
-# Read-only: exit 0 if mirrors match, non-zero if they diverge (no file writes):
+# Read-only: exit 0 if mirrors match, non-zero if they diverge (no file writes).
+# Also prints the authoritative species and event counts:
 python scripts/sync_embedded.py --check
+
+# Read-only: verify every cited DOI resolves and matches its citing text:
+python scripts/check_dois.py --quiet
 
 # Full non-regression suite (non-zero exit on failure):
 node tests/run-all.js
@@ -63,7 +67,8 @@ node tests/run-all.js
 node tests/run-all.js --ci
 ```
 
-CI runs `python3 scripts/sync_embedded.py --check` before the Playwright suite
+CI runs `python3 scripts/sync_embedded.py --check` and
+`python3 scripts/check_dois.py --quiet` before the Playwright suite
 (see `.github/workflows/test.yml`).
 
 Embedded blocks are bounded by unique sentinels
@@ -78,9 +83,14 @@ cannot truncate data when an ordinary banner comment is inserted.
 2. **CI gate** — the check runs in the non-regression workflow.
 3. **Unique sentinels** around embedded blocks — structural anchors for sync/extract.
 4. **Embedded-fallback test** — aborts `fetch` of the JSON files and asserts the same
-   species IDs (21), event IDs (30), and certainty fields where present.
+   species IDs, event IDs, and certainty fields where present.
 5. **Test runner exit status** — `node tests/run-all.js` exits non-zero on failure
    (local and CI).
+6. **DOI verification** — `python scripts/check_dois.py` resolves every DOI cited in
+   `data/`, `docs/` and `app/data/` against Crossref and fails when an identifier is
+   dead or points at a paper whose first author does not appear in the citing text.
+   An identifier inside an inline code span is treated as quoted, not cited, so the
+   validation notes can discuss identifiers that were found to be wrong.
 
 ---
 
