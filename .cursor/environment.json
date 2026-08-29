@@ -1,0 +1,11 @@
+{
+  "name": "hominines-origins",
+  "install": "npm ci && npx playwright install --with-deps chromium",
+  "terminals": [
+    {
+      "name": "app-server",
+      "command": "python3 -m http.server 8000 --bind 0.0.0.0"
+    }
+  ],
+  "ports": [8000]
+}
