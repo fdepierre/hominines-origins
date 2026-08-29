@@ -38,16 +38,16 @@ This project has two layers of data, each with a distinct role.
 
 ### `data/` — Scientific sources (human-readable)
 
-Markdown tables written for humans: researchers, teachers, contributors. These are the **primary sources** — citable, correctable, editable without touching any code.
+English scientific reference documents written for humans: researchers, teachers, contributors. These are the **editorial source of truth** — citable, correctable, editable without touching application code. They are syntheses from primary literature (not literal translations of prior working notes).
 
 | File | Contents |
 |------|----------|
-| [`Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md`](data/Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md) | 12 hominine species: morphology, biometrics, pigmentation, fossil sites, migrations, tools, scientific debates — all with DOI |
-| [`Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md`](data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md) | Human-readable chronological milestones (tools, fire, art, burials, migrations, domestication — all with DOI). Keep in sync with [`app/data/events.json`](app/data/events.json), which currently lists **22** events. |
+| [`Hominins-Morphology-Pigmentation.md`](data/Hominins-Morphology-Pigmentation.md) | Morphology, biometrics, pigmentation, confidence framework, active debates — with DOI |
+| [`Prehistoric-Chronology-Scientific-Reference.md`](data/Prehistoric-Chronology-Scientific-Reference.md) | Chronological milestones (tools, fire, art, burials, migrations, domestication — with DOI, evidence type, and debate notes). Keep in sync with [`app/data/events.json`](app/data/events.json). |
 
 ### `app/data/` — Machine-readable data (JSON-LD)
 
-W3C JSON-LD files derived from the Markdown sources above. These are what the application actually loads at runtime via `fetch()`. The format follows the [JSON-LD](https://json-ld.org/) standard with `@context` referencing schema.org, TDWG Darwin Core, and a local hominines vocabulary.
+W3C JSON-LD files derived from the English scientific reference documents above. These are what the application actually loads at runtime via `fetch()`. The format follows the [JSON-LD](https://json-ld.org/) standard with `@context` referencing schema.org, TDWG Darwin Core, and a local hominines vocabulary.
 
 | File | Contents |
 |------|----------|
@@ -57,13 +57,13 @@ W3C JSON-LD files derived from the Markdown sources above. These are what the ap
 ### The relationship between the two
 
 ```
-data/*.md          ←  humans edit this (researchers, contributors)
-    ↓ derive
-app/data/*.json    ←  app reads this (machine-readable)
+data/*.md          ←  humans edit this (English scientific reference — editorial truth)
+    ↓ derive (manual)
+app/data/*.json    ←  app reads this (executable truth)
 ```
 
 When new research is published:
-1. Update the relevant `.md` file in `data/` with the new finding and its DOI
+1. Update the relevant English `.md` file in `data/` with the finding, evidence type, debate notes, and DOI
 2. Update the corresponding entry in `app/data/` (`species.json` and/or `events.json`) to reflect the change (species rows include the six `hominin:*DebateLevel` / `hominin:*EvidenceType` certainty fields)
 3. If you care about **offline** or **`file://`** use, update the embedded JSON mirrors (`_EMBEDDED_SPECIES`, `_EMBEDDED_EVENTS`) inside [`app/index.html`](app/index.html) so they match `app/data/` — otherwise `fetch` failures will load stale data
 4. Run `node tests/run-all.js` to verify nothing is broken
@@ -168,7 +168,7 @@ node tests/run-all.js             # run all tests
 Read [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The short version:
-- Researchers: update `data/` with new findings and a DOI
+- Researchers: update `data/` English scientific reference documents with new findings and a DOI
 - Translators: improve the `fr` / `en` `TRANSLATIONS` blocks in `app/index.html` (see [CONTRIBUTING.md](CONTRIBUTING.md); a third bundled language is a large, explicit change)
 - Developers: fix a bug, improve the UI, open an issue first for big changes
 - Educators: tell us what doesn't work for your classroom

@@ -1,7 +1,7 @@
 # Scientific References
 
 A curated list of key publications underpinning the data in this project.
-All claims in `data/` should link back to one or more of these.
+All claims in `data/` (English scientific reference documents) should link back to one or more of these.
 
 Last updated: March 2026.
 

@@ -24,10 +24,10 @@ hominines-origins/
 │       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (18 entries; includes six hominin certainty keys per species)
 │       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA (27 milestones)
 ├── data/
-│   ├── Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md
-│   │   └── Human-readable species tables (12 named hominine rows in the source doc; JSON may split *H. sapiens* into phases — keep MD + JSON aligned by policy)
-│   └── Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md
-│       └── Human-readable milestone tables (row count may differ slightly from JSON; JSON is what the app loads)
+│   ├── Hominins-Morphology-Pigmentation.md
+│   │   └── English scientific reference (morphology, pigmentation, debates, DOI; filename has no year — update in place)
+│   └── Prehistoric-Chronology-Scientific-Reference.md
+│       └── English scientific reference (milestones, evidence, debate, DOI; JSON is what the app loads)
 ├── tests/
 │   ├── run-all.js              ← Run all tests: node tests/run-all.js
 │   ├── unit.test.js            ← Data integrity, maths, arrow bearings
@@ -114,14 +114,14 @@ The **application** has no npm dependency at runtime (CDN scripts only). The **r
 
 When new research is published:
 
-1. Update the relevant Markdown file in `data/`.
+1. Update the relevant English scientific reference Markdown file in `data/`.
 2. Update the corresponding JSON-LD in `app/data/` (`species.json` and/or `events.json` as appropriate). For species, keep the six certainty keys on the same object as the rest of the catalogue data.
 3. If you rely on offline / `file://` behaviour, sync **`_EMBEDDED_SPECIES`** and/or **`_EMBEDDED_EVENTS`** in `app/index.html` with the same content (or regenerate from the JSON files).
 4. Run tests: `node tests/run-all.js`.
 5. If the visual layout changed intentionally, update snapshots: `UPDATE_SNAPSHOTS=1 node tests/visual.test.js`.
 6. Open a pull request with the DOI of the new source.
 
-**Rule:** Every factual claim must have a DOI. If you cannot find a DOI, mark the claim as `debate` or `inference`.
+**Rule:** Every factual claim must have a DOI. If you cannot find a DOI, mark the claim as `debate` or `inference`. Do not strengthen or silently drop epistemic qualifications when mirroring into JSON.
 
 ---
 
@@ -163,11 +163,11 @@ Tests are written in plain Node.js — no test framework dependency. They run in
 
 ### Updating a species' pigmentation data
 
-"In `app/data/species.json`, find the `Species` item with `@id` `heidelbergensis`. Update the `hominin:skinDesc` / related fields from [new paper DOI]. Mirror the change in `data/Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md`. If you maintain offline parity, update `_EMBEDDED_SPECIES` in `app/index.html` and run `node tests/run-all.js`."
+"In `app/data/species.json`, find the `Species` item with `@id` `heidelbergensis`. Update the `hominin:skinDesc` / related fields from [new paper DOI]. Mirror the change in `data/Hominins-Morphology-Pigmentation.md`. If you maintain offline parity, update `_EMBEDDED_SPECIES` in `app/index.html` and run `node tests/run-all.js`."
 
 ### Adding a new cultural milestone
 
-"Add a new `Event` to `app/data/events.json` (and the embedded `_EMBEDDED_EVENTS` copy if used): e.g. earliest seafaring [DOI], with `hominin:category`, `hominin:icon`, GeoCoordinates, and `description` / `name` `fr`/`en`. Add the same milestone to `data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md`. Run `node tests/run-all.js`."
+"Add a new `Event` to `app/data/events.json` (and the embedded `_EMBEDDED_EVENTS` copy if used): e.g. earliest seafaring [DOI], with `hominin:category`, `hominin:icon`, GeoCoordinates, and `description` / `name` `fr`/`en`. Add the same milestone to `data/Prehistoric-Chronology-Scientific-Reference.md`. Run `node tests/run-all.js`."
 
 ### Fixing a visual bug
 

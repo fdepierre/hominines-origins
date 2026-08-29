@@ -16,15 +16,16 @@ This is not about bureaucracy. It is about trust. The power of this project is t
 
 ### 1. Scientific data updates
 
-The data lives in `data/`. These Markdown tables are the single source of truth.
+The data lives in `data/`. The English scientific reference documents there are the editorial source of truth (syntheses from primary literature, not application UI copy). Filenames have **no year stamp** — update them in place when new papers appear, bump **Last reviewed**, then decide whether `app/data/` must change.
 
 When updating data:
-- Add or update the DOI reference in the source column
+- Add or update the DOI reference and evidence / debate notes in the relevant English file under `data/`
 - Mirror substantive changes in `app/data/` (`species.json`, `events.json`) — that is what the app loads at runtime
 - If you rely on offline or `file://` behaviour, update the `_EMBEDDED_*` JSON blobs in `app/index.html` to match (see `.ai-context/CONTEXT.md`)
 - Note whether the claim is `DNA direct` / `Genetic inference` / `Morphological inference` / `Debate`
 - If the scientific community is divided, mark it as a debate and represent both positions
 - Do not remove debate entries — science works by exposing uncertainty, not hiding it
+- Do not strengthen, simplify, or silently drop epistemic qualifications when moving a claim from the reference document into JSON
 
 ### 2. Translations (interface vs browser)
 
