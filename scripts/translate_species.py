@@ -11,7 +11,7 @@ Règles :
 - Le champ racine `description` devient {fr, en}.
 
 Les traductions EN sont un mapping explicite basé sur la référence scientifique
-(Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md) et la terminologie
+anglaise (`data/Hominins-Morphology-Pigmentation-2026-EN.md`) et la terminologie
 paléoanthropologique anglaise standard.
 """
 

@@ -169,14 +169,14 @@ There is **no** shared multi-species “lane” map in code.
 
 ## Adding a new species — checklist
 
-- [ ] Add or extend the row(s) in `data/Hominines-Tableau-morphologique-et-pigmentation-complet-2026.md` with DOI.
+- [ ] Add or extend the section(s) in `data/Hominins-Morphology-Pigmentation-2026-EN.md` with DOI, evidence type, and debate notes.
 - [ ] Add a new `Species` object to `app/data/species.json` (`@id`, periods, regions, sites, migrations as `[lat,lng]`, the six `hominin:*DebateLevel` / `hominin:*EvidenceType` keys, etc.).
 - [ ] Update **`_EMBEDDED_SPECIES`** in `app/index.html` if offline parity matters.
 - [ ] Run `node tests/run-all.js`.
 
 ## Adding a new milestone — checklist
 
-- [ ] Add the milestone to `data/Chronologie-prehistorique-Tableau-de-reference-scientifique-2026.md` with DOI.
+- [ ] Add the milestone to `data/Prehistoric-Chronology-Scientific-Reference-2026-EN.md` with DOI, evidence type, and debate notes.
 - [ ] Add a new `Event` to `app/data/events.json` (`@id`, `hominin:dateYearsBP`, `location`, `description`, …).
 - [ ] Update **`_EMBEDDED_EVENTS`** in `app/index.html` if offline parity matters.
 - [ ] Run `node tests/run-all.js`.
