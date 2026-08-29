@@ -1,6 +1,10 @@
-# Hominins — Morphology and Pigmentation Reference Table 2026 (English synthesis, validated)
+# Hominins — Morphology and Pigmentation Reference
 
 > **Status of this document:** English-language scientific reference synthesis for this project — **not** a literal translation of a prior French working file. It is built from the primary literature, with DOIs independently re-checked on 28–29 August 2026. Known transcription errors corrected here include a non-standard bioRxiv DOI version suffix and the Martinón-Torres et al. DOI (`10.1016/j.jhevol.2023.103464`, not `…103507`). **This file is the editorial source of record** for morphology and pigmentation claims mirrored into `app/data/`. It focuses on the confidence framework, taxa with active scientific debate, and validated references; biometric detail is condensed where that keeps the cross-check auditable. Do not strengthen, simplify, or silently drop epistemic qualifications when adapting claims into application data.
+>
+> **Maintenance:** keep this filename stable (no year stamp). When new papers appear, update this document in place and record the review date below — then check whether `app/data/` needs a corresponding change.
+>
+> **Last reviewed:** 28–29 August 2026
 
 Reference table integrating osteological, genomic, and evolutionary-inference data for each key taxon or period. The original columns cover phylogeny, biometrics, morphology, pigmentation, confidence level, active debates, and DOIs.
 

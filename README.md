@@ -42,8 +42,8 @@ English scientific reference documents written for humans: researchers, teachers
 
 | File | Contents |
 |------|----------|
-| [`Hominins-Morphology-Pigmentation-2026-EN.md`](data/Hominins-Morphology-Pigmentation-2026-EN.md) | Morphology, biometrics, pigmentation, confidence framework, active debates — with DOI |
-| [`Prehistoric-Chronology-Scientific-Reference-2026-EN.md`](data/Prehistoric-Chronology-Scientific-Reference-2026-EN.md) | Chronological milestones (tools, fire, art, burials, migrations, domestication — with DOI, evidence type, and debate notes). Keep in sync with [`app/data/events.json`](app/data/events.json). |
+| [`Hominins-Morphology-Pigmentation.md`](data/Hominins-Morphology-Pigmentation.md) | Morphology, biometrics, pigmentation, confidence framework, active debates — with DOI |
+| [`Prehistoric-Chronology-Scientific-Reference.md`](data/Prehistoric-Chronology-Scientific-Reference.md) | Chronological milestones (tools, fire, art, burials, migrations, domestication — with DOI, evidence type, and debate notes). Keep in sync with [`app/data/events.json`](app/data/events.json). |
 
 ### `app/data/` — Machine-readable data (JSON-LD)
 

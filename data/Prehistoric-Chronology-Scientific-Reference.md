@@ -1,8 +1,12 @@
-# Prehistoric Chronology — Scientific Reference Table 2026
+# Prehistoric Chronology — Scientific Reference
 
 > **Status:** English scientific reference synthesis for an educational visualisation project — **the editorial source of record** for chronological milestones mirrored into `app/data/events.json`. This document is not a peer-reviewed publication or an authoritative taxonomic database. It is designed to make the evidence, uncertainty and competing interpretations behind the visual application legible to readers and reviewers. It is not a literal translation of any prior working file.
 >
 > **Review rule:** a claim in this file should be checked against the cited primary publication. Do not strengthen, simplify, translate away, or silently drop its epistemic qualification when adapting it for application data or visual display.
+>
+> **Maintenance:** keep this filename stable (no year stamp). When new papers appear, update this document in place and record the review date below — then check whether `app/data/events.json` (and embedded mirrors) need a corresponding change.
+>
+> **Last reviewed:** 28–29 August 2026
 
 ## How to read this document
 

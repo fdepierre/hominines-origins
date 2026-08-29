@@ -24,9 +24,9 @@ hominines-origins/
 │       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (18 entries; includes six hominin certainty keys per species)
 │       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA (27 milestones)
 ├── data/
-│   ├── Hominins-Morphology-Pigmentation-2026-EN.md
-│   │   └── English scientific reference (morphology, pigmentation, debates, DOI)
-│   └── Prehistoric-Chronology-Scientific-Reference-2026-EN.md
+│   ├── Hominins-Morphology-Pigmentation.md
+│   │   └── English scientific reference (morphology, pigmentation, debates, DOI; filename has no year — update in place)
+│   └── Prehistoric-Chronology-Scientific-Reference.md
 │       └── English scientific reference (milestones, evidence, debate, DOI; JSON is what the app loads)
 ├── tests/
 │   ├── run-all.js              ← Run all tests: node tests/run-all.js
@@ -163,11 +163,11 @@ Tests are written in plain Node.js — no test framework dependency. They run in
 
 ### Updating a species' pigmentation data
 
-"In `app/data/species.json`, find the `Species` item with `@id` `heidelbergensis`. Update the `hominin:skinDesc` / related fields from [new paper DOI]. Mirror the change in `data/Hominins-Morphology-Pigmentation-2026-EN.md`. If you maintain offline parity, update `_EMBEDDED_SPECIES` in `app/index.html` and run `node tests/run-all.js`."
+"In `app/data/species.json`, find the `Species` item with `@id` `heidelbergensis`. Update the `hominin:skinDesc` / related fields from [new paper DOI]. Mirror the change in `data/Hominins-Morphology-Pigmentation.md`. If you maintain offline parity, update `_EMBEDDED_SPECIES` in `app/index.html` and run `node tests/run-all.js`."
 
 ### Adding a new cultural milestone
 
-"Add a new `Event` to `app/data/events.json` (and the embedded `_EMBEDDED_EVENTS` copy if used): e.g. earliest seafaring [DOI], with `hominin:category`, `hominin:icon`, GeoCoordinates, and `description` / `name` `fr`/`en`. Add the same milestone to `data/Prehistoric-Chronology-Scientific-Reference-2026-EN.md`. Run `node tests/run-all.js`."
+"Add a new `Event` to `app/data/events.json` (and the embedded `_EMBEDDED_EVENTS` copy if used): e.g. earliest seafaring [DOI], with `hominin:category`, `hominin:icon`, GeoCoordinates, and `description` / `name` `fr`/`en`. Add the same milestone to `data/Prehistoric-Chronology-Scientific-Reference.md`. Run `node tests/run-all.js`."
 
 ### Fixing a visual bug
 
