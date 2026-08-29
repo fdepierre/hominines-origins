@@ -5758,8 +5758,11 @@ function updateAnimatedMigrations() {
 
 // =====================================================================
 // EMBEDDED DATA FALLBACK — used when fetch() fails (file:// URLs, offline mode)
-// Keep _EMBEDDED_SPECIES / _EMBEDDED_EVENTS in sync with app/data/species.json and events.json when you change the files.
+// Keep _EMBEDDED_SPECIES / _EMBEDDED_EVENTS in sync with app/data/species.json and events.json.
+// Unique sentinels BEGIN/END_EMBEDDED_SPECIES|EVENTS bound each block for scripts/sync_embedded.py.
+// Resync: python scripts/sync_embedded.py   |   Check: python scripts/sync_embedded.py --check
 // =====================================================================
+// === BEGIN_EMBEDDED_SPECIES ===
 const _EMBEDDED_SPECIES = {
   "@context": {
     "@vocab": "https://schema.org/",
@@ -9042,6 +9045,8 @@ const _EMBEDDED_SPECIES = {
     }
   ]
 };
+// === END_EMBEDDED_SPECIES ===
+// === BEGIN_EMBEDDED_EVENTS ===
 const _EMBEDDED_EVENTS = {
   "@context": {
     "@vocab": "https://schema.org/",
@@ -9840,6 +9845,8 @@ const _EMBEDDED_EVENTS = {
     }
   ]
 };
+// === END_EMBEDDED_EVENTS ===
+
 
 // =====================================================================
 // DATA LOADING — fetch JSON-LD from app/data/, fallback to embedded data
