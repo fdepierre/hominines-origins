@@ -16,7 +16,7 @@ This is not about bureaucracy. It is about trust. The power of this project is t
 
 ### 1. Scientific data updates
 
-The data lives in `data/`. The English scientific reference documents there are the editorial source of truth (syntheses from primary literature, not application UI copy).
+The data lives in `data/`. The English scientific reference documents there are the editorial source of truth (syntheses from primary literature, not application UI copy). Filenames have **no year stamp** — update them in place when new papers appear, bump **Last reviewed**, then decide whether `app/data/` must change.
 
 When updating data:
 - Add or update the DOI reference and evidence / debate notes in the relevant English file under `data/`
