@@ -3,10 +3,8 @@
 How scientific knowledge travels through this repository, and which layer is
 authoritative for what.
 
-This document is derived from the verified audit in
-[`docs/DATA_LINEAGE_AUDIT.md`](DATA_LINEAGE_AUDIT.md) (when present) and from the
-repository code as of the safeguards implementation. It describes the **current**
-lineage. It does not change scientific claims.
+Living document. A pre-migration audit snapshot lives in
+[`docs/DATA_LINEAGE_AUDIT.md`](DATA_LINEAGE_AUDIT.md) (historical only).
 
 ---
 
@@ -14,7 +12,7 @@ lineage. It does not change scientific claims.
 
 | Layer | Location | Role |
 |-------|----------|------|
-| Editorial truth | `data/*.md` | Human-readable scientific reference documents (French). DOI-backed claims, debate wording, morphology, pigmentation notes. Edited by researchers and contributors. |
+| Editorial truth | `data/Hominins-Morphology-Pigmentation.md`, `data/Prehistoric-Chronology-Scientific-Reference.md` | English scientific reference syntheses (not literal translations). Stable filenames (no year stamp); update in place and bump **Last reviewed**. |
 | Executable truth | `app/data/species.json`, `app/data/events.json` | Structured JSON-LD the application loads at runtime via `fetch`. Manually maintained; not generated from Markdown. |
 | Derived embedded mirror | `_EMBEDDED_SPECIES` / `_EMBEDDED_EVENTS` inside `app/index.html` | Offline / `file://` fallback when `fetch` fails. **Never authoritative.** Regenerated from `app/data/*.json` only. |
 
@@ -22,7 +20,7 @@ lineage. It does not change scientific claims.
 primary literature (journals, DOI)
         │  manual
         ▼
-data/*.md                 ← editorial source of truth
+data/*.md                 ← editorial source of truth (English references)
         │  manual mirror (no automated generator)
         ▼
 app/data/*.json           ← executable source of truth
@@ -34,15 +32,19 @@ app/index.html            ← derived embedded mirror
 
 ### Editorial vs executable truth
 
-- **`data/`** is the editorial source of truth: prose tables meant for humans,
-  with DOI links and scientific uncertainty stated in words. No script, test, or
-  CI job opens these files. Keeping them aligned with JSON is a human process.
+- **`data/`** is the editorial source of truth: English scientific reference
+  documents with DOI links, evidence types, and debate notes. No script, test, or
+  CI job opens these files. Keeping them aligned with JSON is a human process
+  (e.g. literature update → decide whether `app/data/` must change).
 - **`app/data/`** is the executable source of truth: what the running app and the
   non-regression tests actually consume. Counts and field values here win over
   documentation when they disagree.
 - **`app/index.html` embedded blocks** are a **derived mirror** of `app/data/*.json`.
   Direction is strictly one-way: JSON → HTML. Manual edits to the embedded
   constants are overwritten on the next sync.
+
+Former French working tables were removed from the tree after the English
+references became primary; they remain reachable only via git history if needed.
 
 ---
 
@@ -84,16 +86,12 @@ cannot truncate data when an ordinary banner comment is inserted.
 
 ## Future work (not implemented)
 
-These were identified in the audit and are **out of scope** for the current
-safeguards. Do not treat them as present.
-
 | Item | Why deferred |
 |------|----------------|
 | Markdown → JSON generation | Would require a conversion pipeline that must never strengthen, simplify, infer, translate, or discard epistemic status. No such generator exists; building one is a separate design effort. |
-| DOI / reference fields on `app/data/species.json` | Schema change. Species JSON currently has no citation key; DOIs live only in `data/*.md`. Adding `hominin:references` (or similar) needs an explicit data-model decision. |
+| DOI / reference fields on `app/data/species.json` | Schema change. Species JSON currently has no citation key; DOIs live in the English `data/` references. |
 | Full certainty coverage on all events | Only a minority of events currently carry `hominin:debateLevel` / `hominin:evidenceType`. Completing that is a scientific curation task, not a tooling task. |
 | Automated Markdown↔JSON correspondence checks | Depends on stable identifiers spanning both formats and on the schema decisions above. |
-| Document relocation (`data/fr/`, English root documents) | Migration planning only; must not start until editorial primary language and translation process are confirmed. |
 
 ---
 

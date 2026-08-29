@@ -1,5 +1,12 @@
 # Scope
 
+> **Historical snapshot (pre-migration).** This audit was written before English
+> scientific references became the sole editorial primary and before the French
+> working tables were removed from `data/`. Do **not** treat path inventories or
+> migration plans below as current policy. For the living lineage, see
+> [`docs/DATA_LINEAGE.md`](DATA_LINEAGE.md). French tables remain in git history
+> only if someone needs to recover them.
+
 Read-only audit of the data lineage of `hominines-origins`, performed before any
 scientific-document migration. No repository file was modified by this audit
 beyond writing this report.
