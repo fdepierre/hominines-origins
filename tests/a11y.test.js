@@ -9,7 +9,7 @@
  */
 
 'use strict';
-const { launch, loadApp, setTime,
+const { launch, loadApp, setTime, startAppHttpServer,
         assert, assertSoft, getStats, resetStats,
         BOLD, CYAN, GREEN, RED, YELLOW, RESET } = require('./utils/harness');
 
@@ -684,6 +684,47 @@ async function runA11yTests(options = {}) {
   } else {
     console.log(`  ${YELLOW}skipped in smoke mode (second browser / viewport)${RESET}`);
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 8. CDN OUTAGE RESILIENCE
+  // The UI shell must not depend on any third-party CDN. i18next used to be a
+  // blocking CDN script, and when it failed `data-i18n-pending` was never
+  // cleared, so `body { visibility: hidden }` left a permanently blank page.
+  // ═══════════════════════════════════════════════════════════════════════════
+  console.log(`\n${BOLD}◆ CDN OUTAGE RESILIENCE${RESET}`);
+
+  await test('App still renders when every third-party CDN is unreachable', async () => {
+    const base = await startAppHttpServer();
+    const { browser: b3, page: p3 } = await launch();
+    try {
+      // Block every off-origin host: CDN scripts, fonts and map tiles.
+      await p3.route('**', (route) => {
+        const url = route.request().url();
+        return url.startsWith(base) ? route.continue() : route.abort('failed');
+      });
+      await p3.goto(`${base}/index.html`, { waitUntil: 'load' }).catch(() => {});
+      // Long enough to cover the 2s reveal failsafe in the <head>.
+      await p3.waitForFunction(
+        () => !document.documentElement.hasAttribute('data-i18n-pending'),
+        { timeout: 8000 }
+      );
+      const state = await p3.evaluate(() => ({
+        bodyVisibility: getComputedStyle(document.body).visibility,
+        textLength: (document.body.innerText || '').trim().length,
+        hasTimeline: !!document.querySelector('[data-testid="timeline"]'),
+        i18nWorks: typeof window.i18next !== 'undefined'
+          && window.i18next.t('ui.play') === 'Play',
+      }));
+      assert(state.bodyVisibility === 'visible',
+        `body is visible with all CDNs blocked (got "${state.bodyVisibility}")`);
+      assert(state.textLength > 100,
+        `page renders readable content offline (${state.textLength} chars)`);
+      assert(state.hasTimeline, 'timeline is present with all CDNs blocked');
+      assert(state.i18nWorks, 'inline i18n engine resolves keys with no network');
+    } finally {
+      await b3.close();
+    }
+  });
 
   return errors;
 }

@@ -242,7 +242,17 @@ async function runVisualTests(options = {}) {
     });
     await loadApp(p2, { theme: scenario.theme });
     await setTime(p2, scenario.time);
-    await p2.waitForTimeout(400); // let map tiles and animations settle
+    // Tablet (≤768px) shows a taller map with more markers; wait until MapLibre
+    // is idle so migration cues do not flicker between snapshot runs.
+    if (scenario.w <= 768) {
+      await p2.waitForFunction(() => {
+        const m = window.__mapLibreMap;
+        return !!m && m.loaded() && !m.isMoving() && !m.isZooming();
+      }, { timeout: 10000 }).catch(() => {});
+      await p2.waitForTimeout(800);
+    } else {
+      await p2.waitForTimeout(400); // let map tiles and animations settle
+    }
 
     const currentPath  = path.join(SNAPSHOT_DIR, `${snapshotName}-current.png`);
     const referencePath = path.join(SNAPSHOT_DIR, `${snapshotName}-reference-${PLATFORM}.png`);

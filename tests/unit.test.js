@@ -359,9 +359,33 @@ async function runUnitTests() {
     const bearing = await page.evaluate(() =>
       getBearing([57.3, 69.0], [55.0, -120.0])
     );
-    // crosses antimeridian — should be East
-    assertSoft(bearing > 50 && bearing < 130,
+    // Crosses the antimeridian: the raw longitude delta is -189°, so without
+    // wrapping this reads as West (269°) and the arrow points across Europe.
+    assert(bearing > 50 && bearing < 130,
       `Siberia→Americas bearing is East (got ${bearing}°, expected 50–130°)`);
+  });
+
+  await test('getBearing: Americas → Siberia is roughly West (antimeridian, reverse)', async () => {
+    const bearing = await page.evaluate(() =>
+      getBearing([55.0, -120.0], [57.3, 69.0])
+    );
+    // Guards against over-correcting the wrap: the return trip must stay West.
+    assert(bearing > 230 && bearing < 310,
+      `Americas→Siberia bearing is West (got ${bearing}°, expected 230–310°)`);
+  });
+
+  await test('getBearing: longitude wrapping does not disturb short hops', async () => {
+    const bearings = await page.evaluate(() => ({
+      east: getBearing([0, 10], [0, 20]),
+      west: getBearing([0, 20], [0, 10]),
+      atMeridian: getBearing([0, -5], [0, 5]),
+    }));
+    assert(Math.abs(bearings.east - 90) < 0.01,
+      `Due-east hop is 90° (got ${bearings.east}°)`);
+    assert(Math.abs(bearings.west - 270) < 0.01,
+      `Due-west hop is 270° (got ${bearings.west}°)`);
+    assert(Math.abs(bearings.atMeridian - 90) < 0.01,
+      `Crossing the prime meridian eastward is 90° (got ${bearings.atMeridian}°)`);
   });
 
   // ═══════════════════════════════════════════════════════════════════════════

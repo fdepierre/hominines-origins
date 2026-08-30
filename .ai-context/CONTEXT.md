@@ -103,17 +103,19 @@ Functions: `linearToTime(t)` and `timeToLinear(time)` — do not change these wi
 
 `getBearing(from, to)` returns a compass bearing in degrees (0 = North, 90 = East, 180 = South, 270 = West). The CSS triangle uses `border-bottom` which points up by default, so `rotate(bearing)` correctly points the arrowhead in the direction of travel. Do NOT add or subtract 180.
 
+Longitude deltas that feed `getBearing` (and the migration polyline / walking-figure interpolation) **must** go through `normaliseLngDelta` / `unwrapLng` / `migrationEnd`. Without that wrap, a Beringia crossing (69°E → 120°W) reads as west across Europe instead of east across the Pacific. Do not replace those helpers with a raw `to.lng - from.lng`.
+
 ### Internationalisation
 
 **Goal:** any visitor should be able to read the app in **their** language. Two mechanisms work together:
 
-1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for languages **outside** the bundled list. Keep `<html translate="yes">` (re-applied after `i18next` init and on `languageChanged`). Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands (e.g. `#json-code`, `#welcome-translate-hint`, **Latin taxon names** via `scientificNameHtml()` / `translate="no"` on timeline lane labels and the side-panel `.species-name`, so auto-translate does not corrupt `Homo sapiens`-style strings), the `#lang-select` block so option labels are not double-translated.
+1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for languages **outside** the bundled list. Keep `<html translate="yes">` (re-applied after the inline i18n `init` and on `languageChanged`). Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands (e.g. `#json-code`, `#welcome-translate-hint`, **Latin taxon names** via `scientificNameHtml()` / `translate="no"` on timeline lane labels and the side-panel `.species-name`, so auto-translate does not corrupt `Homo sapiens`-style strings), the `#lang-select` block so option labels are not double-translated.
 
-2. **i18next** — instant UI for **French and English** only (menu / controls / uncertainty explainer); `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]` (keys may be `ui.*` or bare keys — the handler avoids double `ui.ui`), and rebuilds bands/map when needed. Any HTML built from JSON for MapLibre popups/markers or `#band-tooltip` must go through **`bandTipEscapeHtml()`**; roster names use **`scientificNameHtml()`** (`translate="no"`). Scientific narrative from JSON remains **French-first** in the DOM (many JSON entries also carry `en`). Optional `localStorage` key **`ho_ui_lang`** (`fr` \| `en`) stores the manual language override.
+2. **Inline i18n shim** (`window.i18next` in `app/index.html`, no CDN) — instant UI for **French and English** only (menu / controls / uncertainty explainer). The object exposes the same small API the old library used (`t`, `language`, `isInitialized`, `on`, `changeLanguage`, `init`) so call sites and tests stay unchanged. `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]` (keys may be `ui.*` or bare keys — the handler avoids double `ui.ui`), and rebuilds bands/map when needed. Any HTML built from JSON for MapLibre popups/markers or `#band-tooltip` must go through **`bandTipEscapeHtml()`**; roster names use **`scientificNameHtml()`** (`translate="no"`). Scientific narrative from JSON remains **French-first** in the DOM (many JSON entries also carry `en`). Optional `localStorage` key **`ho_ui_lang`** (`fr` \| `en`) stores the manual language override.
 
 The `TRANSLATIONS` object holds **fr** and **en** blocks only.
 
-To add a **third** bundled language: copy the `fr` block, translate every `ui.*` string, add an `<option>` in `#lang-select`, extend the `supported` array in `initI18n()`, and keep `translate="no"` on the selector wrapper so option labels are not double-translated when users run page translation.
+To add a **third** bundled language: copy the `fr` block, translate every `ui.*` string, add an `<option>` in `#lang-select`, add the code to `I18N_SUPPORTED`, and keep `translate="no"` on the selector wrapper so option labels are not double-translated when users run page translation.
 
 ### Theme
 
@@ -121,7 +123,7 @@ The app has dark (default) and light modes controlled by `data-theme` on `<html>
 
 ### npm / Playwright
 
-The **application** has no npm dependency at runtime (CDN scripts only). The **repository** uses **`package.json`** and Playwright for automated tests. Contributors run `npx playwright install chromium` once, then `node tests/run-all.js` (or `npm test`).
+The **application** has no npm dependency at runtime. MapLibre, Prism and Google Fonts still load from CDNs (with SRI on the script/CSS files); FR/EN UI strings are inlined. The **repository** uses **`package.json`** and Playwright for automated tests. Contributors run `npx playwright install chromium` once, then `node tests/run-all.js` (or `npm test`).
 
 ---
 
@@ -178,7 +180,7 @@ not require editing tests.
 - Do not use the word "race" as a biological category anywhere in the codebase.
 - Do not hallucinate DOI references — always verify citations with `python scripts/check_dois.py` before adding them.
 - Do not write species or milestone counts into prose, badges or tests. `app/data/*.json` states them; everything else reads them.
-- Do not change the arrow rotation formula (`rotate(bearing)`) — the current formula is correct.
+- Do not change the arrow rotation formula (`rotate(bearing)`) — the current formula is correct. Longitude wrapping (`normaliseLngDelta` / `unwrapLng`) is a separate concern; do not confuse the two.
 
 ---
 
@@ -186,7 +188,7 @@ not require editing tests.
 
 ### Adding a new bundled UI language (optional)
 
-"Add Russian as a **third** bundled UI language: copy the `fr` block in `TRANSLATIONS`, translate every `ui.*` string, add `<option value="ru">Русский</option>` to `#lang-select`, add `ru` to the `supported` array in `initI18n()`, then run `node tests/run-all.js`. For most classrooms, prefer **browser page translation** instead of growing `TRANSLATIONS`."
+"Add Russian as a **third** bundled UI language: copy the `fr` block in `TRANSLATIONS`, translate every `ui.*` string, add `<option value="ru">Русский</option>` to `#lang-select`, add `ru` to `I18N_SUPPORTED`, then run `node tests/run-all.js`. For most classrooms, prefer **browser page translation** instead of growing `TRANSLATIONS`."
 
 ### Updating a species' pigmentation data
 

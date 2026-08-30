@@ -80,7 +80,7 @@ When new research is published:
 4. Verify the citation you added: `python scripts/check_dois.py`
 5. Run `node tests/run-all.js` to verify nothing is broken
 
-Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. **i18next** switches **French and English** chrome UI strings only; for any other language, or for translating French narrative wholesale, use the browser’s page translator. Map labels are rendered as DOM markers so browser translation can see them.
+Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. A small **inline i18n engine** switches **French and English** chrome UI strings only; for any other language, or for translating French narrative wholesale, use the browser’s page translator. Map labels are rendered as DOM markers so browser translation can see them.
 
 ---
 
@@ -150,9 +150,11 @@ A single HTML file: [`app/index.html`](app/index.html).
 
 | Dependency | Role |
 |------------|------|
-| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) 5.9.0 | Interactive vector world map |
-| [i18next](https://www.i18next.com/) 23.11.5 | **French and English** menu / control strings; all other languages rely on the browser’s page translator |
-| Space Grotesk + Space Mono | Typography (Google Fonts CDN) |
+| [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) 5.9.0 | Interactive vector world map (lazy-loaded from CDN with SRI; map is blank offline) |
+| [Prism](https://prismjs.com/) 1.30.0 | JSON syntax highlighting in the data viewer only (deferred CDN, guarded — unhighlighted JSON if it fails) |
+| Space Grotesk + Space Mono | Typography (Google Fonts CDN; system fonts if it fails) |
+
+French and English menu / control strings are bundled in an **inline i18n engine** inside `app/index.html` — no third-party library. All other languages rely on the browser’s page translator.
 
 The app auto-selects **FR** or **EN** from the browser language and keeps the burger-menu selector for manual override (stored in `localStorage` as `ho_ui_lang`). For other languages, use **Translate this page**; the document root stays `translate="yes"` so browser translation is not blocked.
 
@@ -169,10 +171,11 @@ npx playwright install chromium   # once — downloads the browser
 node tests/run-all.js             # run all four suites
 ```
 
-The suites drive a real browser against the app served over HTTP, and the app
-loads MapLibre, i18next and its fonts from CDNs — so **an internet connection is
-required**. A dropped connection shows up as `ERR_NETWORK_CHANGED` browser errors
-and a blank map, not as a code defect.
+The suites drive a real browser against the app served over HTTP. The **UI
+shell** (timeline, panel, FR/EN strings) is self-contained and works with no
+network; **MapLibre, fonts and Prism** still load from CDNs, so a dropped
+connection shows a blank map and fallback typography, not a blank page. The
+a11y suite includes a CDN-outage case that asserts the shell still renders.
 
 On Linux (including WSL) Chromium needs a few system libraries. If it fails to
 start, install them once with `npx playwright install --with-deps chromium`

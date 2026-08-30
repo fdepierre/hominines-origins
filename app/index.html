@@ -1,4 +1,28 @@
 <!DOCTYPE html>
+<!--
+  HOMININES ORIGINS — single-file app (intentional: no build step).
+
+  How to read this file
+  ---------------------
+  1. <head>        language bootstrap (must run before first paint) + CSS.
+  2. <body>        landmarks only: #map, #side-panel, #timeline, burger, welcome.
+                   Almost no species/event text lives here — JS fills it.
+  3. First <script>  the application: timeline, map, panel, play, data load.
+  4. Second <script> i18n (TRANSLATIONS + shim), data-viewer, welcome modal.
+
+  Data flow
+  ---------
+  loadData() fetches ./data/species.json + events.json.
+  On failure (file://, offline) it uses _EMBEDDED_SPECIES / _EMBEDDED_EVENTS
+  (the big JSON blobs in the first script — do not hand-edit; run
+  python scripts/sync_embedded.py).
+  adaptSpecies / adaptEvent turn JSON-LD into SPECIES_DATA / EVENTS_DATA.
+  setTime() is the hub: needle, lanes, map layers, walking figures.
+
+  Search these banners to jump: "TIMELINE — LOG", "APPLICATION STATE",
+  "MAP — MAPLIBRE", "SIDE PANEL", "SKIN TONES BAND", "DATA LOADING",
+  "MINIMAL i18n ENGINE", "BOOT".
+-->
 <!-- translate=yes: let the browser translate the page to any language (Chrome/Edge/Safari/Firefox page translation). -->
 <html lang="en" data-theme="light" translate="yes">
 <head>
@@ -26,6 +50,12 @@
   document.documentElement.lang = lang;
   document.documentElement.setAttribute('data-initial-ui-lang', lang);
   document.documentElement.setAttribute('data-i18n-pending', '1');
+  // Failsafe: the attribute below hides the body until applyTranslations() clears
+  // it. If anything ever prevents that, reveal an untranslated page rather than a
+  // blank one.
+  setTimeout(function() {
+    document.documentElement.removeAttribute('data-i18n-pending');
+  }, 2000);
 })();
 </script>
 <style>html[data-i18n-pending="1"] body { visibility: hidden; }</style>
@@ -38,6 +68,16 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"></noscript>
 
 <style>
+/*
+  CSS map — search the ===== banners.
+  Tokens (this block) → base/layout → map → side panel → timeline →
+  burger → human-figure grid → welcome → data viewer →
+  mobile overrides (max-width 768px, near the end of this <style>).
+
+  Theme: :root and [data-theme="dark"] share the dark palette;
+  [data-theme="light"] overrides the same variable names.
+  Prefer var(--color-*), var(--space-*), var(--text-*) over raw values.
+*/
 /* ===== DESIGN TOKENS ===== */
 :root {
   --text-xs:   clamp(0.8125rem, 0.75rem + 0.3vw, 0.9375rem); /* 13→15px */
@@ -2347,12 +2387,26 @@ html[data-map-ready="1"] #map {
 </style>
   <link rel="alternate" hreflang="fr" href="./index.html">
   <link rel="alternate" hreflang="en" href="./index.html?lang=en">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <!-- Prism: JSON syntax highlighting in the data viewer only. Deferred and guarded
+       by `if (window.Prism)`, so the app degrades to unhighlighted JSON if it fails.
+       1.30.0 is the first release fixing CVE-2024-53382 (DOM clobbering → XSS). -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/prism-tomorrow.min.css"
+        integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/prism.min.js"
+          integrity="sha384-Cn/s7dpCMIb2rgIjtCYcpcv3LPJjUciybJ5G/sGMK025lFiqdJ4pRgUEgIcolGuJ" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-json.min.js"
+          integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous"></script>
 </head>
 <body>
 <div id="app">
+  <!--
+    Static chrome only. Scientific copy is injected by JS so language
+    switches (and browser page-translate) see real DOM text, not a canvas.
+      #map          MapLibre canvas + overlay buttons (burger, layers)
+      #side-panel   species detail (filled by renderPanel)
+      #timeline     log-scale footer: needle, play, species lanes, skin + events bands
+    After </div#app>: burger panel, welcome modal, data-viewer drawer, #band-tooltip.
+  -->
 
   <!-- HEADER -->
   <!-- header removed — controls in burger menu -->
@@ -2434,7 +2488,8 @@ html[data-map-ready="1"] #map {
 
   </main>
 
-  <!-- TIMELINE -->
+  <!-- TIMELINE: log-scale footer. JS builds .species-lane rows and the
+       skin / events bands inside #timeline-lanes / #skin-band / #events-band. -->
   <footer id="timeline" data-testid="timeline">
 
     <!-- hidden controls kept for JS compat -->
@@ -2524,16 +2579,37 @@ html[data-map-ready="1"] #map {
 
 </div>
 
-<!-- i18next: fast UI for fr + en menu labels. Any other language: keep translate=yes on <html> and use the browser page translator. -->
-<script src="https://unpkg.com/i18next@23.11.5/i18next.min.js"></script>
-<script src="https://unpkg.com/i18next-browser-languagedetector@8.0.0/i18nextBrowserLanguageDetector.min.js"></script>
+<!-- i18n: fast UI for fr + en menu labels, inlined below (see MINIMAL i18n ENGINE). Any other language: keep translate=yes on <html> and use the browser page translator. -->
 <!-- MapLibre is injected after first paint (see loadMapLibre) -->
 
 <script>
 // =====================================================================
+// APPLICATION SCRIPT — table of contents (search the banners)
+// =====================================================================
+//   DATA — SPECIES CATALOGUE     SPECIES_DATA + certainty key list
+//   TIMELINE — LOG SCALE         linearToTime / timeToLinear / formatTime
+//   TIMELINE ROW VIEW            simple (grouped) vs detailed lanes
+//   APPLICATION STATE            currentTime, selection, MapLibre handles
+//   MAP — MAPLIBRE …             lazy CDN load, layers, popups, cues
+//   SIDE PANEL                   pigmentation swatches + renderPanel
+//   TIMELINE                     needle, lanes, scrub, setTime
+//   SKIN TONES BAND / EVENTS     lower two rows of the footer
+//   LAYER TOGGLES / THEME / PLAY
+//   ANTIMERIDIAN HELPERS         wrap longitudes so Beringia goes east
+//   EMBEDDED DATA FALLBACK       mirrors of app/data/*.json
+//   DATA LOADING                 fetch → adaptSpecies/adaptEvent → bootApp
+//   FIGURE ANIMATION             walking silhouettes during Play
+//   BOOT                         wires UI after data is ready
+//   BURGER MENU
+// Second <script> (further down): TRANSLATIONS, i18n shim, data viewer, welcome.
+// =====================================================================
+
+// =====================================================================
 // DATA — SPECIES CATALOGUE (JSON-LD → runtime)
 // =====================================================================
 // SPECIES_DATA is filled by loadData(): fetch ./data/species.json (or _EMBEDDED_SPECIES fallback).
+// Each entry is a flat runtime object (id, name, start/end, color, regions, …),
+// not the raw JSON-LD item — see adaptSpecies().
 let SPECIES_DATA = [];
 
 // Hominin uncertainty axes (debate + evidence per domain) live on each Species node in species.json — copied in adaptSpecies().
@@ -2549,17 +2625,21 @@ const HOMININ_CERTAINTY_KEYS = [
 // =====================================================================
 // TIMELINE — LOG SCALE (years BP)
 // =====================================================================
+// Negative years before present. A linear axis would crush the Holocene
+// into a few pixels; log10(|year|) keeps 7.5 Ma and 2 ka both usable.
+// t in linearToTime is 0 (left / oldest) … 1 (right / youngest).
+// Do not change these two functions without updating the unit tests.
 const TIMELINE_MIN = -7500000;
 const TIMELINE_MAX = -2000;
 
-// Log scale mapping for timeline
+/** Map 0 (oldest, left) … 1 (youngest, right) → year BP on the log timeline. */
 function linearToTime(t) {
-  // t is 0..1
   const logMin = Math.log10(Math.abs(TIMELINE_MIN));
   const logMax = Math.log10(Math.abs(TIMELINE_MAX));
   const logVal = logMin + (logMax - logMin) * t;
   return -Math.pow(10, logVal);
 }
+/** Inverse of linearToTime: year BP → 0–1 position on the log timeline. */
 function timeToLinear(time) {
   const logMin = Math.log10(Math.abs(TIMELINE_MIN));
   const logMax = Math.log10(Math.abs(TIMELINE_MAX));
@@ -2567,6 +2647,7 @@ function timeToLinear(time) {
   return (logVal - logMin) / (logMax - logMin);
 }
 
+/** Human-readable year label (Ma / ka / years), FR or EN from currentDataLang(). */
 function formatTime(t) {
   const abs = Math.abs(t);
   if (currentDataLang() === 'en') {
@@ -2579,6 +2660,7 @@ function formatTime(t) {
   return `— ${Math.round(abs)} ans`;
 }
 
+/** Word between two dates in a period (“à” / “to”). */
 function formatPeriodSeparator() {
   return currentDataLang() === 'en' ? 'to' : 'à';
 }
@@ -2629,6 +2711,7 @@ const SIMPLE_TIMELINE_GROUPS = [
   },
 ];
 
+/** Clone SIMPLE_TIMELINE_GROUPS and attach every sapiens-* catalogue id to grp-sapiens. */
 function resolveSimpleTimelineGroups() {
   const dynSapiensIds = (SPECIES_DATA || [])
     .map(function (s) { return s.id; })
@@ -2644,6 +2727,7 @@ function resolveSimpleTimelineGroups() {
   });
 }
 
+/** Restore simple/detailed mode from sessionStorage (default: simple). */
 function loadTimelineViewModeFromStorage() {
   try {
     var v = sessionStorage.getItem(TIMELINE_VIEW_MODE_STORAGE_KEY);
@@ -2652,6 +2736,7 @@ function loadTimelineViewModeFromStorage() {
   document.documentElement.setAttribute('data-timeline-view', timelineViewMode);
 }
 
+/** Switch simple/detailed lanes, persist the choice, rebuild the timeline. */
 function setTimelineViewMode(mode) {
   if (mode !== 'simple' && mode !== 'detailed') return;
   if (mode === timelineViewMode) {
@@ -2666,6 +2751,7 @@ function setTimelineViewMode(mode) {
   initTimeline();
 }
 
+/** Look up a SPECIES_DATA row by catalogue id, or undefined. */
 function speciesRecordByCatalogueId(id) {
   return (SPECIES_DATA || []).find(function (s) { return s.id === id; });
 }
@@ -2689,11 +2775,13 @@ function speciesSkinVisual(species) {
   };
 }
 
+/** Extra CSS class for a lane bar when the species is drawn with fur hatching. */
 function speciesFurLaneClass(species) {
   const v = speciesSkinVisual(species);
   return v.hasFur ? (' species-lane--' + v.variant) : '';
 }
 
+/** CSS modifier for a grouped lane when every member is fur / partial-fur. */
 function groupFurLaneClass(members) {
   if (!members || !members.length) return '';
   const variants = members.map(function (m) {
@@ -2748,12 +2836,14 @@ function buildTimelineLaneModels() {
   return merged;
 }
 
+/** Species to show for a group at time t: first living member, else the middle one. */
 function representativeSpeciesFromGroupMembers(members, t) {
   var vis = members.filter(function (sp) { return sp.start <= t && sp.end >= t; });
   if (vis.length) return vis[0];
   return members[Math.floor(members.length / 2)];
 }
 
+/** Keep the current selection if it belongs to the group; otherwise pick a representative. */
 function speciesForGroupedLaneClick(model, t) {
   var members = model.members;
   if (typeof selectedSpecies !== 'undefined' && selectedSpecies &&
@@ -2763,6 +2853,7 @@ function speciesForGroupedLaneClick(model, t) {
   return representativeSpeciesFromGroupMembers(members, t);
 }
 
+/** Display name of a grouped lane in the active UI language. */
 function groupLaneTimelineLabel(model) {
   var lang = currentDataLang() === 'en' ? 'en' : 'fr';
   var L = model.laneLabel || {};
@@ -2826,6 +2917,7 @@ function buildGroupedSpeciesLaneBackground(gs, ge, members) {
   return 'linear-gradient(to right, ' + gradientParts.join(', ') + ')';
 }
 
+/** HTML for the grouped-lane tooltip (name, extra note, member list). */
 function groupLaneTooltipHtml(model) {
   var extra = pickLang(model.tooltipExtra, '');
   var membersLines = model.members.map(function (sp) {
@@ -2870,6 +2962,7 @@ function syncTimelineViewToggleUI() {
   detailedBtn.tabIndex = !isSimple ? 0 : -1;
 }
 
+/** Bind click + arrow keys on the simple/detailed segmented control (once). */
 function initTimelineViewControls() {
   var simpleBtn = document.getElementById('timeline-view-mode-simple');
   var detailedBtn = document.getElementById('timeline-view-mode-detailed');
@@ -2904,6 +2997,9 @@ function initTimelineViewControls() {
 // =====================================================================
 // APPLICATION STATE
 // =====================================================================
+// currentTime / selectedSpecies / layerStates drive almost every redraw.
+// MapLibre handles below are the live map; mapMarkers / mapPolygons /
+// mapArrows are leftovers from the pre-MapLibre renderer (unused).
 let currentTime = TIMELINE_MIN;
 let selectedSpecies = null;
 let layerStates = { sites: true, migrations: true, range: true };
@@ -2924,16 +3020,23 @@ const MAP_WORLD_CENTER = [20, 15];
 const MAP_WORLD_ZOOM_DESKTOP = 1.15;
 const MAP_WORLD_ZOOM_MOBILE = 0.72;
 
+/** Initial / reset zoom: slightly closer on desktop than on a phone. */
 function mapWorldZoom() {
   return isMobileViewport() ? MAP_WORLD_ZOOM_MOBILE : MAP_WORLD_ZOOM_DESKTOP;
 }
 
 // MapLibre (~large) loads after the document and i18n; timeline + shell paint first on slow links.
+// Pinned with SRI hashes: recompute both when bumping the version, otherwise the
+// browser refuses the files and the map silently fails to load.
+//   curl -sfL <url> | openssl dgst -sha384 -binary | openssl base64 -A
 const MAPLIBRE_CDN = {
   css: 'https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css',
   js:  'https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js',
+  cssIntegrity: 'sha384-gNYNsUmuZqDYiT3gbirWTV5K7rt71RoveS/yXAaU09d4ZUmeDVTD3XoqB6uJAIFR',
+  jsIntegrity:  'sha384-81ppUWZZO+pveTPk4qU9cZuScEFULHfuOMHVJHFZ7xVBlWQTG1zsPrVIMGAl1WMb',
 };
 
+/** Inject MapLibre CSS+JS from the CDN (once) and resolve when the script loads. */
 function loadMapLibre() {
   if (typeof maplibregl !== 'undefined' && maplibregl) {
     return Promise.resolve();
@@ -2947,10 +3050,14 @@ function loadMapLibre() {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = MAPLIBRE_CDN.css;
+      link.integrity = MAPLIBRE_CDN.cssIntegrity;
+      link.crossOrigin = 'anonymous';
       head.appendChild(link);
     }
     var s = document.createElement('script');
     s.src = MAPLIBRE_CDN.js;
+    s.integrity = MAPLIBRE_CDN.jsIntegrity;
+    s.crossOrigin = 'anonymous';
     s.async = true;
     s.setAttribute('data-ho-maplibre', '1');
     s.onload = function () { resolve(); };
@@ -3020,11 +3127,13 @@ const CONTINENT_LABEL_NAMES = {
   es: { americas: 'Américas', europe: 'Europa', africa: 'África', asia: 'Asia', oceania: 'Oceanía' },
 };
 
+/** BCP 47 tag from the browser (for Intl.DisplayNames), stripped of odd characters. */
 function browserCountryLabelLocale() {
   const raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en');
   return String(raw).replace(/[^a-zA-Z0-9-]/g, '') || 'en';
 }
 
+/** Locale for map labels: stored FR/EN override, else the browser language. */
 function countryLabelLocale() {
   try {
     const stored = localStorage.getItem('ho_ui_lang');
@@ -3036,6 +3145,7 @@ function countryLabelLocale() {
   return browserLocale;
 }
 
+/** Localised country name from an ISO code (Intl.DisplayNames). */
 function countryLabelName(code) {
   const lang = countryLabelLocale();
   try {
@@ -3051,6 +3161,7 @@ function countryLabelName(code) {
   }
 }
 
+/** Continent caption from CONTINENT_LABEL_NAMES, falling back to English. */
 function continentLabelName(code) {
   const lang = countryLabelLocale();
   const primary = String(lang).split('-')[0].toLowerCase();
@@ -3058,6 +3169,7 @@ function continentLabelName(code) {
   return names[code] || CONTINENT_LABEL_NAMES.en[code] || code;
 }
 
+/** Zoom level at which a country label appears (large countries sooner). */
 function countryLabelMinZoom(code) {
   const regionZoom = new Set(['CA', 'US', 'BR', 'AR', 'RU', 'CN', 'IN', 'AU', 'ZA']);
   const countryZoom = new Set(['MX', 'CL', 'PE', 'CO', 'VE', 'EG', 'ET', 'KE', 'TZ', 'CD', 'SA', 'IR', 'TR', 'KZ', 'MN', 'ID', 'JP']);
@@ -3071,6 +3183,10 @@ function countryLabelMinZoom(code) {
 // =====================================================================
 // MAP — MAPLIBRE INITIALISATION
 // =====================================================================
+// Style is the public demotiles demo (no API key). We then recolour it
+// to match the app theme and hide native country labels so our own
+// DOM markers stay translatable. loadMapLibre() injects the CDN scripts
+// only when the map is about to show (see MAPLIBRE_CDN + SRI above).
 function applyMapLibreNeutralBasemap(map, isDark) {
   function paint(layerId, prop, value) {
     try {
@@ -3115,6 +3231,7 @@ function applyMapLibreNeutralBasemap(map, isDark) {
   paint('countries-label', 'text-opacity', 0);
 }
 
+/** Mark the map as styled (data-map-ready) so CSS can un-blur it and tests can wait. */
 function revealMapLibreWhenStyled() {
   requestAnimationFrame(function () {
     document.documentElement.setAttribute('data-map-ready', '1');
@@ -3122,6 +3239,7 @@ function revealMapLibreWhenStyled() {
   });
 }
 
+/** Create the MapLibre map, apply the neutral style, then draw app layers. */
 function initMapLibre() {
   if (typeof maplibregl === 'undefined') return;
   document.documentElement.removeAttribute('data-map-ready');
@@ -3148,6 +3266,7 @@ function initMapLibre() {
   mapLibreMap.on('zoomend', updateMapLibreLabels);
 }
 
+/** Entry point used by bootApp — currently just initMapLibre(). */
 function initMap() {
   initMapLibre();
 }
@@ -3155,10 +3274,14 @@ function initMap() {
 // =====================================================================
 // MAP — SPECIES VISIBLE AT currentTime
 // =====================================================================
+// A species is "alive" when currentTime sits in [start, end] (both BP, negative).
+// updateMapLibre() rebuilds GeoJSON sources from this list; Play calls setTime
+// often, so updateMap() is skipped when the id-set has not changed.
 function getVisibleSpecies() {
   return SPECIES_DATA.filter(s => s.start <= currentTime && s.end >= currentTime);
 }
 
+/** Fill the (usually hidden) map legend with dots + taxon names. */
 function updateMapLegend(visible) {
   const legendContent = document.getElementById('legend-content');
   if (!legendContent) return;
@@ -3172,6 +3295,7 @@ function updateMapLegend(visible) {
     `).join('');
 }
 
+/** Create GeoJSON sources/layers for ranges, migrations and sites if missing. */
 function ensureMapLibreSitesLayer() {
   if (!mapLibreMap || !mapLibreMap.isStyleLoaded()) return false;
   if (!mapLibreMap.getSource('hominine-ranges')) {
@@ -3302,6 +3426,7 @@ function ensureMapLibreSitesLayer() {
   return true;
 }
 
+/** HTML for a milestone popup (label, category, description, source). */
 function mapLibreEventPopupHtml(ev) {
   return (
     '<div style="font-size:13px;line-height:1.5;max-width:240px">' +
@@ -3313,6 +3438,7 @@ function mapLibreEventPopupHtml(ev) {
   );
 }
 
+/** Add/move/remove event DOM markers so they match the visible milestones. */
 function syncMapLibreEventMarkers(visibleEvents) {
   if (!mapLibreMap) return;
   const visibleIds = new Set(visibleEvents.map(ev => ev.id));
@@ -3332,6 +3458,7 @@ function syncMapLibreEventMarkers(visibleEvents) {
   });
 }
 
+/** Remove every event marker from the map (used when the layer is hidden). */
 function clearMapLibreEventMarkers() {
   mapLibreEventMarkers.forEach(function (marker) {
     marker.remove();
@@ -3339,6 +3466,7 @@ function clearMapLibreEventMarkers() {
   mapLibreEventMarkers.clear();
 }
 
+/** Create or reuse the DOM marker for one milestone; click jumps the timeline. */
 function ensureMapLibreEventMarker(ev) {
   if (!mapLibreMap || !ev) return null;
   const existing = mapLibreEventMarkers.get(ev.id);
@@ -3378,6 +3506,7 @@ function ensureMapLibreEventMarker(ev) {
   return marker;
 }
 
+/** Briefly pulse a milestone marker after a timeline-band click. */
 function pulseMapLibreEventMarker(eventId, durationMs) {
   const marker = mapLibreEventMarkers.get(eventId);
   const el = marker && marker.getElement ? marker.getElement() : null;
@@ -3389,6 +3518,7 @@ function pulseMapLibreEventMarker(eventId, durationMs) {
   return true;
 }
 
+/** Push cumulative milestone GeoJSON + sync HTML event markers. */
 function updateMapLibreEvents() {
   if (!mapLibreMap || !mapLibreMap.getSource('hominine-events')) return;
   const visibleEvents = showEvents
@@ -3413,6 +3543,7 @@ function updateMapLibreEvents() {
   syncMapLibreEventMarkers(visibleEvents);
 }
 
+/** Place continent/country DOM labels according to zoom and locale. */
 function updateMapLibreLabels() {
   if (!mapLibreMap) return;
   const labelLocale = countryLabelLocale();
@@ -3479,6 +3610,7 @@ function updateMapLibreLabels() {
   });
 }
 
+/** SVG for a migration arrow or destination dot (rotated by bearing). */
 function mapLibreMigrationCueHtml(kind, species, bearing) {
   const color = species.color || '#d2a45f';
   if (kind === 'dot') {
@@ -3497,12 +3629,14 @@ function mapLibreMigrationCueHtml(kind, species, bearing) {
     '<path d="M6 1.2 10.3 10.2 6 8.1 1.7 10.2Z" fill="' + bandTipEscapeHtml(color) + '"/></svg>';
 }
 
+/** Keep arrow + endpoint markers in sync with visible species migrations. */
 function syncMapLibreMigrationCues(visible) {
   if (!mapLibreMap) return;
   const cueItems = [];
   if (layerStates.migrations) {
     visible.forEach(function (species) {
       species.migrations.forEach(function (mig, idx) {
+        const end = migrationEnd(mig);
         const bearing = getBearing(mig.from, mig.to);
         const t = 0.65;
         cueItems.push({
@@ -3511,8 +3645,8 @@ function syncMapLibreMigrationCues(visible) {
           species: species,
           bearing: bearing,
           lngLat: [
-            mig.from[1] + (mig.to[1] - mig.from[1]) * t,
-            mig.from[0] + (mig.to[0] - mig.from[0]) * t,
+            mig.from[1] + (end[1] - mig.from[1]) * t,
+            mig.from[0] + (end[0] - mig.from[0]) * t,
           ],
         });
         cueItems.push({
@@ -3520,7 +3654,7 @@ function syncMapLibreMigrationCues(visible) {
           kind: 'dot',
           species: species,
           bearing: bearing,
-          lngLat: [mig.to[1], mig.to[0]],
+          lngLat: [end[1], end[0]],
         });
       });
     });
@@ -3553,14 +3687,24 @@ function syncMapLibreMigrationCues(visible) {
   });
 }
 
+// Retries while the style is still loading, but bounded: a style that never
+// finishes should not leave a timer respawning itself for the whole session.
+const MAPLIBRE_STYLE_MAX_RETRIES = 50; // 50 × 100ms = 5s
+let _mapLibreStyleRetries = 0;
+
+/** Rebuild range / migration / site GeoJSON for species alive at currentTime. */
 function updateMapLibre() {
   const visible = getVisibleSpecies();
   updateMapLegend(visible);
   if (!mapLibreMap) return;
   if (!mapLibreMap.isStyleLoaded()) {
-    setTimeout(updateMapLibre, 100);
+    if (_mapLibreStyleRetries < MAPLIBRE_STYLE_MAX_RETRIES) {
+      _mapLibreStyleRetries++;
+      setTimeout(updateMapLibre, 100);
+    }
     return;
   }
+  _mapLibreStyleRetries = 0;
   if (!ensureMapLibreSitesLayer()) return;
   const rangeFeatures = layerStates.range ? visible.flatMap(species =>
     species.regions.map((region, idx) => ({
@@ -3579,7 +3723,7 @@ function updateMapLibre() {
   const migrationFeatures = layerStates.migrations ? visible.flatMap(species =>
     species.migrations.map((mig, idx) => ({
       type: 'Feature',
-      geometry: { type: 'LineString', coordinates: [[mig.from[1], mig.from[0]], [mig.to[1], mig.to[0]]] },
+      geometry: { type: 'LineString', coordinates: [[mig.from[1], mig.from[0]], [unwrapLng(mig.from[1], mig.to[1]), mig.to[0]]] },
       properties: {
         id: species.id + '-migration-' + idx,
         speciesId: species.id,
@@ -3616,6 +3760,7 @@ function updateMapLibre() {
   updateMapLibreEvents();
 }
 
+/** Rebuild map layers for the current time (alias of updateMapLibre). */
 function updateMap() {
   updateMapLibre();
 }
@@ -3625,6 +3770,7 @@ function eventCumulativeTimeMax() {
   return currentTime + Math.max(1e-6, Math.abs(currentTime) * 1e-12);
 }
 
+/** On a phone, switch the bottom tab to Carte so a map focus is visible. */
 function switchMobileTabToMap() {
   try {
     if (typeof window.matchMedia === 'undefined' || !window.matchMedia('(max-width: 768px)').matches) return;
@@ -3644,6 +3790,7 @@ function switchMobileTabToMap() {
   } catch (e) { /* ignore */ }
 }
 
+/** Remember which milestone to zoom to once the map tab is visible (mobile). */
 function queueEventMapFocus(eventId) {
   function kick() {
     focusEventOnMap(eventId);
@@ -3661,6 +3808,7 @@ function queueEventMapFocus(eventId) {
   });
 }
 
+/** Fly the map to a milestone and pulse its marker. */
 function focusEventOnMap(eventId) {
   if (!mapLibreMap) return;
   const ev = EVENTS_DATA.find(item => item.id === eventId);
@@ -3679,6 +3827,7 @@ function focusEventOnMap(eventId) {
   } catch (e) { /* ignore */ }
 }
 
+/** Refresh event markers (wrapper used from Play and language change). */
 function updateEvents() {
   updateMapLibreEvents();
 }
@@ -3686,6 +3835,21 @@ function updateEvents() {
 // =====================================================================
 // SIDE PANEL — species detail
 // =====================================================================
+// renderPanel(species) writes #panel-content as HTML. Narrative fields go
+// through bandTipEscapeHtml(); colours are interpolated into style= as-is
+// (catalogue-controlled). Swatch helpers below take a *sub-trait*
+// (pig.skin / .eyes / .hair), not the pigmentation container.
+
+// True when any sub-trait uses a split (☯) swatch. `variant` lives on each
+// sub-trait, not on the pigmentation container.
+function hasSplitPigmentation(pig) {
+  if (!pig) return false;
+  return ['skin', 'eyes', 'hair'].some(function (trait) {
+    return pig[trait] && pig[trait].variant === 'split';
+  });
+}
+
+/** Colour chip for skin (solid, split, spectrum gradient, or fur hatch). */
 function getSkinSwatch(pig, T) {
   if (pig.variant === 'spectrum' && pig.spectrumColors) {
     const stops = pig.spectrumColors.join(', ');
@@ -3722,6 +3886,7 @@ function getSkinSwatch(pig, T) {
   return `<div class="pig-swatch" style="background:${pig.color}"></div>`;
 }
 
+/** Colour chip for eyes (split = two-tone conic with a pupil overlay). */
 function getEyeSwatch(pig) {
   if (pig.variant === 'split') {
     return `<div class="pig-swatch" style="
@@ -3736,6 +3901,7 @@ function getEyeSwatch(pig) {
   </div>`;
 }
 
+/** Colour chip for hair / fur (split = two-tone conic). */
 function getHairSwatch(pig) {
   if (pig.variant === 'split') {
     return `<div class="pig-swatch" style="
@@ -3745,11 +3911,13 @@ function getHairSwatch(pig) {
   return `<div class="pig-swatch" style="background:${pig.color}"></div>`;
 }
 
+/** CSS class for a pigmentation-certainty badge (dna-direct, genetic, …). */
 function getCertaintyClass(c) {
   const map = { 'dna-direct': 'dna-direct', 'genetic': 'genetic', 'inference': 'inference', 'debate': 'debate' };
   return map[c] || 'inference';
 }
 
+/** SVG body of a standing figure; optional hatch pattern when furVariant is set. */
 function humanFigureSVG(skinColor, eyeColor, hairColor, cx=60, furVariant=null) {
   const cid = 'furpat-' + String(cx) + '-' + (furVariant || 'x') + '-' + Math.random().toString(36).slice(2, 8);
   let furDefs = '';
@@ -3799,6 +3967,7 @@ function humanFigureSVG(skinColor, eyeColor, hairColor, cx=60, furVariant=null) 
   `;
 }
 
+/** One or two figures for the side panel (spectrum / split skin uses a pair). */
 function drawHumanFigure(pigmentation) {
   const skin  = pigmentation.skin;
   const eyeColor  = pigmentation.eyes.color;
@@ -3844,6 +4013,7 @@ function drawHumanFigure(pigmentation) {
   `;
 }
 
+/** Set the selected species, render the panel, highlight it on the map. */
 function selectSpecies(species) {
   selectedSpecies = species;
   renderPanel(species);
@@ -3873,6 +4043,7 @@ function certaintyTriSectorPath(cx, cy, r, i) {
   return 'M ' + cx + ' ' + cy + ' L ' + x0 + ' ' + y0 + ' A ' + r + ' ' + r + ' 0 0 1 ' + x1 + ' ' + y1 + ' Z';
 }
 
+/** Escape a string for use inside an HTML attribute. */
 function escapeHtmlAttr(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -3924,6 +4095,7 @@ function renderCertaintyTriIcon(species, T) {
 }
 
 
+/** Build the side-panel HTML for one species (biometrics, pigmentation, tools). */
 function renderPanel(species) {
   const pig = species.pigmentation;
   const bio = species.biometrics;
@@ -4009,7 +4181,7 @@ function renderPanel(species) {
           `}
         </div>
         <p style="font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.5">
-          ${pig.variant === 'split' ? T('splitVariant', 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.') : ''}
+          ${hasSplitPigmentation(pig) ? T('splitVariant', 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.') : ''}
         </p>
       </div>
 
@@ -4031,7 +4203,7 @@ function renderPanel(species) {
 
       <!-- Certainty badge -->
       <div style="padding:var(--space-3) var(--space-6) 0">
-        <span class="certainty-badge ${getCertaintyClass(pig.certainty)}">${pig.certLabel}</span>
+        <span class="certainty-badge ${getCertaintyClass(pig.certainty)}">${bandTipEscapeHtml(pig.certLabel)}</span>
       </div>
 
       <!-- Footer attribution -->
@@ -4051,12 +4223,13 @@ function renderPanel(species) {
   panelEl.scrollTop = 0;
 }
 // =====================================================================
-// TIMELINE
+// TIMELINE — needle, species lanes, scrub
 // =====================================================================
-
-/// One dedicated row per species.
-// Rows ordered oldest-at-bottom → newest-at-top.
-// rowOrder[0] = oldest (bottom row), rowOrder[N-1] = newest (top row).
+// Vertical order: oldest species at the bottom, newest at the top
+// (rowOrder[0] = bottom). Horizontal position is timeToLinear(year).
+// initTimeline() rebuilds lane DOM; setTime() only moves the needle and
+// restyles which lanes are "alive". Touch/mouse scrub lives on
+// #needle-wrapper and the species track (see initTimeline).
 function isMobileViewport() {
   return typeof window.matchMedia !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
 }
@@ -4067,11 +4240,13 @@ function getLaneMetrics() {
     : { h: 7, gap: 1 };
 }
 
+/** Sort species oldest-first so row 0 is the bottom lane. */
 function buildRowOrder(speciesList) {
   // sort by start descending: oldest (largest start) first = row 0 = bottom
   return [...speciesList].sort((a, b) => b.start - a.start);
 }
 
+/** Pixel offset from the top of the track for a given row index. */
 function getLaneTop(laneIndex, totalRows, lm) {
   lm = lm || getLaneMetrics();
   // laneIndex 0 = bottom → invert so it renders at the bottom of the track
@@ -4084,10 +4259,12 @@ let _timelineTrackListenersWired = false;
 /** Scrub drag state — document listeners wired once via initTimeline. */
 let _timelineScrubDragging = false;
 
+/** The horizontal track that holds species lanes (scrub target). */
 function getTimelineSpeciesTrackEl() {
   return document.getElementById('timeline-species-track');
 }
 
+/** While dragging the needle, map pointer X → setTime on the log scale. */
 function onTimelineScrubPointerMove(e) {
   if (!_timelineScrubDragging) return;
   var clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -4181,11 +4358,13 @@ function updateMobileTimelineReserve() {
 }
 
 var _mobileReserveResizeTimer;
+/** Debounce updateMobileTimelineReserve (120 ms) on resize. */
 function scheduleMobileTimelineReserve() {
   clearTimeout(_mobileReserveResizeTimer);
   _mobileReserveResizeTimer = setTimeout(updateMobileTimelineReserve, 120);
 }
 
+/** Rebuild species-lane DOM from buildTimelineLaneModels() and bind scrubbers. */
 function initTimeline() {
   const track = document.getElementById('timeline-species-track');
   const lanesEl = document.getElementById('timeline-lanes');
@@ -4369,6 +4548,9 @@ function initTimeline() {
 // =====================================================================
 // SKIN TONES BAND
 // =====================================================================
+// Pedagogical row under the species lanes — not per-species data.
+// Periods are hard-coded here (not in species.json). buildSkinBand()
+// turns each entry into a .band-segment whose width is the log interval.
 const SKIN_PERIODS = [
   {
     start: -7500000, end: -2000000, color: '#c8956a', cssClass: 'fur',
@@ -4451,11 +4633,13 @@ function syncTimelineBandsToSpeciesTrack() {
   }
 }
 
+/** Debounce syncTimelineBandsToSpeciesTrack (40 ms). */
 function scheduleTimelineBandSync() {
   clearTimeout(_timelineBandSyncTimer);
   _timelineBandSyncTimer = setTimeout(syncTimelineBandsToSpeciesTrack, 40);
 }
 
+/** Escape text before inserting it into tooltip / panel HTML. */
 function bandTipEscapeHtml(s) {
   if (s == null || s === '') return '';
   return String(s)
@@ -4470,6 +4654,7 @@ function scientificNameHtml(s) {
   return '<span translate="no">' + bandTipEscapeHtml(s) + '</span>';
 }
 
+/** Tooltip HTML for one skin-period segment. */
 function skinBandTooltipHtml(seg) {
   const label = pickLang(seg.label);
   const tip = pickLang(seg.tip);
@@ -4481,6 +4666,7 @@ function skinBandTooltipHtml(seg) {
   );
 }
 
+/** Tooltip HTML for a single-species timeline lane. */
 function speciesLaneTooltipHtml(species) {
   return (
     '<strong style="color:' + bandTipEscapeHtml(species.color) + '">' + scientificNameHtml(species.name) + '</strong><br>' +
@@ -4489,6 +4675,7 @@ function speciesLaneTooltipHtml(species) {
   );
 }
 
+/** Render SKIN_PERIODS as .band-segment elements on #skin-band. */
 function buildSkinBand() {
   const band = document.getElementById('skin-band');
   const track = document.getElementById('skin-band-track');
@@ -4563,6 +4750,8 @@ function buildSkinBand() {
 // =====================================================================
 // EVENTS BAND (tools, fire, art, burial...)
 // =====================================================================
+// Markers come from EVENTS_DATA (events.json). Icons are emoji; we
+// normalise variation selectors so the same glyph matches across OS/editors.
 /** NFC + strip VS16 so JSON / éditeurs / OS matchent le même glyphe (ex. 🚶 vs 🚶‍♂️). */
 function normalizeGlyphKey(s) {
   if (typeof s !== 'string') return '';
@@ -4588,6 +4777,7 @@ const _MIGRATION_KEEP_RAW_EMOJI = new Set([
   normalizeGlyphKey('⛵'),
 ]);
 
+/** True if the milestone icon is a walking/human emoji that we replace with SVG. */
 function isHumanFigureGlyph(icon) {
   const k = normalizeGlyphKey(icon);
   if (!k) return false;
@@ -4599,12 +4789,14 @@ function isHumanFigureGlyph(icon) {
   return false;
 }
 
+/** First catalogue species alive at `time` (used to colour event figures). */
 function getSpeciesAtTime(time) {
   return SPECIES_DATA
     .filter(s => s.start <= time && s.end >= time)
     .sort((a, b) => b.start - a.start); // most recent = first
 }
 
+/** True when this milestone should show a tinted human silhouette instead of an emoji. */
 function eventUsesPigmentedHumanSvg(ev) {
   if (!ev || typeof ev.icon !== 'string') return false;
   if (isHumanFigureGlyph(ev.icon)) return true;
@@ -4614,6 +4806,7 @@ function eventUsesPigmentedHumanSvg(ev) {
   return false;
 }
 
+/** Pigmentation to paint on an event’s human figure (species at that date). */
 function eventFigurePigmentation(ev) {
   const active = getSpeciesAtTime(ev.time);
   const pig    = active.length ? (active[0].pigmentation || {}) : {};
@@ -4638,6 +4831,7 @@ function eventMapMarkerInnerContent(ev) {
 /** Pinned #band-tooltip on mobile: 'event:id' | 'skin:idx' | 'species:id' */
 let _bandTipPinKey = null;
 
+/** Hide the pinned mobile tooltip and clear _bandTipPinKey. */
 function closeMobileBandTooltip() {
   const tip = document.getElementById('band-tooltip');
   if (tip) {
@@ -4682,12 +4876,14 @@ function positionBandTipNearIcon(markerEl) {
   tip.style.bottom = 'auto';
 }
 
+/** Find a milestone in the open events-peek list by id. */
 function eventPeekItemById(id) {
   if (!id) return null;
   const esc = (typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(id) : id;
   return document.querySelector('#events-peek .events-peek-item[data-event-id="' + esc + '"]');
 }
 
+/** One-time document listeners that close the band tooltip on tap-outside / Escape. */
 function installBandTooltipGlobalCloserIfNeeded() {
   if (window._hoBandTipCloserInstalled) return;
   window._hoBandTipCloserInstalled = true;
@@ -4711,6 +4907,7 @@ function installBandTooltipGlobalCloserIfNeeded() {
   }, false);
 }
 
+/** HTML for an events-band tooltip (same fields as the map popup). */
 function eventTooltipHtml(ev) {
   const catLabel = getCategoryLabel(ev.category);
   const srcHtml  = ev.source
@@ -4723,6 +4920,7 @@ function eventTooltipHtml(ev) {
   );
 }
 
+/** Place #band-tooltip near a cursor / touch point, clamped to the viewport. */
 function positionBandTipAtCursor(cx, cy) {
   const tip = document.getElementById('band-tooltip');
   if (!tip) return;
@@ -4738,6 +4936,7 @@ function positionBandTipAtCursor(cx, cy) {
   tip.style.top  = y + 'px';
 }
 
+/** Pin the events tooltip next to a band marker (touch / click). */
 function showEventTooltipPinned(ev, markerEl) {
   const tip = document.getElementById('band-tooltip');
   if (!tip || !ev) return;
@@ -4754,6 +4953,7 @@ function showEventTooltipPinned(ev, markerEl) {
   return place;
 }
 
+/** User activated a jalon: jump time, focus the map, show tooltip or peek. */
 function activateEventFromBand(ev, markerEl) {
   const tip = document.getElementById('band-tooltip');
   stopPlay();
@@ -4790,6 +4990,7 @@ function activateEventFromBand(ev, markerEl) {
   }
 }
 
+/** Place event-marker icons on #events-band from EVENTS_DATA. */
 function buildEventsBand() {
   const band = document.getElementById('events-band');
   const track = document.getElementById('events-band-track');
@@ -4849,6 +5050,7 @@ const _eventsPeek = {
   lastPinnedId: null,
 };
 
+/** Close the clustered-events peek layer. */
 function hideEventsPeek() {
   const peek = document.getElementById('events-peek');
   if (peek) {
@@ -4871,17 +5073,20 @@ function hideEventsPeek() {
   }
 }
 
+/** Rebuild peek items if the peek panel is currently open. */
 function refreshEventsPeekIfOpen() {
   if (!_eventsPeek.open) return;
   scheduleEventsPeekFrame();
 }
 
+/** Hit-test: is (x, y) inside el’s bounding box (with a small pad)? */
 function eventsPeekRectContains(el, x, y) {
   if (!el) return false;
   const r = el.getBoundingClientRect();
   return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
 }
 
+/** Visible event-marker elements that overlap and should open the peek. */
 function eventsPeekCollectMarkers() {
   const track = document.getElementById('events-band-track');
   if (!track) return [];
@@ -4898,6 +5103,7 @@ function eventsPeekCollectMarkers() {
   return out;
 }
 
+/** Spread overlapping peek icons on X so they do not sit on top of each other. */
 function eventsPeekResolveXs(items, pinIdx, pinX, minX, maxX, gap) {
   const xs = items.map(function (item, i) {
     return i === pinIdx ? pinX : pinX + (item.x - items[pinIdx].x);
@@ -4919,11 +5125,13 @@ function eventsPeekResolveXs(items, pinIdx, pinX, minX, maxX, gap) {
   return xs;
 }
 
+/** Icon HTML inside one peek button (emoji or tinted human SVG). */
 function eventsPeekInnerHtml(ev) {
   if (eventUsesPigmentedHumanSvg(ev)) return eventMapMarkerInnerContent(ev);
   return '';
 }
 
+/** Show the jalon tooltip while the peek strip is open. */
 function showEventsPeekTooltip(ev, cx, cy) {
   const tip = document.getElementById('band-tooltip');
   if (!tip || isMobileViewport()) return;
@@ -4936,6 +5144,7 @@ function showEventsPeekTooltip(ev, cx, cy) {
   requestAnimationFrame(function () { positionBandTipAtCursor(cx, cy); });
 }
 
+/** Reposition the peek tooltip onto the given event. */
 function syncEventsPeekTargetTooltip(ev) {
   const tip = document.getElementById('band-tooltip');
   if (!tip || isMobileViewport() || !ev) return;
@@ -4952,6 +5161,7 @@ function syncEventsPeekTargetTooltip(ev) {
   else positionBandTipAtCursor(_eventsPeek.x, _eventsPeek.y);
 }
 
+/** Hover / focus / click handlers for one peek button. */
 function bindEventsPeekItem(itemEl) {
   if (itemEl._hoPeekBound) return;
   itemEl._hoPeekBound = true;
@@ -4977,6 +5187,7 @@ function bindEventsPeekItem(itemEl) {
   });
 }
 
+/** Render peek buttons at the resolved X positions. */
 function renderEventsPeekItems(cluster, xs, pinnedId) {
   const host = document.getElementById('events-peek-items');
   if (!host) return;
@@ -5013,6 +5224,7 @@ function renderEventsPeekItems(cluster, xs, pinnedId) {
   });
 }
 
+/** Position and size the peek layer over the events band. */
 function updateEventsPeekFrame() {
   _eventsPeek.raf = 0;
   const peek = document.getElementById('events-peek');
@@ -5140,11 +5352,13 @@ function updateEventsPeekFrame() {
   syncEventsPeekTargetTooltip(cluster[pinIdx].ev);
 }
 
+/** rAF-throttle updateEventsPeekFrame. */
 function scheduleEventsPeekFrame() {
   if (_eventsPeek.raf) return;
   _eventsPeek.raf = requestAnimationFrame(updateEventsPeekFrame);
 }
 
+/** Create the peek overlay and bind pointermove (once). */
 function installEventsPeekLayer() {
   const track = document.getElementById('events-band-track');
   const peek = document.getElementById('events-peek');
@@ -5330,6 +5544,7 @@ function updateTimelineValueLabelPosition() {
   }
 }
 
+/** Move the vertical needle, play button and time label to currentTime. */
 function updateNeedlePosition() {
   const fullNeedle = document.getElementById('timeline-full-needle');
   if (!fullNeedle) return;
@@ -5372,6 +5587,7 @@ let _fitNarrativeTimer = null; // debounce mobile fitBounds when visible species
 /** After flyTo on a jalon, skip debounced fitBounds briefly (avoids zoom-then-unzoom flicker on phone). */
 let _suppressMobileNarrativeFitUntil = 0;
 
+/** Pause auto-fitBounds for `ms` so a jalon zoom is not immediately undone. */
 function suppressMobileNarrativeFit(ms) {
   if (!isMobileViewport()) return;
   clearTimeout(_fitNarrativeTimer);
@@ -5412,6 +5628,7 @@ function scheduleFitMapToVisibleNarrative() {
   }, 160);
 }
 
+/** Fit the map to living species’ sites / ranges / migrations. */
 function fitMapToVisibleNarrative(opts) {
   if (!mapLibreMap) return;
   const visible = getVisibleSpecies();
@@ -5445,6 +5662,10 @@ function resetMapToWorldView() {
   } catch (e) { /* ignore */ }
 }
 
+// Hub for "the user (or Play) moved in time".
+// Always: clamp, label, lane highlight, needle, walking-figure visibility.
+// Map: full updateMap() only when the set of living species changes;
+// during Play with the same set, only refresh migration cues + events.
 function setTime(time) {
   currentTime = Math.max(TIMELINE_MIN, Math.min(TIMELINE_MAX, time));
   document.getElementById('timeline-current-label').textContent = formatTime(currentTime);
@@ -5495,6 +5716,8 @@ function setTime(time) {
 // =====================================================================
 // LAYER TOGGLES
 // =====================================================================
+// Buttons live in the burger (cloned from #layer-toggles). `events` is a
+// separate flag (showEvents); sites / migrations / range sit on layerStates.
 function initLayerToggles() {
   document.querySelectorAll('.layer-btn[data-layer]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -5515,9 +5738,12 @@ function initLayerToggles() {
 // =====================================================================
 // THEME TOGGLE
 // =====================================================================
+// Persists on <html data-theme="light|dark"> and localStorage ho_theme.
+// CSS variables flip; MapLibre palette is reapplied in applyMapLibreNeutralBasemap.
 const SVG_SUN  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
 const SVG_MOON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 
+/** Apply light or dark theme to <html> and restyle the map palette. */
 function setTheme(theme) {
   const root = document.documentElement;
   root.setAttribute('data-theme', theme);
@@ -5534,6 +5760,7 @@ function setTheme(theme) {
   });
 }
 
+/** Bind the sun/moon button; persist theme in localStorage. */
 function initThemeToggle() {
   const root = document.documentElement;
   function readTheme() {
@@ -5579,6 +5806,9 @@ let showEvents = true;
 // =====================================================================
 // PLAY / AUTOPLAY
 // =====================================================================
+// Advances currentTime on an interval (~30 fps). startPlay / stopPlay also
+// swap the play/pause SVG and spawn or freeze walking figures.
+// Wrapping at TIMELINE_MAX jumps back to TIMELINE_MIN (loop).
 let playInterval = null;
 let isPlaying = false;
 
@@ -5602,6 +5832,7 @@ function updatePlayControlAccessibility() {
   const os = document.getElementById('play-overlay-btn-sr');
   if (os) os.textContent = name;
 }
+/** Set lang= on the play/pause label spans so page-translate sees the source. */
 function syncPlayToggleLabelLang() {
   var lang = 'en';
   try {
@@ -5622,6 +5853,7 @@ function fillPlayToggleLabelTexts() {
   syncPlayToggleLabelLang();
   updatePlayControlAccessibility();
 }
+/** Toggle .is-playing on play buttons (swaps Play/Pause label via CSS). */
 function setPlayToggleVisualPlaying(on) {
   document.querySelectorAll('.play-toggle-label').forEach(function (el) {
     if (on) el.classList.add('is-playing');
@@ -5629,6 +5861,7 @@ function setPlayToggleVisualPlaying(on) {
   });
 }
 
+/** Start the time interval, swap the icon to pause, spawn walking figures. */
 function startPlay() {
   if (isPlaying) return;
   isPlaying = true;
@@ -5686,6 +5919,7 @@ function startPlay() {
   playInterval = setInterval(tick, 1000 / PLAY_FPS);
 }
 
+/** Stop the interval and freeze walking figures in place. */
 function stopPlay() {
   if (!isPlaying) return;
   isPlaying = false;
@@ -5721,6 +5955,7 @@ function syncMobilePlayBarState() {
   updatePlayControlAccessibility();
 }
 
+/** Play if paused, pause if playing. */
 function togglePlay() {
   if (isPlaying) stopPlay();
   else startPlay();
@@ -5731,17 +5966,44 @@ window.stopPlay = stopPlay;
 window.togglePlay = togglePlay;
 
 // =====================================================================
-// ANIMATED MIGRATION ARROWS (during play)
+// ANIMATED MIGRATION ARROWS + ANTIMERIDIAN
 // =====================================================================
+// Cue markers (arrow + dest dot) sit on MapLibre Marker DOM, not the line
+// layer. Every consumer of mig.from/mig.to must use migrationEnd() so a
+// Pacific crossing is not drawn the long way across Europe.
+// Shortest signed longitude delta, i.e. wrapped into [-180, 180].
+// Without this, Siberia (69°E) → British Columbia (120°W) reads as -189°
+// (the long way west across Europe) instead of +171° (east via Beringia).
+function normaliseLngDelta(dLng) {
+  if (dLng > 180) return dLng - 360;
+  if (dLng < -180) return dLng + 360;
+  return dLng;
+}
+
+// Destination longitude expressed continuously with `fromLng`, so a path that
+// crosses the antimeridian keeps increasing/decreasing instead of jumping.
+// May fall outside [-180, 180]; MapLibre wraps world copies for display.
+function unwrapLng(fromLng, toLng) {
+  return fromLng + normaliseLngDelta(toLng - fromLng);
+}
+
+// Migration destination [lat, lng] with the longitude unwrapped relative to the
+// origin, so bearing, polyline and animation all take the same short path.
+function migrationEnd(mig) {
+  return [mig.to[0], unwrapLng(mig.from[1], mig.to[1])];
+}
+
+/** Compass bearing in degrees (0 = N, 90 = E) for a rhumb line; wraps longitude. */
 function getBearing(from, to) {
   // Rhumb-line bearing: matches the apparent direction of the
   // straight polyline on a Mercator (flat) map projection.
   // from/to are [lat, lng]. CSS rotation 0° = up (North), 90° = right (East).
-  const dLng = to[1] - from[1];
+  const dLng = normaliseLngDelta(to[1] - from[1]);
   const dLat = to[0] - from[0];
   return (Math.atan2(dLng, dLat) * 180 / Math.PI + 360) % 360;
 }
 
+/** Cheap Play-tick update: migration line paint + cue markers only. */
 function updateAnimatedMigrations() {
   if (!mapLibreMap) return;
   try {
@@ -9851,6 +10113,11 @@ const _EMBEDDED_EVENTS = {
 // =====================================================================
 // DATA LOADING — fetch JSON-LD from app/data/, fallback to embedded data
 // =====================================================================
+// Order: fetch both files → stash raw JSON on window._RAW_* (language
+// switch re-adapts from these) → map to SPECIES_DATA / EVENTS_DATA →
+// set __HOMININ_CERTAINTY_READY (tests wait on this) → bootApp().
+// The cache-bust query is bumped when the catalogue changes so Pages
+// clients do not keep a stale JSON after deploy.
 async function loadData() {
   let sj, ej;
   try {
@@ -9918,6 +10185,8 @@ function pickLangList(arr) {
   return arr.map(x => pickLang(x));
 }
 
+// JSON-LD Species node → runtime object used by the map, lanes and panel.
+// pickLang() unwraps {fr,en} fields. Certainty keys are copied as-is.
 function adaptSpecies(item) {
   const skin = {
     desc:  pickLang(item['hominin:skinDesc']),
@@ -9987,6 +10256,7 @@ function adaptSpecies(item) {
   return sp;
 }
 
+// JSON-LD Event (milestone) → runtime object for the events band + map markers.
 function adaptEvent(item) {
   const geo = (item.location && item.location.geo) || { latitude: 0, longitude: 0 };
   return {
@@ -10012,7 +10282,6 @@ function relocaliseData() {
   if (!sj || !ej) return;
   SPECIES_DATA = sj.itemListElement.map(adaptSpecies);
   EVENTS_DATA  = ej.itemListElement.map(adaptEvent);
-  if (typeof rebuildCountryLabels === 'function') rebuildCountryLabels();
   // Keep the current selection identity stable across language switches.
   if (typeof selectedSpecies !== 'undefined' && selectedSpecies && selectedSpecies.id) {
     const next = SPECIES_DATA.find(s => s.id === selectedSpecies.id);
@@ -10028,12 +10297,8 @@ function relocaliseData() {
   } else if (typeof updateMap === 'function') {
     updateMap();
   }
-  // Data viewer (drawer) — re-render the currently open tab if any.
-  try {
-    if (typeof _dv !== 'undefined' && _dv.open && typeof switchDataTab === 'function') {
-      switchDataTab(_dv.tab);
-    }
-  } catch (e) { /* ignore */ }
+  // The data viewer drawer is refreshed by applyTranslations(), which runs from
+  // the same 'languageChanged' handler; `_dv` is not reachable from this scope.
 
   if (typeof syncTimelineViewToggleUI === 'function') syncTimelineViewToggleUI();
 }
@@ -10047,6 +10312,7 @@ function relocaliseData() {
 // walkState = { mig, from, to, dur, t0, pausedAt } | null
 const speciesFigures = {};
 
+/** DOM element for a walking silhouette (size from heightM). */
 function makeMapLibreFigureElement(species) {
   const pig       = species.pigmentation || {};
   const skinColor = (pig.skin  && pig.skin.color)  || species.color || '#8B6347';
@@ -10066,6 +10332,7 @@ function makeMapLibreFigureElement(species) {
   return el;
 }
 
+/** Move a walking-figure marker; latlng is [lat, lng]. */
 function setFigureMarkerPosition(marker, latlng) {
   if (!marker || !latlng) return;
   marker.setLngLat([latlng[1], latlng[0]]);
@@ -10117,7 +10384,9 @@ function advanceFigure(id) {
 function startWalkFigure(id, mig, resumeElapsed) {
   const e = speciesFigures[id];
   if (!e || !e.marker) return;
-  const from = mig.from, to = mig.to;
+  // Unwrapped destination: keeps the walk continuous across the antimeridian
+  // (and stops `dist` — hence the duration — being inflated by a 360° jump).
+  const from = mig.from, to = migrationEnd(mig);
   const dist = Math.sqrt(Math.pow(to[0]-from[0],2)+Math.pow(to[1]-from[1],2));
   const dur  = Math.max(3000, Math.min(8000, 1500 + dist * 70));
   const t0   = performance.now() - resumeElapsed;
@@ -10171,6 +10440,8 @@ function checkAndSpawnFigures() {
 // =====================================================================
 // BOOT
 // =====================================================================
+// Called once data is in memory. Wires timeline, theme, play, map load,
+// then setTime(TIMELINE_MIN) so the first paint matches the needle.
 function bootApp() {
   loadTimelineViewModeFromStorage();
   initTimeline();
@@ -10267,6 +10538,8 @@ document.addEventListener('DOMContentLoaded', loadData);
 // =====================================================================
 // BURGER MENU — init on DOMContentLoaded so panel HTML is available
 // =====================================================================
+// Theme, language, layer clones, uncertainty explainer, GitHub + data-viewer
+// links all live in #burger-panel (markup at the end of <body>).
 document.addEventListener('DOMContentLoaded', function initBurger() {
   var btn     = document.getElementById('burger-btn');
   var panel   = document.getElementById('burger-panel');
@@ -10312,16 +10585,20 @@ document.addEventListener('DOMContentLoaded', function initBurger() {
           (species roster names, map tooltips, timeline lane labels) so page-translate
           does not corrupt scientific names; the spectrum “one species” caption is
           plain HTML under the silhouettes, not an SVG text node.
-     2) SECONDARY — i18next: instant menu chrome for **French and English** only
-        (no round-trip to an online translator for those two).
+     2) SECONDARY — inline i18n shim (window.i18next): instant menu chrome
+        for **French and English** only (no CDN, no translator round-trip).
      ===================================================================== -->
 <script>
 (function() {
+// This IIFE owns TRANSLATIONS, the i18n shim, applyTranslations, the
+// JSON data-viewer drawer, and the welcome-modal locale hint.
+// It talks to the first script via globals (i18next, relocaliseData, SPECIES_DATA).
 
 // =====================================================================
-// TRANSLATIONS (i18next resources)
-// Keys here are for the bundled selector. Prefer short, plain strings so
-// browser translators can still rewrite the rest of the document cleanly.
+// TRANSLATIONS (bundled FR/EN chrome strings)
+// Nested as { lng: { translation: { ui: { key: string } } } } so the
+// shim's t('ui.play') lookup matches the old i18next resource shape.
+// Scientific narrative is NOT here — it lives in species.json / events.json.
 // =====================================================================
 const TRANSLATIONS = {
   fr: {
@@ -11211,6 +11488,63 @@ const TRANSLATIONS = {
 };
 
 // =====================================================================
+// MINIMAL i18n ENGINE
+// Replaces the i18next CDN script. Only fr/en are bundled, with no
+// interpolation, plurals or key nesting, so a nested lookup with one
+// fallback language covers every call site. Keeping the `i18next` global
+// name and its Promise-returning signatures means call sites and tests
+// need no changes.
+// Loading this from a CDN previously took the whole page down when the CDN
+// was unreachable: `data-i18n-pending` was never cleared and the body stayed
+// hidden. Inlining it makes the UI shell work offline, as intended by the
+// single-file architecture.
+// =====================================================================
+const I18N_SUPPORTED = ['fr', 'en'];
+const I18N_FALLBACK = 'fr';
+
+window.i18next = (function () {
+  let current = I18N_FALLBACK;
+  const listeners = { languageChanged: [] };
+
+  function lookup(lng, key) {
+    let node = (TRANSLATIONS[lng] || {}).translation;
+    for (const part of key.split('.')) {
+      if (node === null || typeof node !== 'object') return undefined;
+      node = node[part];
+    }
+    return typeof node === 'string' ? node : undefined;
+  }
+
+  const api = {
+    isInitialized: false,
+    get language() { return current; },
+    t(key, opts) {
+      const hit = lookup(current, key);
+      if (hit !== undefined) return hit;
+      const fallback = lookup(I18N_FALLBACK, key);
+      if (fallback !== undefined) return fallback;
+      // i18next returns the key itself when nothing matches; several call
+      // sites rely on that instead of passing a defaultValue.
+      return (opts && opts.defaultValue !== undefined) ? opts.defaultValue : key;
+    },
+    init(cfg) {
+      current = I18N_SUPPORTED.includes(cfg && cfg.lng) ? cfg.lng : I18N_FALLBACK;
+      api.isInitialized = true;
+      return Promise.resolve(api.t);
+    },
+    changeLanguage(lng) {
+      current = I18N_SUPPORTED.includes(lng) ? lng : I18N_FALLBACK;
+      listeners.languageChanged.forEach(function (fn) {
+        try { fn(current); } catch (e) { /* one bad listener must not block the others */ }
+      });
+      return Promise.resolve(api.t);
+    },
+    on(evt, fn) { if (listeners[evt]) listeners[evt].push(fn); },
+  };
+  return api;
+})();
+
+// =====================================================================
 // APPLY TRANSLATIONS TO DOM
 // =====================================================================
 function applyTranslations() {
@@ -11359,8 +11693,9 @@ function getLangFromBrowser() {
   return raw.split('-')[0].toLowerCase();
 }
 
+/** FR or EN for chrome: stored override, then <html data-initial-ui-lang>, then browser. */
 function getInitialUiLang() {
-  const supported = ['fr', 'en'];
+  const supported = I18N_SUPPORTED;
   const initial = document.documentElement.getAttribute('data-initial-ui-lang');
   if (supported.includes(initial)) return initial;
   try {
@@ -11372,6 +11707,7 @@ function getInitialUiLang() {
   return 'en';
 }
 
+/** Init the inline i18n shim, apply strings, bind #lang-select. */
 function initI18n() {
   const detected = getInitialUiLang();
 
@@ -11380,12 +11716,7 @@ function initI18n() {
   if (sel) sel.value = detected;
 
   i18next
-    .init({
-      lng: detected,
-      fallbackLng: 'fr',
-      resources: TRANSLATIONS,
-      interpolation: { escapeValue: false },
-    })
+    .init({ lng: detected })
     .then(() => {
       applyTranslations();
       document.documentElement.setAttribute('translate', 'yes');
@@ -11417,9 +11748,12 @@ if (document.readyState === 'loading') {
 }
 
 // =====================================================================
-// DATA VIEWER JS (Évolution 2)
+// DATA VIEWER — burger "see the JSON" drawer
 // =====================================================================
+// Scoped inside this IIFE: _dv and switchDataTab are not globals.
+// Prism highlights #json-code when the library loaded; otherwise plain text.
 const _dv = { open: false, tab: 'species' };
+/** Open the JSON drawer on the species or events tab. */
 function openDataViewer(tab) {
   const ov = document.getElementById('data-viewer-overlay');
   const dr = document.getElementById('data-viewer-drawer');
@@ -11428,6 +11762,7 @@ function openDataViewer(tab) {
   ov.setAttribute('aria-hidden','false');
   _dv.open = true; switchDataTab(tab||'species');
 }
+/** Close the JSON drawer. */
 function closeDataViewer() {
   const ov = document.getElementById('data-viewer-overlay');
   const dr = document.getElementById('data-viewer-drawer');
@@ -11435,6 +11770,7 @@ function closeDataViewer() {
   setTimeout(() => { ov.hidden=true; dr.hidden=true; ov.setAttribute('aria-hidden','true'); }, 300);
   _dv.open = false;
 }
+/** Show species.json or events.json in the drawer and re-highlight. */
 function switchDataTab(tab) {
   _dv.tab = tab;
   document.querySelectorAll('.dv-tab').forEach(b => {
@@ -11447,6 +11783,7 @@ function switchDataTab(tab) {
   el.textContent = JSON.stringify(raw,null,2);
   if (window.Prism) Prism.highlightElement(el);
 }
+/** Bind open/close/copy/tab clicks on the data-viewer drawer. */
 function initDataViewer() {
   const btnOpen = document.getElementById('btn-data-viewer');
   if (!btnOpen) return;
@@ -11459,10 +11796,11 @@ function initDataViewer() {
     if (!raw) return;
     navigator.clipboard.writeText(JSON.stringify(raw,null,2)).then(() => {
       const lbl = document.getElementById('copy-label');
+      if (!lbl) return;
       const orig = lbl.textContent;
       lbl.textContent = '\u2713 ' + (typeof i18next!=='undefined' && i18next.isInitialized ? i18next.t('ui.copied') : 'Copi\u00e9');
       setTimeout(() => lbl.textContent=orig, 2000);
-    });
+    }).catch(() => { /* clipboard permission denied or unavailable — leave the label alone */ });
   });
   document.addEventListener('keydown', e => { if (e.key==='Escape' && _dv.open) closeDataViewer(); });
 }
@@ -11471,7 +11809,7 @@ window.addEventListener('load', initDataViewer);
 })();
 
 // =====================================================================
-// PLAY OVERLAY (centred startup button)
+// PLAY OVERLAY (legacy centred button — CSS forces display:none)
 // =====================================================================
 (function() {
   var overlay    = document.getElementById('play-overlay');
@@ -11497,8 +11835,10 @@ window.addEventListener('load', initDataViewer);
 })();
 
 // =====================================================================
-// MOBILE TABS
+// MOBILE TABS — Carte / Détail / Play (≤768px bottom bar)
 // =====================================================================
+// Toggles .view-map / .view-detail on #main. Play on this bar calls the
+// same togglePlay() as the desktop timeline button.
 (function() {
   var main = document.getElementById('main');
   if (!main) return;
@@ -11562,8 +11902,11 @@ window.addEventListener('load', initDataViewer);
 })();
 
 // =====================================================================
-// WELCOME MODAL — init on DOMContentLoaded (modal HTML is at end of body)
+// WELCOME MODAL — first visit + returning-visitor "map warming" overlay
 // =====================================================================
+// localStorage ho_welcomed_v3 skips the intro copy. Returning visitors
+// still see the same overlay until data-map-ready so the raw MapLibre
+// flash is hidden. Unsupported browser locales get a "Translate this page" hint.
 document.addEventListener('DOMContentLoaded', function initWelcome() {
   var STORAGE_KEY = 'ho_welcomed_v3';
   var overlay = document.getElementById('welcome-modal-overlay');

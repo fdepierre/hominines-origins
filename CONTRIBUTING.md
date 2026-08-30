@@ -38,8 +38,8 @@ When updating data:
 To add a **third** bundled UI language (not required for coverage):
 
 1. Open `app/index.html`
-2. Copy the `fr` block inside `TRANSLATIONS`, translate every `ui.*` string, and register the locale in `i18next.init` resources
-3. Add an `<option>` to `#lang-select` and extend the `supported` array in `initI18n()`
+2. Copy the `fr` block inside `TRANSLATIONS`, translate every `ui.*` string, and add the locale code to `I18N_SUPPORTED`
+3. Add an `<option>` to `#lang-select`
 4. Run `node tests/run-all.js`
 
 For one-off classroom use, **do not** add a pack — tell users to pick FR or EN in the burger, then translate the page.
