@@ -37,7 +37,8 @@ hominines-origins/
 │   └── ROADMAP.md
 ├── scripts/
 │   ├── sync_embedded.py        ← JSON → embedded mirrors in app/index.html (one-way); --check for CI
-│   └── check_dois.py           ← Resolves every cited DOI against Crossref; --quiet for CI
+│   ├── check_dois.py           ← Resolves every cited DOI against Crossref; --quiet for CI
+│   └── check_md_json.py        ← Catalogue ids, DOI sets, debate/evidence tokens Markdown↔JSON
 ├── tests/
 │   ├── run-all.js              ← Run all tests: node tests/run-all.js
 │   ├── unit.test.js            ← Data integrity, maths, arrow bearings, embedded-fallback parity
@@ -111,11 +112,11 @@ Longitude deltas that feed `getBearing` (and the migration polyline / walking-fi
 
 1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for languages **outside** the bundled list. Keep `<html translate="yes">` (re-applied after the inline i18n `init` and on `languageChanged`). Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands (e.g. `#json-code`, `#welcome-translate-hint`, **Latin taxon names** via `scientificNameHtml()` / `translate="no"` on timeline lane labels and the side-panel `.species-name`, so auto-translate does not corrupt `Homo sapiens`-style strings), the `#lang-select` block so option labels are not double-translated.
 
-2. **Inline i18n shim** (`window.i18next` in `app/index.html`, no CDN) — instant UI for **French and English** only (menu / controls / uncertainty explainer). The object exposes the same small API the old library used (`t`, `language`, `isInitialized`, `on`, `changeLanguage`, `init`) so call sites and tests stay unchanged. `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]` (keys may be `ui.*` or bare keys — the handler avoids double `ui.ui`), and rebuilds bands/map when needed. Any HTML built from JSON for MapLibre popups/markers or `#band-tooltip` must go through **`bandTipEscapeHtml()`**; roster names use **`scientificNameHtml()`** (`translate="no"`). Scientific narrative from JSON remains **French-first** in the DOM (many JSON entries also carry `en`). Optional `localStorage` key **`ho_ui_lang`** (`fr` \| `en`) stores the manual language override.
+2. **Inline i18n shim** (`window.i18next` in `app/index.html`, no CDN) — instant UI for **English and French** only (menu / controls / uncertainty explainer). The object exposes the same small API the old library used (`t`, `language`, `isInitialized`, `on`, `changeLanguage`, `init`) so call sites and tests stay unchanged. `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]` (keys may be `ui.*` or bare keys — the handler avoids double `ui.ui`), and rebuilds bands/map when needed. Any HTML built from JSON for MapLibre popups/markers or `#band-tooltip` must go through **`bandTipEscapeHtml()`**; roster names use **`scientificNameHtml()`** (`translate="no"`). Scientific narrative from JSON is **English-first** in the DOM (`fr` is a bundled translation). Optional `localStorage` key **`ho_ui_lang`** (`en` \| `fr`) stores the manual language override. Missing keys and missing `{fr,en}` fields fall back to **English**.
 
 The `TRANSLATIONS` object holds **fr** and **en** blocks only.
 
-To add a **third** bundled language: copy the `fr` block, translate every `ui.*` string, add an `<option>` in `#lang-select`, add the code to `I18N_SUPPORTED`, and keep `translate="no"` on the selector wrapper so option labels are not double-translated when users run page translation.
+To add a **third** bundled language: copy the `en` block, translate every `ui.*` string, add an `<option>` in `#lang-select`, add the code to `I18N_SUPPORTED`, and keep `translate="no"` on the selector wrapper so option labels are not double-translated when users run page translation.
 
 ### Theme
 
@@ -132,9 +133,9 @@ The **application** has no npm dependency at runtime. MapLibre, Prism and Google
 When new research is published:
 
 1. Update the relevant English scientific reference Markdown file in `data/` (see [`data/README.md`](../data/README.md) for the reading order and table conventions).
-2. Update the corresponding JSON-LD in `app/data/` (`species.json` and/or `events.json` as appropriate). For species, keep the six certainty keys on the same object as the rest of the catalogue data.
+2. Update the corresponding JSON-LD in `app/data/` (`species.json` and/or `events.json` as appropriate). For species, keep the six certainty keys and `hominin:references` on the same object as the rest of the catalogue data. For events, set `hominin:debateLevel` and `hominin:evidenceType` (use `UNASSESSED` only when the chronology Markdown has no synthesis yet).
 3. Regenerate the embedded mirrors: `python scripts/sync_embedded.py`. Never hand-edit **`_EMBEDDED_SPECIES`** / **`_EMBEDDED_EVENTS`** — the next sync overwrites them.
-4. Verify citations: `python scripts/check_dois.py`.
+4. Verify correspondence and citations: `python scripts/check_md_json.py` then `python scripts/check_dois.py`.
 5. Run tests: `node tests/run-all.js`.
 6. If the visual layout changed intentionally, update snapshots: `UPDATE_SNAPSHOTS=1 node tests/visual.test.js`.
 7. Open a pull request with the DOI of the new source.
@@ -153,6 +154,7 @@ Always run before committing:
 
 ```bash
 python scripts/sync_embedded.py --check   # JSON ↔ embedded mirrors agree
+python scripts/check_md_json.py           # Markdown ids, DOIs, debate/evidence tokens
 python scripts/check_dois.py              # every cited DOI resolves and matches
 node tests/run-all.js                     # four browser suites
 ```
@@ -164,7 +166,7 @@ npx playwright install chromium
 ```
 
 Tests are written in plain Node.js — no test framework dependency. Four suites
-(unit, visual, a11y, MapLibre) take about three minutes; the two Python gates are
+(unit, visual, a11y, MapLibre) take about three minutes; the Python gates are
 near-instant apart from the Crossref lookups. Catalogue counts are asserted
 against `app/data/*.json` rather than hard-coded, so growing the catalogue does
 not require editing tests.
@@ -188,7 +190,7 @@ not require editing tests.
 
 ### Adding a new bundled UI language (optional)
 
-"Add Russian as a **third** bundled UI language: copy the `fr` block in `TRANSLATIONS`, translate every `ui.*` string, add `<option value="ru">Русский</option>` to `#lang-select`, add `ru` to `I18N_SUPPORTED`, then run `node tests/run-all.js`. For most classrooms, prefer **browser page translation** instead of growing `TRANSLATIONS`."
+"Add Russian as a **third** bundled UI language: copy the `en` block in `TRANSLATIONS`, translate every `ui.*` string, add `<option value="ru">Русский</option>` to `#lang-select`, add `ru` to `I18N_SUPPORTED`, then run `node tests/run-all.js`. For most classrooms, prefer **browser page translation** instead of growing `TRANSLATIONS`."
 
 ### Updating a species' pigmentation data
 

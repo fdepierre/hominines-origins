@@ -1,10 +1,10 @@
 # Hominins — Morphology and Pigmentation Reference
 
-> **Status of this document:** English-language scientific reference synthesis for this project — **not** a literal translation of a prior French working file. It is built from the primary literature, with DOIs independently re-checked on 28–29 August 2026. Known transcription errors corrected here include a non-standard bioRxiv DOI version suffix and the Martinón-Torres et al. DOI (`10.1016/j.jhevol.2023.103464`, not `…103507`). **This file is the editorial source of record** for morphology and pigmentation claims mirrored into `app/data/`. It focuses on the confidence framework, taxa with active scientific debate, and validated references; biometric detail is condensed where that keeps the cross-check auditable. Do not strengthen, simplify, or silently drop epistemic qualifications when adapting claims into application data.
+> **Status of this document:** English-language scientific reference synthesis for this project, built from the primary literature, with DOIs independently re-checked on 28–29 August 2026. Known transcription errors corrected here include a non-standard bioRxiv DOI version suffix and the Martinón-Torres et al. DOI (`10.1016/j.jhevol.2023.103464`, not `…103507`). **This file is the editorial source of record** for morphology and pigmentation claims mirrored into `app/data/`. It focuses on the confidence framework, taxa with active scientific debate, and validated references; biometric detail is condensed where that keeps the cross-check auditable. Do not strengthen, simplify, or silently drop epistemic qualifications when adapting claims into application data.
 >
 > **Maintenance:** keep this filename stable (no year stamp). When new papers appear, update this document in place and record the review date below — then check whether `app/data/` needs a corresponding change. New to this folder? Start at [`README.md`](README.md).
 >
-> **Last reviewed:** 29 August 2026 — citation audit: every DOI in this file re-resolved against Crossref, the dead Dmanisi identifier replaced, and every superscript marker given a definition in the reference list. The consolidated table now covers all catalogue entries.
+> **Last reviewed:** 30 August 2026 — catalogue identifier map added so Markdown footnotes and `species.json` `hominin:references` can be checked against each other. Citation audit of 29 August 2026 still stands.
 
 Reference table integrating osteological, genomic, and evolutionary-inference data for each key taxon or period. The original columns cover phylogeny, biometrics, morphology, pigmentation, confidence level, active debates, and DOIs.
 
@@ -20,6 +20,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 0a. *Sahelanthropus tchadensis* (Toumaï) — ~7 million years
+<!-- catalogue-id: sahelanthropus -->
 **Phylogeny:** Oldest known pre-human, discovered in 2001 at Toros-Menalla (Djourab Desert, Chad) by the French–Chadian MPFT mission led by Michel Brunet.[^T1]
 
 **Biometrics:** cranial volume 320–380 cm³; estimated height ~110–120 cm; estimated weight ~35 kg (inferred from femur TM 266-01-063).
@@ -32,6 +33,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 0b. *Ardipithecus ramidus* — ~4.4 million years
+<!-- catalogue-id: ardipithecus -->
 **Phylogeny:** Forest-dwelling hominin described in 2009 by Tim White et al. "Ardi" skeleton (ARA-VP-6/500) from Aramis (Middle Awash, Ethiopia). Preceded by *Ardipithecus kadabba* (5.8–5.2 Ma).[^T3]
 
 **Biometrics:** female height ~120 cm; female weight ~50 kg; cranial volume 300–350 cm³.
@@ -44,6 +46,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 1. *Australopithecus afarensis* — 4.1 to 2.7 million years
+<!-- catalogue-id: afarensis -->
 **Phylogeny:** Pre-*Homo* hominid, probable ancestor of the genus *Homo*. Notably described via the "Lucy" skeleton (AL 288-1, Hadar, Ethiopia).[^1]
 
 **Biometrics:** male height ~150 cm; female height ~105–110 cm; male weight ~42 kg; female weight ~29 kg; brain volume 385–550 cm³; marked sexual dimorphism (~40%).
@@ -56,6 +59,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 2. *Homo habilis* — 2.4 to 1.4 million years
+<!-- catalogue-id: habilis -->
 **Phylogeny:** First recognised member of the genus *Homo*; contemporary with *Australopithecus*. Coherent species status still debated (Wood & Collard 1999).[^4]
 
 **Biometrics:** male height ~130–135 cm; female height ~100–120 cm; male weight ~37 kg; brain volume 500–900 cm³.
@@ -66,6 +70,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 3. *Homo erectus* — 1.8 million to 250,000 years
+<!-- catalogue-id: erectus -->
 **Phylogeny:** First hominin with body proportions genuinely comparable to modern humans. Present in Africa, Europe and Asia. The "Turkana Boy" specimen (KNM-WT 15000) is one of the most complete skeletons in the entire human evolutionary record.[^5]
 
 **Biometrics:** male height 145–185 cm; female height 130–160 cm; male weight 40–68 kg; brain volume 600–1,100 cm³ (mean ~900 cm³).
@@ -78,6 +83,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 3b. *Homo erectus georgicus* (Dmanisi) — ~1.77 million years
+<!-- catalogue-id: georgicus -->
 **Phylogeny:** Archaic *Homo erectus* population found at Dmanisi (Georgia). Oldest known hominins outside Africa. Five skulls described by Lordkipanidze et al. (2013) show exceptionally wide morphological variability within a single synchronous population.[^T4]
 
 **Biometrics:** male height ~145–166 cm; male weight ~40–50 kg; cranial volume 546–775 cm³ (skull D4500: 546 cm³).
@@ -88,6 +94,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 4. *Homo heidelbergensis* — 700,000 to 200,000 years
+<!-- catalogue-id: heidelbergensis -->
 **Phylogeny:** Probable ancestor of the Neanderthals in Eurasia and possibly of *H. sapiens* in Africa. Coherent species status heavily debated. The Thomas Quarry I fossils (Casablanca, 773,000 years) fit within the African lineage leading to this species.[^T6]
 
 **Biometrics:** male height ~175 cm (Kabwe individuals up to 181 cm); female height ~157 cm; brain volume 1,100–1,400 cm³.
@@ -96,6 +103,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 5. *Homo neanderthalensis* — 400,000 to 28,000 years
+<!-- catalogue-id: neanderthal -->
 **Phylogeny:** Sister species of *H. sapiens*; both species evolved from *H. heidelbergensis* / a common African ancestor. 2–4% Neanderthal DNA introgression persists in the genomes of present-day non-African humans.[^7][^8]
 
 **Biometrics:** male height ~164 cm (range 148–177 cm); female height ~155 cm; male weight ~65 kg; brain volume 1,200–1,750 cm³ (slightly greater than average *H. sapiens*).
@@ -114,12 +122,14 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 5b. *Homo antecessor* — ~1.2 million to 770,000 years
+<!-- catalogue-id: antecessor -->
 **Phylogeny:** Discovered 1994–1997 at Atapuerca (Spain; Sima del Elefante and Gran Dolina TD6). Long considered a candidate for the common ancestor of Neanderthals and *Sapiens*. This interpretation is **revised in 2026** by Hublin et al. in light of the Thomas Quarry I fossils (Morocco, 773 ka), which now occupy this basal position.[^T5][^T6]
 
 **Debate:** phylogenetic status entirely rethought in 2026: a sister population (not an ancestor) to the clade leading to the Thomas Quarry I hominins and beyond. The modern-looking facial traits would represent morphological convergence.
 
 ***
 ## 6. Denisovans — ~400,000 to ~30,000 years
+<!-- catalogue-id: denisovan -->
 **Phylogeny:** Sister species of the Neanderthals; 3–5% Denisovan DNA persists in present-day Asian and Oceanian populations. Until 2025, known only from tiny fragments (a finger bone, teeth). In **June 2025**, Fu Qiaomei et al. (*Science* and *Cell*, Beijing) identified the "Dragon Man" skull (Harbin, China, ~146,000 years) as Denisovan via ancient proteomics and mitochondrial DNA.[^11][^12][^13][^14]
 
 **Biometrics:** estimated male height >180 cm; estimated lean mass ~100 kg (Bence Viola, University of Toronto, 2025); brain volume high, estimated ≥ *H. sapiens*.
@@ -132,6 +142,7 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 ***
 ## 6b. *Homo longi* / *Homo juluensis* — Chinese Middle Pleistocene — ~1 million to ~50,000 years
+<!-- catalogue-id: longi -->
 > **Taxonomic status: ❓ Open debate (ACTIVE_DEBATE)** — three competing positions, all defended by established research teams. None commands consensus in 2026.
 
 **Phylogeny:** The classification of Middle Pleistocene *Homo* in East Asia is traditionally called "the muddle in the middle." Two rival proposals now structure the debate. In 2021, Ni Xijun et al. described the Harbin skull as *Homo longi*. In November 2024, Bae Christopher J. (University of Hawai'i) and Wu Xiujie (Chinese Academy of Sciences) proposed a distinct taxon, *Homo juluensis* ("big head"), grouping Xujiayao (holotype), Xuchang (paratype), Penghu 1 and possibly the Denisovans.[^HJ1] In September 2025, the digital reconstruction of the Yunxian 2 skull (~1 Ma) placed this fossil as an early member of an Asian *H. longi* clade that includes the Denisovans.[^HJ2]
@@ -152,36 +163,67 @@ Several popularisation sources present *Homo juluensis* as a "newly discovered h
 
 ***
 ## 7. *Homo sapiens* — Early Africa — 315,000 to 100,000 years
+<!-- catalogue-id: sapiens-africa -->
 **Phylogeny:** Jebel Irhoud fossils (315,000 years): a mosaic of modern (flat face) and archaic (elongated neurocranium) traits. Omo Kibish (195,000 years, revised to 233,000) and Herto (160,000 years) fossils: closer to present-day humans.[^15][^16]
 
 **Pigmentation ✅ Direct ancient DNA:** *Nature* (2025, Jakobsson & Schlebusch, Uppsala/Cape Town): 28 ancient genomes from southern Africa (10,200 to 150 years BP) show that alleles for strong pigmentation, brown eyes, and lactose non-persistence are fixed throughout the ancestral population — dark skin is the robustly supported ancestral condition for *H. sapiens*, not an assumption.
 
 ***
 ## Consolidated summary table
-| Taxon | Period | Height M/F (cm) | Weight M/F (kg) | Brain (cm³) | Skin | Eyes | Hair | Confidence |
-|---|---|---|---|---|---|---|---|---|
-| *S. tchadensis* (Toumaï) | ~7 Ma | ~115 / n/a | ~35 / n/a | 320–380 | Under fur: lightly pigmented | Brown | Dense fur | ⚠️ |
-| *Ardipithecus ramidus* | 5.8–4.4 Ma | n/a / ~120 | n/a / ~50 | 300–350 | Under fur: lightly pigmented | Brown | Fur | ⚠️ |
-| *A. afarensis* | 4.1–2.7 Ma | 150 / 105 | 42 / 29 | 385–550 | Fur + lightly pigmented skin | Brown | Fur | ⚠️ |
-| *Australopithecus* sp., StW 573 ("Little Foot") | 3.83–3.51 Ma | Not documented | Not documented | ≥ 408 (minimum; endocast crushed) | Fur + lightly pigmented skin | Brown | Dark fur | ❓ Taxonomy and chronology both disputed |
-| *Australopithecus* sp., Ledi-Geraru (unnamed) | 2.8–2.6 Ma | Not documented (13 teeth only) | Not documented | Not documented — no associated cranium | Fur + lightly pigmented skin | Brown | Dark fur | ❓ Taxon not formally named |
-| *H. habilis* | 2.4–1.4 Ma | 130–135 / 100–120 | 37 / 32 | 500–900 | Pelage → dark transition | Brown | Transitional | ⚠️ |
-| *H. erectus* | 1.8 Ma–250 ka | 145–185 / 130–160 | 40–68 / 30–50 | 600–1,100 | **Black/very dark** since ~1.2 Ma | Brown | Black, curly | 🔬 MC1R |
-| *H. e. georgicus* (Dmanisi) | ~1.77 Ma | 145–166 / n/a | 40–50 / n/a | 546–775 | Dark | Brown | Dark, curly | ⚠️ |
-| *H. antecessor* | 1.2 Ma–770 ka | 165–175 / n/a | n/a | ~1,000 | Dark | Brown | Dark | ⚠️ |
-| *H. heidelbergensis* | 700–200 ka | 175 / 157 | 62 / 51 | 1,100–1,400 | Dark | Brown | Dark | ⚠️ |
-| *H. naledi* | 335–241 ka | 145 / n/a | 40 / n/a | 465–610 | Dark | Brown | Dark | ⚠️ |
-| *H. floresiensis* | 190–50 ka | n/a / 106 | n/a / 25 | ~426 | Dark | Brown | Dark | ⚠️ |
-| *H. neanderthalensis* | 400–28 ka | ~164 / ~155 | ~65 / ~54 | 1,200–1,750 | **Variable**: dark majority; pale/red ~1% | Brown; blue possible (minority) | Brown-chestnut; red (minority) | ✅ DNA + ❓ debate |
-| Denisovans | ~400–30 ka | >180 / n/a | ~100 / n/a | ≥ *H. sap.* (estimated) | **Dark** | **Dark** | **Dark** | ✅ DNA |
-| *H. longi* / *H. juluensis* (debated) | ~1 Ma–50 ka | n/a | n/a | >1,000 (Xujiayao) | Unknown — dark by inference | Brown (probable) | Dark (probable) | ❓ Taxonomy unresolved |
-| *H. sapiens* Africa | 315–100 ka | ~185 / ~170 | ~70 / ~60 | 1,200–1,600 | **Very dark/black** | **Dark brown** | Black, curly | ✅ African DNA |
-| *H. sapiens* Levant — first documented Out-of-Africa | 130–90 ka | ~185 / ~170 | ~70 / n/a | ~1,450–1,550 | Very dark (African continuity) | Dark brown | Black | ⚠️ Inference from genomic continuity |
-| *H. sapiens* Upper Palaeolithic | 45–14 ka | ~170–185 / ~158–168 | ~70 / ~57 | ~1,400 | **Dark** (347/348 individuals) | Dark; light-eye peak ~14–4 ka | Dark | ✅ 348 genomes |
-| *H. sapiens* Mesolithic — the European pigmentation paradox | 14–7 ka | ~167–172 / ~155–163 | ~65 / n/a | ~1,400 | Dark to intermediate (transition under way) | Light-eye peak: 11/35 individuals | Dark (near-unanimous) | ✅ Direct DNA |
-| *H. sapiens* Neolithic | 10–5 ka | ~163–168 / ~152–158 | ~60–65 / ~50–55 | ~1,400 | Intermediate → lightening | Variable | Ötzi: black (direct DNA) | ✅ Direct DNA |
-| *H. sapiens* Bronze/Iron Age | 5–2 ka | ~168–175 / ~156–163 | ~65–70 / ~55–60 | ~1,400 | **Widespread light skin in N. Europe**; still variable in the South | Light N/NW; brown S | Variable | ✅ Direct DNA |
-| *H. sapiens* Present (global) | 0 ka | Highly variable (≈155–185 / ≈145–175) | Highly variable (≈50–90 / ≈40–80) | ~1,200–1,500 | Continuous spectrum, very dark to very light; dark skin is the ancestral state and remains the global majority; light skin = recent regional adaptations | Brown dominant globally; light eyes common mainly in Europe and parts of West Asia | Highly diverse (black, brown, blond, red; straight to curly), polygenic architecture | ✅ Modern genomics + multi-regional ancient DNA |
+| id | Taxon | Period | Height M/F (cm) | Weight M/F (kg) | Brain (cm³) | Skin | Eyes | Hair | Confidence |
+|---|---|---|---|---|---|---|---|---|---|
+| sahelanthropus | *S. tchadensis* (Toumaï) | ~7 Ma | ~115 / n/a | ~35 / n/a | 320–380 | Under fur: lightly pigmented | Brown | Dense fur | ⚠️ |
+| ardipithecus | *Ardipithecus ramidus* | 5.8–4.4 Ma | n/a / ~120 | n/a / ~50 | 300–350 | Under fur: lightly pigmented | Brown | Fur | ⚠️ |
+| afarensis | *A. afarensis* | 4.1–2.7 Ma | 150 / 105 | 42 / 29 | 385–550 | Fur + lightly pigmented skin | Brown | Fur | ⚠️ |
+| stw573 | *Australopithecus* sp., StW 573 ("Little Foot") | 3.83–3.51 Ma | Not documented | Not documented | ≥ 408 (minimum; endocast crushed) | Fur + lightly pigmented skin | Brown | Dark fur | ❓ Taxonomy and chronology both disputed |
+| australopithecus-ledi-geraru | *Australopithecus* sp., Ledi-Geraru (unnamed) | 2.8–2.6 Ma | Not documented (13 teeth only) | Not documented | Not documented — no associated cranium | Fur + lightly pigmented skin | Brown | Dark fur | ❓ Taxon not formally named |
+| habilis | *H. habilis* | 2.4–1.4 Ma | 130–135 / 100–120 | 37 / 32 | 500–900 | Pelage → dark transition | Brown | Transitional | ⚠️ |
+| erectus | *H. erectus* | 1.8 Ma–250 ka | 145–185 / 130–160 | 40–68 / 30–50 | 600–1,100 | **Black/very dark** since ~1.2 Ma | Brown | Black, curly | 🔬 MC1R |
+| georgicus | *H. e. georgicus* (Dmanisi) | ~1.77 Ma | 145–166 / n/a | 40–50 / n/a | 546–775 | Dark | Brown | Dark, curly | ⚠️ |
+| antecessor | *H. antecessor* | 1.2 Ma–770 ka | 165–175 / n/a | n/a | ~1,000 | Dark | Brown | Dark | ⚠️ |
+| heidelbergensis | *H. heidelbergensis* | 700–200 ka | 175 / 157 | 62 / 51 | 1,100–1,400 | Dark | Brown | Dark | ⚠️ |
+| naledi | *H. naledi* | 335–241 ka | 145 / n/a | 40 / n/a | 465–610 | Dark | Brown | Dark | ⚠️ |
+| floresiensis | *H. floresiensis* | 190–50 ka | n/a / 106 | n/a / 25 | ~426 | Dark | Brown | Dark | ⚠️ |
+| neanderthal | *H. neanderthalensis* | 400–28 ka | ~164 / ~155 | ~65 / ~54 | 1,200–1,750 | **Variable**: dark majority; pale/red ~1% | Brown; blue possible (minority) | Brown-chestnut; red (minority) | ✅ DNA + ❓ debate |
+| denisovan | Denisovans | ~400–30 ka | >180 / n/a | ~100 / n/a | ≥ *H. sap.* (estimated) | **Dark** | **Dark** | **Dark** | ✅ DNA |
+| longi | *H. longi* / *H. juluensis* (debated) | ~1 Ma–50 ka | n/a | n/a | >1,000 (Xujiayao) | Unknown — dark by inference | Brown (probable) | Dark (probable) | ❓ Taxonomy unresolved |
+| sapiens-africa | *H. sapiens* Africa | 315–100 ka | ~185 / ~170 | ~70 / ~60 | 1,200–1,600 | **Very dark/black** | **Dark brown** | Black, curly | ✅ African DNA |
+| sapiens-levant | *H. sapiens* Levant — first documented Out-of-Africa | 130–90 ka | ~185 / ~170 | ~70 / n/a | ~1,450–1,550 | Very dark (African continuity) | Dark brown | Black | ⚠️ Inference from genomic continuity |
+| sapiens-upper-paleo | *H. sapiens* Upper Palaeolithic | 45–14 ka | ~170–185 / ~158–168 | ~70 / ~57 | ~1,400 | **Dark** (347/348 individuals) | Dark; light-eye peak ~14–4 ka | Dark | ✅ 348 genomes |
+| sapiens-mesolithic | *H. sapiens* Mesolithic — the European pigmentation paradox | 14–7 ka | ~167–172 / ~155–163 | ~65 / n/a | ~1,400 | Dark to intermediate (transition under way) | Light-eye peak: 11/35 individuals | Dark (near-unanimous) | ✅ Direct DNA |
+| sapiens-neolithic | *H. sapiens* Neolithic | 10–5 ka | ~163–168 / ~152–158 | ~60–65 / ~50–55 | ~1,400 | Intermediate → lightening | Variable | Ötzi: black (direct DNA) | ✅ Direct DNA |
+| sapiens-bronze | *H. sapiens* Bronze/Iron Age | 5–2 ka | ~168–175 / ~156–163 | ~65–70 / ~55–60 | ~1,400 | **Widespread light skin in N. Europe**; still variable in the South | Light N/NW; brown S | Variable | ✅ Direct DNA |
+| — | *H. sapiens* Present (global) | 0 ka | Highly variable (≈155–185 / ≈145–175) | Highly variable (≈50–90 / ≈40–80) | ~1,200–1,500 | Continuous spectrum, very dark to very light; dark skin is the ancestral state and remains the global majority; light skin = recent regional adaptations | Brown dominant globally; light eyes common mainly in Europe and parts of West Asia | Highly diverse (black, brown, blond, red; straight to curly), polygenic architecture | ✅ Modern genomics + multi-regional ancient DNA |
+
+The Present (global) row has no counterpart in `app/data/` (timeline ends at 2 ka). Treat its `id` of — as editorial-only.
+
+## Catalogue identifier map
+
+Each catalogue `@id` is listed once. Footnotes named here are the only DOIs that may appear in that species' `hominin:references` in `species.json` (`scripts/check_md_json.py`).
+
+| id | Footnotes |
+|---|---|
+| sahelanthropus | T1, T2 |
+| ardipithecus | T3 |
+| afarensis | 1, 2, 3 |
+| stw573 | LF1, LF2 |
+| australopithecus-ledi-geraru | LG1 |
+| habilis | 4, 2, 3 |
+| erectus | 5, 3 |
+| georgicus | T4 |
+| antecessor | T5, T6 |
+| heidelbergensis | T6, 6 |
+| neanderthal | 7, 8, 9, 10 |
+| denisovan | 11, 12, 13, 14 |
+| longi | HJ1, HJ2, HJ3 |
+| naledi | T8 |
+| floresiensis | FL1, FL2 |
+| sapiens-africa | 15, 16, 2 |
+| sapiens-levant | 2 |
+| sapiens-upper-paleo | 17 |
+| sapiens-mesolithic | 6 |
+| sapiens-neolithic | 6 |
+| sapiens-bronze | 6 |
 
 ***
 ## Main active scientific conflicts (2026)
@@ -202,7 +244,7 @@ Several popularisation sources present *Homo juluensis* as a "newly discovered h
 ## Validation notes (English synthesis, 28–29 August 2026)
 
 - Core DOIs re-checked resolve correctly (`nature00879`, `jhevol.2020.102898`, `science.1175802` [format valid, publisher blocks automated access], `s41467-024-53918-7`, `s41467-024-55313-8`).
-- **Corrected during validation:** the bioRxiv preprint DOI on ancient-DNA pigmentation inference carried a non-standard version suffix (`10.1101/2025.01.29.635495v2`) in the French source file; the base DOI `10.1101/2025.01.29.635495` should be used, since bioRxiv DOIs should not carry a version tag.
+- **Corrected during validation:** the bioRxiv preprint DOI on ancient-DNA pigmentation inference carried a non-standard version suffix (`10.1101/2025.01.29.635495v2`); the base DOI `10.1101/2025.01.29.635495` should be used, since bioRxiv DOIs should not carry a version tag.
 - **Corrected during validation:** the Martinón-Torres et al. (2024) DOI (`10.1016/j.jhevol.2023.103507`) does not resolve. The correct DOI, confirmed via PubMed and the publisher's page, is `10.1016/j.jhevol.2023.103464` (*Journal of Human Evolution* 195:103464, 2024).[^T8] This is the same correction applied in the chronology file, since the reference is shared.
 - All `ACTIVE_DEBATE`, `STRONG_CONSENSUS`, `MODERATE_CONSENSUS`, `SPECULATIVE_HYPOTHESIS` and `EVOLUTIONARY_INFERENCE` status tags are kept as English machine-readable enum values rather than free prose.
 
@@ -239,3 +281,9 @@ that verification over the whole repository.
 [^HJ1]: Bae C.J. & Wu X., "Making sense of eastern Asian Late Quaternary hominin variability", *Nature Communications* 15:9479 (2 November 2024). DOI [10.1038/s41467-024-53918-7](https://doi.org/10.1038/s41467-024-53918-7)
 [^HJ2]: Feng X., Yin Q., Gao F., Lu D. et al., with Stringer C. & Ni X., "The phylogenetic position of the Yunxian cranium elucidates the origin of *Homo longi* and the Denisovans", *Science* 389(6767):1320–1324 (25 September 2025). DOI [10.1126/science.ado9202](https://doi.org/10.1126/science.ado9202)
 [^HJ3]: Author correction to Bae & Wu 2024, *Nature Communications* 15:10697 (19 December 2024). DOI [10.1038/s41467-024-55313-8](https://doi.org/10.1038/s41467-024-55313-8)
+[^LF1]: Martin J.M. et al., "The StW 573 Little Foot fossil should not be attributed to *Australopithecus prometheus*", *American Journal of Biological Anthropology* 188:e70177 (2025). DOI [10.1002/ajpa.70177](https://doi.org/10.1002/ajpa.70177)
+[^LF2]: Granger D.E. et al., "New cosmogenic burial ages for Sterkfontein Member 2", *Nature* 522:85–88 (2015). DOI [10.1038/nature14268](https://doi.org/10.1038/nature14268)
+[^LG1]: Villmoare B. et al., "New discoveries of *Australopithecus* and *Homo* from Ledi-Geraru", *Nature* 650:374–380 (2025). DOI [10.1038/s41586-025-09390-4](https://doi.org/10.1038/s41586-025-09390-4)
+[^FL1]: Gordon et al., *PNAS* 105, 1342–1347 (2008). DOI [10.1073/pnas.0710041105](https://doi.org/10.1073/pnas.0710041105)
+[^FL2]: van den Bergh G.D. et al., "*Homo floresiensis*-like fossils from the early Middle Pleistocene of Flores", *Nature* 534:245–248 (2016). DOI [10.1038/nature17999](https://doi.org/10.1038/nature17999)
+[^17]: Perretti A. et al., "Inference of human pigmentation from ancient DNA by genotype likelihood", bioRxiv (2025). DOI [10.1101/2025.01.29.635495](https://doi.org/10.1101/2025.01.29.635495)

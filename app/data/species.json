@@ -117,7 +117,19 @@
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Brunet et al. (2002) 10.1038/nature00879",
+          "identifier": "10.1038/nature00879",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Macchiarelli et al. (2020) 10.1016/j.jhevol.2020.102898",
+          "identifier": "10.1016/j.jhevol.2020.102898",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -237,7 +249,14 @@
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "White et al. (2009) 10.1126/science.1175802",
+          "identifier": "10.1126/science.1175802",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -395,7 +414,24 @@
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Johanson & Taieb (1976) 10.1038/260293a0",
+          "identifier": "10.1038/260293a0",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Jablonski & Chaplin (2000) 10.1006/jhev.2000.0403",
+          "identifier": "10.1006/jhev.2000.0403",
+          "hominin:supports": "pigmentation"
+        },
+        {
+          "name": "Rogers et al. (2004) 10.1086/381006",
+          "identifier": "10.1086/381006",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -495,7 +531,19 @@
       "hominin:behaviorDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:behaviorEvidenceType": "EVOLUTIONARY_INFERENCE",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Martin et al. (2025) 10.1002/ajpa.70177",
+          "identifier": "10.1002/ajpa.70177",
+          "hominin:supports": "debate"
+        },
+        {
+          "name": "Granger et al. (2015) 10.1038/nature14268",
+          "identifier": "10.1038/nature14268",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -595,7 +643,14 @@
       "hominin:behaviorDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:behaviorEvidenceType": "EVOLUTIONARY_INFERENCE",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Villmoare et al. (2025) 10.1038/s41586-025-09390-4",
+          "identifier": "10.1038/s41586-025-09390-4",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -739,7 +794,24 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Wood & Collard (1999) 10.1126/science.284.5411.65",
+          "identifier": "10.1126/science.284.5411.65",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Jablonski & Chaplin (2000) 10.1006/jhev.2000.0403",
+          "identifier": "10.1006/jhev.2000.0403",
+          "hominin:supports": "pigmentation"
+        },
+        {
+          "name": "Rogers et al. (2004) 10.1086/381006",
+          "identifier": "10.1086/381006",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -862,7 +934,14 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Lordkipanidze et al. (2013) 10.1126/science.1238484",
+          "identifier": "10.1126/science.1238484",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -1091,7 +1170,19 @@
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "INDIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "INDIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Brown et al. (1985) 10.1038/316788a0",
+          "identifier": "10.1038/316788a0",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Rogers et al. (2004) 10.1086/381006",
+          "identifier": "10.1086/381006",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -1211,7 +1302,19 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Carbonell et al. (2008) 10.1038/nature06815",
+          "identifier": "10.1038/nature06815",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Hublin et al. (2026) 10.1038/s41586-025-09914-y",
+          "identifier": "10.1038/s41586-025-09914-y",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -1363,7 +1466,24 @@
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Bae & Wu (2024) 10.1038/s41467-024-53918-7",
+          "identifier": "10.1038/s41467-024-53918-7",
+          "hominin:supports": "debate"
+        },
+        {
+          "name": "Feng et al. (2025) 10.1126/science.ado9202",
+          "identifier": "10.1126/science.ado9202",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Bae & Wu (2024) 10.1038/s41467-024-55313-8",
+          "identifier": "10.1038/s41467-024-55313-8",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -1551,7 +1671,19 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Hublin et al. (2026) 10.1038/s41586-025-09914-y",
+          "identifier": "10.1038/s41586-025-09914-y",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Beleza et al. (2013) 10.1093/molbev/mss207",
+          "identifier": "10.1093/molbev/mss207",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -1783,7 +1915,29 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Green et al. (2010) 10.1126/science.1188021",
+          "identifier": "10.1126/science.1188021",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Prufer et al. (2014) 10.1038/nature12886",
+          "identifier": "10.1038/nature12886",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Lalueza-Fox et al. (2007) 10.1126/science.1147417",
+          "identifier": "10.1126/science.1147417",
+          "hominin:supports": "pigmentation"
+        },
+        {
+          "name": "Iasi et al. (2024) 10.1126/science.adq3010",
+          "identifier": "10.1126/science.adq3010",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -1969,7 +2123,29 @@
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Reich et al. (2010) 10.1038/nature09710",
+          "identifier": "10.1038/nature09710",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Meyer et al. (2012) 10.1126/science.1224344",
+          "identifier": "10.1126/science.1224344",
+          "hominin:supports": "pigmentation"
+        },
+        {
+          "name": "Fu et al. (2025) 10.1126/science.adu9677",
+          "identifier": "10.1126/science.adu9677",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Fu et al. (2025) 10.1016/j.cell.2025.05.040",
+          "identifier": "10.1016/j.cell.2025.05.040",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -2089,7 +2265,14 @@
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Martinon-Torres et al. (2024) 10.1016/j.jhevol.2023.103464",
+          "identifier": "10.1016/j.jhevol.2023.103464",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -2241,7 +2424,24 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Hublin et al. (2017) 10.1038/nature22336",
+          "identifier": "10.1038/nature22336",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Vidal et al. (2022) 10.1038/s41586-021-04275-8",
+          "identifier": "10.1038/s41586-021-04275-8",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Jablonski & Chaplin (2000) 10.1006/jhev.2000.0403",
+          "identifier": "10.1006/jhev.2000.0403",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -2392,7 +2592,14 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Jablonski & Chaplin (2000) 10.1006/jhev.2000.0403",
+          "identifier": "10.1006/jhev.2000.0403",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -2512,7 +2719,19 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Gordon et al. (2008) 10.1073/pnas.0710041105",
+          "identifier": "10.1073/pnas.0710041105",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "van den Bergh et al. (2016) 10.1038/nature17999",
+          "identifier": "10.1038/nature17999",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -2763,7 +2982,14 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Perretti et al. (2025) 10.1101/2025.01.29.635495",
+          "identifier": "10.1101/2025.01.29.635495",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -2918,7 +3144,14 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Beleza et al. (2013) 10.1093/molbev/mss207",
+          "identifier": "10.1093/molbev/mss207",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -3095,7 +3328,14 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Beleza et al. (2013) 10.1093/molbev/mss207",
+          "identifier": "10.1093/molbev/mss207",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -3276,7 +3516,14 @@
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Beleza et al. (2013) 10.1093/molbev/mss207",
+          "identifier": "10.1093/molbev/mss207",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     }
   ]
 }

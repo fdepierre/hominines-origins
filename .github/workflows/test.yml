@@ -30,6 +30,9 @@ jobs:
       - name: Check JSON-to-embedded data lineage
         run: python3 scripts/sync_embedded.py --check
 
+      - name: Verify Markdown↔JSON catalogue correspondence
+        run: python3 scripts/check_md_json.py --quiet
+
       - name: Verify cited DOIs resolve and match their citing text
         run: python3 scripts/check_dois.py --quiet
 

@@ -21,8 +21,8 @@ const UPDATE_MODE   = process.env.UPDATE_SNAPSHOTS === '1';
 // The app picks its UI language from navigator.language, which Chromium inherits
 // from the host machine unless pinned. Without this every string in a snapshot
 // depends on the developer's system locale, so a French desktop and an English
-// CI runner can never agree. Snapshots are French because the catalogue
-// narrative is French-first; the a11y suite covers the other locales.
+// CI runner can never agree. Snapshots are pinned to French (bundled translation)
+// so pixel baselines stay stable; the a11y suite covers English and other locales.
 const SNAPSHOT_LOCALE = 'fr-FR';
 
 // Text rasterisation (hinting, antialiasing, font fallback) differs per OS, so a

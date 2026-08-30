@@ -38,7 +38,7 @@ When updating data:
 To add a **third** bundled UI language (not required for coverage):
 
 1. Open `app/index.html`
-2. Copy the `fr` block inside `TRANSLATIONS`, translate every `ui.*` string, and add the locale code to `I18N_SUPPORTED`
+2. Copy the `en` block inside `TRANSLATIONS`, translate every `ui.*` string, and add the locale code to `I18N_SUPPORTED`
 3. Add an `<option>` to `#lang-select`
 4. Run `node tests/run-all.js`
 
@@ -106,6 +106,7 @@ If you see content that violates these values, open an issue.
 
 - [ ] Tests pass: `node tests/run-all.js`
 - [ ] Data lineage intact: `python scripts/sync_embedded.py --check`
+- [ ] Markdown↔JSON correspondence: `python scripts/check_md_json.py`
 - [ ] Citations verified: `python scripts/check_dois.py`
 - [ ] New data has DOI references
 - [ ] No claims about "racial" biology

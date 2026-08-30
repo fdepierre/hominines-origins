@@ -21,7 +21,9 @@
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -3670000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Am. J. Biol. Anthropol. 188:e70177 (2025); Nature 522:85 (2015)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Martin et al., Am. J. Biol. Anthropol. 188:e70177 (2025) 10.1002/ajpa.70177; Granger et al., Nature 522:85 (2015) 10.1038/nature14268",
       "description": {
         "fr": "Squelette quasi complet de Sterkfontein (Silberberg Grotto). Datation cosmogénique ~3,67 Ma ; attribution à A. prometheus rejetée par Martin et al. 2025 — ni prometheus ni clairement africanus. Débat actif taxon + datation.",
         "en": "Near-complete Sterkfontein skeleton (Silberberg Grotto). Cosmogenic dating ~3.67 Ma; A. prometheus attribution rejected by Martin et al. 2025 — neither prometheus nor clearly africanus. Active debate on taxon and dating."
@@ -47,7 +49,9 @@
       "hominin:color": "#8B6914",
       "hominin:dateYearsBP": -3300000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature 521:310 (2015)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Harmand et al., Nature 521:310 (2015) 10.1038/nature14464",
       "description": {
         "fr": "Plus anciens outils connus — Lomekwi 3, Kenya (3,3 Ma). Débat sur l'intentionnalité.",
         "en": "Oldest known tools — Lomekwi 3, Kenya (3.3 Ma). Intentionality debated."
@@ -73,7 +77,9 @@
       "hominin:color": "#8B6914",
       "hominin:dateYearsBP": -3200000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature 260:293 (1976)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Johanson & Taieb, Nature 260:293 (1976) 10.1038/260293a0",
       "description": {
         "fr": "Squelette AL 288-1 \"Lucy\" daté ~3,2 Ma, découvert à Hadar (Éthiopie) par Johanson & Taieb. ~40% du squelette préservé. Empreintes de Laetoli (3,7 Ma) confirment la bipédie habituelle.",
         "en": "AL 288-1 \"Lucy\" skeleton dated ~3.2 Ma, discovered at Hadar (Ethiopia) by Johanson & Taieb. ~40% of skeleton preserved. Laetoli footprints (3.7 Ma) confirm habitual bipedalism."
@@ -99,7 +105,9 @@
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -2780000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature 650:374 (2025) DOI 10.1038/s41586-025-09390-4",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Villmoare et al., Nature 650:374 (2025) 10.1038/s41586-025-09390-4",
       "description": {
         "fr": "Ledi-Geraru (Éthiopie) : dents attribuées à Homo (~2,78 Ma) et à une nouvelle espèce d'Australopithecus. Villmoare et al. concluent à ≥3 lignées dans l'Afar entre 3,0 et 2,5 Ma — modèle cladogénétique simple remis en cause.",
         "en": "Ledi-Geraru (Ethiopia): teeth attributed to Homo (~2.78 Ma) and a new Australopithecus species. Villmoare et al. conclude ≥3 lineages in the Afar between 3.0 and 2.5 Ma — simple cladogenetic model challenged."
@@ -125,7 +133,9 @@
       "hominin:color": "#A07820",
       "hominin:dateYearsBP": -2600000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature Commun. 16 (2025)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Braun et al., Nature Communications 16 (2025) 10.1038/s41467-025-64244-x",
       "description": {
         "fr": "Séquence Oldowayen continue sur ~300 000 ans — Namorotukunan, Koobi Fora, Kenya.",
         "en": "Continuous Oldowan sequence over ~300,000 years — Namorotukunan, Koobi Fora, Kenya."
@@ -151,7 +161,9 @@
       "hominin:color": "#A06020",
       "hominin:dateYearsBP": -2100000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature 559:608 (2018)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Zhu et al., Nature 559:608 (2018) 10.1038/s41586-018-0299-4",
       "description": {
         "fr": "Outils lithiques sur le Plateau de Lœss (Chine) datés ~2,1 Ma. Suggèrent une sortie d'Afrique antérieure aux estimations classiques. Datations encore discutées.",
         "en": "Stone tools on the Loess Plateau (China) dated ~2.1 Ma. Suggest an Out-of-Africa earlier than classic estimates. Datings still debated."
@@ -177,7 +189,9 @@
       "hominin:color": "#A06020",
       "hominin:dateYearsBP": -1770000,
       "hominin:category": "migration",
-      "hominin:dateReference": "Science 342:326 (2013)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Lordkipanidze et al., Science 342:326 (2013) 10.1126/science.1238484",
       "description": {
         "fr": "Plus anciens hominines connus hors d'Afrique. 5 crânes d'H. erectus georgicus à Dmanisi (Géorgie). Variabilité morphologique exceptionnelle au sein d'une seule population.",
         "en": "Earliest known hominins outside Africa. 5 H. erectus georgicus skulls at Dmanisi (Georgia). Exceptional morphological variability within a single population."
@@ -203,7 +217,9 @@
       "hominin:color": "#C04010",
       "hominin:dateYearsBP": -1760000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature 460:82 (2009)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Lepre et al., Nature 477:82 (2011) 10.1038/nature10372",
       "description": {
         "fr": "Premiers bifaces façonnés — Kokiselei 4, Turkana Ouest. Rupture cognitive majeure.",
         "en": "First shaped handaxes — Kokiselei 4, West Turkana. Major cognitive shift."
@@ -229,7 +245,9 @@
       "hominin:color": "#D05010",
       "hominin:dateYearsBP": -1000000,
       "hominin:category": "fire",
-      "hominin:dateReference": "PNAS 109:E1215 (2012)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Berna et al., PNAS 109:E1215 (2012) 10.1073/pnas.1117620109",
       "description": {
         "fr": "Traces de combustion >1 Ma — Wonderwerk Cave, Afrique du Sud. Usage ≠ fabrication intentionnelle.",
         "en": "Combustion traces >1 Ma — Wonderwerk Cave, South Africa. Use ≠ intentional making."
@@ -255,7 +273,9 @@
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -1000000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Science 389:1320 (2025) DOI 10.1126/science.ado9202",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Feng et al., Science 389:1320 (2025) 10.1126/science.ado9202",
       "description": {
         "fr": "Reconstruction numérique de Yunxian 2 (Hubei) : membre précoce du clade asiatique H. longi (incl. Dénisoviens), groupe frère de H. sapiens. Débat concurrent H. juluensis (Bae & Wu 2024) ; pas d'ADN nucléaire.",
         "en": "Digital reconstruction of Yunxian 2 (Hubei): early member of the Asian H. longi clade (incl. Denisovans), sister to H. sapiens. Competing H. juluensis proposal (Bae & Wu 2024); no nuclear DNA."
@@ -281,7 +301,9 @@
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -773000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature (2026) DOI 10.1038/s41586-025-09914-y",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Hublin et al., Nature (2026) 10.1038/s41586-025-09914-y",
       "description": {
         "fr": "Thomas Quarry I, Casablanca — 773 ka (Brunhes/Matuyama, datation robuste). Population souvent présentée comme basale aux 3 lignées ; alternative : H. erectus en divergence. Datation = consensus fort ; phylogénie = consensus modéré.",
         "en": "Thomas Quarry I, Casablanca — 773 ka (Brunhes/Matuyama, robust dating). Often framed as basal to the 3 lineages; alternative: diverging H. erectus. Dating = strong consensus; phylogeny = moderate consensus."
@@ -307,7 +329,9 @@
       "hominin:color": "#E06020",
       "hominin:dateYearsBP": -400000,
       "hominin:category": "fire",
-      "hominin:dateReference": "Nature (déc. 2025)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Davis et al., Nature (2025) 10.1038/s41586-025-09855-6",
       "description": {
         "fr": "Pyrite de fer + argile cuite >750°C — Barnham, Suffolk, Angleterre. Repousse le record de 350 000 ans.",
         "en": "Iron pyrite + clay fired >750°C — Barnham, Suffolk, England. Pushes record back 350,000 years."
@@ -333,7 +357,9 @@
       "hominin:color": "#C04010",
       "hominin:dateYearsBP": -315000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature 546:289 (2017)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Hublin et al., Nature 546:289 (2017) 10.1038/nature22336; Richter et al., Nature 546:293 (2017) 10.1038/nature22335",
       "description": {
         "fr": "5 individus H. sapiens à Jebel Irhoud (Maroc), datation TL 315±34 ka. Mosaïque de traits modernes (face plate) et archaïques (neurocrâne allongé). Infirme le modèle d'origine est-africaine unique.",
         "en": "5 H. sapiens individuals at Jebel Irhoud (Morocco), TL dating 315±34 ka. Mosaic of modern (flat face) and archaic (elongated neurocranium) traits. Refutes the single East-African origin model."
@@ -361,7 +387,7 @@
       "hominin:category": "symbolic",
       "hominin:debateLevel": "ACTIVE_DEBATE",
       "hominin:evidenceType": "INDIRECT_DATA",
-      "hominin:dateReference": "eLife reviewed preprints (2025) ; J. Hum. Evol. (2024)",
+      "hominin:dateReference": "Berger et al., eLife (2025) 10.7554/eLife.89106; Martinon-Torres et al., J. Hum. Evol. (2024) 10.1016/j.jhevol.2023.103464",
       "description": {
         "fr": "Squelettes d'H. naledi dans les chambres profondes de Rising Star (Afrique du Sud). Berger et al. proposent des dépôts intentionnels de corps, foyers et gravures symboliques chez un hominine à cerveau réduit (~465–610 cm³). Contesté vigoureusement sur les plans taphonomique et stratigraphique — pas de consensus sur les sépultures intentionnelles (Martinón-Torres et al. 2024, J. Hum. Evol.).",
         "en": "H. naledi skeletons in deep chambers of Rising Star cave system (South Africa). Berger et al. propose intentional body deposits, hearths and symbolic engravings by a small-brained hominin (~465–610 cm³). Vigorously contested on taphonomic and stratigraphic grounds — no consensus on intentional burial (Martinón-Torres et al. 2024, J. Hum. Evol.)."
@@ -387,7 +413,9 @@
       "hominin:color": "#C04010",
       "hominin:dateYearsBP": -233000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature 601:579 (2022)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Vidal et al., Nature 601:579 (2022) 10.1038/s41586-021-04275-8",
       "description": {
         "fr": "Omo I (Éthiopie) re-daté à 233±22 ka via tephra Shala (Vidal et al. 2022). Cohérent avec une origine pan-africaine de H. sapiens (Jebel Irhoud + Omo + Florisbad).",
         "en": "Omo I (Ethiopia) re-dated to 233±22 ka via Shala tephra (Vidal et al. 2022). Consistent with a pan-African origin of H. sapiens (Jebel Irhoud + Omo + Florisbad)."
@@ -413,7 +441,9 @@
       "hominin:color": "#2070B0",
       "hominin:dateYearsBP": -176500,
       "hominin:category": "symbolic",
-      "hominin:dateReference": "Nature 534:111 (2016)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Jaubert et al., Nature 534:111 (2016) 10.1038/nature18291",
       "description": {
         "fr": "Structures en stalagmites à 336m de profondeur — Bruniquel, France. Plus ancien usage intentionnel de l'espace souterrain.",
         "en": "Stalagmite structures 336m deep — Bruniquel, France. Oldest known intentional use of underground space."
@@ -439,7 +469,9 @@
       "hominin:color": "#C0A000",
       "hominin:dateYearsBP": -130000,
       "hominin:category": "symbolic",
-      "hominin:dateReference": "PNAS 104:9964 (2007)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Bouzouggar et al., PNAS 104:9964 (2007) 10.1073/pnas.0703877104",
       "description": {
         "fr": "Nassarius perforés — Skhul (Israël) 140–100 ka ; Taforalt (Maroc) 82 ka. Premières parures symboliques.",
         "en": "Perforated Nassarius — Skhul (Israel) 140–100 ka; Taforalt (Morocco) 82 ka. First symbolic ornaments."
@@ -467,7 +499,7 @@
       "hominin:category": "migration",
       "hominin:debateLevel": "STRONG_CONSENSUS",
       "hominin:evidenceType": "DIRECT_DATA",
-      "hominin:dateReference": "PNAS 105(4):1342–1347 (2008) ; Proc. R. Soc. B 284:20171065 (2017)",
+      "hominin:dateReference": "Gordon et al., PNAS 105:1342 (2008) 10.1073/pnas.0710041105; van den Bergh et al., Nature 534:245 (2016) 10.1038/nature17999",
       "description": {
         "fr": "Série de restes graciles (LB1 et associés) — Liang Bua, île de Flores, Indonésie. Stature ~1 m, volume cérébral ~426 cm³. Nanisme insulaire sur un Homo archaïque, disparu vers ~50 ka. Les hypothèses pathologiques (microcéphalie, crétinisme endémique) ont été largement réfutées par analyses morphométriques comparatives. Débat résiduel sur l'ancêtre exact (H. erectus insulaire vs lignée plus basale) et sur les modalités d'extinction.",
         "en": "Series of gracile remains (LB1 and associated) — Liang Bua, Flores Island, Indonesia. Stature ~1 m, brain volume ~426 cm³. Insular dwarfism on an archaic Homo lineage, extinct ~50 ka. Pathological hypotheses (microcephaly, endemic cretinism) largely refuted by comparative morphometric analyses. Residual debate on exact ancestor (insular H. erectus vs more basal lineage) and mode of extinction."
@@ -493,7 +525,9 @@
       "hominin:color": "#D07010",
       "hominin:dateYearsBP": -110000,
       "hominin:category": "symbolic",
-      "hominin:dateReference": "Nature Human Behaviour (2025)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Zaidner et al., Nature Human Behaviour (2025) 10.1038/s41562-025-02110-y",
       "description": {
         "fr": "5 individus en position fœtale + ocre + objets rituels — Tinshemet Cave, Israël. Révisé de 100 000 à 110 000 ans (Nature Human Behaviour 2025).",
         "en": "5 individuals in foetal position + ochre + ritual objects — Tinshemet Cave, Israel. Revised from 100,000 to 110,000 years (Nature Human Behaviour 2025)."
@@ -519,6 +553,8 @@
       "hominin:color": "#E08020",
       "hominin:dateYearsBP": -75000,
       "hominin:category": "symbolic",
+      "hominin:debateLevel": "UNASSESSED",
+      "hominin:evidenceType": "UNASSESSED",
       "hominin:dateReference": "J. Hum. Evol. 48:3 (2005)",
       "description": {
         "fr": "41+ perles Nassarius kraussianus — Blombos Cave, Afrique du Sud. 75 000 ans (OSL/TL).",
@@ -545,7 +581,9 @@
       "hominin:color": "#8050C0",
       "hominin:dateYearsBP": -67800,
       "hominin:category": "art",
-      "hominin:dateReference": "Nature (janv. 2026)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Oktaviana et al., Nature (2026) 10.1038/s41586-025-09968-y",
       "description": {
         "fr": "Empreintes de main — Liang Metanduno, île de Muna, Sulawesi. ≥67 800 ans. Dépasse de 16 600 ans le précédent record (Nature 2026).",
         "en": "Hand stencils — Liang Metanduno, Muna Island, Sulawesi. ≥67,800 years. Exceeds previous record by 16,600 years (Nature 2026)."
@@ -571,7 +609,9 @@
       "hominin:color": "#208060",
       "hominin:dateYearsBP": -65000,
       "hominin:category": "migration",
-      "hominin:dateReference": "Nature 547 (2017)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Clarkson et al., Nature 547:306 (2017) 10.1038/nature22968",
       "description": {
         "fr": "OSL 65 000 ans — Madjedbebe, Territoire du Nord. Génomique (2025) : ~60 000 ans, deux routes depuis la Sonde.",
         "en": "OSL 65,000 years — Madjedbebe, Northern Territory. Genomics (2025): ~60,000 years, two routes from Sundaland."
@@ -597,7 +637,9 @@
       "hominin:color": "#9060D0",
       "hominin:dateYearsBP": -51200,
       "hominin:category": "art",
-      "hominin:dateReference": "Nature 631 (2024)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Oktaviana et al., Nature 631 (2024) 10.1038/s41586-024-07541-7",
       "description": {
         "fr": "Figures anthropomorphes + cochon sauvage — Leang Karampuang, Sulawesi. Première scène avec interaction connue.",
         "en": "Anthropomorphic figures + wild pig — Leang Karampuang, Sulawesi. First known scene with interaction."
@@ -623,6 +665,8 @@
       "hominin:color": "#E08020",
       "hominin:dateYearsBP": -47500,
       "hominin:category": "migration",
+      "hominin:debateLevel": "UNASSESSED",
+      "hominin:evidenceType": "UNASSESSED",
       "hominin:dateReference": "Nature 626:341 (2024)",
       "description": {
         "fr": "Ossements + industrie LRJ — Grotte de Ranis, Thuringe, Allemagne. Légèrement révisé de 45 000 à 47 500 ans (Nature 2024).",
@@ -649,7 +693,9 @@
       "hominin:color": "#E08020",
       "hominin:dateYearsBP": -43000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature Commun. (2024)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Shao et al., Nature Communications (2024) 10.1038/s41467-024-51349-y",
       "description": {
         "fr": "1ère grande culture matérielle H. sapiens en Europe (43–28 ka). Deux vagues de dispersion confirmées par génomique (2024).",
         "en": "First major H. sapiens material culture in Europe (43–28 ka). Two dispersal waves confirmed by genomics (2024)."
@@ -675,7 +721,9 @@
       "hominin:color": "#A070D0",
       "hominin:dateYearsBP": -36000,
       "hominin:category": "art",
-      "hominin:dateReference": "PNAS 113:4670 (2016)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Quiles et al., PNAS 113:4670 (2016) 10.1073/pnas.1523158113",
       "description": {
         "fr": "Ardèche, France — 37–33 500 ans (phase 1). Débat actif sur attribution culturelle Aurignacien vs Gravettien.",
         "en": "Ardèche, France — 37–33,500 years (phase 1). Active debate on cultural attribution Aurignacian vs Gravettian."
@@ -701,6 +749,8 @@
       "hominin:color": "#A070D0",
       "hominin:dateYearsBP": -35000,
       "hominin:category": "art",
+      "hominin:debateLevel": "UNASSESSED",
+      "hominin:evidenceType": "UNASSESSED",
       "hominin:dateReference": "",
       "description": {
         "fr": "Peintures rupestres bisons — Altamira, Espagne. ~35 000 ans.",
@@ -727,6 +777,8 @@
       "hominin:color": "#B080E0",
       "hominin:dateYearsBP": -17000,
       "hominin:category": "art",
+      "hominin:debateLevel": "UNASSESSED",
+      "hominin:evidenceType": "UNASSESSED",
       "hominin:dateReference": "",
       "description": {
         "fr": "Chef-d'œuvre pariétal — Lascaux, Dordogne, France. ~17 000 ans.",
@@ -753,7 +805,9 @@
       "hominin:color": "#E04040",
       "hominin:dateYearsBP": -16000,
       "hominin:category": "migration",
-      "hominin:dateReference": "Science 391:1283 (2026)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Surovell et al., Science 391:1283 (2026) 10.1126/science.adw9217",
       "description": {
         "fr": "Monte Verde II reclassé Holocène moyen par Surovell et al. (Science 2026). Débat pré-Clovis non résolu — l'un des débats les plus actifs en 2026.",
         "en": "Monte Verde II reclassified mid-Holocene by Surovell et al. (Science 2026). Pre-Clovis debate unresolved — one of the most active debates in 2026."
@@ -779,7 +833,9 @@
       "hominin:color": "#60A040",
       "hominin:dateYearsBP": -10400,
       "hominin:category": "neolithic",
-      "hominin:dateReference": "PNAS 119:e2110930119 (2022)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Stiner et al., PNAS 119:e2110930119 (2022) 10.1073/pnas.2110930119",
       "description": {
         "fr": "Processus graduel sur ~1 000 ans — Aşıklı Höyük, Anatolie. Génomique 118 génomes anciens (Science 2025).",
         "en": "Gradual process over ~1,000 years — Aşıklı Höyük, Anatolia. Genomics of 118 ancient genomes (Science 2025)."

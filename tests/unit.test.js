@@ -72,33 +72,71 @@ async function runUnitTests() {
   });
 
   await test('Species panel keeps scientific names stable and common names translatable', async () => {
-    const state = await page.evaluate(async () => {
-      if (window.i18next) await i18next.changeLanguage('fr');
-      const species = SPECIES_DATA.find(sp => sp.id === 'erectus') || SPECIES_DATA[0];
-      renderPanel(species);
-      const scientific = document.querySelector('.species-name');
-      const common = document.querySelector('.species-name-common');
-      const panel = document.getElementById('panel-content');
-      const root = document.querySelector('#panel-content .animate-in');
-      return {
-        panelTranslate: panel ? panel.getAttribute('translate') : '',
-        panelLang: panel ? panel.getAttribute('lang') : '',
-        rootTranslate: root ? root.getAttribute('translate') : '',
-        rootLang: root ? root.getAttribute('lang') : '',
-        scientificTranslate: scientific ? scientific.getAttribute('translate') : '',
-        commonTranslate: common ? common.getAttribute('translate') : '',
-        commonLang: common ? common.getAttribute('lang') : '',
-        commonText: common ? common.textContent.trim() : '',
-      };
-    });
-    assert(state.panelTranslate === 'yes', 'Species panel content is browser-translatable');
-    assert(state.panelLang === 'fr', `Species panel exposes source language (got "${state.panelLang}")`);
-    assert(state.rootTranslate === 'yes', 'Rendered species block is browser-translatable');
-    assert(state.rootLang === 'fr', `Rendered species block exposes source language (got "${state.rootLang}")`);
-    assert(state.scientificTranslate === 'no', 'Scientific taxon name is protected from browser translation');
-    assert(state.commonTranslate === 'yes', 'Common/descriptive species name is browser-translatable');
-    assert(state.commonLang === 'fr', `Common species name exposes source language (got "${state.commonLang}")`);
-    assert(/homme debout/i.test(state.commonText), `French common name rendered for translation (got "${state.commonText}")`);
+    async function panelState(lang) {
+      return page.evaluate(async (lng) => {
+        if (window.i18next) await i18next.changeLanguage(lng);
+        const species = SPECIES_DATA.find(sp => sp.id === 'erectus') || SPECIES_DATA[0];
+        renderPanel(species);
+        const scientific = document.querySelector('.species-name');
+        const common = document.querySelector('.species-name-common');
+        const panel = document.getElementById('panel-content');
+        const root = document.querySelector('#panel-content .animate-in');
+        return {
+          panelTranslate: panel ? panel.getAttribute('translate') : '',
+          panelLang: panel ? panel.getAttribute('lang') : '',
+          rootTranslate: root ? root.getAttribute('translate') : '',
+          rootLang: root ? root.getAttribute('lang') : '',
+          scientificTranslate: scientific ? scientific.getAttribute('translate') : '',
+          commonTranslate: common ? common.getAttribute('translate') : '',
+          commonLang: common ? common.getAttribute('lang') : '',
+          commonText: common ? common.textContent.trim() : '',
+        };
+      }, lang);
+    }
+
+    const enState = await panelState('en');
+    assert(enState.panelTranslate === 'yes', 'Species panel content is browser-translatable');
+    assert(enState.panelLang === 'en', `English-first panel exposes source language (got "${enState.panelLang}")`);
+    assert(enState.rootTranslate === 'yes', 'Rendered species block is browser-translatable');
+    assert(enState.rootLang === 'en', `English-first block exposes source language (got "${enState.rootLang}")`);
+    assert(enState.scientificTranslate === 'no', 'Scientific taxon name is protected from browser translation');
+    assert(enState.commonTranslate === 'yes', 'Common/descriptive species name is browser-translatable');
+    assert(enState.commonLang === 'en', `English common name exposes source language (got "${enState.commonLang}")`);
+    assert(/upright man/i.test(enState.commonText), `English common name rendered as source (got "${enState.commonText}")`);
+
+    const frState = await panelState('fr');
+    assert(frState.panelLang === 'fr', `French translation exposes lang=fr (got "${frState.panelLang}")`);
+    assert(frState.rootLang === 'fr', `French block exposes lang=fr (got "${frState.rootLang}")`);
+    assert(frState.commonLang === 'fr', `French common name exposes lang=fr (got "${frState.commonLang}")`);
+    assert(frState.scientificTranslate === 'no', 'Scientific taxon name stays protected in French UI');
+    assert(/homme debout/i.test(frState.commonText), `French common name still rendered (got "${frState.commonText}")`);
+  });
+
+  await test('French browser locale adapts catalogue narrative without a manual language switch', async () => {
+    const { browser: bFr, page: pFr } = await launch({ locale: 'fr-FR' });
+    try {
+      await loadApp(pFr);
+      const state = await pFr.evaluate(() => {
+        const species = SPECIES_DATA.find(sp => sp.id === 'sahelanthropus') || SPECIES_DATA[0];
+        renderPanel(species);
+        const common = document.querySelector('.species-name-common');
+        return {
+          htmlLang: document.documentElement.lang,
+          uiLang: (window.i18next && i18next.language) || '',
+          common: species.common,
+          commonText: common ? common.textContent.trim() : '',
+          heightM: (species.biometrics && species.biometrics.heightM) || '',
+        };
+      });
+      assert(state.htmlLang === 'fr', `French browser sets html lang=fr (got "${state.htmlLang}")`);
+      assert(String(state.uiLang).startsWith('fr'), `i18n language is French (got "${state.uiLang}")`);
+      assert(/plus ancien/i.test(state.common), `Catalogue common name is French (got "${state.common}")`);
+      assert(!/earliest known/i.test(state.common), `Catalogue common name is not left in English (got "${state.common}")`);
+      assert(/estimé/i.test(state.heightM), `Biometrics use French copy (got "${state.heightM}")`);
+      assert(/plus ancien/i.test(state.commonText), `Panel renders French common name (got "${state.commonText}")`);
+    } finally {
+      await bFr.close();
+    }
   });
 
   await test('Every species start < end (chronological order)', async () => {
@@ -153,6 +191,19 @@ async function runUnitTests() {
     assert(issues.length === 0, `Hominin certainty fields valid (issues: ${issues.join('; ') || 'none'})`);
   });
 
+  await test('Every species has hominin:references with a DOI', async () => {
+    const issues = await page.evaluate(() => {
+      const doi = /10\.\d{4,9}\/\S+/;
+      return (window._RAW_SPECIES_JSON?.itemListElement || []).flatMap((s) => {
+        const refs = s['hominin:references'];
+        if (!Array.isArray(refs) || refs.length === 0) return [`${s['@id']} missing hominin:references`];
+        const hasDoi = refs.some((r) => r && doi.test(String(r.identifier || r.name || '')));
+        return hasDoi ? [] : [`${s['@id']} references have no DOI`];
+      });
+    });
+    assert(issues.length === 0, `Species references present (issues: ${issues.join('; ') || 'none'})`);
+  });
+
   await test('Migration paths: from/to are valid [lat,lng] pairs', async () => {
     const bad = await page.evaluate(() => {
       const issues = [];
@@ -204,7 +255,7 @@ async function runUnitTests() {
       EVENT_CERTAINTY_KEYS.forEach((k) => {
         if (e[k] !== undefined && e[k] !== null) row[k] = e[k];
       });
-      if (Object.keys(row).length) expectedEventCert[e['@id']] = row;
+      expectedEventCert[e['@id']] = row;
     });
 
     const { browser: embBrowser, page: embPage } = await launch();
@@ -232,7 +283,7 @@ async function runUnitTests() {
           eventKeys.forEach((k) => {
             if (e[k] !== undefined && e[k] !== null) row[k] = e[k];
           });
-          if (Object.keys(row).length) eventCert[e['@id']] = row;
+          eventCert[e['@id']] = row;
         });
         // Reference equality: loadData assigns the embedded consts on fetch failure.
         const usedEmbedded = rawSpecies === _EMBEDDED_SPECIES && rawEvents === _EMBEDDED_EVENTS;
@@ -254,11 +305,38 @@ async function runUnitTests() {
       );
       assert(
         JSON.stringify(runtime.eventCert) === JSON.stringify(expectedEventCert),
-        'Embedded event certainty fields match events.json where present'
+        'Embedded event certainty fields match events.json'
       );
     } finally {
       await embBrowser.close();
     }
+  });
+
+  await test('Every event has hominin certainty fields on JSON and runtime', async () => {
+    const debateLevels = new Set(['STRONG_CONSENSUS', 'MODERATE_CONSENSUS', 'ACTIVE_DEBATE', 'SPECULATIVE_HYPOTHESIS', 'UNASSESSED']);
+    const evidenceTypes = new Set(['DIRECT_DATA', 'INDIRECT_DATA', 'EVOLUTIONARY_INFERENCE', 'MEDIA_NARRATIVE', 'UNASSESSED']);
+    const file = JSON.parse(fs.readFileSync(EVENTS_JSON_PATH, 'utf8'));
+    const fileIssues = [];
+    file.itemListElement.forEach((e) => {
+      EVENT_CERTAINTY_KEYS.forEach((k) => {
+        if (e[k] === undefined || e[k] === null) fileIssues.push(`${e['@id']} missing ${k}`);
+      });
+      if (!debateLevels.has(e['hominin:debateLevel'])) fileIssues.push(`${e['@id']} bad debateLevel`);
+      if (!evidenceTypes.has(e['hominin:evidenceType'])) fileIssues.push(`${e['@id']} bad evidenceType`);
+    });
+    assert(fileIssues.length === 0, `events.json certainty valid (issues: ${fileIssues.join('; ') || 'none'})`);
+
+    const runtimeIssues = await page.evaluate(({ debateLevels: dl, evidenceTypes: et }) => {
+      const bad = [];
+      const dset = new Set(dl);
+      const eset = new Set(et);
+      (EVENTS_DATA || []).forEach((ev) => {
+        if (!dset.has(ev['hominin:debateLevel'])) bad.push(`${ev.id} missing/bad debateLevel`);
+        if (!eset.has(ev['hominin:evidenceType'])) bad.push(`${ev.id} missing/bad evidenceType`);
+      });
+      return bad;
+    }, { debateLevels: [...debateLevels], evidenceTypes: [...evidenceTypes] });
+    assert(runtimeIssues.length === 0, `EVENTS_DATA certainty copied (issues: ${runtimeIssues.join('; ') || 'none'})`);
   });
 
   await test('Every event has id, time, label, icon, lat, lng', async () => {

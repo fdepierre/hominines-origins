@@ -38,7 +38,7 @@ This project has two layers of data, each with a distinct role.
 
 ### `data/` — Scientific sources (human-readable)
 
-English scientific reference documents written for humans: researchers, teachers, contributors. These are the **editorial source of truth** — citable, correctable, editable without touching application code. They are syntheses from primary literature (not literal translations of prior working notes).
+English scientific reference documents written for humans: researchers, teachers, contributors. These are the **editorial source of truth** — citable, correctable, editable without touching application code. They are syntheses from primary literature.
 
 Start at [`data/README.md`](data/README.md): it explains which document to read first, how the tables are built, and where the field-by-field data dictionary lives.
 
@@ -53,8 +53,8 @@ W3C JSON-LD files derived from the English scientific reference documents above.
 
 | File | Contents |
 |------|----------|
-| [`app/data/species.json`](app/data/species.json) | Catalogue entries in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Narrative fields use `fr` as the canonical language in the running app (parallel `en` is often present in the file for reuse and tooling). |
-| [`app/data/events.json`](app/data/events.json) | Chronological milestones in JSON-LD: GeoCoordinates, `hominin:dateYearsBP`, DOI references. Same pattern: French-first in the UI, optional `en` in the data. |
+| [`app/data/species.json`](app/data/species.json) | Catalogue entries in JSON-LD: all pigmentation, biometrics, fossil sites, migrations, tools, debates, scientific uncertainty fields. Narrative fields use `en` as the source language in the running app (parallel `fr` is a bundled translation). |
+| [`app/data/events.json`](app/data/events.json) | Chronological milestones in JSON-LD: GeoCoordinates, `hominin:dateYearsBP`, DOI references. Same pattern: English-first in the UI, bundled `fr` in the data. |
 
 **How many entries are there?** The JSON files are the answer — no prose in this
 repository states a count, on purpose. Counts drift the moment the catalogue
@@ -75,12 +75,12 @@ app/data/*.json    ←  app reads this (executable truth)
 
 When new research is published:
 1. Update the relevant English `.md` file in `data/` with the finding, evidence type, debate notes, and DOI
-2. Update the corresponding entry in `app/data/` (`species.json` and/or `events.json`) to reflect the change (species rows include the six `hominin:*DebateLevel` / `hominin:*EvidenceType` certainty fields)
+2. Update the corresponding entry in `app/data/` (`species.json` and/or `events.json`) to reflect the change (species rows include the six `hominin:*DebateLevel` / `hominin:*EvidenceType` certainty fields and `hominin:references`; events include `hominin:debateLevel` / `hominin:evidenceType`)
 3. Regenerate the embedded mirrors so offline and `file://` users see the same catalogue: `python scripts/sync_embedded.py`. Never hand-edit `_EMBEDDED_SPECIES` / `_EMBEDDED_EVENTS` inside [`app/index.html`](app/index.html) — the next sync overwrites them
-4. Verify the citation you added: `python scripts/check_dois.py`
+4. Verify correspondence and the citation you added: `python scripts/check_md_json.py` then `python scripts/check_dois.py`
 5. Run `node tests/run-all.js` to verify nothing is broken
 
-Many JSON-LD narrative fields carry both `fr` and `en`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. A small **inline i18n engine** switches **French and English** chrome UI strings only; for any other language, or for translating French narrative wholesale, use the browser’s page translator. Map labels are rendered as DOM markers so browser translation can see them.
+Many JSON-LD narrative fields carry both `en` and `fr`, but the **page is authored so browsers may translate the whole document**: `<html translate="yes">` is kept when the UI language changes, while the raw JSON `<code id="json-code">` stays `translate="no"` so identifiers stay stable. A small **inline i18n engine** switches **English and French** chrome UI strings only; for any other language, or for translating the English narrative wholesale, use the browser’s page translator. Map labels are rendered as DOM markers so browser translation can see them.
 
 ---
 
@@ -130,6 +130,7 @@ Every species entry in `app/data/species.json` carries these fields for each of 
 | `MODERATE_CONSENSUS` | Most specialists agree on the general interpretation, but legitimate debates persist on details: precise scenario, exact ancestor, numerical parameters. No fundamental controversy, just unresolved nuance. |
 | `ACTIVE_DEBATE` | Teams are publishing opposing, well-argued interpretations in peer-reviewed journals. No position has yet stabilised the consensus. Both sides have serious data and arguments. This signals active science, not vague uncertainty. |
 | `SPECULATIVE_HYPOTHESIS` | The interpretation rests on very indirect inferences, weak analogies or models poorly constrained by data. Often overrepresented in media relative to its actual standing in the scientific literature. Not necessarily wrong — it may become `ACTIVE_DEBATE` if new data emerge. |
+| `UNASSESSED` | **Events only.** No editorial synthesis yet for this milestone. Must not be read as consensus or as absence of debate. Forbidden on species entries. |
 
 ### `hominin:evidenceType`
 
@@ -139,6 +140,7 @@ Every species entry in `app/data/species.json` carries these fields for each of 
 | `INDIRECT_DATA` | Based on secondary indicators: taphonomic context, spatial distribution of remains, comparison with modern or fossil analogues. One additional interpretive step is required, but the underlying observations remain tangible. |
 | `EVOLUTIONARY_INFERENCE` | Based on phylogenetic, genetic or ecological models, without direct data on the taxon in question. Typical for pigmentation when no ancient DNA is available, or for behaviours inferred by analogy with closely related species. |
 | `MEDIA_NARRATIVE` | The interpretation circulates mainly through press releases, public lectures, videos or social media rather than robust scientific syntheses. Flagging this value documents the gap between popular narrative and the actual state of the literature. It is not necessarily factually wrong — it is a question of proportionality and nuance. |
+| `UNASSESSED` | **Events only.** Evidence type not yet tied to an editorial source. |
 
 ---
 
@@ -154,9 +156,9 @@ A single HTML file: [`app/index.html`](app/index.html).
 | [Prism](https://prismjs.com/) 1.30.0 | JSON syntax highlighting in the data viewer only (deferred CDN, guarded — unhighlighted JSON if it fails) |
 | Space Grotesk + Space Mono | Typography (Google Fonts CDN; system fonts if it fails) |
 
-French and English menu / control strings are bundled in an **inline i18n engine** inside `app/index.html` — no third-party library. All other languages rely on the browser’s page translator.
+English and French menu / control strings are bundled in an **inline i18n engine** inside `app/index.html` — no third-party library. English is the source language; French is a bundled translation. All other languages rely on the browser’s page translator.
 
-The app auto-selects **FR** or **EN** from the browser language and keeps the burger-menu selector for manual override (stored in `localStorage` as `ho_ui_lang`). For other languages, use **Translate this page**; the document root stays `translate="yes"` so browser translation is not blocked.
+The app defaults to **English**, auto-selects **French** when the browser language is `fr`, and keeps the burger-menu selector for manual override (stored in `localStorage` as `ho_ui_lang`). A `?lang=fr` or `?lang=en` query also pins the first load. For other languages, use **Translate this page**; the document root stays `translate="yes"` so browser translation is not blocked.
 
 ---
 
@@ -189,10 +191,11 @@ library and work on any Python ≥ 3.9.
 | A11y | Play/pause, FR/EN i18n, welcome hints (`locale` es/fr/en), touch targets, tablet layout |
 | MapLibre | Map sources and layers, neutral basemap, app-managed labels, walking figures, event markers |
 
-Two data-integrity gates run in CI before the browser suites:
+Three data-integrity gates run in CI before the browser suites:
 
 ```bash
 python scripts/sync_embedded.py --check   # JSON ↔ embedded mirrors agree
+python scripts/check_md_json.py           # Markdown ids, DOIs, debate/evidence tokens
 python scripts/check_dois.py              # every cited DOI resolves and matches its text
 ```
 

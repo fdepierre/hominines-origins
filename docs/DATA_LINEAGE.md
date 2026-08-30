@@ -11,7 +11,7 @@ Living document.
 
 | Layer | Location | Role |
 |-------|----------|------|
-| Editorial truth | `data/Hominins-Morphology-Pigmentation.md`, `data/Prehistoric-Chronology-Scientific-Reference.md` | English scientific reference syntheses (not literal translations). Stable filenames (no year stamp); update in place and bump **Last reviewed**. |
+| Editorial truth | `data/Hominins-Morphology-Pigmentation.md`, `data/Prehistoric-Chronology-Scientific-Reference.md` | English scientific reference syntheses. Stable filenames (no year stamp); update in place and bump **Last reviewed**. |
 | Executable truth | `app/data/species.json`, `app/data/events.json` | Structured JSON-LD the application loads at runtime via `fetch`. Manually maintained; not generated from Markdown. |
 | Derived embedded mirror | `_EMBEDDED_SPECIES` / `_EMBEDDED_EVENTS` inside `app/index.html` | Offline / `file://` fallback when `fetch` fails. **Never authoritative.** Regenerated from `app/data/*.json` only. |
 
@@ -32,18 +32,16 @@ app/index.html            ← derived embedded mirror
 ### Editorial vs executable truth
 
 - **`data/`** is the editorial source of truth: English scientific reference
-  documents with DOI links, evidence types, and debate notes. No script, test, or
-  CI job opens these files. Keeping them aligned with JSON is a human process
-  (e.g. literature update → decide whether `app/data/` must change).
+  documents with DOI links, evidence types, and debate notes. `scripts/check_md_json.py`
+  opens these files only to verify that catalogue identifiers, DOIs, and
+  `DebateLevel` / `EvidenceType` tokens match `app/data/*.json`. It does not
+  generate JSON. Keeping prose aligned with JSON remains a human process.
 - **`app/data/`** is the executable source of truth: what the running app and the
   non-regression tests actually consume. Counts and field values here win over
   documentation when they disagree.
 - **`app/index.html` embedded blocks** are a **derived mirror** of `app/data/*.json`.
   Direction is strictly one-way: JSON → HTML. Manual edits to the embedded
   constants are overwritten on the next sync.
-
-Former French working tables were removed from the tree after the English
-references became primary; they remain reachable only via git history if needed.
 
 ---
 
@@ -60,13 +58,17 @@ python scripts/sync_embedded.py --check
 # Read-only: verify every cited DOI resolves and matches its citing text:
 python scripts/check_dois.py --quiet
 
+# Read-only: identifiers, DOI sets, and debate/evidence tokens Markdown↔JSON:
+python scripts/check_md_json.py --quiet
+
 # Full non-regression suite (non-zero exit on failure):
 node tests/run-all.js
 # or equivalently for CI:
 node tests/run-all.js --ci
 ```
 
-CI runs `python3 scripts/sync_embedded.py --check` and
+CI runs `python3 scripts/sync_embedded.py --check`,
+`python3 scripts/check_md_json.py --quiet`, and
 `python3 scripts/check_dois.py --quiet` before the Playwright suite
 (see `.github/workflows/test.yml`).
 
@@ -82,7 +84,7 @@ cannot truncate data when an ordinary banner comment is inserted.
 2. **CI gate** — the check runs in the non-regression workflow.
 3. **Unique sentinels** around embedded blocks — structural anchors for sync/extract.
 4. **Embedded-fallback test** — aborts `fetch` of the JSON files and asserts the same
-   species IDs, event IDs, and certainty fields where present.
+   species IDs, event IDs, species certainty fields, and event certainty fields.
 5. **Test runner exit status** — `node tests/run-all.js` exits non-zero on failure
    (local and CI).
 6. **DOI verification** — `python scripts/check_dois.py` resolves every DOI cited in
@@ -90,6 +92,11 @@ cannot truncate data when an ordinary banner comment is inserted.
    dead or points at a paper whose first author does not appear in the citing text.
    An identifier inside an inline code span is treated as quoted, not cited, so the
    validation notes can discuss identifiers that were found to be wrong.
+7. **Markdown↔JSON correspondence** — `python scripts/check_md_json.py` requires
+   every catalogue `@id` to have a Markdown `id`, JSON DOIs to be a subset of the
+   paired Markdown DOIs, and event `debateLevel` / `evidenceType` to match the
+   Markdown tokens. `UNASSESSED` on an event is explicit “not yet synthesised”,
+   not consensus.
 
 ---
 
@@ -97,10 +104,7 @@ cannot truncate data when an ordinary banner comment is inserted.
 
 | Item | Why deferred |
 |------|----------------|
-| Markdown → JSON generation | Would require a conversion pipeline that must never strengthen, simplify, infer, translate, or discard epistemic status. No such generator exists; building one is a separate design effort. |
-| DOI / reference fields on `app/data/species.json` | Schema change. Species JSON currently has no citation key; DOIs live in the English `data/` references. |
-| Full certainty coverage on all events | Only a minority of events currently carry `hominin:debateLevel` / `hominin:evidenceType`. Completing that is a scientific curation task, not a tooling task. |
-| Automated Markdown↔JSON correspondence checks | Depends on stable identifiers spanning both formats and on the schema decisions above. |
+| Markdown → JSON generation | Would require a conversion pipeline that must never strengthen, simplify, infer, translate, or discard epistemic status. Correspondence checks exist; a generator that preserves epistemic status is a separate design effort. |
 
 ---
 

@@ -29,6 +29,7 @@ Each `itemListElement` entry is a `Species`-shaped node (custom `hominin:` and `
 | `hominin:heightM`, `hominin:heightF`, `hominin:weightM`, `hominin:brain`, `hominin:dimorphism` | → `biometrics.*` |
 | `hominin:tools`, `hominin:debate`, `hominin:migrations` | Arrays / strings → same names on runtime object |
 | `hominin:taxonomyDebateLevel`, `hominin:taxonomyEvidenceType`, `hominin:behaviorDebateLevel`, `hominin:behaviorEvidenceType`, `hominin:pigmentationDebateLevel`, `hominin:pigmentationEvidenceType` | Uncertainty axes → copied onto runtime object by `adaptSpecies()` (`HOMININ_CERTAINTY_KEYS`) |
+| `hominin:references` | Array of `{name, identifier, hominin:supports}`. `identifier` is a DOI; `name` must include the first-author surname on the **same JSON line** as the DOI (`check_dois.py`). `hominin:supports` is `taxonomy` \| `behavior` \| `pigmentation` \| `debate`. Copied by `adaptSpecies()`. |
 | `hominin:lane` | **Present in JSON only** — not copied by `adaptSpecies()`; timeline layout uses **one row per species** via `buildRowOrder(SPECIES_DATA)` |
 
 ---
@@ -42,7 +43,7 @@ count, this document does not. Shape:
 {
   id:       String,   // from @id, e.g. "erectus", "sapiens-africa"
   name:     String,   // taxon:scientificName, e.g. "Homo erectus"
-  common:   String,   // name.fr (French-first UI)
+  common:   String,   // name.en (English-first UI; fr is a bundled translation)
   start:    Number,   // hominin:periodStart (years BP, negative)
   end:      Number,   // hominin:periodEnd (must be > start)
   color:    String,   // Hex for timeline bar
@@ -70,6 +71,7 @@ count, this document does not. Shape:
   "hominin:behaviorEvidenceType":     String,
   "hominin:pigmentationDebateLevel":  String,
   "hominin:pigmentationEvidenceType": String,
+  "hominin:references": Array[{ name, identifier, "hominin:supports" }],
 }
 ```
 
@@ -83,6 +85,7 @@ Use bracket notation for these keys: `species['hominin:taxonomyDebateLevel']`.
 | `MODERATE_CONSENSUS` | Broad agreement with nuance on details |
 | `ACTIVE_DEBATE` | Several serious interpretations coexist |
 | `SPECULATIVE_HYPOTHESIS` | Plausible but thinly tested |
+| `UNASSESSED` | **Events only.** No editorial synthesis yet for this milestone. Must not be read as consensus or as absence of debate. Forbidden on species entries. |
 
 | `*EvidenceType` | Meaning (short) |
 |-----------------|-----------------|
@@ -90,6 +93,7 @@ Use bracket notation for these keys: `species['hominin:taxonomyDebateLevel']`.
 | `INDIRECT_DATA` | Solid indirect fossil / archaeological context |
 | `EVOLUTIONARY_INFERENCE` | Comparative or model-based evolutionary inference |
 | `MEDIA_NARRATIVE` | Media-led narrative, weakly tied to primary literature |
+| `UNASSESSED` | **Events only.** Evidence type not yet tied to an editorial source. |
 
 Canonical values live on each species object in [`../app/data/species.json`](../app/data/species.json). Tests serve `app/` over HTTP so `fetch` works.
 
@@ -108,6 +112,13 @@ Canonical values live on each species object in [`../app/data/species.json`](../
 
 Each `itemListElement` is an `Event` with `hominin:*` fields and `location.geo` for coordinates.
 
+| Key | Role |
+|-----|------|
+| `@id` | Slug used as runtime `id` |
+| `hominin:dateYearsBP` | Years BP (negative) → `time` |
+| `hominin:dateReference` | Display citation **and** DOI, with the first-author surname on the same line |
+| `hominin:debateLevel`, `hominin:evidenceType` | Uncertainty axes for the displayed claim. Required on every event. Copied by `adaptEvent()`. `UNASSESSED` only when the chronology Markdown has no synthesis yet. |
+
 ---
 
 ## EVENTS_DATA — runtime array (after `adaptEvent`)
@@ -118,14 +129,16 @@ One object per milestone in `app/data/events.json`. Shape:
 {
   id:       String,   // @id slug
   time:     Number,   // hominin:dateYearsBP (negative)
-  label:    String,   // name.fr
+  label:    String,   // name.en
   icon:     String,   // emoji
   color:    String,   // hex; aligns with CATEGORY_COLORS
-  desc:     String,   // description.fr
+  desc:     String,   // description.en
   category: String,   // tools | fire | phylo | symbolic | art | migration | neolithic
   lat:      Number,
   lng:      Number,
   source:   String,   // hominin:dateReference (DOI / citation)
+  "hominin:debateLevel":   String,  // copied by adaptEvent
+  "hominin:evidenceType":  String,
 }
 ```
 
@@ -173,16 +186,18 @@ There is **no** shared multi-species “lane” map in code.
 
 ## Adding a new species — checklist
 
-- [ ] Add or extend the section(s) in `data/Hominins-Morphology-Pigmentation.md` with DOI, evidence type, and debate notes, **and add a row to its consolidated summary table** — that table is expected to cover every catalogue entry.
-- [ ] Add a new `Species` object to `app/data/species.json` (`@id`, periods, regions, sites, migrations as `[lat,lng]`, the six `hominin:*DebateLevel` / `hominin:*EvidenceType` keys, etc.).
+- [ ] Add or extend the section(s) in `data/Hominins-Morphology-Pigmentation.md` with DOI, evidence type, and debate notes, **add a row to its consolidated summary table**, and list the `@id` in the catalogue identifier map — that table is expected to cover every catalogue entry.
+- [ ] Add a new `Species` object to `app/data/species.json` (`@id`, periods, regions, sites, migrations as `[lat,lng]`, the six `hominin:*DebateLevel` / `hominin:*EvidenceType` keys, `hominin:references` with at least one DOI, etc.).
 - [ ] Regenerate the offline mirror: `python scripts/sync_embedded.py`.
+- [ ] Run `python scripts/check_md_json.py` (identifiers, DOI sets, debate/evidence tokens).
 - [ ] Verify citations: `python scripts/check_dois.py`.
 - [ ] Run `node tests/run-all.js`. No count needs updating — the tests read the catalogue size from `app/data/species.json`.
 
 ## Adding a new milestone — checklist
 
-- [ ] Add the milestone to `data/Prehistoric-Chronology-Scientific-Reference.md` with DOI, evidence type, and debate notes. Name the first author in the reference cell — `check_dois.py` compares it against Crossref.
-- [ ] Add a new `Event` to `app/data/events.json` (`@id`, `hominin:dateYearsBP`, `location`, `description`, …).
+- [ ] Add the milestone to `data/Prehistoric-Chronology-Scientific-Reference.md` with `id`, `DebateLevel`, `EvidenceType`, and DOI. Name the first author in the reference cell — `check_dois.py` compares it against Crossref.
+- [ ] Add a new `Event` to `app/data/events.json` (`@id`, `hominin:dateYearsBP`, `hominin:debateLevel`, `hominin:evidenceType`, `location`, `description`, …).
+- [ ] Run `python scripts/check_md_json.py` (identifiers, DOI sets, debate/evidence tokens).
 - [ ] Regenerate the offline mirror: `python scripts/sync_embedded.py`.
 - [ ] Verify citations: `python scripts/check_dois.py`.
 - [ ] Run `node tests/run-all.js`. No count needs updating — the tests read the catalogue size from `app/data/events.json`.

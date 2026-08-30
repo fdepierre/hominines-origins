@@ -40,11 +40,15 @@
 (function() {
   var lang = 'en';
   try {
-    var stored = localStorage.getItem('ho_ui_lang');
-    if (stored === 'fr' || stored === 'en') lang = stored;
+    var q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+    if (q === 'fr' || q === 'en') lang = q;
     else {
-      var raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
-      lang = raw.indexOf('fr') === 0 ? 'fr' : 'en';
+      var stored = localStorage.getItem('ho_ui_lang');
+      if (stored === 'fr' || stored === 'en') lang = stored;
+      else {
+        var raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
+        lang = raw.indexOf('fr') === 0 ? 'fr' : 'en';
+      }
     }
   } catch (e) { /* keep English default */ }
   document.documentElement.lang = lang;
@@ -445,6 +449,7 @@ ul.uncertainty-level-list {
 .uncertainty-level-li--moderate { --certainty-swatch: var(--certainty-moderate-consensus); }
 .uncertainty-level-li--active-debate { --certainty-swatch: var(--certainty-active-debate); }
 .uncertainty-level-li--speculative { --certainty-swatch: var(--certainty-speculative); }
+.uncertainty-level-li--unassessed { --certainty-swatch: var(--certainty-unknown); }
 .certainty-tri-pop {
   position: absolute;
   top: calc(100% + 6px);
@@ -1381,6 +1386,43 @@ html[data-map-ready="1"] #map {
   transition: all var(--transition-interactive);
 }
 #burger-btn:hover { background: var(--color-surface-offset); }
+
+#page-translate-banner {
+  position: absolute;
+  top: var(--space-3);
+  left: calc(var(--space-3) + 40px + var(--space-2));
+  z-index: 600;
+  max-width: min(380px, calc(100% - 72px));
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--color-text);
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+#page-translate-banner[hidden] { display: none !important; }
+#page-translate-banner-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+#burger-translate-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: var(--space-2) 0 0;
+}
+#burger-translate-hint[hidden] { display: none !important; }
 
 #burger-overlay {
   display: none;
@@ -2385,8 +2427,9 @@ html[data-map-ready="1"] #map {
 }
 
 </style>
-  <link rel="alternate" hreflang="fr" href="./index.html">
-  <link rel="alternate" hreflang="en" href="./index.html?lang=en">
+  <link rel="alternate" hreflang="en" href="./index.html">
+  <link rel="alternate" hreflang="fr" href="./index.html?lang=fr">
+  <link rel="alternate" hreflang="x-default" href="./index.html">
   <!-- Prism: JSON syntax highlighting in the data viewer only. Deferred and guarded
        by `if (window.Prism)`, so the app degrades to unhighlighted JSON if it fails.
        1.30.0 is the first release fixing CVE-2024-53382 (DOM clobbering → XSS). -->
@@ -2422,6 +2465,10 @@ html[data-map-ready="1"] #map {
         <span class="sr-only" data-i18n="ui.menu">Menu</span>
         <span aria-hidden="true">☰</span>
       </button>
+      <aside id="page-translate-banner" data-testid="page-translate-banner" hidden translate="yes">
+        <div id="page-translate-banner-text" class="page-translate-banner-text"></div>
+        <button type="button" id="page-translate-banner-dismiss" aria-label="Dismiss">×</button>
+      </aside>
 
       <!-- Layer toggles hidden from map — shown in burger menu -->
       <div class="layer-toggle-group" id="layer-toggles" style="display:none;">
@@ -2621,6 +2668,7 @@ const HOMININ_CERTAINTY_KEYS = [
   'hominin:pigmentationDebateLevel',
   'hominin:pigmentationEvidenceType',
 ];
+const EVENT_CERTAINTY_KEYS = ['hominin:debateLevel', 'hominin:evidenceType'];
 
 // =====================================================================
 // TIMELINE — LOG SCALE (years BP)
@@ -3426,6 +3474,34 @@ function ensureMapLibreSitesLayer() {
   return true;
 }
 
+/** Look up a bundled ui.* string; safe before the i18n shim has inited. */
+function uiT(key, fallback) {
+  if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+    return i18next.t('ui.' + key, { defaultValue: fallback });
+  }
+  return fallback;
+}
+
+/** Debate / evidence lines for a milestone. Absence is labelled, never silent. */
+function eventCertaintyHtml(ev) {
+  const dl = ev && ev['hominin:debateLevel'];
+  const et = ev && ev['hominin:evidenceType'];
+  if (!dl && !et) return '';
+  const debateFb = dl === 'UNASSESSED'
+    ? 'Not yet assessed in the editorial synthesis.'
+    : (dl || '');
+  const evidFb = et === 'UNASSESSED'
+    ? 'Evidence type not yet assessed.'
+    : (et || '');
+  const debate = dl ? uiT('uncertaintyDebate_' + dl, debateFb) : '';
+  const evid = et ? uiT('uncertaintyEvid_' + et, evidFb) : '';
+  const parts = [debate, evid].filter(Boolean);
+  if (!parts.length) return '';
+  return '<br><span style="color:var(--color-text-faint)">' +
+    parts.map(function (p) { return bandTipEscapeHtml(p); }).join(' · ') +
+    '</span>';
+}
+
 /** HTML for a milestone popup (label, category, description, source). */
 function mapLibreEventPopupHtml(ev) {
   return (
@@ -3433,6 +3509,7 @@ function mapLibreEventPopupHtml(ev) {
     '<strong style="color:' + bandTipEscapeHtml(ev.color || '#d2a45f') + '">' + bandTipEscapeHtml(ev.label || '') + '</strong><br>' +
     '<em style="color:#9a8f7a">' + bandTipEscapeHtml(getCategoryLabel(ev.category || '')) + '</em><br>' +
     bandTipEscapeHtml(ev.desc || '') +
+    eventCertaintyHtml(ev) +
     (ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>' : '') +
     '</div>'
   );
@@ -4916,7 +4993,7 @@ function eventTooltipHtml(ev) {
   return (
     '<strong style="color:' + bandTipEscapeHtml(ev.color) + '">' + bandTipEscapeHtml(ev.label) + '</strong><br>' +
     '<em style="color:var(--color-text-muted)">' + bandTipEscapeHtml(catLabel) + '</em><br>' +
-    bandTipEscapeHtml(ev.desc) + srcHtml
+    bandTipEscapeHtml(ev.desc) + eventCertaintyHtml(ev) + srcHtml
   );
 }
 
@@ -6144,7 +6221,19 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Brunet et al. (2002) 10.1038/nature00879",
+          "identifier": "10.1038/nature00879",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Macchiarelli et al. (2020) 10.1016/j.jhevol.2020.102898",
+          "identifier": "10.1016/j.jhevol.2020.102898",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -6264,7 +6353,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "White et al. (2009) 10.1126/science.1175802",
+          "identifier": "10.1126/science.1175802",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -6422,7 +6518,24 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Johanson & Taieb (1976) 10.1038/260293a0",
+          "identifier": "10.1038/260293a0",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Jablonski & Chaplin (2000) 10.1006/jhev.2000.0403",
+          "identifier": "10.1006/jhev.2000.0403",
+          "hominin:supports": "pigmentation"
+        },
+        {
+          "name": "Rogers et al. (2004) 10.1086/381006",
+          "identifier": "10.1086/381006",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -6522,7 +6635,19 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:behaviorEvidenceType": "EVOLUTIONARY_INFERENCE",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Martin et al. (2025) 10.1002/ajpa.70177",
+          "identifier": "10.1002/ajpa.70177",
+          "hominin:supports": "debate"
+        },
+        {
+          "name": "Granger et al. (2015) 10.1038/nature14268",
+          "identifier": "10.1038/nature14268",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -6622,7 +6747,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:behaviorEvidenceType": "EVOLUTIONARY_INFERENCE",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Villmoare et al. (2025) 10.1038/s41586-025-09390-4",
+          "identifier": "10.1038/s41586-025-09390-4",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -6766,7 +6898,24 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Wood & Collard (1999) 10.1126/science.284.5411.65",
+          "identifier": "10.1126/science.284.5411.65",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Jablonski & Chaplin (2000) 10.1006/jhev.2000.0403",
+          "identifier": "10.1006/jhev.2000.0403",
+          "hominin:supports": "pigmentation"
+        },
+        {
+          "name": "Rogers et al. (2004) 10.1086/381006",
+          "identifier": "10.1086/381006",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -6889,7 +7038,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Lordkipanidze et al. (2013) 10.1126/science.1238484",
+          "identifier": "10.1126/science.1238484",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -7118,7 +7274,19 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "INDIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "INDIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Brown et al. (1985) 10.1038/316788a0",
+          "identifier": "10.1038/316788a0",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Rogers et al. (2004) 10.1086/381006",
+          "identifier": "10.1086/381006",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -7238,7 +7406,19 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Carbonell et al. (2008) 10.1038/nature06815",
+          "identifier": "10.1038/nature06815",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Hublin et al. (2026) 10.1038/s41586-025-09914-y",
+          "identifier": "10.1038/s41586-025-09914-y",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -7390,7 +7570,24 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Bae & Wu (2024) 10.1038/s41467-024-53918-7",
+          "identifier": "10.1038/s41467-024-53918-7",
+          "hominin:supports": "debate"
+        },
+        {
+          "name": "Feng et al. (2025) 10.1126/science.ado9202",
+          "identifier": "10.1126/science.ado9202",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Bae & Wu (2024) 10.1038/s41467-024-55313-8",
+          "identifier": "10.1038/s41467-024-55313-8",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -7578,7 +7775,19 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Hublin et al. (2026) 10.1038/s41586-025-09914-y",
+          "identifier": "10.1038/s41586-025-09914-y",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Beleza et al. (2013) 10.1093/molbev/mss207",
+          "identifier": "10.1093/molbev/mss207",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -7810,7 +8019,29 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Green et al. (2010) 10.1126/science.1188021",
+          "identifier": "10.1126/science.1188021",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Prufer et al. (2014) 10.1038/nature12886",
+          "identifier": "10.1038/nature12886",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Lalueza-Fox et al. (2007) 10.1126/science.1147417",
+          "identifier": "10.1126/science.1147417",
+          "hominin:supports": "pigmentation"
+        },
+        {
+          "name": "Iasi et al. (2024) 10.1126/science.adq3010",
+          "identifier": "10.1126/science.adq3010",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -7996,7 +8227,29 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Reich et al. (2010) 10.1038/nature09710",
+          "identifier": "10.1038/nature09710",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Meyer et al. (2012) 10.1126/science.1224344",
+          "identifier": "10.1126/science.1224344",
+          "hominin:supports": "pigmentation"
+        },
+        {
+          "name": "Fu et al. (2025) 10.1126/science.adu9677",
+          "identifier": "10.1126/science.adu9677",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Fu et al. (2025) 10.1016/j.cell.2025.05.040",
+          "identifier": "10.1016/j.cell.2025.05.040",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -8116,7 +8369,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "ACTIVE_DEBATE",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Martinon-Torres et al. (2024) 10.1016/j.jhevol.2023.103464",
+          "identifier": "10.1016/j.jhevol.2023.103464",
+          "hominin:supports": "debate"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -8268,7 +8528,24 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Hublin et al. (2017) 10.1038/nature22336",
+          "identifier": "10.1038/nature22336",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Vidal et al. (2022) 10.1038/s41586-021-04275-8",
+          "identifier": "10.1038/s41586-021-04275-8",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "Jablonski & Chaplin (2000) 10.1006/jhev.2000.0403",
+          "identifier": "10.1006/jhev.2000.0403",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -8419,7 +8696,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Jablonski & Chaplin (2000) 10.1006/jhev.2000.0403",
+          "identifier": "10.1006/jhev.2000.0403",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -8539,7 +8823,19 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE"
+      "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:references": [
+        {
+          "name": "Gordon et al. (2008) 10.1073/pnas.0710041105",
+          "identifier": "10.1073/pnas.0710041105",
+          "hominin:supports": "taxonomy"
+        },
+        {
+          "name": "van den Bergh et al. (2016) 10.1038/nature17999",
+          "identifier": "10.1038/nature17999",
+          "hominin:supports": "taxonomy"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -8790,7 +9086,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Perretti et al. (2025) 10.1101/2025.01.29.635495",
+          "identifier": "10.1101/2025.01.29.635495",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -8945,7 +9248,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Beleza et al. (2013) 10.1093/molbev/mss207",
+          "identifier": "10.1093/molbev/mss207",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -9122,7 +9432,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "STRONG_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Beleza et al. (2013) 10.1093/molbev/mss207",
+          "identifier": "10.1093/molbev/mss207",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     },
     {
       "@type": "Species",
@@ -9303,7 +9620,14 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorDebateLevel": "MODERATE_CONSENSUS",
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
-      "hominin:pigmentationEvidenceType": "DIRECT_DATA"
+      "hominin:pigmentationEvidenceType": "DIRECT_DATA",
+      "hominin:references": [
+        {
+          "name": "Beleza et al. (2013) 10.1093/molbev/mss207",
+          "identifier": "10.1093/molbev/mss207",
+          "hominin:supports": "pigmentation"
+        }
+      ]
     }
   ]
 };
@@ -9332,7 +9656,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -3670000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Am. J. Biol. Anthropol. 188:e70177 (2025); Nature 522:85 (2015)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Martin et al., Am. J. Biol. Anthropol. 188:e70177 (2025) 10.1002/ajpa.70177; Granger et al., Nature 522:85 (2015) 10.1038/nature14268",
       "description": {
         "fr": "Squelette quasi complet de Sterkfontein (Silberberg Grotto). Datation cosmogénique ~3,67 Ma ; attribution à A. prometheus rejetée par Martin et al. 2025 — ni prometheus ni clairement africanus. Débat actif taxon + datation.",
         "en": "Near-complete Sterkfontein skeleton (Silberberg Grotto). Cosmogenic dating ~3.67 Ma; A. prometheus attribution rejected by Martin et al. 2025 — neither prometheus nor clearly africanus. Active debate on taxon and dating."
@@ -9358,7 +9684,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#8B6914",
       "hominin:dateYearsBP": -3300000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature 521:310 (2015)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Harmand et al., Nature 521:310 (2015) 10.1038/nature14464",
       "description": {
         "fr": "Plus anciens outils connus — Lomekwi 3, Kenya (3,3 Ma). Débat sur l'intentionnalité.",
         "en": "Oldest known tools — Lomekwi 3, Kenya (3.3 Ma). Intentionality debated."
@@ -9384,7 +9712,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#8B6914",
       "hominin:dateYearsBP": -3200000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature 260:293 (1976)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Johanson & Taieb, Nature 260:293 (1976) 10.1038/260293a0",
       "description": {
         "fr": "Squelette AL 288-1 \"Lucy\" daté ~3,2 Ma, découvert à Hadar (Éthiopie) par Johanson & Taieb. ~40% du squelette préservé. Empreintes de Laetoli (3,7 Ma) confirment la bipédie habituelle.",
         "en": "AL 288-1 \"Lucy\" skeleton dated ~3.2 Ma, discovered at Hadar (Ethiopia) by Johanson & Taieb. ~40% of skeleton preserved. Laetoli footprints (3.7 Ma) confirm habitual bipedalism."
@@ -9410,7 +9740,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -2780000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature 650:374 (2025) DOI 10.1038/s41586-025-09390-4",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Villmoare et al., Nature 650:374 (2025) 10.1038/s41586-025-09390-4",
       "description": {
         "fr": "Ledi-Geraru (Éthiopie) : dents attribuées à Homo (~2,78 Ma) et à une nouvelle espèce d'Australopithecus. Villmoare et al. concluent à ≥3 lignées dans l'Afar entre 3,0 et 2,5 Ma — modèle cladogénétique simple remis en cause.",
         "en": "Ledi-Geraru (Ethiopia): teeth attributed to Homo (~2.78 Ma) and a new Australopithecus species. Villmoare et al. conclude ≥3 lineages in the Afar between 3.0 and 2.5 Ma — simple cladogenetic model challenged."
@@ -9436,7 +9768,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#A07820",
       "hominin:dateYearsBP": -2600000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature Commun. 16 (2025)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Braun et al., Nature Communications 16 (2025) 10.1038/s41467-025-64244-x",
       "description": {
         "fr": "Séquence Oldowayen continue sur ~300 000 ans — Namorotukunan, Koobi Fora, Kenya.",
         "en": "Continuous Oldowan sequence over ~300,000 years — Namorotukunan, Koobi Fora, Kenya."
@@ -9462,7 +9796,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#A06020",
       "hominin:dateYearsBP": -2100000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature 559:608 (2018)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Zhu et al., Nature 559:608 (2018) 10.1038/s41586-018-0299-4",
       "description": {
         "fr": "Outils lithiques sur le Plateau de Lœss (Chine) datés ~2,1 Ma. Suggèrent une sortie d'Afrique antérieure aux estimations classiques. Datations encore discutées.",
         "en": "Stone tools on the Loess Plateau (China) dated ~2.1 Ma. Suggest an Out-of-Africa earlier than classic estimates. Datings still debated."
@@ -9488,7 +9824,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#A06020",
       "hominin:dateYearsBP": -1770000,
       "hominin:category": "migration",
-      "hominin:dateReference": "Science 342:326 (2013)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Lordkipanidze et al., Science 342:326 (2013) 10.1126/science.1238484",
       "description": {
         "fr": "Plus anciens hominines connus hors d'Afrique. 5 crânes d'H. erectus georgicus à Dmanisi (Géorgie). Variabilité morphologique exceptionnelle au sein d'une seule population.",
         "en": "Earliest known hominins outside Africa. 5 H. erectus georgicus skulls at Dmanisi (Georgia). Exceptional morphological variability within a single population."
@@ -9514,7 +9852,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#C04010",
       "hominin:dateYearsBP": -1760000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature 460:82 (2009)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Lepre et al., Nature 477:82 (2011) 10.1038/nature10372",
       "description": {
         "fr": "Premiers bifaces façonnés — Kokiselei 4, Turkana Ouest. Rupture cognitive majeure.",
         "en": "First shaped handaxes — Kokiselei 4, West Turkana. Major cognitive shift."
@@ -9540,7 +9880,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#D05010",
       "hominin:dateYearsBP": -1000000,
       "hominin:category": "fire",
-      "hominin:dateReference": "PNAS 109:E1215 (2012)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Berna et al., PNAS 109:E1215 (2012) 10.1073/pnas.1117620109",
       "description": {
         "fr": "Traces de combustion >1 Ma — Wonderwerk Cave, Afrique du Sud. Usage ≠ fabrication intentionnelle.",
         "en": "Combustion traces >1 Ma — Wonderwerk Cave, South Africa. Use ≠ intentional making."
@@ -9566,7 +9908,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -1000000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Science 389:1320 (2025) DOI 10.1126/science.ado9202",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Feng et al., Science 389:1320 (2025) 10.1126/science.ado9202",
       "description": {
         "fr": "Reconstruction numérique de Yunxian 2 (Hubei) : membre précoce du clade asiatique H. longi (incl. Dénisoviens), groupe frère de H. sapiens. Débat concurrent H. juluensis (Bae & Wu 2024) ; pas d'ADN nucléaire.",
         "en": "Digital reconstruction of Yunxian 2 (Hubei): early member of the Asian H. longi clade (incl. Denisovans), sister to H. sapiens. Competing H. juluensis proposal (Bae & Wu 2024); no nuclear DNA."
@@ -9592,7 +9936,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#805090",
       "hominin:dateYearsBP": -773000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature (2026) DOI 10.1038/s41586-025-09914-y",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Hublin et al., Nature (2026) 10.1038/s41586-025-09914-y",
       "description": {
         "fr": "Thomas Quarry I, Casablanca — 773 ka (Brunhes/Matuyama, datation robuste). Population souvent présentée comme basale aux 3 lignées ; alternative : H. erectus en divergence. Datation = consensus fort ; phylogénie = consensus modéré.",
         "en": "Thomas Quarry I, Casablanca — 773 ka (Brunhes/Matuyama, robust dating). Often framed as basal to the 3 lineages; alternative: diverging H. erectus. Dating = strong consensus; phylogeny = moderate consensus."
@@ -9618,7 +9964,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#E06020",
       "hominin:dateYearsBP": -400000,
       "hominin:category": "fire",
-      "hominin:dateReference": "Nature (déc. 2025)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Davis et al., Nature (2025) 10.1038/s41586-025-09855-6",
       "description": {
         "fr": "Pyrite de fer + argile cuite >750°C — Barnham, Suffolk, Angleterre. Repousse le record de 350 000 ans.",
         "en": "Iron pyrite + clay fired >750°C — Barnham, Suffolk, England. Pushes record back 350,000 years."
@@ -9644,7 +9992,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#C04010",
       "hominin:dateYearsBP": -315000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature 546:289 (2017)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Hublin et al., Nature 546:289 (2017) 10.1038/nature22336; Richter et al., Nature 546:293 (2017) 10.1038/nature22335",
       "description": {
         "fr": "5 individus H. sapiens à Jebel Irhoud (Maroc), datation TL 315±34 ka. Mosaïque de traits modernes (face plate) et archaïques (neurocrâne allongé). Infirme le modèle d'origine est-africaine unique.",
         "en": "5 H. sapiens individuals at Jebel Irhoud (Morocco), TL dating 315±34 ka. Mosaic of modern (flat face) and archaic (elongated neurocranium) traits. Refutes the single East-African origin model."
@@ -9672,7 +10022,7 @@ const _EMBEDDED_EVENTS = {
       "hominin:category": "symbolic",
       "hominin:debateLevel": "ACTIVE_DEBATE",
       "hominin:evidenceType": "INDIRECT_DATA",
-      "hominin:dateReference": "eLife reviewed preprints (2025) ; J. Hum. Evol. (2024)",
+      "hominin:dateReference": "Berger et al., eLife (2025) 10.7554/eLife.89106; Martinon-Torres et al., J. Hum. Evol. (2024) 10.1016/j.jhevol.2023.103464",
       "description": {
         "fr": "Squelettes d'H. naledi dans les chambres profondes de Rising Star (Afrique du Sud). Berger et al. proposent des dépôts intentionnels de corps, foyers et gravures symboliques chez un hominine à cerveau réduit (~465–610 cm³). Contesté vigoureusement sur les plans taphonomique et stratigraphique — pas de consensus sur les sépultures intentionnelles (Martinón-Torres et al. 2024, J. Hum. Evol.).",
         "en": "H. naledi skeletons in deep chambers of Rising Star cave system (South Africa). Berger et al. propose intentional body deposits, hearths and symbolic engravings by a small-brained hominin (~465–610 cm³). Vigorously contested on taphonomic and stratigraphic grounds — no consensus on intentional burial (Martinón-Torres et al. 2024, J. Hum. Evol.)."
@@ -9698,7 +10048,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#C04010",
       "hominin:dateYearsBP": -233000,
       "hominin:category": "phylo",
-      "hominin:dateReference": "Nature 601:579 (2022)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Vidal et al., Nature 601:579 (2022) 10.1038/s41586-021-04275-8",
       "description": {
         "fr": "Omo I (Éthiopie) re-daté à 233±22 ka via tephra Shala (Vidal et al. 2022). Cohérent avec une origine pan-africaine de H. sapiens (Jebel Irhoud + Omo + Florisbad).",
         "en": "Omo I (Ethiopia) re-dated to 233±22 ka via Shala tephra (Vidal et al. 2022). Consistent with a pan-African origin of H. sapiens (Jebel Irhoud + Omo + Florisbad)."
@@ -9724,7 +10076,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#2070B0",
       "hominin:dateYearsBP": -176500,
       "hominin:category": "symbolic",
-      "hominin:dateReference": "Nature 534:111 (2016)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Jaubert et al., Nature 534:111 (2016) 10.1038/nature18291",
       "description": {
         "fr": "Structures en stalagmites à 336m de profondeur — Bruniquel, France. Plus ancien usage intentionnel de l'espace souterrain.",
         "en": "Stalagmite structures 336m deep — Bruniquel, France. Oldest known intentional use of underground space."
@@ -9750,7 +10104,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#C0A000",
       "hominin:dateYearsBP": -130000,
       "hominin:category": "symbolic",
-      "hominin:dateReference": "PNAS 104:9964 (2007)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Bouzouggar et al., PNAS 104:9964 (2007) 10.1073/pnas.0703877104",
       "description": {
         "fr": "Nassarius perforés — Skhul (Israël) 140–100 ka ; Taforalt (Maroc) 82 ka. Premières parures symboliques.",
         "en": "Perforated Nassarius — Skhul (Israel) 140–100 ka; Taforalt (Morocco) 82 ka. First symbolic ornaments."
@@ -9778,7 +10134,7 @@ const _EMBEDDED_EVENTS = {
       "hominin:category": "migration",
       "hominin:debateLevel": "STRONG_CONSENSUS",
       "hominin:evidenceType": "DIRECT_DATA",
-      "hominin:dateReference": "PNAS 105(4):1342–1347 (2008) ; Proc. R. Soc. B 284:20171065 (2017)",
+      "hominin:dateReference": "Gordon et al., PNAS 105:1342 (2008) 10.1073/pnas.0710041105; van den Bergh et al., Nature 534:245 (2016) 10.1038/nature17999",
       "description": {
         "fr": "Série de restes graciles (LB1 et associés) — Liang Bua, île de Flores, Indonésie. Stature ~1 m, volume cérébral ~426 cm³. Nanisme insulaire sur un Homo archaïque, disparu vers ~50 ka. Les hypothèses pathologiques (microcéphalie, crétinisme endémique) ont été largement réfutées par analyses morphométriques comparatives. Débat résiduel sur l'ancêtre exact (H. erectus insulaire vs lignée plus basale) et sur les modalités d'extinction.",
         "en": "Series of gracile remains (LB1 and associated) — Liang Bua, Flores Island, Indonesia. Stature ~1 m, brain volume ~426 cm³. Insular dwarfism on an archaic Homo lineage, extinct ~50 ka. Pathological hypotheses (microcephaly, endemic cretinism) largely refuted by comparative morphometric analyses. Residual debate on exact ancestor (insular H. erectus vs more basal lineage) and mode of extinction."
@@ -9804,7 +10160,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#D07010",
       "hominin:dateYearsBP": -110000,
       "hominin:category": "symbolic",
-      "hominin:dateReference": "Nature Human Behaviour (2025)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Zaidner et al., Nature Human Behaviour (2025) 10.1038/s41562-025-02110-y",
       "description": {
         "fr": "5 individus en position fœtale + ocre + objets rituels — Tinshemet Cave, Israël. Révisé de 100 000 à 110 000 ans (Nature Human Behaviour 2025).",
         "en": "5 individuals in foetal position + ochre + ritual objects — Tinshemet Cave, Israel. Revised from 100,000 to 110,000 years (Nature Human Behaviour 2025)."
@@ -9830,6 +10188,8 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#E08020",
       "hominin:dateYearsBP": -75000,
       "hominin:category": "symbolic",
+      "hominin:debateLevel": "UNASSESSED",
+      "hominin:evidenceType": "UNASSESSED",
       "hominin:dateReference": "J. Hum. Evol. 48:3 (2005)",
       "description": {
         "fr": "41+ perles Nassarius kraussianus — Blombos Cave, Afrique du Sud. 75 000 ans (OSL/TL).",
@@ -9856,7 +10216,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#8050C0",
       "hominin:dateYearsBP": -67800,
       "hominin:category": "art",
-      "hominin:dateReference": "Nature (janv. 2026)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Oktaviana et al., Nature (2026) 10.1038/s41586-025-09968-y",
       "description": {
         "fr": "Empreintes de main — Liang Metanduno, île de Muna, Sulawesi. ≥67 800 ans. Dépasse de 16 600 ans le précédent record (Nature 2026).",
         "en": "Hand stencils — Liang Metanduno, Muna Island, Sulawesi. ≥67,800 years. Exceeds previous record by 16,600 years (Nature 2026)."
@@ -9882,7 +10244,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#208060",
       "hominin:dateYearsBP": -65000,
       "hominin:category": "migration",
-      "hominin:dateReference": "Nature 547 (2017)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Clarkson et al., Nature 547:306 (2017) 10.1038/nature22968",
       "description": {
         "fr": "OSL 65 000 ans — Madjedbebe, Territoire du Nord. Génomique (2025) : ~60 000 ans, deux routes depuis la Sonde.",
         "en": "OSL 65,000 years — Madjedbebe, Northern Territory. Genomics (2025): ~60,000 years, two routes from Sundaland."
@@ -9908,7 +10272,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#9060D0",
       "hominin:dateYearsBP": -51200,
       "hominin:category": "art",
-      "hominin:dateReference": "Nature 631 (2024)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Oktaviana et al., Nature 631 (2024) 10.1038/s41586-024-07541-7",
       "description": {
         "fr": "Figures anthropomorphes + cochon sauvage — Leang Karampuang, Sulawesi. Première scène avec interaction connue.",
         "en": "Anthropomorphic figures + wild pig — Leang Karampuang, Sulawesi. First known scene with interaction."
@@ -9934,6 +10300,8 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#E08020",
       "hominin:dateYearsBP": -47500,
       "hominin:category": "migration",
+      "hominin:debateLevel": "UNASSESSED",
+      "hominin:evidenceType": "UNASSESSED",
       "hominin:dateReference": "Nature 626:341 (2024)",
       "description": {
         "fr": "Ossements + industrie LRJ — Grotte de Ranis, Thuringe, Allemagne. Légèrement révisé de 45 000 à 47 500 ans (Nature 2024).",
@@ -9960,7 +10328,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#E08020",
       "hominin:dateYearsBP": -43000,
       "hominin:category": "tools",
-      "hominin:dateReference": "Nature Commun. (2024)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Shao et al., Nature Communications (2024) 10.1038/s41467-024-51349-y",
       "description": {
         "fr": "1ère grande culture matérielle H. sapiens en Europe (43–28 ka). Deux vagues de dispersion confirmées par génomique (2024).",
         "en": "First major H. sapiens material culture in Europe (43–28 ka). Two dispersal waves confirmed by genomics (2024)."
@@ -9986,7 +10356,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#A070D0",
       "hominin:dateYearsBP": -36000,
       "hominin:category": "art",
-      "hominin:dateReference": "PNAS 113:4670 (2016)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Quiles et al., PNAS 113:4670 (2016) 10.1073/pnas.1523158113",
       "description": {
         "fr": "Ardèche, France — 37–33 500 ans (phase 1). Débat actif sur attribution culturelle Aurignacien vs Gravettien.",
         "en": "Ardèche, France — 37–33,500 years (phase 1). Active debate on cultural attribution Aurignacian vs Gravettian."
@@ -10012,6 +10384,8 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#A070D0",
       "hominin:dateYearsBP": -35000,
       "hominin:category": "art",
+      "hominin:debateLevel": "UNASSESSED",
+      "hominin:evidenceType": "UNASSESSED",
       "hominin:dateReference": "",
       "description": {
         "fr": "Peintures rupestres bisons — Altamira, Espagne. ~35 000 ans.",
@@ -10038,6 +10412,8 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#B080E0",
       "hominin:dateYearsBP": -17000,
       "hominin:category": "art",
+      "hominin:debateLevel": "UNASSESSED",
+      "hominin:evidenceType": "UNASSESSED",
       "hominin:dateReference": "",
       "description": {
         "fr": "Chef-d'œuvre pariétal — Lascaux, Dordogne, France. ~17 000 ans.",
@@ -10064,7 +10440,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#E04040",
       "hominin:dateYearsBP": -16000,
       "hominin:category": "migration",
-      "hominin:dateReference": "Science 391:1283 (2026)",
+      "hominin:debateLevel": "ACTIVE_DEBATE",
+      "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:dateReference": "Surovell et al., Science 391:1283 (2026) 10.1126/science.adw9217",
       "description": {
         "fr": "Monte Verde II reclassé Holocène moyen par Surovell et al. (Science 2026). Débat pré-Clovis non résolu — l'un des débats les plus actifs en 2026.",
         "en": "Monte Verde II reclassified mid-Holocene by Surovell et al. (Science 2026). Pre-Clovis debate unresolved — one of the most active debates in 2026."
@@ -10090,7 +10468,9 @@ const _EMBEDDED_EVENTS = {
       "hominin:color": "#60A040",
       "hominin:dateYearsBP": -10400,
       "hominin:category": "neolithic",
-      "hominin:dateReference": "PNAS 119:e2110930119 (2022)",
+      "hominin:debateLevel": "MODERATE_CONSENSUS",
+      "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:dateReference": "Stiner et al., PNAS 119:e2110930119 (2022) 10.1073/pnas.2110930119",
       "description": {
         "fr": "Processus graduel sur ~1 000 ans — Aşıklı Höyük, Anatolie. Génomique 118 génomes anciens (Science 2025).",
         "en": "Gradual process over ~1,000 years — Aşıklı Höyük, Anatolia. Genomics of 118 ancient genomes (Science 2025)."
@@ -10147,34 +10527,39 @@ async function loadData() {
 async function ej_json(r) { return r.json(); }
 
 // Language helpers --------------------------------------------------------
-// Reads the active UI language from i18next; falls back to 'fr' when i18next
-// isn't ready yet or the requested language isn't available on a value.
+// Prefer the initialised i18n language. Until init(), i18next.language is the
+// English fallback and must be ignored — otherwise loadData() freezes the
+// catalogue in English while a French browser still gets French chrome.
 function currentDataLang() {
   try {
-    if (typeof i18next !== 'undefined' && i18next.language) {
+    if (typeof i18next !== 'undefined' && i18next.isInitialized && i18next.language) {
       const raw = String(i18next.language).toLowerCase();
-      return raw.startsWith('en') ? 'en' : 'fr';
+      return raw.startsWith('fr') ? 'fr' : 'en';
     }
   } catch (e) { /* ignore */ }
-  // Secondary fallback: stored choice or browser hint
+  try {
+    const initial = document.documentElement.getAttribute('data-initial-ui-lang');
+    if (initial === 'fr' || initial === 'en') return initial;
+  } catch (e) { /* ignore */ }
   try {
     const stored = localStorage.getItem('ho_ui_lang');
-    if (stored) return String(stored).toLowerCase().startsWith('en') ? 'en' : 'fr';
+    if (stored === 'fr' || stored === 'en') return stored;
   } catch (e) { /* ignore */ }
   const nav = (((navigator.languages && navigator.languages[0]) || navigator.language || 'en')).toLowerCase();
   return nav.startsWith('fr') ? 'fr' : 'en';
 }
 
 // Picks the localised string from an {fr,en} object; tolerates plain strings
-// (backward compatibility with older data shapes).
+// (backward compatibility with older data shapes). English is the source
+// language; French is a bundled translation.
 function pickLang(v, fallback) {
   if (v == null) return fallback != null ? fallback : '';
   if (typeof v === 'string') return v;
   if (typeof v === 'object') {
     const lang = currentDataLang();
     if (v[lang] != null) return v[lang];
-    if (v.fr != null)    return v.fr;
     if (v.en != null)    return v.en;
+    if (v.fr != null)    return v.fr;
   }
   return fallback != null ? fallback : '';
 }
@@ -10253,13 +10638,16 @@ function adaptSpecies(item) {
   HOMININ_CERTAINTY_KEYS.forEach((k) => {
     if (item[k] !== undefined && item[k] !== null) sp[k] = item[k];
   });
+  if (Array.isArray(item['hominin:references'])) {
+    sp['hominin:references'] = item['hominin:references'];
+  }
   return sp;
 }
 
 // JSON-LD Event (milestone) → runtime object for the events band + map markers.
 function adaptEvent(item) {
   const geo = (item.location && item.location.geo) || { latitude: 0, longitude: 0 };
-  return {
+  const ev = {
     id:       item['@id'],
     time:     item['hominin:dateYearsBP'],
     label:    pickLang(item.name),
@@ -10271,6 +10659,10 @@ function adaptEvent(item) {
     lng:      geo.longitude || 0,
     source:   item['hominin:dateReference'] || '',
   };
+  EVENT_CERTAINTY_KEYS.forEach((k) => {
+    if (item[k] !== undefined && item[k] !== null) ev[k] = item[k];
+  });
+  return ev;
 }
 
 // Re-derive SPECIES_DATA / EVENTS_DATA from the raw JSON for the active
@@ -10575,8 +10967,9 @@ document.addEventListener('DOMContentLoaded', function initBurger() {
 <!-- =====================================================================
      INTERNATIONALISATION — two layers (same goal: reach every language)
      1) PRIMARY — Browser page translation (Chrome, Edge, Safari, Firefox…):
-        - Narrative from JSON is French-first in the DOM; the built-in selector
-          only switches **French or English** menu labels (see welcome dialog).
+        - Narrative from JSON is English-first in the DOM; French is a bundled
+          translation. The built-in selector only switches **English or French**
+          menu labels (see welcome dialog).
         - For any other language: pick Français or English for menu labels, then
           use the browser’s “Translate this page” on the whole document.
         - Keep <html translate="yes"> (re-applied on languageChanged). Mark only
@@ -10608,6 +11001,7 @@ const TRANSLATIONS = {
         play: 'Play', pause: 'Pause',
         appSubtitle: 'Explorez près de 7,5 millions d\'années de migrations humaines',
         language: 'Langue',
+        browserTranslateHint: 'Cette page est en anglais (le français est aussi intégré). Votre navigateur est en <strong>{lang}</strong> (<code>{code}</code>). Pour la lire en {lang}, utilisez <strong>Traduire cette page</strong> — l\'icône Google Traduction dans la barre d\'adresse, ou le bandeau de traduction.',
         mapLayers: 'Couches carte',
         displayBurgerSection: 'Affichage',
         selectSpecies: 'Sélectionnez une espèce',
@@ -10669,11 +11063,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Consensus modéré — large accord avec des nuances ou débats de détail.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Débat actif — plusieurs thèses publiées coexistent.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Hypothèse spéculative — pistes plausibles encore peu testées.',
+        uncertaintyDebateList_UNASSESSED: 'Non évalué — pas encore rattaché à une synthèse éditoriale ; l\'absence n\'est pas un consensus.',
         uncertaintyEvidIntro: 'Types de preuves possibles :',
         uncertaintyEvidList_DIRECT_DATA: 'Données directes — observation directe sur restes ou molécules anciennes.',
         uncertaintyEvidList_INDIRECT_DATA: 'Données indirectes — fossiles, contextes archéologiques ou indices sans lecture moléculaire directe du trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Inférence évolutive — raisonnement à partir de parentés, d\'écologie ou de modèles comparés.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Récit médiatique — relais souvent simplifié ou anticipé par rapport aux publications spécialisées.',
+        uncertaintyEvidList_UNASSESSED: 'Non évalué — le type de preuve n\'a pas encore été rattaché à une source éditoriale.',
         uncertaintyWhy: 'L’icône à trois secteurs du panneau reprend les mêmes couleurs que la liste ci‑dessous, pour toute espèce. La teinte sur la carte et sur la frise chronologique identifie le groupe taxonomique ; elle ne remplace pas ces niveaux d’accord.',
         certaintyPanelTitle: 'Certitude par thème',
         certaintyTriAria: 'Certitude par thème : secteur supérieur taxonomie, puis comportement, puis pigmentation (sens horaire). Survolez ou activez pour le détail.',
@@ -10685,10 +11081,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Bon accord général, avec des nuances actives.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Plusieurs positions défendues dans la littérature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Piste encore fragile ou peu testée.',
+        uncertaintyDebate_UNASSESSED: 'Pas encore évalué dans la synthèse éditoriale.',
         uncertaintyEvid_DIRECT_DATA: 'Preuve directe (ex. ADN ancien ou restes très informatifs).',
         uncertaintyEvid_INDIRECT_DATA: 'Preuves solides mais indirectes pour ce trait précis.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Déduit par comparaison évolutive ou modélisation.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Surtout relais médiatique, peu ancré dans les sources primaires.',
+        uncertaintyEvid_UNASSESSED: 'Type de preuve non encore évalué.',
         timelineViewGroupAria: 'Contrôle du niveau de lecture sur la chronologie (vue fusionnée ou toutes les lignées).',
         timelineViewSimple: 'Vue simple',
         timelineViewDetailed: 'Vue détaillée',
@@ -10702,6 +11100,7 @@ const TRANSLATIONS = {
         play: 'Play', pause: 'Pause',
         appSubtitle: 'Explore nearly seven and a half million years of human migrations',
         language: 'Language',
+        browserTranslateHint: 'This page is in English (French is also built in). Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong> — the Google Translate icon in the address bar, or the translate popup.',
         mapLayers: 'Map layers',
         displayBurgerSection: 'Display',
         selectSpecies: 'Select a species',
@@ -10763,11 +11162,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyTriAria: 'Certainty by topic: top sector taxonomy, then behaviour, then pigmentation (clockwise). Hover or focus the icon for full detail.',
@@ -10779,10 +11180,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
         timelineViewGroupAria: 'Control how timeline rows are grouped (merged view or full catalogue rows).',
         timelineViewSimple: 'Simple view',
         timelineViewDetailed: 'Detailed view',
@@ -10855,11 +11258,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
@@ -10869,10 +11274,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
       }
     }
   },
@@ -10942,11 +11349,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
@@ -10956,10 +11365,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
       }
     }
   },
@@ -11029,11 +11440,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
@@ -11043,10 +11456,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
       }
     }
   },
@@ -11116,11 +11531,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
@@ -11130,10 +11547,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
       }
     }
   },
@@ -11203,11 +11622,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
@@ -11217,10 +11638,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
       }
     }
   },
@@ -11290,11 +11713,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
@@ -11304,10 +11729,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
       }
     }
   },
@@ -11377,11 +11804,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
@@ -11391,10 +11820,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
       }
     }
   },
@@ -11464,11 +11895,13 @@ const TRANSLATIONS = {
         uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
         uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
         uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
+        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
         uncertaintyEvidIntro: 'Evidence types you may see:',
         uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
         uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
         uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
         uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
+        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyDomainTax: 'Taxonomy',
@@ -11478,10 +11911,12 @@ const TRANSLATIONS = {
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
         uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
+        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
         uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
         uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
         uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
         uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
+        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
       }
     }
   },
@@ -11499,8 +11934,8 @@ const TRANSLATIONS = {
 // hidden. Inlining it makes the UI shell work offline, as intended by the
 // single-file architecture.
 // =====================================================================
-const I18N_SUPPORTED = ['fr', 'en'];
-const I18N_FALLBACK = 'fr';
+const I18N_SUPPORTED = ['en', 'fr'];
+const I18N_FALLBACK = 'en';
 
 window.i18next = (function () {
   let current = I18N_FALLBACK;
@@ -11547,6 +11982,112 @@ window.i18next = (function () {
 // =====================================================================
 // APPLY TRANSLATIONS TO DOM
 // =====================================================================
+function pageTranslateActive() {
+  return /\btranslated-(ltr|rtl)\b/.test(document.documentElement.className || '');
+}
+
+function browserPrimaryLang() {
+  const raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en');
+  return String(raw).split('-')[0].toLowerCase();
+}
+
+function browserWantsPageTranslate() {
+  const bl = browserPrimaryLang();
+  return bl !== 'en' && bl !== 'fr';
+}
+
+function humanBrowserLangName(code) {
+  try {
+    const loc = navigator.language || 'en';
+    const dn = new Intl.DisplayNames([loc, 'en', 'fr'], { type: 'language' });
+    return dn.of(code) || code;
+  } catch (err) { return code; }
+}
+
+function browserTranslateHintHtml() {
+  if (!browserWantsPageTranslate()) return '';
+  const code = browserPrimaryLang();
+  const name = humanBrowserLangName(code);
+  const fallback = 'This page is in English (French is also built in). Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong> — the Google Translate icon in the address bar, or the translate popup.';
+  let tpl = fallback;
+  try {
+    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+      const hit = i18next.t('ui.browserTranslateHint');
+      if (hit && hit !== 'ui.browserTranslateHint') tpl = hit;
+    }
+  } catch (e) { /* keep fallback */ }
+  return String(tpl).split('{lang}').join(name).split('{code}').join(code);
+}
+
+function syncBrowserTranslateHint() {
+  const html = browserTranslateHintHtml();
+  const welcomeHint = document.getElementById('welcome-translate-hint');
+  const welcomePanel = document.getElementById('welcome-lang-panel');
+  const burgerHint = document.getElementById('burger-translate-hint');
+  const banner = document.getElementById('page-translate-banner');
+  const bannerText = document.getElementById('page-translate-banner-text');
+  if (welcomeHint && welcomePanel) {
+    welcomeHint.innerHTML = html;
+    welcomePanel.hidden = !html;
+  }
+  if (burgerHint) {
+    burgerHint.innerHTML = html;
+    burgerHint.hidden = !html;
+  }
+  if (banner) {
+    let dismissed = false;
+    try { dismissed = sessionStorage.getItem('ho_translate_banner_dismissed') === '1'; } catch (e) { /* ignore */ }
+    if (!html || dismissed || pageTranslateActive()) {
+      banner.hidden = true;
+    } else {
+      if (bannerText) bannerText.innerHTML = html;
+      banner.hidden = false;
+    }
+  }
+}
+
+function applyDocumentSourceLang(lng) {
+  if (pageTranslateActive()) return;
+  if (document.documentElement.getAttribute('lang') === lng) return;
+  document.documentElement.setAttribute('lang', lng);
+}
+
+/** Same EN/FR source as the rest of the app — not a separate navigator guess. */
+function welcomeUiLang() {
+  try {
+    if (typeof i18next !== 'undefined' && i18next.isInitialized && i18next.language) {
+      return String(i18next.language).toLowerCase().startsWith('fr') ? 'fr' : 'en';
+    }
+  } catch (e) { /* ignore */ }
+  if (typeof getInitialUiLang === 'function') return getInitialUiLang();
+  const initial = document.documentElement.getAttribute('data-initial-ui-lang');
+  if (initial === 'fr' || initial === 'en') return initial;
+  return 'en';
+}
+
+function setWelcomeCopy(lang) {
+  const fr = String(lang || welcomeUiLang()).toLowerCase().startsWith('fr');
+  function setHtml(id, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+  if (fr) {
+    setHtml('welcome-tagline', 'Des origines africaines à la conquête du monde');
+    setHtml('welcome-body', 'À partir des premières lignées en <strong>Afrique orientale</strong>, soit il y a près de <strong>7,5&nbsp;millions d\'années</strong>, différentes espèces d\'hominines&nbsp;— nos ancêtres et leurs cousins&nbsp;— ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.');
+    setHtml('tip-cursor', 'Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.');
+    setHtml('tip-marker', 'Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d\'une espèce.');
+    setHtml('tip-play', 'Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.');
+    setHtml('welcome-start-label', 'Commencer l\'exploration');
+    return;
+  }
+  setHtml('welcome-tagline', 'From African origins to the peopling of the world');
+  setHtml('welcome-body', 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.');
+  setHtml('tip-cursor', 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.');
+  setHtml('tip-marker', 'Click a <strong>marker</strong> on the map to show details for a species.');
+  setHtml('tip-play', 'Press <strong>Play</strong> to animate migrations through time.');
+  setHtml('welcome-start-label', 'Start exploring');
+}
+
 function applyTranslations() {
   const t = i18next.t.bind(i18next);
   const lng = i18next.language;
@@ -11556,7 +12097,7 @@ function applyTranslations() {
   // map controls and panels). A future RTL mode would need mirrored controls, attribution, and QA —
   // do not infer dir from navigator.language alone.
   document.documentElement.dir = 'ltr';
-  document.documentElement.lang = lng;
+  applyDocumentSourceLang(lng);
   document.documentElement.removeAttribute('data-i18n-pending');
 
   // Logo subtitle
@@ -11683,6 +12224,9 @@ function applyTranslations() {
   if (typeof syncMobilePlayBarState === 'function') syncMobilePlayBarState();
 
   if (typeof syncTimelineViewToggleUI === 'function') syncTimelineViewToggleUI();
+
+  setWelcomeCopy(String(lng).toLowerCase().startsWith('fr') ? 'fr' : 'en');
+  syncBrowserTranslateHint();
 }
 
 // =====================================================================
@@ -11720,14 +12264,25 @@ function initI18n() {
     .then(() => {
       applyTranslations();
       document.documentElement.setAttribute('translate', 'yes');
+      // init() does not fire languageChanged. Re-adapt only when the catalogue
+      // was frozen in the wrong language — a redundant rebuild dismisses Chrome's
+      // Translate this page bar.
+      try {
+        if (!pageTranslateActive() && typeof relocaliseData === 'function'
+            && window._RAW_SPECIES_JSON && SPECIES_DATA && SPECIES_DATA[0]) {
+          const sample = window._RAW_SPECIES_JSON.itemListElement[0];
+          const want = typeof pickLang === 'function' ? pickLang(sample && sample.name) : '';
+          if (want && want !== SPECIES_DATA[0].common) relocaliseData();
+        }
+      } catch (e) { /* ignore */ }
     });
 
   i18next.on('languageChanged', (lng) => {
-    document.documentElement.setAttribute('lang', lng);
-    // Keep page translatable by the browser for languages outside the bundled list.
+    if (!pageTranslateActive()) applyDocumentSourceLang(lng);
     document.documentElement.setAttribute('translate', 'yes');
-    // Re-derive scientific content (species + events) in the new language.
-    try { if (typeof relocaliseData === 'function') relocaliseData(); } catch (e) { /* ignore */ }
+    try {
+      if (!pageTranslateActive() && typeof relocaliseData === 'function') relocaliseData();
+    } catch (e) { /* ignore */ }
   });
 
   // Language selector change handler
@@ -11937,60 +12492,24 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
     afterMapReady(hideOverlay);
   }
 
-  function browserUiLang() {
-    var raw = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
-    return String(raw).split('-')[0].toLowerCase();
-  }
-  function humanLangName(code) {
-    try {
-      var loc = navigator.language || 'en';
-      var dn = new Intl.DisplayNames([loc, 'en', 'fr'], { type: 'language' });
-      return dn.of(code) || code;
-    } catch (err) { return code; }
-  }
-
-  function setHtml(id, html) {
-    var el = document.getElementById(id);
-    if (el) el.innerHTML = html;
-  }
-
-  function setWelcomeCopy(lang, browserLang) {
-    if (lang === 'fr') {
-      setHtml('welcome-tagline', 'Des origines africaines à la conquête du monde');
-      setHtml('welcome-body', 'À partir des premières lignées en <strong>Afrique orientale</strong>, soit il y a près de <strong>7,5&nbsp;millions d\'années</strong>, différentes espèces d\'hominines&nbsp;— nos ancêtres et leurs cousins&nbsp;— ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.');
-      setHtml('tip-cursor', 'Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.');
-      setHtml('tip-marker', 'Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d\'une espèce.');
-      setHtml('tip-play', 'Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.');
-      setHtml('welcome-start-label', 'Commencer l\'exploration');
-      return;
-    }
-
-    setHtml('welcome-tagline', 'From African origins to the peopling of the world');
-    setHtml('welcome-body', 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.');
-    setHtml('tip-cursor', 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.');
-    setHtml('tip-marker', 'Click a <strong>marker</strong> on the map to show details for a species.');
-    setHtml('tip-play', 'Press <strong>Play</strong> to animate migrations through time.');
-    setHtml('welcome-start-label', 'Start exploring');
-
-    if (browserLang !== 'en') {
-      var hint = document.getElementById('welcome-translate-hint');
-      var panel = document.getElementById('welcome-lang-panel');
-      if (hint && panel) {
-        var name = humanLangName(browserLang);
-        panel.hidden = false;
-        hint.innerHTML =
-          'Your browser language appears to be <strong>' + name + '</strong> (<code>' + browserLang + '</code>). ' +
-          'The app ships in English and French; if your browser offers <strong>Translate this page</strong>, you can use it after closing this dialog.';
-      }
-    }
-  }
-
-  var hint = document.getElementById('welcome-translate-hint');
-  var bl = browserUiLang();
-  if (hint) hint.textContent = '';
-  var welcomeLang = bl === 'fr' ? 'fr' : 'en';
   var alreadyWelcomed = !!storedGet();
-  setWelcomeCopy(welcomeLang, bl);
+  setWelcomeCopy(welcomeUiLang());
+  syncBrowserTranslateHint();
+  setTimeout(syncBrowserTranslateHint, 0);
+
+  var bannerDismiss = document.getElementById('page-translate-banner-dismiss');
+  if (bannerDismiss) {
+    bannerDismiss.addEventListener('click', function () {
+      try { sessionStorage.setItem('ho_translate_banner_dismissed', '1'); } catch (e) { /* ignore */ }
+      var banner = document.getElementById('page-translate-banner');
+      if (banner) banner.hidden = true;
+    });
+  }
+  try {
+    new MutationObserver(function () {
+      if (pageTranslateActive()) syncBrowserTranslateHint();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) { /* ignore */ }
   if (alreadyWelcomed) {
     afterMapReady(function () {
       setTimeout(hideOverlay, 1000);
@@ -12045,10 +12564,11 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
         <div class="burger-lang-wrap" translate="no">
           <span>🌐</span>
           <select id="lang-select" data-testid="lang-select" aria-label="Language" translate="no">
-            <option value="fr">Français</option>
             <option value="en">English</option>
+            <option value="fr">Français</option>
           </select>
         </div>
+        <p id="burger-translate-hint" data-testid="burger-translate-hint" hidden translate="yes"></p>
       </div>
 
       <!-- Thème + Données -->
@@ -12091,6 +12611,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
           <li class="uncertainty-level-li--moderate" data-i18n-text="uncertaintyDebateList_MODERATE_CONSENSUS"></li>
           <li class="uncertainty-level-li--active-debate" data-i18n-text="uncertaintyDebateList_ACTIVE_DEBATE"></li>
           <li class="uncertainty-level-li--speculative" data-i18n-text="uncertaintyDebateList_SPECULATIVE_HYPOTHESIS"></li>
+          <li class="uncertainty-level-li--unassessed" data-i18n-text="uncertaintyDebateList_UNASSESSED"></li>
         </ul>
         <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);" data-i18n-text="uncertaintyEvidIntro"></p>
         <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-2);padding-left:1.1em;line-height:1.45;">
@@ -12098,6 +12619,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
           <li data-i18n-text="uncertaintyEvidList_INDIRECT_DATA"></li>
           <li data-i18n-text="uncertaintyEvidList_EVOLUTIONARY_INFERENCE"></li>
           <li data-i18n-text="uncertaintyEvidList_MEDIA_NARRATIVE"></li>
+          <li data-i18n-text="uncertaintyEvidList_UNASSESSED"></li>
         </ul>
         <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0;" data-i18n-text="uncertaintyWhy"></p>
       </div>
@@ -12124,10 +12646,10 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
     <div id="welcome-modal">
       <div>
         <div class="welcome-logo" id="welcome-title">Hominin<span>es</span> Origins</div>
-        <div class="welcome-tagline" id="welcome-tagline">Des origines africaines à la conquête du monde</div>
+        <div class="welcome-tagline" id="welcome-tagline">From African origins to the peopling of the world</div>
       </div>
       <div class="welcome-body" id="welcome-body">
-        À partir des premières lignées en <strong>Afrique orientale</strong>, soit il y a près de <strong>7,5&nbsp;millions d'années</strong>, différentes espèces d'hominines&nbsp;— nos ancêtres et leurs cousins&nbsp;— ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.
+        From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.
       </div>
       <div class="welcome-tips">
         <div class="welcome-tip">
@@ -12135,29 +12657,29 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
             <!-- timeline scrubber handle -->
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
           </span>
-          <span id="tip-cursor">Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.</span>
+          <span id="tip-cursor">Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.</span>
         </div>
         <div class="welcome-tip">
           <span class="welcome-tip-icon">
             <!-- map marker pin -->
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           </span>
-          <span id="tip-marker">Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d'une espèce.</span>
+          <span id="tip-marker">Click a <strong>marker</strong> on the map to show details for a species.</span>
         </div>
         <div class="welcome-tip">
           <span class="welcome-tip-icon">
             <!-- play triangle — matches app play button -->
             <svg width="20" height="20" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>
           </span>
-          <span id="tip-play">Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.</span>
+          <span id="tip-play">Press <strong>Play</strong> to animate migrations through time.</span>
         </div>
       </div>
       <div class="welcome-lang-panel" id="welcome-lang-panel" translate="yes" hidden>
-        <p id="welcome-translate-hint" translate="no"></p>
+        <p id="welcome-translate-hint" translate="yes"></p>
       </div>
       <button id="welcome-start-btn" onclick="document.getElementById('welcome-modal-overlay').style.display='none'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        <span id="welcome-start-label">Commencer l'exploration</span>
+        <span id="welcome-start-label">Start exploring</span>
       </button>
     </div>
   </div>

@@ -27,7 +27,7 @@ assignees: ''
 **How to contribute:**
 
 1. Open `app/index.html` — only **`fr`** and **`en`** blocks in `TRANSLATIONS` are shipped for menu chrome.
-2. Edit the relevant `ui.*` keys; keep scientific narrative in JSON **French-first** (separate from i18next).
+2. Edit the relevant `ui.*` keys; keep scientific narrative in JSON **English-first** (French is a bundled translation, separate from i18next).
 3. Run `node tests/run-all.js`.
 4. Open a pull request.
 

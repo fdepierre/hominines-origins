@@ -48,6 +48,8 @@ policy is in [`../docs/DATA_LINEAGE.md`](../docs/DATA_LINEAGE.md).
 There is deliberately **no generator** from Markdown to JSON. A converter that
 had to preserve epistemic status without ever strengthening or flattening it
 does not exist here, and writing one is a separate design problem.
+`scripts/check_md_json.py` only verifies that catalogue `id` values, DOI sets,
+and debate/evidence tokens already match.
 
 ---
 
@@ -103,7 +105,7 @@ in the [project README](../README.md#scientific-uncertainty-framework):
 2. Decide whether `app/data/species.json` or `app/data/events.json` must change,
    and mirror the substance — never the epistemic status alone.
 3. Regenerate the offline mirrors: `python scripts/sync_embedded.py`.
-4. Verify: `python scripts/check_dois.py` then `node tests/run-all.js`.
+4. Verify: `python scripts/check_md_json.py` then `python scripts/check_dois.py` then `node tests/run-all.js`.
 
 **The non-negotiable rule:** conversion between layers may change format only.
 It must never strengthen, simplify, infer, translate away, or silently discard
@@ -115,11 +117,10 @@ Full contribution guidance: [`../CONTRIBUTING.md`](../CONTRIBUTING.md).
 
 ## A note on language
 
-These documents are **English**. The JSON catalogue carries parallel `fr` and
-`en` strings, and the running application shows **French first**. That is a
-deliberate split: the editorial record is English so it can be reviewed
-internationally, while the application's narrative voice remains French with
-browser translation available for every other language.
+These documents are **English**. The JSON catalogue carries parallel `en` and
+`fr` strings, and the running application is **English-first**. French is a
+bundled translation (chrome UI and narrative). Browser translation covers every
+other language. Editorial Markdown and the app source voice therefore match.
 
 ---
 

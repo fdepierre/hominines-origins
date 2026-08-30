@@ -448,6 +448,8 @@ async function runA11yTests(options = {}) {
             welcomeOpen: !!(overlay && !overlay.classList.contains('hidden')),
             welcomeFrBtn: !!document.getElementById('welcome-pick-fr'),
             welcomeEnBtn: !!document.getElementById('welcome-pick-en'),
+            tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
+            startLabel: (document.getElementById('welcome-start-label') || {}).textContent || '',
           };
         });
         assert(st.welcomeOpen, 'Welcome overlay is visible on first load');
@@ -457,6 +459,8 @@ async function runA11yTests(options = {}) {
         assert(!st.hintPanelVisible, 'FR locale does not show translation hint panel');
         assert(st.hintHtml === '', 'FR locale has no translate hint copy');
         assert(!st.welcomeFrBtn && !st.welcomeEnBtn, 'Welcome screen has no language-choice buttons');
+        assert(/origines africaines/i.test(st.tagline), `FR welcome tagline is French (got "${st.tagline}")`);
+        assert(/commencer/i.test(st.startLabel), `FR welcome button is French (got "${st.startLabel}")`);
       } finally {
         await bFr.close();
       }
@@ -480,6 +484,8 @@ async function runA11yTests(options = {}) {
             welcomeOpen: !!(overlay && !overlay.classList.contains('hidden')),
             welcomeFrBtn: !!document.getElementById('welcome-pick-fr'),
             welcomeEnBtn: !!document.getElementById('welcome-pick-en'),
+            tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
+            startLabel: (document.getElementById('welcome-start-label') || {}).textContent || '',
           };
         });
         assert(st.welcomeOpen, 'Welcome overlay is visible on first load');
@@ -489,6 +495,9 @@ async function runA11yTests(options = {}) {
         assert(!st.hintPanelVisible, 'EN locale does not show translation hint panel');
         assert(st.hintHtml === '', 'EN locale has no translate hint copy');
         assert(!st.welcomeFrBtn && !st.welcomeEnBtn, 'Welcome screen has no language-choice buttons');
+        assert(/african origins/i.test(st.tagline), `EN welcome tagline is English (got "${st.tagline}")`);
+        assert(!/origines africaines/i.test(st.tagline), `EN welcome is not left in French (got "${st.tagline}")`);
+        assert(/start exploring/i.test(st.startLabel), `EN welcome button is English (got "${st.startLabel}")`);
       } finally {
         await bEn.close();
       }
@@ -521,12 +530,17 @@ async function runA11yTests(options = {}) {
           const st = await pOther.evaluate(() => {
             const hint = document.getElementById('welcome-translate-hint');
             const panel = document.getElementById('welcome-lang-panel');
+            const banner = document.getElementById('page-translate-banner');
+            const burgerHint = document.getElementById('burger-translate-hint');
             return {
               nav: navigator.language,
               htmlLang: document.documentElement.lang,
               selectorValue: document.getElementById('lang-select')?.value || '',
               hintText: hint ? hint.textContent || '' : '',
               hintPanelVisible: !!(panel && !panel.hidden),
+              bannerVisible: !!(banner && !banner.hidden),
+              burgerHintVisible: !!(burgerHint && !burgerHint.hidden),
+              burgerHintText: burgerHint ? burgerHint.textContent || '' : '',
             };
           });
           assert(st.nav.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `navigator.language is ${locale} (got "${st.nav}")`);
@@ -534,6 +548,9 @@ async function runA11yTests(options = {}) {
           assert(st.selectorValue === 'en', `Burger language selector defaults to EN (got "${st.selectorValue}")`);
           assert(st.hintPanelVisible, `${locale} shows browser-translate hint panel`);
           assert(st.hintText.includes('Translate this page'), `${locale} hint mentions Translate this page`);
+          assert(st.bannerVisible, `${locale} shows the on-map translate banner`);
+          assert(st.burgerHintVisible, `${locale} shows the burger translate hint`);
+          assert(st.burgerHintText.includes('Translate this page'), `${locale} burger hint mentions Translate this page`);
         } finally {
           await bOther.close();
         }
@@ -543,12 +560,22 @@ async function runA11yTests(options = {}) {
     await test('Manual language switch persists and overrides browser locale', async () => {
       const { browser: bManual, page: pManual } = await launch({ locale: 'fr-FR' });
       try {
-        await loadApp(pManual);
+        await loadApp(pManual, { dismissWelcome: false });
+        const before = await pManual.evaluate(() => ({
+          tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
+        }));
+        assert(/origines africaines/i.test(before.tagline), `FR browser welcome starts in French (got "${before.tagline}")`);
         await pManual.evaluate(() => {
           const sel = document.getElementById('lang-select');
           if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
         });
         await pManual.waitForTimeout(450);
+        const switched = await pManual.evaluate(() => ({
+          tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
+          startLabel: (document.getElementById('welcome-start-label') || {}).textContent || '',
+        }));
+        assert(/african origins/i.test(switched.tagline), `Welcome follows EN selector (got "${switched.tagline}")`);
+        assert(/start exploring/i.test(switched.startLabel), `Welcome button follows EN selector (got "${switched.startLabel}")`);
         await loadApp(pManual);
         const st = await pManual.evaluate(() => ({
           nav: navigator.language,
