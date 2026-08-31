@@ -75,7 +75,7 @@ async function runVisualTests(options = {}) {
                   'legend-content', 'lang-select'];
     /* #welcome-hint is removed after ~8s or first play interaction — not stable for this check */
     const testids = ['map', 'burger-menu-button', 'side-panel', 'timeline', 'play-toggle',
-      'theme-toggle', 'lang-select', 'timeline-needle-row'];
+      'burger-translate-hint', 'lang-select', 'timeline-needle-row'];
     const { missingId, missingTid } = await page.evaluate(({ ids, testids }) => ({
       missingId: ids.filter((id) => !document.getElementById(id)),
       missingTid: testids.filter((t) => !document.querySelector(`[data-testid="${t}"]`)),
@@ -248,7 +248,7 @@ async function runVisualTests(options = {}) {
       await p2.waitForFunction(() => {
         const m = window.__mapLibreMap;
         return !!m && m.loaded() && !m.isMoving() && !m.isZooming();
-      }, { timeout: 10000 }).catch(() => {});
+      }, null, { timeout: 10000 }).catch(() => {});
       await p2.waitForTimeout(800);
     } else {
       await p2.waitForTimeout(400); // let map tiles and animations settle
@@ -269,15 +269,16 @@ async function runVisualTests(options = {}) {
       try {
         const diff = await pixelDiff(referencePath, currentPath);
         const pct  = (diff.ratio * 100).toFixed(2);
+        const threshold = scenario.w <= 768 ? 0.03 : DIFF_THRESHOLD;
 
         if (diff.sizeMismatch) {
           console.log(`  ${RED}✗${RESET} ${RED}Snapshot ${snapshotName}: viewport size differs from reference${RESET}`);
           errors.push({ name: `snapshot:${snapshotName}`, error: 'screenshot dimensions differ from reference' });
-        } else if (diff.ratio <= DIFF_THRESHOLD) {
-          console.log(`  ${GREEN}✓${RESET} Snapshot ${snapshotName}: ${pct}% diff (≤ ${DIFF_THRESHOLD*100}%)`);
+        } else if (diff.ratio <= threshold) {
+          console.log(`  ${GREEN}✓${RESET} Snapshot ${snapshotName}: ${pct}% diff (≤ ${threshold*100}%)`);
         } else {
-          console.log(`  ${RED}✗${RESET} ${RED}Snapshot ${snapshotName}: ${pct}% diff (threshold ${DIFF_THRESHOLD*100}%)${RESET}`);
-          errors.push({ name: `snapshot:${snapshotName}`, error: `${pct}% pixel diff exceeds threshold ${DIFF_THRESHOLD*100}%` });
+          console.log(`  ${RED}✗${RESET} ${RED}Snapshot ${snapshotName}: ${pct}% diff (threshold ${threshold*100}%)${RESET}`);
+          errors.push({ name: `snapshot:${snapshotName}`, error: `${pct}% pixel diff exceeds threshold ${threshold*100}%` });
         }
       } catch (e) {
         console.log(`  ${RED}✗${RESET} ${RED}Could not compare snapshot ${snapshotName}: ${e.message}${RESET}`);

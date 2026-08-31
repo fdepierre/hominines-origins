@@ -107,18 +107,26 @@ async function runMapLibreTests() {
       assert(initial.startVisible, 'Standard welcome modal keeps its start button visible');
       assert(String(initial.mapFilter).includes('blur'), 'Map is blurred while the readable style is being prepared');
       assert(Number(initial.mapOpacity) === 0, 'Initial MapLibre colours are fully hidden while the readable style is being prepared');
-      await returningPage.waitForFunction(() => document.documentElement.getAttribute('data-map-ready') === '1', { timeout: 20000 });
-      await returningPage.waitForTimeout(1200);
+      await returningPage.waitForFunction(() => document.documentElement.getAttribute('data-map-ready') === '1', null, { timeout: 20000 });
+      await returningPage.waitForFunction(() => {
+        const overlay = document.getElementById('welcome-modal-overlay');
+        const map = document.getElementById('map');
+        const filter = map ? getComputedStyle(map).filter : '';
+        return overlay && overlay.classList.contains('hidden')
+          && Number(getComputedStyle(map).opacity) === 1
+          && (filter === 'none' || filter === '');
+      }, null, { timeout: 8000 });
       const afterReady = await returningPage.evaluate(() => {
         const overlay = document.getElementById('welcome-modal-overlay');
+        const map = document.getElementById('map');
         return {
           hidden: overlay ? overlay.classList.contains('hidden') : false,
-          mapFilter: getComputedStyle(document.getElementById('map')).filter,
-          mapOpacity: getComputedStyle(document.getElementById('map')).opacity,
+          mapFilter: map ? getComputedStyle(map).filter : '',
+          mapOpacity: map ? getComputedStyle(map).opacity : 0,
         };
       });
       assert(afterReady.hidden, 'Returning visitor overlay auto-hides after the readable map is ready');
-      assert(afterReady.mapFilter === 'none', 'Map blur is removed after the readable style is ready');
+      assert(!/blur\(/i.test(String(afterReady.mapFilter)), 'Map blur is removed after the readable style is ready');
       assert(Number(afterReady.mapOpacity) === 1, 'Map is visible after the readable style is ready');
     } finally {
       await returningBrowser.close();

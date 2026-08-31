@@ -412,49 +412,23 @@ a { color: var(--color-primary); }
 .certainty-tri-wedge--speculative { fill: var(--certainty-speculative); }
 .certainty-tri-wedge--unknown { fill: var(--certainty-unknown); }
 .certainty-tri-pop-legend {
-  font-size: 9px;
+  font-size: inherit;
   font-family: var(--font-mono);
   color: var(--color-text-faint);
   letter-spacing: 0.02em;
   margin: calc(-1 * var(--space-1)) 0 var(--space-2);
   line-height: 1.35;
 }
-
-/* Même code couleurs que l’icône tri (menu info → niveaux d’accord) */
-ul.uncertainty-level-list {
-  list-style: none;
-  padding-left: 0;
-  margin: 0 0 var(--space-2);
-}
-.uncertainty-level-list > li {
-  position: relative;
-  padding-left: 1.1em;
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  line-height: 1.45;
-  margin-bottom: 0.35em;
-}
-.uncertainty-level-list > li:last-child { margin-bottom: 0; }
-.uncertainty-level-list > li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.42em;
-  width: 0.5em;
-  height: 0.5em;
-  border-radius: 2px;
-  background: var(--certainty-swatch, var(--certainty-unknown));
-}
-.uncertainty-level-li--strong { --certainty-swatch: var(--certainty-strong-consensus); }
-.uncertainty-level-li--moderate { --certainty-swatch: var(--certainty-moderate-consensus); }
-.uncertainty-level-li--active-debate { --certainty-swatch: var(--certainty-active-debate); }
-.uncertainty-level-li--speculative { --certainty-swatch: var(--certainty-speculative); }
-.uncertainty-level-li--unassessed { --certainty-swatch: var(--certainty-unknown); }
 .certainty-tri-pop {
-  position: absolute;
-  top: calc(100% + 6px);
+  position: fixed;
+  top: 0;
   right: 0;
-  width: min(288px, 78vw);
+  width: min(420px, calc(100vw - 24px));
+  max-height: min(70vh, calc(100dvh - 5rem));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: var(--space-3);
   background: var(--color-surface-offset);
   border: 1px solid var(--color-border);
@@ -466,9 +440,17 @@ ul.uncertainty-level-list {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  z-index: 40;
+  /* Portaled to body (see bindCertaintyTriPops) so it stacks above #map / MapLibre labels. */
+  z-index: 1200;
+  isolation: isolate;
+  transform: translateZ(0);
   transition: opacity 0.15s ease, visibility 0.15s;
   box-shadow: var(--shadow-md);
+}
+.certainty-tri-pop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 .certainty-tri-pop-title {
   font-size: 10px;
@@ -493,12 +475,6 @@ ul.uncertainty-level-list {
   color: var(--color-text);
   font-size: var(--text-xs);
   margin-bottom: 4px;
-}
-.certainty-tri-slot:hover .certainty-tri-pop,
-.certainty-tri-slot:focus-within .certainty-tri-pop {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -626,6 +602,10 @@ html[data-map-ready="1"] #map {
   min-height: 0;
   scroll-padding-top: var(--space-2);
   scroll-padding-bottom: var(--space-6);
+  /* Same scale as the burger: one body size; hierarchy is weight, case, colour. */
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  font-family: var(--font-body);
 }
 
 .side-panel-header {
@@ -635,20 +615,30 @@ html[data-map-ready="1"] #map {
   top: 0;
   background: var(--color-surface);
   z-index: 10;
+  overflow: visible;
 }
 /* default: single column header text; .side-panel-header--certainty adds flex row (see certainty-tri rules) */
 
-.period-label {
-  font-size: var(--text-xs);
+.period-label,
+.pigmentation-title,
+.section-title {
+  font-size: inherit;
   font-family: var(--font-mono);
-  color: var(--color-primary);
+  /* Space Mono ships 400/700 only — 600 was synthesizing Bold and filling counters. */
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+
+.period-label {
+  color: var(--color-primary);
   margin-bottom: var(--space-1);
 }
 
 .species-name {
-  font-size: var(--text-lg);
+  font-size: 1.25rem;
+  font-family: inherit;
   font-weight: 700;
   font-style: italic;
   line-height: 1.2;
@@ -658,8 +648,8 @@ html[data-map-ready="1"] #map {
   overflow-wrap: break-word;
 }
 .species-name-common {
-  font-size: 11px;
-  line-height: 1.35;
+  font-size: inherit;
+  line-height: 1.4;
   color: var(--color-text-muted);
   font-style: normal;
   max-width: 100%;
@@ -674,11 +664,7 @@ html[data-map-ready="1"] #map {
   scroll-margin-bottom: var(--space-6);
 }
 .pigmentation-title {
-  font-size: var(--text-xs);
-  font-family: var(--font-mono);
   color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   margin-bottom: var(--space-2);
 }
 
@@ -696,10 +682,11 @@ html[data-map-ready="1"] #map {
   gap: 4px;
 }
 .pig-label {
-  font-size: 10px;
-  color: var(--color-text-muted);
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--color-text);
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 .pig-swatch {
   width: 36px;
@@ -738,11 +725,11 @@ html[data-map-ready="1"] #map {
   opacity: 0.65;
 }
 .pig-desc {
-  font-size: 10px;
-  color: var(--color-text);
+  font-size: inherit;
+  color: var(--color-text-muted);
   text-align: center;
-  font-weight: 500;
-  line-height: 1.3;
+  font-weight: 400;
+  line-height: inherit;
 }
 
 /* Certainty badge */
@@ -750,8 +737,10 @@ html[data-map-ready="1"] #map {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: var(--text-xs);
-  padding: 3px var(--space-2);
+  font-size: 10px;
+  line-height: 1.35;
+  font-weight: 400;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-full);
   font-family: var(--font-mono);
 }
@@ -782,21 +771,26 @@ html[data-map-ready="1"] #map {
   padding: var(--space-3);
 }
 .bio-item-label {
-  font-size: var(--text-xs);
+  font-size: inherit;
   color: var(--color-text-muted);
   margin-bottom: var(--space-1);
 }
 .bio-item-value {
-  font-size: var(--text-sm);
+  font-size: inherit;
   font-weight: 600;
-  font-family: var(--font-mono);
-  color: var(--color-primary);
+  color: var(--color-text);
 }
 
 /* Tools & technology */
 .tools-section {
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--color-divider);
+}
+.tools-section .section-title,
+.debate-section .section-title {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
 }
 .tool-tag {
   display: inline-flex;
@@ -805,8 +799,9 @@ html[data-map-ready="1"] #map {
   background: var(--color-surface-offset);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--text-xs);
+  padding: 2px var(--space-2);
+  font-size: 11px;
+  line-height: 1.35;
   margin: var(--space-1);
 }
 
@@ -819,11 +814,11 @@ html[data-map-ready="1"] #map {
   background: rgba(168,64,64,0.08);
   border-left: 3px solid #a84040;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   margin-top: var(--space-2);
-  font-size: var(--text-sm);
+  font-size: 11px;
   color: var(--color-text-muted);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* Empty state */
@@ -837,9 +832,9 @@ html[data-map-ready="1"] #map {
   text-align: center;
   gap: var(--space-4);
 }
-.empty-state-icon { font-size: 48px; opacity: 0.3; }
-.empty-state-title { font-size: var(--text-lg); font-weight: 600; }
-.empty-state-desc { font-size: var(--text-sm); color: var(--color-text-muted); max-width: 28ch; line-height: 1.6; }
+.empty-state-icon { font-size: 2.5rem; opacity: 0.3; }
+.empty-state-title { font-size: 1.25rem; font-weight: 600; }
+.empty-state-desc { font-size: inherit; color: var(--color-text-muted); max-width: 28ch; line-height: inherit; }
 
 /* ===== TIMELINE ===== */
 #timeline {
@@ -1417,10 +1412,13 @@ html[data-map-ready="1"] #map {
   padding: 0 2px;
 }
 #burger-translate-hint {
-  font-size: var(--text-xs);
+  font-size: inherit;
   color: var(--color-text-muted);
-  line-height: 1.5;
-  margin: var(--space-2) 0 0;
+  line-height: inherit;
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-sm);
 }
 #burger-translate-hint[hidden] { display: none !important; }
 
@@ -1435,7 +1433,7 @@ html[data-map-ready="1"] #map {
 #burger-panel {
   position: fixed;
   top: 0; left: 0; bottom: 0;
-  width: min(300px, 90vw);
+  width: min(320px, 90vw);
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
   z-index: 1501;
@@ -1443,6 +1441,9 @@ html[data-map-ready="1"] #map {
   transform: translateX(-100%);
   transition: transform 280ms cubic-bezier(0.16,1,0.3,1);
   box-shadow: var(--shadow-lg);
+  /* One body size for the whole menu; hierarchy is weight, case, and colour. */
+  font-size: var(--text-xs);
+  line-height: 1.5;
 }
 #burger-panel.open { transform: translateX(0); }
 
@@ -1454,7 +1455,10 @@ html[data-map-ready="1"] #map {
 }
 #burger-app-title {
   flex: 1;
-  font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.02em;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 #burger-app-title span { color: var(--color-primary); }
 #burger-close {
@@ -1462,22 +1466,36 @@ html[data-map-ready="1"] #map {
   border-radius: var(--radius-sm);
   display: flex; align-items: center; justify-content: center;
   color: var(--color-text-muted);
-  font-size: 18px; line-height: 1;
+  font-size: 1.125rem;
+  line-height: 1;
   transition: all var(--transition-interactive);
 }
 #burger-close:hover { background: var(--color-surface-offset); color: var(--color-text); }
 
 #burger-panel-body {
-  flex: 1; overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: var(--space-4) var(--space-5);
   display: flex; flex-direction: column; gap: var(--space-5);
 }
 
 .burger-section-title {
-  font-size: var(--text-xs); font-family: var(--font-mono);
+  font-size: inherit;
+  font-family: var(--font-mono);
+  font-weight: 600;
   color: var(--color-text-muted);
-  text-transform: uppercase; letter-spacing: 0.08em;
-  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  margin: 0 0 var(--space-2);
+}
+#burger-panel p,
+#burger-panel ul,
+#burger-panel li {
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--color-text-muted);
 }
 .burger-row {
   display: flex; gap: var(--space-2); flex-wrap: wrap;
@@ -1491,16 +1509,57 @@ html[data-map-ready="1"] #map {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text);
-  font-size: var(--text-sm);
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
   padding: 6px var(--space-3);
 }
 .burger-btn-row {
   display: flex; gap: var(--space-2);
 }
-.burger-layer-btns {
-  display: flex; flex-direction: column; gap: var(--space-2);
+.burger-about-p {
+  margin: 0 0 var(--space-2);
+  font-size: 11px;
+  line-height: 1.45;
 }
-/* Layer buttons inside burger inherit existing .layer-btn styles */
+.burger-critics {
+  margin: 0 0 var(--space-2);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  line-height: 1.4;
+}
+.burger-about-p:last-of-type {
+  margin-bottom: var(--space-3);
+}
+#burger-panel .layer-btn {
+  font-size: inherit;
+  line-height: inherit;
+}
+.burger-footer {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-divider);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.burger-footer a,
+.burger-footer-note {
+  font-size: inherit;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  line-height: inherit;
+}
+.burger-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
 
 /* ===== TIMELINE: play button + label float at left of species track ===== */
 
@@ -1699,14 +1758,11 @@ html[data-map-ready="1"] #map {
 }
 /* needle-wrapper starts right after timeline padding — no extra padding needed */
 
-/* ===== HUMAN FIGURE — grille 3 colonnes : silhouettes | libellés | valeurs ===== */
+/* ===== HUMAN FIGURE — silhouette + tableau libellé | valeur ===== */
 .human-figure-container {
   display: grid;
-  grid-template-columns: auto fit-content(11.75rem) minmax(0, 1fr);
-  /* Lignes biométriques explicites — sans elles 1 / -1 ne span qu’une ligne et les mesures se tassent */
-  grid-template-rows: repeat(4, auto);
+  grid-template-columns: auto minmax(0, 1fr);
   column-gap: var(--space-3);
-  row-gap: 5px;
   align-items: start;
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-divider);
@@ -1716,11 +1772,7 @@ html[data-map-ready="1"] #map {
   overflow: visible;
 }
 
-/* Colonne 1 : silhouette(s) sur toute la hauteur des lignes biométriques */
 .human-figure-col {
-  grid-column: 1;
-  grid-row: 1 / span 4;
-  align-self: stretch;
   justify-self: center;
   display: flex;
   flex-direction: column;
@@ -1731,7 +1783,7 @@ html[data-map-ready="1"] #map {
 
 .human-figure-col > .human-figure-svg {
   display: block;
-  width: 72px;
+  width: 56px;
   max-width: 100%;
   height: auto;
   aspect-ratio: 120 / 172;
@@ -1762,7 +1814,7 @@ html[data-map-ready="1"] #map {
 }
 
 .human-figure-one-species-label {
-  font-size: 9px;
+  font-size: inherit;
   font-family: var(--font-mono);
   color: var(--color-text);
   opacity: 0.55;
@@ -1773,38 +1825,41 @@ html[data-map-ready="1"] #map {
   pointer-events: none;
 }
 
-/* Colonnes 2–3 : une ligne = libellé + valeur (sous-grille interne) */
-.figure-bio-row {
-  grid-column: 2 / span 2;
-  display: grid;
-  grid-template-columns: fit-content(11.75rem) minmax(0, 1fr);
-  column-gap: var(--space-3);
-  align-items: baseline;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--color-divider);
-}
-
-.figure-bio-row:last-of-type {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.figure-bio-label {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
+.figure-bio-table {
+  width: 100%;
   min-width: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11px;
+  line-height: 1.35;
 }
-
-.figure-bio-val {
-  font-size: var(--text-xs);
-  font-weight: 600;
+.figure-bio-table th,
+.figure-bio-table td {
+  padding: 0.4em 0;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.figure-bio-table th {
+  width: 42%;
+  padding-right: 0.7em;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  text-align: start;
+}
+.figure-bio-table td {
+  width: 58%;
+  font-family: var(--font-body);
+  font-weight: 400;
   color: var(--color-text);
   text-align: start;
-  min-width: 0;
-  overflow-wrap: break-word;
+}
+.figure-bio-table tr + tr th,
+.figure-bio-table tr + tr td {
+  border-top: 1px solid var(--color-divider);
 }
 
 /* Screen-reader + browser-translate friendly text inside icon-only controls */
@@ -1879,12 +1934,17 @@ html[data-map-ready="1"] #map {
 
 /* Section title shared */
 .section-title {
-  font-size: var(--text-xs);
-  font-family: var(--font-mono);
   color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   margin-bottom: var(--space-3);
+}
+.panel-note,
+.panel-footer-link {
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--color-text-faint);
+}
+.panel-footer-link {
+  text-decoration: none;
 }
 
 /* Animation fade */
@@ -2019,6 +2079,16 @@ html[data-map-ready="1"] #map {
 .welcome-tagline {
   font-size: var(--text-sm); color: var(--color-text-muted);
   font-style: italic; margin-top: -8px;
+}
+.welcome-critics {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-top: var(--space-2);
+  line-height: 1.4;
 }
 .welcome-body {
   font-size: var(--text-sm); color: var(--color-text-muted);
@@ -2216,8 +2286,6 @@ html[data-map-ready="1"] #map {
   border: 1px solid var(--color-divider);
 }
 [data-theme="light"] .human-figure-container { background: #c0b8aa !important; }
-.pig-label { color: var(--color-text) !important; font-weight: 600; }
-.pig-desc  { color: var(--color-text-muted); font-size: 10px; }
 
 /* .timeline-species-track height is set dynamically by JS */
 
@@ -2469,32 +2537,6 @@ html[data-map-ready="1"] #map {
         <div id="page-translate-banner-text" class="page-translate-banner-text"></div>
         <button type="button" id="page-translate-banner-dismiss" aria-label="Dismiss">×</button>
       </aside>
-
-      <!-- Layer toggles hidden from map — shown in burger menu -->
-      <div class="layer-toggle-group" id="layer-toggles" style="display:none;">
-        <button class="layer-btn active" data-layer="sites" data-i18n-title="ui.layerSitesTitle">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
-            <circle cx="7" cy="7" r="2" fill="currentColor"/>
-          </svg>Sites fossiles
-        </button>
-        <button class="layer-btn active" data-layer="migrations" data-i18n-title="ui.layerMigrationsTitle">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 7 Q5 3 9 7 L12 7M10 5l2 2-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 2"/>
-          </svg>Migrations
-        </button>
-        <button class="layer-btn active" data-layer="range" data-i18n-title="ui.layerRangeTitle">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
-            <circle cx="7" cy="7" r="5" fill="currentColor" opacity="0.15"/>
-          </svg>Zones
-        </button>
-        <button class="layer-btn active" data-layer="events" data-i18n-title="ui.layerEventsTitle">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <polygon points="7,2 9,6 13,6.5 10,9.5 10.5,13 7,11 3.5,13 4,9.5 1,6.5 5,6" stroke="currentColor" stroke-width="1" fill="currentColor" opacity="0.6"/>
-          </svg>Jalons culturels
-        </button>
-      </div>
 
       <!-- Welcome hint -->
       <div id="welcome-hint">
@@ -3300,9 +3342,13 @@ function initMapLibre() {
     maxZoom: 7,
     attributionControl: false,
     renderWorldCopies: false,
+    dragRotate: false,
+    pitchWithRotate: false,
+    touchPitch: false,
   });
   window.__mapLibreMap = mapLibreMap;
-  mapLibreMap.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+  mapLibreMap.touchZoomRotate.disableRotation();
+  mapLibreMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
   mapLibreMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
   mapLibreMap.on('load', function () {
     applyMapLibreNeutralBasemap(mapLibreMap, document.documentElement.getAttribute('data-theme') === 'dark');
@@ -4171,6 +4217,59 @@ function renderCertaintyTriIcon(species, T) {
   );
 }
 
+/** Pin the certainty popover to the icon in viewport coords so it can overlap the map. */
+function layoutCertaintyTriPop(slot, pop) {
+  const hit = slot && slot.querySelector('.certainty-tri-hit');
+  if (!pop || !hit) return;
+  const r = hit.getBoundingClientRect();
+  const gap = 6;
+  const margin = 12;
+  const maxH = Math.max(140, window.innerHeight - r.bottom - gap - margin);
+  pop.style.top = Math.round(r.bottom + gap) + 'px';
+  pop.style.right = Math.round(Math.max(margin, window.innerWidth - r.right)) + 'px';
+  pop.style.left = 'auto';
+  pop.style.maxHeight = maxH + 'px';
+}
+
+function bindCertaintyTriPops() {
+  document.querySelectorAll('body > .certainty-tri-pop').forEach(function (p) { p.remove(); });
+  document.querySelectorAll('.certainty-tri-slot').forEach(function (slot) {
+    const pop = slot.querySelector('.certainty-tri-pop');
+    if (!pop) return;
+    document.body.appendChild(pop);
+    let hideTimer = null;
+    function show() {
+      clearTimeout(hideTimer);
+      layoutCertaintyTriPop(slot, pop);
+      pop.classList.add('is-open');
+    }
+    function hideSoon() {
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(function () { pop.classList.remove('is-open'); }, 160);
+    }
+    slot.addEventListener('mouseenter', show);
+    slot.addEventListener('focusin', show);
+    slot.addEventListener('mouseleave', hideSoon);
+    slot.addEventListener('focusout', hideSoon);
+    pop.addEventListener('mouseenter', show);
+    pop.addEventListener('mouseleave', hideSoon);
+  });
+}
+
+if (!window._certaintyTriPopGlobals) {
+  window._certaintyTriPopGlobals = true;
+  window.addEventListener('resize', function () {
+    const pop = document.querySelector('body > .certainty-tri-pop.is-open');
+    const slot = document.querySelector('.certainty-tri-slot');
+    if (pop && slot) layoutCertaintyTriPop(slot, pop);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('body > .certainty-tri-pop.is-open').forEach(function (p) {
+      p.classList.remove('is-open');
+    });
+  });
+}
 
 /** Build the side-panel HTML for one species (biometrics, pigmentation, tools). */
 function renderPanel(species) {
@@ -4186,16 +4285,13 @@ function renderPanel(species) {
     [T('weightM', 'Poids ♂'), bio.weightM],
     [T('brainVol', 'Cerveau'), bio.brain],
   ];
-  const morphoBioHtml = bioMorphoRows.map(function (pair, i) {
-    const lab = bandTipEscapeHtml(String(pair[0]));
-    const val = bandTipEscapeHtml(String(pair[1] == null ? '' : pair[1]));
-    return (
-      '<div class="figure-bio-row" style="grid-row: ' + (i + 1) + '">' +
-      '<span class="figure-bio-label">' + lab + '</span>' +
-      '<span class="figure-bio-val">' + val + '</span>' +
-      '</div>'
-    );
-  }).join('');
+  const morphoBioHtml = '<table class="figure-bio-table"><tbody>' +
+    bioMorphoRows.map(function (pair) {
+      const lab = bandTipEscapeHtml(String(pair[0]));
+      const val = bandTipEscapeHtml(String(pair[1] == null ? '' : pair[1]));
+      return '<tr><th scope="row">' + lab + '</th><td>' + val + '</td></tr>';
+    }).join('') +
+    '</tbody></table>';
   const html = `
     <div class="animate-in" lang="${currentDataLang()}" dir="auto" translate="yes">
       <div class="side-panel-header${hasTri ? ' side-panel-header--certainty' : ''}">
@@ -4207,7 +4303,7 @@ function renderPanel(species) {
         ${renderCertaintyTriIcon(species, T)}
       </div>
 
-      <!-- Human figure + quick biometrics (3 colonnes : silhouettes | libellés | valeurs) -->
+      <!-- Human figure + biometrics table (label | value) -->
       <div class="human-figure-container">
         <div class="human-figure-col">
           ${drawHumanFigure(pig)}
@@ -4257,7 +4353,7 @@ function renderPanel(species) {
           </div>
           `}
         </div>
-        <p style="font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.5">
+        <p class="panel-note">
           ${hasSplitPigmentation(pig) ? T('splitVariant', 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.') : ''}
         </p>
       </div>
@@ -4285,8 +4381,7 @@ function renderPanel(species) {
 
       <!-- Footer attribution -->
       <div style="padding:var(--space-4) var(--space-6);text-align:center">
-        <a href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer"
-           style="font-size:var(--text-xs);color:var(--color-text-faint);text-decoration:none">
+        <a class="panel-footer-link" href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer">
           Hominines Origins — open source
         </a>
       </div>
@@ -4298,6 +4393,7 @@ function renderPanel(species) {
   const panelEl = document.getElementById('side-panel');
   /* Ne pas défiler vers le bas automatiquement : priorité à la silhouette pendant le défilement du temps. */
   panelEl.scrollTop = 0;
+  bindCertaintyTriPops();
 }
 // =====================================================================
 // TIMELINE — needle, species lanes, scrub
@@ -5793,8 +5889,8 @@ function setTime(time) {
 // =====================================================================
 // LAYER TOGGLES
 // =====================================================================
-// Buttons live in the burger (cloned from #layer-toggles). `events` is a
-// separate flag (showEvents); sites / migrations / range sit on layerStates.
+// Map layers stay on. `events` is a separate flag (showEvents);
+// sites / migrations / range sit on layerStates.
 function initLayerToggles() {
   document.querySelectorAll('.layer-btn[data-layer]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -10930,8 +11026,8 @@ document.addEventListener('DOMContentLoaded', loadData);
 // =====================================================================
 // BURGER MENU — init on DOMContentLoaded so panel HTML is available
 // =====================================================================
-// Theme, language, layer clones, uncertainty explainer, GitHub + data-viewer
-// links all live in #burger-panel (markup at the end of <body>).
+// Language, JSON data-viewer, uncertainty explainer, and GitHub link
+// all live in #burger-panel (markup at the end of <body>).
 document.addEventListener('DOMContentLoaded', function initBurger() {
   var btn     = document.getElementById('burger-btn');
   var panel   = document.getElementById('burger-panel');
@@ -10953,13 +11049,6 @@ document.addEventListener('DOMContentLoaded', function initBurger() {
   if (closeBtn) closeBtn.addEventListener('click', closeBurger);
   overlay.addEventListener('click', closeBurger);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeBurger(); });
-
-  // Move layer toggle buttons into burger panel (after initLayerToggles has bound them)
-  var src  = document.getElementById('layer-toggles');
-  var dest = document.getElementById('burger-layer-btns');
-  if (src && dest) {
-    while (src.firstChild) dest.appendChild(src.firstChild);
-  }
 });
 
 </script>
@@ -11001,9 +11090,15 @@ const TRANSLATIONS = {
         play: 'Play', pause: 'Pause',
         appSubtitle: 'Explorez près de 7,5 millions d\'années de migrations humaines',
         language: 'Langue',
+        pageTranslateDesigned: 'L\'interface existe en français et en anglais. Pour toute autre langue, l\'application est conçue pour que <strong>Google Traduction</strong> (ou « Traduire cette page » dans Chrome, Edge, Safari…) traduise automatiquement le contenu.',
         browserTranslateHint: 'Cette page est en anglais (le français est aussi intégré). Votre navigateur est en <strong>{lang}</strong> (<code>{code}</code>). Pour la lire en {lang}, utilisez <strong>Traduire cette page</strong> — l\'icône Google Traduction dans la barre d\'adresse, ou le bandeau de traduction.',
         mapLayers: 'Couches carte',
         displayBurgerSection: 'Affichage',
+        aboutAppTitle: 'Le projet',
+        criticsIntro: 'Expérimental — destiné aux critiques',
+        aboutAppBody: 'Hominines Origins est une collecte de données issues d’articles scientifiques, assistée par l’IA, et une application interactive générée à partir de cette connaissance. Les faits restent traçables et rattachés à des sources, avec un DOI lorsque c’est possible.',
+        aboutAppShows: 'La carte et la frise montrent où chaque groupe a vécu, quand, comment il s’est déplacé, et ce que les traces matérielles disent de l’apparence et des techniques. L’application tourne dans le navigateur, sans serveur ni compte.',
+        aboutAppData: 'Sous l’affichage, le catalogue est en JSON-LD : c’est ce que l’application charge. Vous pouvez le lire ici.',
         selectSpecies: 'Sélectionnez une espèce',
         selectSpeciesDesc: 'Cliquez sur un marqueur sur la carte ou déplacez la barre chronologique pour explorer',
         slideTimeline: '◄ glissez ou tapez sur la timeline ►',
@@ -11100,9 +11195,15 @@ const TRANSLATIONS = {
         play: 'Play', pause: 'Pause',
         appSubtitle: 'Explore nearly seven and a half million years of human migrations',
         language: 'Language',
+        pageTranslateDesigned: 'The interface is available in English and French. For any other language, the app is designed so <strong>Google Translate</strong> (or your browser\'s <strong>Translate this page</strong>) can automatically translate the content.',
         browserTranslateHint: 'This page is in English (French is also built in). Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong> — the Google Translate icon in the address bar, or the translate popup.',
         mapLayers: 'Map layers',
         displayBurgerSection: 'Display',
+        aboutAppTitle: 'The project',
+        criticsIntro: 'Experimental — for critics',
+        aboutAppBody: 'Hominines Origins is a structured collection of data extracted from research papers with the help of AI, and an interactive app generated from that knowledge. Claims stay traceable and linked to sources, with a DOI when one is available.',
+        aboutAppShows: 'The map and timeline show where each group lived, when, how they moved, and what material traces say about appearance and technology. The app runs in the browser: no server, no login.',
+        aboutAppData: 'Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here.',
         selectSpecies: 'Select a species',
         selectSpeciesDesc: 'Click a marker on the map or drag the timeline to explore',
         slideTimeline: '◄ drag or tap the timeline ►',
@@ -12004,18 +12105,29 @@ function humanBrowserLangName(code) {
   } catch (err) { return code; }
 }
 
+function i18nHtmlOrFallback(key, fallback) {
+  try {
+    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+      const hit = i18next.t(key);
+      if (hit && hit !== key) return hit;
+    }
+  } catch (e) { /* keep fallback */ }
+  return fallback;
+}
+
+function pageTranslateDesignedHtml() {
+  return i18nHtmlOrFallback(
+    'ui.pageTranslateDesigned',
+    'The interface is available in English and French. For any other language, the app is designed so <strong>Google Translate</strong> (or your browser\'s <strong>Translate this page</strong>) can automatically translate the content.'
+  );
+}
+
 function browserTranslateHintHtml() {
   if (!browserWantsPageTranslate()) return '';
   const code = browserPrimaryLang();
   const name = humanBrowserLangName(code);
   const fallback = 'This page is in English (French is also built in). Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong> — the Google Translate icon in the address bar, or the translate popup.';
-  let tpl = fallback;
-  try {
-    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
-      const hit = i18next.t('ui.browserTranslateHint');
-      if (hit && hit !== 'ui.browserTranslateHint') tpl = hit;
-    }
-  } catch (e) { /* keep fallback */ }
+  const tpl = i18nHtmlOrFallback('ui.browserTranslateHint', fallback);
   return String(tpl).split('{lang}').join(name).split('{code}').join(code);
 }
 
@@ -12031,8 +12143,8 @@ function syncBrowserTranslateHint() {
     welcomePanel.hidden = !html;
   }
   if (burgerHint) {
-    burgerHint.innerHTML = html;
-    burgerHint.hidden = !html;
+    burgerHint.innerHTML = pageTranslateDesignedHtml();
+    burgerHint.hidden = false;
   }
   if (banner) {
     let dismissed = false;
@@ -12073,6 +12185,7 @@ function setWelcomeCopy(lang) {
   }
   if (fr) {
     setHtml('welcome-tagline', 'Des origines africaines à la conquête du monde');
+    setHtml('welcome-critics-note', 'Expérimental — destiné aux critiques');
     setHtml('welcome-body', 'À partir des premières lignées en <strong>Afrique orientale</strong>, soit il y a près de <strong>7,5&nbsp;millions d\'années</strong>, différentes espèces d\'hominines&nbsp;— nos ancêtres et leurs cousins&nbsp;— ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.');
     setHtml('tip-cursor', 'Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.');
     setHtml('tip-marker', 'Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d\'une espèce.');
@@ -12081,6 +12194,7 @@ function setWelcomeCopy(lang) {
     return;
   }
   setHtml('welcome-tagline', 'From African origins to the peopling of the world');
+  setHtml('welcome-critics-note', 'Experimental — for critics');
   setHtml('welcome-body', 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.');
   setHtml('tip-cursor', 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.');
   setHtml('tip-marker', 'Click a <strong>marker</strong> on the map to show details for a species.');
@@ -12103,23 +12217,6 @@ function applyTranslations() {
   // Logo subtitle
   const logoSub = document.querySelector('.logo-sub');
   if (logoSub) logoSub.textContent = t('ui.logoSub');
-
-  // Header buttons
-  const themeBtn = document.querySelector('[data-theme-toggle]');
-  if (themeBtn) themeBtn.title = t('ui.toggleTheme');
-
-  // Layer toggle buttons
-  const layerBtns = document.querySelectorAll('[data-layer]');
-  layerBtns.forEach(btn => {
-    const layer = btn.getAttribute('data-layer');
-    const map = { sites: 'ui.layerSites', migrations: 'ui.layerMigrations', range: 'ui.layerRange', events: 'ui.layerEvents' };
-    if (map[layer]) {
-      // Keep the SVG, update only the text node
-      const svg = btn.querySelector('svg');
-      btn.textContent = t(map[layer]);
-      if (svg) btn.prepend(svg);
-    }
-  });
 
   // Timeline hint
   const hint = document.querySelector('.timeline-hint');
@@ -12462,10 +12559,13 @@ window.addEventListener('load', initDataViewer);
 // localStorage ho_welcomed_v3 skips the intro copy. Returning visitors
 // still see the same overlay until data-map-ready so the raw MapLibre
 // flash is hidden. Unsupported browser locales get a "Translate this page" hint.
-document.addEventListener('DOMContentLoaded', function initWelcome() {
+var welcomeBooted = false;
+function initWelcome() {
+  if (welcomeBooted) return;
   var STORAGE_KEY = 'ho_welcomed_v3';
   var overlay = document.getElementById('welcome-modal-overlay');
   if (!overlay) return;
+  welcomeBooted = true;
 
   function storedGet() { try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; } }
   function storedSet() { try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {} }
@@ -12475,11 +12575,26 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   }
 
   function afterMapReady(fn) {
-    if (isMapReady()) {
+    var ran = false;
+    function run() {
+      if (ran) return;
+      ran = true;
       fn();
+    }
+    if (isMapReady()) {
+      run();
       return;
     }
-    document.addEventListener('ho:map-ready', fn, { once: true });
+    document.addEventListener('ho:map-ready', run, { once: true });
+    var n = 0;
+    var poll = setInterval(function () {
+      if (isMapReady()) {
+        clearInterval(poll);
+        run();
+      } else if (++n > 200) {
+        clearInterval(poll);
+      }
+    }, 50);
   }
 
   function hideOverlay() {
@@ -12493,9 +12608,16 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   }
 
   var alreadyWelcomed = !!storedGet();
-  setWelcomeCopy(welcomeUiLang());
-  syncBrowserTranslateHint();
-  setTimeout(syncBrowserTranslateHint, 0);
+  if (alreadyWelcomed) {
+    afterMapReady(function () { setTimeout(hideOverlay, 1000); });
+  }
+  try {
+    if (typeof setWelcomeCopy === 'function') setWelcomeCopy(welcomeUiLang());
+    if (typeof syncBrowserTranslateHint === 'function') {
+      syncBrowserTranslateHint();
+      setTimeout(syncBrowserTranslateHint, 0);
+    }
+  } catch (e) { /* overlay hide must not depend on copy */ }
 
   var bannerDismiss = document.getElementById('page-translate-banner-dismiss');
   if (bannerDismiss) {
@@ -12510,12 +12632,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
       if (pageTranslateActive()) syncBrowserTranslateHint();
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   } catch (e) { /* ignore */ }
-  if (alreadyWelcomed) {
-    afterMapReady(function () {
-      setTimeout(hideOverlay, 1000);
-    });
-    return;
-  }
+  if (alreadyWelcomed) return;
 
   var btn = document.getElementById('welcome-start-btn');
   if (btn) {
@@ -12526,7 +12643,19 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
   document.addEventListener('keydown', function onEsc(e) {
     if (e.key === 'Escape') { dismiss(); document.removeEventListener('keydown', onEsc); }
   });
-});
+}
+
+function bootWelcome() {
+  if (document.getElementById('welcome-modal-overlay')) {
+    initWelcome();
+    return;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootWelcome, { once: true });
+  }
+  setTimeout(bootWelcome, 0);
+}
+bootWelcome();
 
 </script>
 <div id="data-viewer-overlay" class="data-viewer-overlay" hidden aria-hidden="true"></div>
@@ -12568,72 +12697,33 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
             <option value="fr">Français</option>
           </select>
         </div>
-        <p id="burger-translate-hint" data-testid="burger-translate-hint" hidden translate="yes"></p>
+        <p id="burger-translate-hint" data-testid="burger-translate-hint" translate="yes">The interface is available in English and French. For any other language, the app is designed so <strong>Google Translate</strong> (or your browser's <strong>Translate this page</strong>) can automatically translate the content.</p>
       </div>
 
-      <!-- Thème + Données -->
+      <!-- Le projet + données JSON -->
       <div>
-        <div class="burger-section-title" data-i18n="ui.displayBurgerSection">Affichage</div>
+        <div class="burger-section-title" data-i18n-text="aboutAppTitle">The project</div>
+        <p class="burger-critics" data-i18n-text="criticsIntro">Experimental — for critics</p>
+        <p class="burger-about-p" data-i18n-text="aboutAppBody">Hominines Origins is a structured collection of data extracted from research papers with the help of AI, and an interactive app generated from that knowledge. Claims stay traceable and linked to sources, with a DOI when one is available.</p>
+        <p class="burger-about-p" data-i18n-text="aboutAppShows">The map and timeline show where each group lived, when, how they moved, and what material traces say about appearance and technology. The app runs in the browser: no server, no login.</p>
+        <p class="burger-about-p" data-i18n-text="aboutAppData">Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here.</p>
         <div class="burger-btn-row">
-          <button type="button" class="layer-btn" data-testid="theme-toggle" data-theme-toggle data-i18n-title="ui.toggleTheme" style="flex:1; justify-content:center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
-            <span data-i18n="ui.toggleTheme">Mode sombre</span>
-          </button>
           <button id="btn-data-viewer" class="layer-btn" data-i18n-title="ui.dataViewerTitle" style="flex:1; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-            <span data-i18n="ui.dataViewerTitle">Données</span>
+            <span data-i18n="ui.dataViewerTitle">JSON data</span>
           </button>
         </div>
-      </div>
-
-      <!-- Couches carte -->
-      <div>
-        <div class="burger-section-title" data-i18n="ui.mapLayers">Couches carte</div>
-        <div class="burger-layer-btns" id="burger-layer-btns">
-          <!-- filled by JS from #layer-toggles -->
-        </div>
-      </div>
-
-      <!-- Scientific uncertainty (plain language) -->
-      <div class="burger-uncertainty-block" style="margin-top:var(--space-4); padding-top:var(--space-4); border-top:1px solid var(--color-divider); max-height:42vh; overflow-y:auto;">
-        <div class="burger-section-title" data-i18n-text="uncertaintySectionTitle"></div>
-        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.55;margin:0 0 var(--space-3);" data-i18n-text="infoAboutBody"></p>
-        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.55;margin:0 0 var(--space-2);" data-i18n-text="uncertaintyIntro"></p>
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin:var(--space-3) 0 var(--space-1);" data-i18n-text="uncertaintyAxis1Title"></div>
-        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0 0 var(--space-2);" data-i18n-text="uncertaintyAxis1Body"></p>
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin:var(--space-2) 0 var(--space-1);" data-i18n-text="uncertaintyAxis2Title"></div>
-        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0 0 var(--space-2);" data-i18n-text="uncertaintyAxis2Body"></p>
-        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);" data-i18n-text="uncertaintyDebateIntro"></p>
-        <ul class="uncertainty-level-list">
-          <li class="uncertainty-level-li--strong" data-i18n-text="uncertaintyDebateList_STRONG_CONSENSUS"></li>
-          <li class="uncertainty-level-li--moderate" data-i18n-text="uncertaintyDebateList_MODERATE_CONSENSUS"></li>
-          <li class="uncertainty-level-li--active-debate" data-i18n-text="uncertaintyDebateList_ACTIVE_DEBATE"></li>
-          <li class="uncertainty-level-li--speculative" data-i18n-text="uncertaintyDebateList_SPECULATIVE_HYPOTHESIS"></li>
-          <li class="uncertainty-level-li--unassessed" data-i18n-text="uncertaintyDebateList_UNASSESSED"></li>
-        </ul>
-        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-1);" data-i18n-text="uncertaintyEvidIntro"></p>
-        <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0 0 var(--space-2);padding-left:1.1em;line-height:1.45;">
-          <li data-i18n-text="uncertaintyEvidList_DIRECT_DATA"></li>
-          <li data-i18n-text="uncertaintyEvidList_INDIRECT_DATA"></li>
-          <li data-i18n-text="uncertaintyEvidList_EVOLUTIONARY_INFERENCE"></li>
-          <li data-i18n-text="uncertaintyEvidList_MEDIA_NARRATIVE"></li>
-          <li data-i18n-text="uncertaintyEvidList_UNASSESSED"></li>
-        </ul>
-        <p style="font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0;" data-i18n-text="uncertaintyWhy"></p>
       </div>
 
       <!-- GitHub + Warning -->
-      <div style="margin-top:auto; padding-top: var(--space-4); border-top: 1px solid var(--color-divider); display:flex; flex-direction:column; gap:var(--space-3);">
-        <a href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer"
-           style="display:inline-flex; align-items:center; gap:var(--space-2); font-size:var(--text-xs); color:var(--color-text-muted); text-decoration:none; font-family:var(--font-mono);">
+      <div class="burger-footer">
+        <a href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
           </svg>
           fdepierre/hominines-origins
         </a>
-        <div style="font-size:var(--text-xs); color:var(--color-text-muted); font-family:var(--font-mono); line-height:1.6;" data-i18n="ui.experimentalWarning">
+        <div class="burger-footer-note" data-i18n="ui.experimentalWarning">
           Expérimental · Généré par IA · Vérifiez les sources
         </div>
       </div>
@@ -12647,6 +12737,7 @@ document.addEventListener('DOMContentLoaded', function initWelcome() {
       <div>
         <div class="welcome-logo" id="welcome-title">Hominin<span>es</span> Origins</div>
         <div class="welcome-tagline" id="welcome-tagline">From African origins to the peopling of the world</div>
+        <p class="welcome-critics" id="welcome-critics-note">Experimental — for critics</p>
       </div>
       <div class="welcome-body" id="welcome-body">
         From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.

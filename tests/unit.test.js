@@ -54,7 +54,7 @@ async function runUnitTests() {
 
   await test('Stable data-testid hooks exist for automation', async () => {
     const testids = ['map', 'burger-menu-button', 'side-panel', 'timeline', 'play-toggle',
-      'theme-toggle', 'lang-select', 'timeline-needle-row'];
+      'burger-translate-hint', 'lang-select', 'timeline-needle-row'];
     const missing = await page.evaluate((ids) =>
       ids.filter((t) => !document.querySelector(`[data-testid="${t}"]`)), testids);
     assert(missing.length === 0, `data-testid hooks present (missing: ${missing.join(', ') || 'none'})`);

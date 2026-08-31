@@ -5,7 +5,7 @@
  * Run: node tests/a11y.test.js
  * Smoke (faster, fewer cases): node tests/a11y.test.js --smoke — skips tablet,
  * Play auto-stop-at-end, dir=ltr sweep, Playwright welcome-locale, and
- * close-button / layer-title i18n checks.
+ * close-button i18n checks.
  */
 
 'use strict';
@@ -53,18 +53,6 @@ async function runA11yTests(options = {}) {
     assert(text && text.length > 0, `Play button has accessible text: "${text}"`);
   });
 
-  await test('Theme toggle button has accessible name', async () => {
-    const label = await page.evaluate(() => {
-      const btn = document.querySelector('[data-testid="theme-toggle"]');
-      if (!btn) return '';
-      const sub = btn.querySelector('span');
-      const subT = sub ? (sub.textContent || '').trim() : '';
-      return (btn.getAttribute('aria-label') || btn.title || subT).trim();
-    });
-    assert(label && label.length > 0, `Theme toggle has accessible name: "${label}"`);
-    assert(!label.includes('ui.ui.'), `Theme title must not double-prefix i18n keys (got "${label}")`);
-  });
-
   await test('Language selector has aria-label', async () => {
     const label = await page.evaluate(() => {
       const sel = document.querySelector('[data-testid="lang-select"]');
@@ -104,13 +92,13 @@ async function runA11yTests(options = {}) {
     assert(size >= 24, `Timeline scrubber is ≥ 24px (got ${Math.round(size)}px)`);
   });
 
-  await test('Layer toggle buttons ≥ 28px tall', async () => {
-    const heights = await page.evaluate(() =>
-      [...document.querySelectorAll('.layer-btn')].map(btn => btn.getBoundingClientRect().height)
-    );
-    assert(heights.length > 0, `Found ${heights.length} layer buttons`);
-    const small = heights.filter(h => h < 28);
-    assertSoft(small.length === 0, `All layer buttons ≥ 28px tall (${small.length} too small)`);
+  await test('Burger JSON data button ≥ 28px tall', async () => {
+    const height = await page.evaluate(() => {
+      const btn = document.getElementById('btn-data-viewer');
+      return btn ? btn.getBoundingClientRect().height : 0;
+    });
+    assert(height > 0, 'JSON data button is in the DOM');
+    assertSoft(height >= 28, `JSON data button height = ${Math.round(height)}px (expected ≥ 28px)`);
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -217,34 +205,7 @@ async function runA11yTests(options = {}) {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 5. THEME TOGGLE
-  // ═══════════════════════════════════════════════════════════════════════════
-  console.log(`\n${BOLD}◆ THEME TOGGLE${RESET}`);
-
-  await test('Theme toggle switches between dark and light', async () => {
-    const found = await page.evaluate(() => !!document.querySelector('[data-testid="theme-toggle"]'));
-    assert(found, 'Theme toggle button found');
-
-    const before = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
-    await page.evaluate(() => {
-      const btn = document.querySelector('[data-testid="theme-toggle"]');
-      if (btn) btn.click();
-    });
-    await page.waitForTimeout(250);
-    const mid = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
-    assert(mid !== before, `First click changes theme (${before} → ${mid})`);
-
-    await page.evaluate(() => {
-      const btn = document.querySelector('[data-testid="theme-toggle"]');
-      if (btn) btn.click();
-    });
-    await page.waitForTimeout(250);
-    const after = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'light');
-    assert(after === before, `Second click restores theme (${mid} → ${after}, expected ${before})`);
-  });
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 6. I18N — LANGUAGE SWITCHING
+  // 5. I18N — LANGUAGE SWITCHING
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ INTERNATIONALISATION${RESET}`);
 
@@ -596,7 +557,7 @@ async function runA11yTests(options = {}) {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 6c. CLOSE BUTTONS (sr-only) + LAYER TITLE I18N (regression for ui.ui.*)
+  // 6c. CLOSE BUTTONS (sr-only)
   // ═══════════════════════════════════════════════════════════════════════════
   if (!smoke) {
     console.log(`\n${BOLD}◆ CLOSE BUTTONS & I18N TITLES${RESET}`);
@@ -649,17 +610,26 @@ async function runA11yTests(options = {}) {
       await page.waitForTimeout(150);
     });
 
-    await test('Map layer button titles are localized (no broken ui.ui.* key)', async () => {
-      const sitesTitle = await page.evaluate(() => {
-        const el = document.querySelector('.layer-btn[data-layer="sites"]');
-        return el ? el.title : '';
+    await test('Burger language section always explains browser translation', async () => {
+      await page.click('[data-testid="burger-menu-button"]');
+      await page.waitForSelector('#burger-panel.open', { timeout: 4000 });
+      const hint = await page.evaluate(() => {
+        const el = document.getElementById('burger-translate-hint');
+        return {
+          hidden: !el || el.hidden,
+          text: el ? (el.textContent || '').trim() : '',
+        };
       });
-      assert(sitesTitle && !sitesTitle.includes('ui.ui.'), `Sites layer title: "${sitesTitle}"`);
-      assert(/fossil|site|fósil|Afficher|Mostrar|masquer|ocultar/i.test(sitesTitle),
-        `Sites layer title looks localized: "${sitesTitle}"`);
+      assert(!hint.hidden, 'Burger translate hint is visible');
+      assert(
+        /Google Translate|Google Traduction|Translate this page|Traduire cette page/i.test(hint.text),
+        `Burger hint mentions browser/Google Translate (got: ${JSON.stringify(hint.text.slice(0, 180))})`
+      );
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
     });
   } else {
-    console.log(`\n  ${YELLOW}Close-button / layer-title checks: skipped in smoke mode${RESET}`);
+    console.log(`\n  ${YELLOW}Close-button checks: skipped in smoke mode${RESET}`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
