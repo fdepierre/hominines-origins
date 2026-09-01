@@ -412,13 +412,34 @@ a { color: var(--color-primary); }
 .certainty-tri-wedge--speculative { fill: var(--certainty-speculative); }
 .certainty-tri-wedge--unknown { fill: var(--certainty-unknown); }
 .certainty-tri-pop-legend {
-  font-size: inherit;
-  font-family: var(--font-mono);
-  color: var(--color-text-faint);
-  letter-spacing: 0.02em;
-  margin: calc(-1 * var(--space-1)) 0 var(--space-2);
-  line-height: 1.35;
+  font-size: 11px;
+  font-family: var(--font-body);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+  line-height: 1.45;
 }
+.certainty-tri-legend-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em 0.85em;
+  margin-top: 0.4em;
+}
+.certainty-tri-legend-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  white-space: nowrap;
+}
+.certainty-tri-swatch {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.certainty-tri-swatch--strong { background: var(--certainty-strong-consensus); }
+.certainty-tri-swatch--moderate { background: var(--certainty-moderate-consensus); }
+.certainty-tri-swatch--weak { background: var(--certainty-active-debate); }
 .certainty-tri-pop {
   position: fixed;
   top: 0;
@@ -453,11 +474,12 @@ a { color: var(--color-primary); }
   pointer-events: auto;
 }
 .certainty-tri-pop-title {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-faint);
+  font-size: 1.15rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+  line-height: 1.25;
   margin-bottom: var(--space-2);
 }
 .certainty-tri-row {
@@ -4211,7 +4233,13 @@ function renderCertaintyTriIcon(species, T) {
     '</svg></button>' +
     '<div class="certainty-tri-pop" role="tooltip">' +
     '<div class="certainty-tri-pop-title">' + T('certaintyPanelTitle', 'Certitude par thème') + '</div>' +
-    '<div class="certainty-tri-pop-legend">' + T('certaintyTriLegend', 'Même code pour toutes les espèces : vert = fort consensus · orange = modéré · rouge = débat ou hypothèse fragile.') + '</div>' +
+    '<div class="certainty-tri-pop-legend">' +
+    '<div>' + T('certaintyTriLegendIntro', 'Même code pour toutes les espèces :') + '</div>' +
+    '<div class="certainty-tri-legend-keys">' +
+    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--strong" aria-hidden="true"></span>' + T('certaintyTriLegendStrong', 'fort consensus') + '</span>' +
+    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--moderate" aria-hidden="true"></span>' + T('certaintyTriLegendModerate', 'modéré') + '</span>' +
+    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--weak" aria-hidden="true"></span>' + T('certaintyTriLegendWeak', 'débat actif ou hypothèse fragile') + '</span>' +
+    '</div></div>' +
     popRows +
     '</div></div>'
   );
@@ -11169,6 +11197,10 @@ const TRANSLATIONS = {
         certaintyPanelTitle: 'Certitude par thème',
         certaintyTriAria: 'Certitude par thème : secteur supérieur taxonomie, puis comportement, puis pigmentation (sens horaire). Survolez ou activez pour le détail.',
         certaintyTriLegend: 'Même code pour toutes les espèces : vert = fort consensus · orange = modéré · rouge = débat actif ou hypothèse fragile.',
+        certaintyTriLegendIntro: 'Même code pour toutes les espèces :',
+        certaintyTriLegendStrong: 'fort consensus',
+        certaintyTriLegendModerate: 'modéré',
+        certaintyTriLegendWeak: 'débat actif ou hypothèse fragile',
         certaintyDomainTax: 'Taxonomie',
         certaintyDomainBehavior: 'Comportement',
         certaintyDomainPig: 'Pigmentation',
@@ -11274,6 +11306,10 @@ const TRANSLATIONS = {
         certaintyPanelTitle: 'Certainty by topic',
         certaintyTriAria: 'Certainty by topic: top sector taxonomy, then behaviour, then pigmentation (clockwise). Hover or focus the icon for full detail.',
         certaintyTriLegend: 'Same key for every species: green = strong consensus · orange = moderate · red = active debate or fragile hypothesis.',
+        certaintyTriLegendIntro: 'Same key for every species:',
+        certaintyTriLegendStrong: 'strong consensus',
+        certaintyTriLegendModerate: 'moderate',
+        certaintyTriLegendWeak: 'active debate or fragile hypothesis',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
         certaintyDomainPig: 'Pigmentation',
