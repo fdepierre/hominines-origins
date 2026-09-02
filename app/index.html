@@ -12048,12 +12048,6 @@ var demoController = (function () {
     if (title) title.textContent = demoT('demoTitle', 'Discovering the application');
     var ov = overlay();
     if (ov) ov.setAttribute('aria-label', demoT('demoTitle', 'Discovering the application'));
-    var pauseBtn = document.getElementById('demo-pause-btn');
-    if (pauseBtn) {
-      pauseBtn.textContent = state.paused
-        ? demoT('demoResume', 'Resume')
-        : demoT('demoPause', 'Pause');
-    }
   }
 
   function setFinaleCopy() {
@@ -12124,8 +12118,6 @@ var demoController = (function () {
     resetFinaleLayout();
     var fin = finaleEl();
     if (fin) fin.hidden = true;
-    var pauseBtn = document.getElementById('demo-pause-btn');
-    if (pauseBtn) pauseBtn.hidden = true;
     var nextBtn = document.getElementById('demo-next-btn');
     if (nextBtn) nextBtn.hidden = true;
     var ov = overlay();
@@ -12395,8 +12387,6 @@ var demoController = (function () {
     setFinaleCopy();
     var fin = finaleEl();
     if (fin) fin.hidden = false;
-    var pauseBtn = document.getElementById('demo-pause-btn');
-    if (pauseBtn) pauseBtn.hidden = true;
     hideNext();
   }
 
@@ -12567,14 +12557,8 @@ var demoController = (function () {
   function wireOnce() {
     if (state.wired) return;
     state.wired = true;
-    var skip = document.getElementById('demo-skip-btn');
-    var exit = document.getElementById('demo-exit-btn');
-    var pause = document.getElementById('demo-pause-btn');
     var explore = document.getElementById('demo-explore-btn');
     var replay = document.getElementById('demo-replay-btn');
-    if (skip) skip.addEventListener('click', function () { skipToFinale(); });
-    if (exit) exit.addEventListener('click', function () { exitDemo(); });
-    if (pause) pause.addEventListener('click', function () { userTogglePause(); });
     if (explore) explore.addEventListener('click', function () { exploreFromFinale(); });
     if (replay) replay.addEventListener('click', function () { start(); });
     document.addEventListener('keydown', function (e) {
@@ -12618,8 +12602,6 @@ var demoController = (function () {
     var fin = finaleEl();
     if (fin) fin.hidden = true;
     resetFinaleLayout();
-    var pauseBtn = document.getElementById('demo-pause-btn');
-    if (pauseBtn) pauseBtn.hidden = !!state.reducedMotion;
     hideNext();
     setChromeCopy();
     if (typeof resetMapToWorldView === 'function') resetMapToWorldView();
@@ -14299,10 +14281,7 @@ bootWelcome();
     <div class="demo-chrome">
       <div class="demo-title" id="demo-title">Discovering the application</div>
       <div class="demo-chrome-actions">
-        <button type="button" id="demo-pause-btn" hidden data-i18n="ui.demoPause">Pause</button>
         <button type="button" id="demo-next-btn" hidden data-i18n="ui.demoNext">Continue</button>
-        <button type="button" id="demo-skip-btn" data-i18n="ui.demoSkip">Skip introduction</button>
-        <button type="button" id="demo-exit-btn" data-i18n="ui.demoExit">Exit</button>
       </div>
     </div>
     <svg class="demo-svg-arrows" id="demo-svg-arrows" aria-hidden="true">
