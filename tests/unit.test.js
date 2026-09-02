@@ -971,6 +971,41 @@ async function runUnitTests() {
     assert(!!st.caretX, `caret is aligned to the hovered icon (--peek-caret-x ${st.caretX})`);
   });
 
+  await test('Guided demo is wired to real Homo sapiens catalogue data', async () => {
+    const st = await page.evaluate(() => {
+      const sapiens = (SPECIES_DATA || []).filter((s) => /^sapiens-/i.test(String(s.id)));
+      const ooa = sapiens
+        .filter((s) => s.migrations && s.migrations.length)
+        .sort((a, b) => a.start - b.start)[0];
+      const t0 = sapiens.length ? Math.min.apply(null, sapiens.map((s) => s.start)) : null;
+      const t1 = sapiens.length ? Math.max.apply(null, sapiens.map((s) => s.end)) : null;
+      const other = /naledi|neanderthal|n[ée]andertal|floresiensis|erectus|denisov|heidelberg|rudolfensis|habilis|georgicus|longi|juluensis|australopith|paranthrop|sahelanthrop|orrorin|ardipith/i;
+      const artifacts = (EVENTS_DATA || []).filter((ev) => {
+        if (ev.time < t0 || ev.time > t1) return false;
+        if (ev.category === 'phylo' || ev.category === 'migration') return false;
+        const blob = String(ev.label || '') + ' ' + String(ev.desc || '');
+        if (other.test(blob) && !/sapiens/i.test(blob)) return false;
+        return true;
+      }).sort((a, b) => a.time - b.time);
+      return {
+        hasController: !!(window.demoController && typeof window.demoController.start === 'function'),
+        replay: !!document.getElementById('burger-replay-demo'),
+        overlay: !!document.getElementById('demo-overlay'),
+        sapiensAfrica: sapiens.some((s) => s.id === 'sapiens-africa'),
+        sapiensStart: t0,
+        ooaId: ooa && ooa.id,
+        firstArtifacts: artifacts.slice(0, 2).map((e) => e.id),
+      };
+    });
+    assert(st.hasController, 'demoController.start is available');
+    assert(st.replay, '#burger-replay-demo exists in the burger menu');
+    assert(st.overlay, '#demo-overlay exists');
+    assert(st.sapiensAfrica, 'catalogue includes sapiens-africa');
+    assert(st.sapiensStart === -315000, `Homo sapiens sequence starts at -315000 (got ${st.sapiensStart})`);
+    assert(st.ooaId === 'sapiens-levant', `first sapiens migration row is sapiens-levant (got ${st.ooaId})`);
+    assert(st.firstArtifacts.length >= 1, 'at least one sapiens artefact exists for the demo');
+  });
+
   // ─── close ────────────────────────────────────────────────────────────────
   await browser.close();
   return errors;

@@ -1621,6 +1621,8 @@ html[data-map-ready="1"] #map {
 }
 .burger-btn-row {
   display: flex; gap: var(--space-2);
+  min-width: 0;
+  width: 100%;
 }
 .burger-about-p {
   margin: 0 0 var(--space-2);
@@ -1643,6 +1645,19 @@ html[data-map-ready="1"] #map {
 #burger-panel .layer-btn {
   font-size: inherit;
   line-height: inherit;
+  white-space: normal;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+#burger-replay-demo {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  flex: 1 1 auto;
+}
+#burger-replay-demo svg {
+  flex-shrink: 0;
 }
 .burger-footer {
   margin-top: auto;
@@ -1660,10 +1675,9 @@ html[data-map-ready="1"] #map {
   line-height: inherit;
 }
 .burger-footer a {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  text-decoration: none;
+  display: inline;
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 
 /* ===== TIMELINE: play button + label float at left of species track ===== */
@@ -2200,6 +2214,68 @@ html[data-map-ready="1"] #map {
   line-height: 1.6;
 }
 .welcome-body strong { color: var(--color-text); }
+.welcome-landmarks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin: var(--space-1) 0;
+}
+.welcome-landmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+}
+.welcome-landmark-icon {
+  width: 100%;
+  min-height: 88px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-divider);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 6px;
+  box-sizing: border-box;
+}
+.welcome-landmark-icon svg { display: block; }
+.welcome-landmark-icon--figure .human-figure-svg {
+  width: 52px;
+  height: auto;
+  aspect-ratio: 120 / 172;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.55));
+}
+.welcome-landmark-icon--cluster {
+  flex-wrap: wrap;
+}
+.welcome-glyph {
+  font-size: 20px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45));
+}
+.welcome-landmark-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+.welcome-landmark-sub {
+  display: block;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+.welcome-blurb {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  text-align: center;
+  margin: 0;
+}
 .welcome-tips {
   display: flex; flex-direction: column; gap: var(--space-2);
 }
@@ -2211,6 +2287,43 @@ html[data-map-ready="1"] #map {
   flex-shrink: 0; margin-top: 1px;
   color: var(--color-primary);
   display: flex; align-items: center;
+}
+#welcome-modal-overlay.welcome-fold-to-burger {
+  pointer-events: none;
+  background: transparent;
+  backdrop-filter: none;
+}
+#welcome-modal-overlay.welcome-fold-to-burger #welcome-modal {
+  animation: welcomeFoldToBurger 0.7s ease-in forwards;
+  transform-origin: center center;
+}
+@keyframes welcomeFoldToBurger {
+  to {
+    transform: translate(var(--welcome-fold-dx, -40vw), var(--welcome-fold-dy, -40vh)) scale(0.08);
+    opacity: 0;
+  }
+}
+.fold-to-burger-card {
+  animation: welcomeFoldToBurger 0.7s ease-in forwards;
+  transform-origin: center center;
+  pointer-events: none;
+}
+#burger-btn.burger-pulse-once {
+  animation: burgerInvitePulse 0.9s ease-out 2;
+}
+@keyframes burgerInvitePulse {
+  0%, 100% { box-shadow: var(--shadow-sm); }
+  40% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 35%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #welcome-modal-overlay.welcome-fold-to-burger #welcome-modal,
+  .fold-to-burger-card {
+    animation: welcomeFoldFade 0.35s ease forwards;
+  }
+  @keyframes welcomeFoldFade {
+    to { opacity: 0; }
+  }
+  #burger-btn.burger-pulse-once { animation: none; }
 }
 #welcome-start-btn {
   align-self: stretch;
@@ -2262,6 +2375,177 @@ html[data-map-ready="1"] #map {
   color: var(--color-text-muted);
   margin-top: var(--space-3);
   line-height: 1.55;
+}
+
+/* ===== GUIDED DEMO ===== */
+#demo-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  pointer-events: none;
+}
+#demo-overlay[hidden] { display: none !important; }
+#demo-overlay .demo-chrome,
+#demo-overlay .demo-tooltip,
+#demo-overlay .demo-finale {
+  pointer-events: auto;
+}
+.demo-chrome {
+  position: absolute;
+  top: var(--space-3);
+  left: 56px;
+  right: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  z-index: 2;
+}
+.demo-title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  box-shadow: var(--shadow-sm);
+}
+.demo-chrome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+.demo-chrome-actions button,
+.demo-finale-actions button {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.demo-chrome-actions button:hover,
+.demo-finale-actions button:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-highlight);
+}
+.demo-chrome-actions .demo-btn-primary,
+.demo-finale-actions .demo-btn-primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+.demo-svg-arrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+}
+.demo-svg-arrows line {
+  stroke: var(--color-primary);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  marker-end: url(#demo-arrow-head);
+}
+.demo-tooltip {
+  position: absolute;
+  z-index: 3;
+  max-width: min(360px, calc(100vw - 24px));
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
+  border-radius: var(--tooltip-radius);
+  padding: var(--tooltip-pad);
+  font-size: var(--tooltip-size);
+  font-family: var(--tooltip-font);
+  line-height: var(--tooltip-lh);
+  color: var(--tooltip-color);
+  box-shadow: var(--tooltip-shadow);
+}
+.demo-tooltip[hidden],
+.demo-finale[hidden] { display: none !important; }
+.demo-finale {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  width: min(440px, calc(100vw - 24px));
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+.demo-finale p {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--color-text);
+}
+.demo-finale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+html.demo-active #timeline,
+html.demo-active #map,
+html.demo-active #side-panel,
+html.demo-active #burger-btn {
+  pointer-events: none;
+}
+html.demo-active .species-lane:not([data-id="grp-sapiens"]):not([data-id^="sapiens-"]) {
+  opacity: 0.08 !important;
+  filter: grayscale(0.6);
+  pointer-events: none;
+}
+html.demo-active .timeline-view-switch,
+html.demo-active #skin-band {
+  opacity: 0.28;
+  pointer-events: none;
+}
+html.demo-active .event-marker { opacity: 0.12; }
+html.demo-active .event-marker.demo-event-keep { opacity: 1; }
+html.demo-active .species-lane.demo-lane-spotlight {
+  opacity: 1 !important;
+  filter: brightness(1.25);
+  box-shadow: 0 0 0 2px var(--color-primary), 0 0 12px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  z-index: 8;
+}
+html.demo-active .event-marker.demo-artifact-spotlight,
+html.demo-active .maplibre-event-marker.demo-artifact-spotlight,
+html.demo-active .maplibre-walking-figure.demo-figure-spotlight {
+  filter: drop-shadow(0 0 10px rgba(212, 130, 10, 0.95));
+  z-index: 8;
+}
+html.demo-active #side-panel.demo-panel-spotlight {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+html.demo-active .event-marker.demo-artifact-spotlight {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.35);
+}
+@media (max-width: 768px) {
+  .welcome-landmarks { gap: var(--space-2); }
+  .welcome-landmark-icon { min-height: 72px; padding: 6px 4px; }
+  .welcome-landmark-icon--figure .human-figure-svg { width: 44px; }
+  .welcome-glyph { font-size: 18px; }
+  .demo-chrome { left: var(--space-3); top: 52px; }
+  .demo-finale { top: 36%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.demo-active .event-marker.demo-artifact-spotlight {
+    transform: translate(-50%, -50%);
+  }
 }
 
 /* ===== DATA VIEWER DRAWER ===== */
@@ -3263,6 +3547,12 @@ const mapLibreMigrationMarkers = new Map();
 const mapLibreFigureMarkers = new Map();
 const mapLibreLabelMarkers = new Map();
 let isDragging = false;
+/** When true, map/timeline only keep Homo sapiens rows (guided demo). */
+let _demoSpeciesOnly = false;
+/** Optional Set of event ids allowed on map/band during the guided demo. */
+let _demoEventAllow = null;
+/** When true, setTime() does not auto-change the side-panel selection. */
+let _demoLockSelection = false;
 
 const MAP_WORLD_CENTER = [20, 15];
 const MAP_WORLD_ZOOM_DESKTOP = 1.15;
@@ -3523,7 +3813,11 @@ function initMap() {
 // updateMapLibre() rebuilds GeoJSON sources from this list; Play calls setTime
 // often, so updateMap() is skipped when the id-set has not changed.
 function getVisibleSpecies() {
-  return SPECIES_DATA.filter(s => s.start <= currentTime && s.end >= currentTime);
+  var list = SPECIES_DATA.filter(s => s.start <= currentTime && s.end >= currentTime);
+  if (_demoSpeciesOnly) {
+    list = list.filter(function (s) { return /^sapiens-/i.test(String(s.id)); });
+  }
+  return list;
 }
 
 /** Fill the (usually hidden) map legend with dots + taxon names. */
@@ -3809,7 +4103,11 @@ function pulseMapLibreEventMarker(eventId, durationMs) {
 function updateMapLibreEvents() {
   if (!mapLibreMap || !mapLibreMap.getSource('hominine-events')) return;
   const visibleEvents = showEvents
-    ? EVENTS_DATA.filter(ev => ev.time >= TIMELINE_MIN && ev.time <= eventCumulativeTimeMax())
+    ? EVENTS_DATA.filter(function (ev) {
+      if (ev.time < TIMELINE_MIN || ev.time > eventCumulativeTimeMax()) return false;
+      if (_demoEventAllow && !_demoEventAllow.has(ev.id)) return false;
+      return true;
+    })
     : [];
   const features = visibleEvents
       .map(ev => ({
@@ -6303,6 +6601,7 @@ function setTime(time) {
   }
 
   // Panel update logic
+  if (_demoLockSelection) return;
   const visible = getVisibleSpecies();
 
   if (visible.length === 0) {
@@ -11312,6 +11611,7 @@ function makeMapLibreFigureElement(species) {
   const w = Math.round(22 * scale), h = Math.round(35 * scale);
   const el = document.createElement('div');
   el.className = 'maplibre-walking-figure';
+  el.setAttribute('data-species-id', species.id || '');
   el.style.cssText = 'width:' + w + 'px;height:' + h + 'px;display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.72));';
   el.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 120 160" fill="none"' +
     ' xmlns="http://www.w3.org/2000/svg" style="display:block">' +
@@ -11357,7 +11657,10 @@ function spawnFigure(species) {
     walkState: null,
     raf      : null,
   };
-  if (marker) setTimeout(function(){ advanceFigure(species.id); }, 600);
+  if (marker) setTimeout(function(){
+    var entry = speciesFigures[species.id];
+    if (entry && !entry.walkState && !entry.raf) advanceFigure(species.id);
+  }, 600);
 }
 
 // Start the next queued migration walk for a species
@@ -11424,6 +11727,964 @@ function checkAndSpawnFigures() {
   });
 }
 
+/** Fold a card toward #burger-btn (welcome overlay + demo finale). */
+function foldUiToBurger(el, onDone) {
+  var burger = document.getElementById('burger-btn');
+  var reduced = false;
+  try {
+    reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  } catch (e) { /* ignore */ }
+  var finished = false;
+  function finish() {
+    if (finished) return;
+    finished = true;
+    if (el) {
+      el.classList.remove('fold-to-burger-card');
+      el.style.removeProperty('--welcome-fold-dx');
+      el.style.removeProperty('--welcome-fold-dy');
+    }
+    if (burger) {
+      burger.classList.add('burger-pulse-once');
+      setTimeout(function () { burger.classList.remove('burger-pulse-once'); }, 1800);
+    }
+    if (typeof onDone === 'function') onDone();
+  }
+  if (!el || !burger || reduced) {
+    finish();
+    return;
+  }
+  var er = el.getBoundingClientRect();
+  var br = burger.getBoundingClientRect();
+  if (er.width < 2 || er.height < 2) {
+    finish();
+    return;
+  }
+  el.style.position = 'fixed';
+  el.style.left = er.left + 'px';
+  el.style.top = er.top + 'px';
+  el.style.right = 'auto';
+  el.style.bottom = 'auto';
+  el.style.margin = '0';
+  el.style.width = er.width + 'px';
+  el.style.transform = 'none';
+  var dx = (br.left + br.width / 2) - (er.left + er.width / 2);
+  var dy = (br.top + br.height / 2) - (er.top + er.height / 2);
+  el.style.setProperty('--welcome-fold-dx', dx + 'px');
+  el.style.setProperty('--welcome-fold-dy', dy + 'px');
+  void el.offsetWidth;
+  el.classList.add('fold-to-burger-card');
+  el.addEventListener('animationend', finish, { once: true });
+  setTimeout(finish, 850);
+}
+window.foldUiToBurger = foldUiToBurger;
+
+// =====================================================================
+// GUIDED DEMO — short Homo sapiens walkthrough for first-time visitors
+// =====================================================================
+// demoController owns every timer, temporary CSS class, filter and
+// listener used by the introduction. start() / skipToFinale() / exit()
+// all go through cleanupVisuals() so a skip or Escape cannot leave a
+// partial filter. Scientific data is never mutated.
+var demoController = (function () {
+  var PHASE = {
+    IDLE: 'idle',
+    INTRO: 'intro',
+    TIMELINE: 'timeline',
+    PLAY: 'play',
+    OOA: 'ooa',
+    ARTIFACT: 'artifact',
+    PANEL: 'panel',
+    FINALE: 'finale'
+  };
+  var TIP_HOLD_MS = 5000;
+
+  var state = {
+    active: false,
+    phase: PHASE.IDLE,
+    paused: false,
+    reducedMotion: false,
+    timers: [],
+    interval: null,
+    listeners: [],
+    snapshot: null,
+    ooaDone: false,
+    artifactsShown: [],
+    artifactQueue: [],
+    ooaSpecies: null,
+    sapiensStart: null,
+    demoPlayStart: null,
+    playSpeed: 0.00036,
+    currentTip: '',
+    arrowTargets: [],
+    panelSubstep: 0,
+    suppressArtifactsUntil: 0,
+    wired: false
+  };
+
+  function demoT(key, fallback) {
+    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+      return i18next.t('ui.' + key, { defaultValue: fallback });
+    }
+    return fallback;
+  }
+
+  function prefersReducedMotion() {
+    try {
+      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch (e) { return false; }
+  }
+
+  function sapiensRows() {
+    return (SPECIES_DATA || []).filter(function (s) { return /^sapiens-/i.test(String(s.id)); });
+  }
+
+  function sapiensStartTime() {
+    var rows = sapiensRows();
+    if (!rows.length) return TIMELINE_MIN;
+    return rows.reduce(function (min, s) { return s.start < min ? s.start : min; }, rows[0].start);
+  }
+
+  function firstOutOfAfricaSpecies() {
+    return sapiensRows()
+      .filter(function (s) { return s.migrations && s.migrations.length; })
+      .sort(function (a, b) { return a.start - b.start; })[0] || null;
+  }
+
+  var OTHER_TAXA_RE = /naledi|neanderthal|n[ée]andertal|floresiensis|erectus|denisov|heidelberg|rudolfensis|habilis|georgicus|longi|juluensis|australopith|paranthrop|sahelanthrop|orrorin|ardipith/i;
+
+  function eventInSapiensWindow(ev, t0, t1) {
+    return ev && ev.time >= t0 && ev.time <= t1;
+  }
+
+  function eventIsOtherTaxon(ev) {
+    var blob = String((ev && ev.label) || '') + ' ' + String((ev && ev.desc) || '');
+    if (!OTHER_TAXA_RE.test(blob)) return false;
+    return !/sapiens/i.test(blob);
+  }
+
+  function isDemoArtifact(ev) {
+    if (!ev) return false;
+    if (ev.category === 'phylo' || ev.category === 'migration') return false;
+    return !eventIsOtherTaxon(ev);
+  }
+
+  function sapiensDemoEvents() {
+    var rows = sapiensRows();
+    if (!rows.length) return [];
+    var t0 = sapiensStartTime();
+    var t1 = rows.reduce(function (max, s) { return s.end > max ? s.end : max; }, rows[0].end);
+    return (EVENTS_DATA || []).filter(function (ev) {
+      return eventInSapiensWindow(ev, t0, t1) && !eventIsOtherTaxon(ev);
+    }).sort(function (a, b) { return a.time - b.time; });
+  }
+
+  function demoArtifactQueue() {
+    return sapiensDemoEvents().filter(isDemoArtifact);
+  }
+
+  function addTimer(fn, ms) {
+    var id = setTimeout(fn, ms);
+    state.timers.push(id);
+    return id;
+  }
+
+  function clearTimers() {
+    state.timers.forEach(function (id) { clearTimeout(id); });
+    state.timers = [];
+    if (state.interval) {
+      clearInterval(state.interval);
+      state.interval = null;
+    }
+  }
+
+  function on(el, type, fn, opts) {
+    if (!el) return;
+    el.addEventListener(type, fn, opts);
+    state.listeners.push({ el: el, type: type, fn: fn, opts: opts });
+  }
+
+  function clearListeners() {
+    state.listeners.forEach(function (l) {
+      try { l.el.removeEventListener(l.type, l.fn, l.opts); } catch (e) { /* ignore */ }
+    });
+    state.listeners = [];
+  }
+
+  function overlay() { return document.getElementById('demo-overlay'); }
+  function tipEl() { return document.getElementById('demo-tooltip'); }
+  function finaleEl() { return document.getElementById('demo-finale'); }
+  function arrowsSvg() { return document.getElementById('demo-svg-arrows'); }
+
+  function hideTooltip() {
+    var el = tipEl();
+    if (el) {
+      el.hidden = true;
+      el.textContent = '';
+    }
+    state.currentTip = '';
+    clearArrows();
+  }
+
+  function clearArrows() {
+    var svg = arrowsSvg();
+    if (!svg) return;
+    svg.querySelectorAll('line').forEach(function (n) { n.remove(); });
+    state.arrowTargets = [];
+  }
+
+  function clearHighlights() {
+    document.querySelectorAll('.demo-lane-spotlight, .demo-artifact-spotlight, .demo-figure-spotlight, .demo-panel-spotlight, .demo-event-keep')
+      .forEach(function (n) {
+        n.classList.remove('demo-lane-spotlight', 'demo-artifact-spotlight', 'demo-figure-spotlight', 'demo-panel-spotlight', 'demo-event-keep');
+      });
+    var panel = document.getElementById('side-panel');
+    if (panel) panel.classList.remove('demo-panel-spotlight');
+  }
+
+  function syncEventBandKeep() {
+    document.querySelectorAll('.event-marker').forEach(function (el) {
+      var id = el.getAttribute('data-event-id');
+      el.classList.toggle('demo-event-keep', !!(id && _demoEventAllow && _demoEventAllow.has(id)));
+    });
+  }
+
+  function sapiensLaneEl() {
+    return document.getElementById('lane-grp-sapiens')
+      || document.querySelector('[data-id="grp-sapiens"]')
+      || document.querySelector('[id^="lane-sapiens-"]');
+  }
+
+  function sapiensFigureEl() {
+    return document.querySelector('.maplibre-walking-figure[data-species-id="sapiens-levant"]')
+      || document.querySelector('.maplibre-walking-figure[data-species-id="sapiens-upper-paleo"]')
+      || document.querySelector('.maplibre-walking-figure[data-species-id^="sapiens-"]')
+      || document.querySelector('.maplibre-walking-figure');
+  }
+
+  function eventBandEl(id) {
+    return document.querySelector('.event-marker[data-event-id="' + id + '"]');
+  }
+
+  function eventMapEl(id) {
+    var marker = mapLibreEventMarkers && mapLibreEventMarkers.get(id);
+    return marker && marker.getElement ? marker.getElement() : null;
+  }
+
+  function rectCenter(el) {
+    if (!el) return null;
+    var r = el.getBoundingClientRect();
+    if (r.width < 1 && r.height < 1) return null;
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, r: r };
+  }
+
+  function drawArrowsTo(els) {
+    clearArrows();
+    var svg = arrowsSvg();
+    var tip = tipEl();
+    if (!svg || !tip || tip.hidden) return;
+    var target = null;
+    (els || []).some(function (candidate) {
+      if (rectCenter(candidate)) {
+        target = candidate;
+        return true;
+      }
+      return false;
+    });
+    if (!target) return;
+    var tr = tip.getBoundingClientRect();
+    var origin = { x: tr.left + tr.width / 2, y: tr.bottom };
+    var c = rectCenter(target);
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', String(origin.x));
+    line.setAttribute('y1', String(origin.y));
+    line.setAttribute('x2', String(c.x));
+    line.setAttribute('y2', String(c.y));
+    svg.appendChild(line);
+    state.arrowTargets = [target];
+  }
+
+  function placeTooltip(text, anchors, where) {
+    var el = tipEl();
+    if (!el) return;
+    state.currentTip = text;
+    el.textContent = text;
+    el.hidden = false;
+    var pad = 16;
+    var top = 72;
+    var left = pad;
+    if (where === 'timeline') {
+      var track = document.getElementById('timeline') || document.getElementById('needle-wrapper');
+      var tr = track ? track.getBoundingClientRect() : null;
+      top = tr ? Math.max(pad, tr.top - 88) : window.innerHeight - 140;
+      left = pad + 8;
+    } else if (where === 'map') {
+      var map = document.getElementById('map');
+      var mr = map ? map.getBoundingClientRect() : null;
+      top = mr ? mr.top + 64 : 88;
+      left = mr ? mr.left + 12 : pad;
+    } else if (where === 'panel') {
+      var panel = document.getElementById('side-panel');
+      var pr = panel ? panel.getBoundingClientRect() : null;
+      top = pr && pr.width > 40 ? pr.top + 48 : 88;
+      left = pr && pr.width > 40 ? Math.max(pad, pr.left - 280) : pad;
+    }
+    el.style.top = top + 'px';
+    el.style.left = left + 'px';
+    el.style.right = 'auto';
+    requestAnimationFrame(function () {
+      var box = el.getBoundingClientRect();
+      if (box.right > window.innerWidth - pad) {
+        el.style.left = Math.max(pad, window.innerWidth - box.width - pad) + 'px';
+      }
+      if (box.bottom > window.innerHeight - pad) {
+        el.style.top = Math.max(pad, window.innerHeight - box.height - pad) + 'px';
+      }
+      drawArrowsTo(anchors || []);
+    });
+  }
+
+  function setChromeCopy() {
+    var title = document.getElementById('demo-title');
+    if (title) title.textContent = demoT('demoTitle', 'Discovering the application');
+    var ov = overlay();
+    if (ov) ov.setAttribute('aria-label', demoT('demoTitle', 'Discovering the application'));
+    var pauseBtn = document.getElementById('demo-pause-btn');
+    if (pauseBtn) {
+      pauseBtn.textContent = state.paused
+        ? demoT('demoResume', 'Resume')
+        : demoT('demoPause', 'Pause');
+    }
+  }
+
+  function setFinaleCopy() {
+    var p = document.getElementById('demo-finale-text');
+    if (p) p.textContent = demoT('demoFinale', 'Enjoy exploring different hominins, their time periods, and their movements across the world.');
+  }
+
+  function snapshotApp() {
+    return {
+      time: currentTime,
+      speciesId: selectedSpecies && selectedSpecies.id,
+      playing: !!isPlaying,
+      timelineView: timelineViewMode,
+      mobileView: (document.getElementById('main') || {}).className || ''
+    };
+  }
+
+  function restoreApp(snap) {
+    _demoSpeciesOnly = false;
+    _demoEventAllow = null;
+    _demoLockSelection = false;
+    document.documentElement.classList.remove('demo-active');
+    if (typeof stopPlay === 'function') stopPlay();
+    if (snap && snap.timelineView && typeof setTimelineViewMode === 'function') {
+      setTimelineViewMode(snap.timelineView);
+    }
+    if (snap && typeof snap.time === 'number' && typeof setTime === 'function') {
+      setTime(snap.time);
+    }
+    if (snap && snap.speciesId && typeof selectSpecies === 'function') {
+      var sp = (SPECIES_DATA || []).find(function (s) { return s.id === snap.speciesId; });
+      if (sp) selectSpecies(sp);
+    }
+    if (typeof updateMap === 'function') updateMap();
+    if (typeof updateEvents === 'function') updateEvents();
+  }
+
+  function applyDemoFilters() {
+    _demoSpeciesOnly = true;
+    var allow = new Set();
+    sapiensDemoEvents().forEach(function (ev) { allow.add(ev.id); });
+    _demoEventAllow = allow;
+    _demoLockSelection = true;
+    document.documentElement.classList.add('demo-active');
+    if (typeof timelineViewMode !== 'undefined' && timelineViewMode !== 'simple' && typeof setTimelineViewMode === 'function') {
+      setTimelineViewMode('simple');
+    }
+    syncEventBandKeep();
+    if (typeof updateMap === 'function') updateMap();
+    if (typeof updateEvents === 'function') updateEvents();
+  }
+
+  function restoreFullViewKeepTime() {
+    _demoSpeciesOnly = false;
+    _demoEventAllow = null;
+    _demoLockSelection = false;
+    document.documentElement.classList.remove('demo-active');
+    clearHighlights();
+    if (typeof updateMap === 'function') updateMap();
+    if (typeof updateEvents === 'function') updateEvents();
+    if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
+  }
+
+  function cleanupVisuals() {
+    clearTimers();
+    hideTooltip();
+    clearHighlights();
+    resetFinaleLayout();
+    var fin = finaleEl();
+    if (fin) fin.hidden = true;
+    var pauseBtn = document.getElementById('demo-pause-btn');
+    if (pauseBtn) pauseBtn.hidden = true;
+    var nextBtn = document.getElementById('demo-next-btn');
+    if (nextBtn) nextBtn.hidden = true;
+    var ov = overlay();
+    if (ov) {
+      ov.hidden = true;
+      ov.style.background = '';
+      ov.style.pointerEvents = '';
+    }
+    var chrome = document.querySelector('#demo-overlay .demo-chrome');
+    if (chrome) chrome.style.visibility = '';
+  }
+
+  function fullCleanup(restoreSnapshot) {
+    cleanupVisuals();
+    clearListeners();
+    if (typeof isPlaying !== 'undefined' && isPlaying && typeof stopPlay === 'function') stopPlay();
+    else if (typeof isPlaying !== 'undefined') isPlaying = false;
+    if (restoreSnapshot && state.snapshot) restoreApp(state.snapshot);
+    else restoreFullViewKeepTime();
+    state.active = false;
+    state.phase = PHASE.IDLE;
+    state.paused = false;
+    state.ooaDone = false;
+    state.artifactsShown = [];
+    state.artifactQueue = [];
+    state.snapshot = null;
+    state.panelSubstep = 0;
+  }
+
+  function hideWelcomeOverlay() {
+    var ov = document.getElementById('welcome-modal-overlay');
+    if (!ov) return;
+    ov.style.display = 'none';
+    ov.classList.add('hidden');
+    ov.classList.remove('welcome-fold-to-burger');
+  }
+
+  function startPlayLoop() {
+    if (state.interval) {
+      clearInterval(state.interval);
+      state.interval = null;
+    }
+    if (state.reducedMotion) return;
+    isPlaying = true;
+    if (typeof resetMapToWorldView === 'function') resetMapToWorldView();
+    if (typeof checkAndSpawnFigures === 'function') checkAndSpawnFigures();
+    if (typeof resumeAllFigureWalks === 'function') resumeAllFigureWalks();
+    state.interval = setInterval(function () {
+      if (!state.active || state.paused || state.phase !== PHASE.PLAY) return;
+      var lin = timeToLinear(currentTime) + state.playSpeed;
+      if (lin >= 0.98) {
+        setTime(TIMELINE_MAX);
+        goToPanel();
+        return;
+      }
+      setTime(linearToTime(lin));
+      skipEmptySapiensGap();
+      if (typeof checkAndSpawnFigures === 'function') checkAndSpawnFigures();
+      onPlayTick(currentTime);
+    }, 1000 / 30);
+  }
+
+  function pausePlayLoop() {
+    state.paused = true;
+    if (typeof isPlaying !== 'undefined') isPlaying = false;
+    var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    Object.keys(speciesFigures || {}).forEach(function (id) {
+      var e = speciesFigures[id];
+      if (!e) return;
+      if (e.walkState && e.raf) {
+        e.walkState.pausedAt = now - (e.walkState.t0 || now);
+        cancelAnimationFrame(e.raf);
+        e.raf = null;
+      } else if (e.raf) {
+        cancelAnimationFrame(e.raf);
+        e.raf = null;
+      }
+    });
+    setChromeCopy();
+  }
+
+  function resumePlayLoop() {
+    state.paused = false;
+    state.phase = PHASE.PLAY;
+    isPlaying = true;
+    if (typeof resumeAllFigureWalks === 'function') resumeAllFigureWalks();
+    setChromeCopy();
+    if (!state.interval) startPlayLoop();
+  }
+
+  function userTogglePause() {
+    if (!state.active || state.phase === PHASE.FINALE) return;
+    if (state.paused) resumePlayLoop();
+    else {
+      pausePlayLoop();
+      state.phase = state.phase === PHASE.PLAY ? 'paused' : state.phase;
+    }
+  }
+
+  function spotlightLane() {
+    var lane = sapiensLaneEl();
+    if (lane) lane.classList.add('demo-lane-spotlight');
+    return lane;
+  }
+
+  function spotlightFigure() {
+    var fig = sapiensFigureEl();
+    if (fig) fig.classList.add('demo-figure-spotlight');
+    return fig;
+  }
+
+  function spotlightArtifact(ev) {
+    if (!ev) return [];
+    var els = [];
+    var mapEl = eventMapEl(ev.id);
+    if (mapEl) {
+      mapEl.classList.add('demo-artifact-spotlight');
+      els.push(mapEl);
+    }
+    var band = eventBandEl(ev.id);
+    if (band) {
+      band.classList.add('demo-artifact-spotlight', 'demo-event-keep');
+      els.push(band);
+    }
+    if (typeof pulseMapLibreEventMarker === 'function') pulseMapLibreEventMarker(ev.id, TIP_HOLD_MS);
+    return els;
+  }
+
+  function speciesById(id) {
+    return (SPECIES_DATA || []).find(function (s) { return s.id === id; }) || null;
+  }
+
+  function skipEmptySapiensGap() {
+    var levant = speciesById('sapiens-levant');
+    var upper = speciesById('sapiens-upper-paleo');
+    var gapFrom = levant ? levant.end : -90000;
+    var gapTo = upper ? upper.start : -45000;
+    if (currentTime > gapFrom && currentTime < gapTo) {
+      setTime(gapTo);
+      if (typeof checkAndSpawnFigures === 'function') checkAndSpawnFigures();
+      if (typeof resumeAllFigureWalks === 'function') resumeAllFigureWalks();
+      if (typeof resetMapToWorldView === 'function') resetMapToWorldView();
+      return true;
+    }
+    return false;
+  }
+
+  function jumpToWorldwideDispersal() {
+    if (!state.active || state.phase !== PHASE.PLAY) return;
+    var upper = speciesById('sapiens-upper-paleo');
+    setTime(upper ? upper.start : -45000);
+    if (typeof checkAndSpawnFigures === 'function') checkAndSpawnFigures();
+    if (typeof resumeAllFigureWalks === 'function') resumeAllFigureWalks();
+    if (typeof resetMapToWorldView === 'function') resetMapToWorldView();
+  }
+
+  function onPlayTick(t) {
+    skipEmptySapiensGap();
+    if (!state.ooaDone && state.ooaSpecies && t > (state.demoPlayStart || state.ooaSpecies.start)) {
+      runOoaBeat();
+      return;
+    }
+    if (Date.now() < (state.suppressArtifactsUntil || 0)) return;
+    if (state.artifactsShown.length >= 2) return;
+    var next = state.artifactQueue.find(function (ev) {
+      return ev.time < t && state.artifactsShown.indexOf(ev.id) === -1;
+    });
+    if (next) runArtifactBeat(next);
+  }
+
+  function runOoaBeat() {
+    state.ooaDone = true;
+    state.phase = PHASE.OOA;
+    pausePlayLoop();
+    var fig = spotlightFigure();
+    placeTooltip(
+      demoT('demoStep3', 'On the map, figures and paths show movements through time and space.'),
+      fig ? [fig] : [],
+      'map'
+    );
+    var hold = state.reducedMotion ? 0 : TIP_HOLD_MS;
+    if (state.reducedMotion) showNext(function () { afterOoa(); });
+    else addTimer(afterOoa, hold);
+  }
+
+  function afterOoa() {
+    if (!state.active || state.phase !== PHASE.OOA) return;
+    hideNext();
+    if (!state.reducedMotion) {
+      state.suppressArtifactsUntil = Date.now() + 500;
+      state.phase = PHASE.PLAY;
+      resumePlayLoop();
+      addTimer(function () {
+        if (state.phase === PHASE.PLAY) hideTooltip();
+        clearHighlights();
+        spotlightLane();
+      }, 2200);
+    } else {
+      continueReduced();
+    }
+  }
+
+  function runArtifactBeat(ev) {
+    state.artifactsShown.push(ev.id);
+    state.phase = PHASE.ARTIFACT;
+    pausePlayLoop();
+    if (typeof ensureMapLibreEventMarker === 'function') ensureMapLibreEventMarker(ev);
+    var els = spotlightArtifact(ev);
+    placeTooltip(
+      demoT('demoStep4', 'Objects and traces are linked to a place and a period. Click them later to explore their source and interpretation.'),
+      els,
+      'map'
+    );
+    var hold = state.reducedMotion ? 0 : TIP_HOLD_MS;
+    if (state.reducedMotion) showNext(function () { afterArtifact(); });
+    else addTimer(afterArtifact, hold);
+  }
+
+  function afterArtifact() {
+    if (!state.active || state.phase !== PHASE.ARTIFACT) return;
+    hideNext();
+    clearHighlights();
+    spotlightLane();
+    if (state.reducedMotion) {
+      continueReduced();
+      return;
+    }
+    state.phase = PHASE.PLAY;
+    resumePlayLoop();
+    if (state.artifactsShown.length >= 2) {
+      addTimer(function () {
+        if (state.active && state.phase === PHASE.PLAY) goToPanel();
+      }, 2200);
+    }
+  }
+
+  function goToPanel() {
+    if (!state.active || state.phase === PHASE.PANEL || state.phase === PHASE.FINALE) return;
+    state.phase = PHASE.PANEL;
+    pausePlayLoop();
+    clearHighlights();
+    var fig = spotlightFigure();
+    var panel = document.getElementById('side-panel');
+    if (panel) panel.classList.add('demo-panel-spotlight');
+    if (typeof isMobileViewport === 'function' && isMobileViewport()) {
+      var main = document.getElementById('main');
+      if (main) {
+        main.classList.remove('view-map');
+        main.classList.add('view-detail');
+      }
+    }
+    var msg = demoT('demoStep5', 'The panel on the right presents characteristics and information associated with selected items.');
+    placeTooltip(msg, panel ? [panel] : (fig ? [fig] : []), 'panel');
+    if (state.reducedMotion) showNext(function () { showFinale(); });
+    else addTimer(showFinale, TIP_HOLD_MS);
+  }
+
+  function showFinale() {
+    if (!state.active) return;
+    state.phase = PHASE.FINALE;
+    hideTooltip();
+    clearHighlights();
+    restoreFullViewKeepTime();
+    if (typeof stopPlay === 'function') stopPlay();
+    var ov = overlay();
+    if (ov) ov.hidden = false;
+    setFinaleCopy();
+    var fin = finaleEl();
+    if (fin) fin.hidden = false;
+    var pauseBtn = document.getElementById('demo-pause-btn');
+    if (pauseBtn) pauseBtn.hidden = true;
+    hideNext();
+  }
+
+  function showNext(fn) {
+    var btn = document.getElementById('demo-next-btn');
+    if (!btn) {
+      addTimer(fn, 2400);
+      return;
+    }
+    btn.hidden = false;
+    btn.onclick = function () {
+      btn.hidden = true;
+      btn.onclick = null;
+      fn();
+    };
+  }
+
+  function hideNext() {
+    var btn = document.getElementById('demo-next-btn');
+    if (btn) {
+      btn.hidden = true;
+      btn.onclick = null;
+    }
+  }
+
+  function resetFinaleLayout() {
+    var fin = finaleEl();
+    if (!fin) return;
+    fin.classList.remove('fold-to-burger-card');
+    ['position', 'left', 'top', 'right', 'bottom', 'margin', 'width', 'transform'].forEach(function (p) {
+      fin.style.removeProperty(p);
+    });
+    fin.style.removeProperty('--welcome-fold-dx');
+    fin.style.removeProperty('--welcome-fold-dy');
+  }
+
+  function exploreFromFinale() {
+    if (!state.active) return;
+    hideTooltip();
+    var chrome = document.querySelector('#demo-overlay .demo-chrome');
+    if (chrome) chrome.style.visibility = 'hidden';
+    restoreFullViewKeepTime();
+    if (typeof stopPlay === 'function') stopPlay();
+    var ov = overlay();
+    if (ov) {
+      ov.style.background = 'transparent';
+      ov.style.pointerEvents = 'none';
+    }
+    var fin = finaleEl();
+    function done() {
+      if (ov) {
+        ov.style.background = '';
+        ov.style.pointerEvents = '';
+      }
+      if (chrome) chrome.style.visibility = '';
+      resetFinaleLayout();
+      fullCleanup(false);
+    }
+    if (fin && !fin.hidden && typeof foldUiToBurger === 'function') {
+      foldUiToBurger(fin, done);
+    } else {
+      done();
+    }
+  }
+
+  function continueReduced() {
+    if (!state.ooaDone && state.ooaSpecies) {
+      setTime(state.demoPlayStart != null ? state.demoPlayStart : state.ooaSpecies.start);
+      if (typeof checkAndSpawnFigures === 'function') {
+        isPlaying = true;
+        checkAndSpawnFigures();
+        isPlaying = false;
+      }
+      runOoaBeat();
+      return;
+    }
+    var nextArt = state.artifactQueue.find(function (ev) {
+      return state.artifactsShown.indexOf(ev.id) === -1;
+    });
+    if (nextArt) {
+      setTime(nextArt.time);
+      if (typeof updateMap === 'function') updateMap();
+      runArtifactBeat(nextArt);
+      return;
+    }
+    goToPanel();
+  }
+
+  function runIntro() {
+    state.phase = PHASE.INTRO;
+    var start = state.demoPlayStart != null ? state.demoPlayStart : state.sapiensStart;
+    applyDemoFilters();
+    setTime(start);
+    isPlaying = true;
+    if (typeof checkAndSpawnFigures === 'function') checkAndSpawnFigures();
+    isPlaying = false;
+    var focus = state.ooaSpecies || sapiensRows().sort(function (a, b) { return a.start - b.start; })[0];
+    if (focus && typeof selectSpecies === 'function') {
+      _demoLockSelection = false;
+      selectSpecies(focus);
+      _demoLockSelection = true;
+    }
+    var spawn = focus && speciesFigures[focus.id];
+    if (spawn && spawn.marker && focus.migrations && focus.migrations[0] && typeof setFigureMarkerPosition === 'function') {
+      setFigureMarkerPosition(spawn.marker, focus.migrations[0].from);
+    }
+    if (typeof resetMapToWorldView === 'function') resetMapToWorldView();
+    spotlightLane();
+    var fig = spotlightFigure();
+    setChromeCopy();
+    placeTooltip(
+      demoT('demoStep1', 'This is Homo sapiens. Its story begins in Africa.'),
+      fig ? [fig] : [sapiensLaneEl()].filter(Boolean),
+      'map'
+    );
+    if (state.reducedMotion) showNext(runTimelineStep);
+    else addTimer(runTimelineStep, TIP_HOLD_MS);
+  }
+
+  function showMovementTipWhilePlaying() {
+    if (!state.active || state.phase !== PHASE.PLAY) return;
+    var fig = spotlightFigure();
+    placeTooltip(
+      demoT('demoStep3', 'On the map, figures and paths show movements through time and space.'),
+      fig ? [fig] : [],
+      'map'
+    );
+    addTimer(function () {
+      if (state.active && state.phase === PHASE.PLAY) hideTooltip();
+    }, TIP_HOLD_MS);
+  }
+
+  function beginGuidedPlay() {
+    if (!state.active) return;
+    state.phase = PHASE.PLAY;
+    state.ooaDone = true;
+    state.suppressArtifactsUntil = Date.now() + 16000;
+    hideTooltip();
+    resumePlayLoop();
+    addTimer(showMovementTipWhilePlaying, 700);
+    addTimer(jumpToWorldwideDispersal, 8000);
+    addTimer(function () {
+      if (!state.active || state.phase === PHASE.FINALE || state.phase === PHASE.PANEL) return;
+      if (state.phase === PHASE.PLAY || state.phase === 'paused') goToPanel();
+    }, 28000);
+  }
+
+  function runTimelineStep() {
+    if (!state.active) return;
+    state.phase = PHASE.TIMELINE;
+    hideNext();
+    spotlightLane();
+    placeTooltip(
+      demoT('demoStep2', 'At the bottom, the timeline shows periods. The cursor indicates the moment being viewed.'),
+      [document.getElementById('timeline-scrubber'), sapiensLaneEl()].filter(Boolean),
+      'timeline'
+    );
+    if (state.reducedMotion) {
+      showNext(function () { continueReduced(); });
+      return;
+    }
+    addTimer(function () {
+      if (!state.active) return;
+      beginGuidedPlay();
+    }, TIP_HOLD_MS);
+  }
+
+  function wireOnce() {
+    if (state.wired) return;
+    state.wired = true;
+    var skip = document.getElementById('demo-skip-btn');
+    var exit = document.getElementById('demo-exit-btn');
+    var pause = document.getElementById('demo-pause-btn');
+    var explore = document.getElementById('demo-explore-btn');
+    var replay = document.getElementById('demo-replay-btn');
+    if (skip) skip.addEventListener('click', function () { skipToFinale(); });
+    if (exit) exit.addEventListener('click', function () { exitDemo(); });
+    if (pause) pause.addEventListener('click', function () { userTogglePause(); });
+    if (explore) explore.addEventListener('click', function () { exploreFromFinale(); });
+    if (replay) replay.addEventListener('click', function () { start(); });
+    document.addEventListener('keydown', function (e) {
+      if (!state.active) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        exitDemo();
+      }
+    });
+    window.addEventListener('resize', function () {
+      if (!state.active || !state.currentTip) return;
+      drawArrowsTo(state.arrowTargets);
+    });
+  }
+
+  function prepareStart() {
+    wireOnce();
+    if (state.active) fullCleanup(false);
+    hideWelcomeOverlay();
+    if (typeof stopPlay === 'function') stopPlay();
+    if (typeof window.closeBurgerMenu === 'function') window.closeBurgerMenu();
+    state.reducedMotion = prefersReducedMotion();
+    state.snapshot = snapshotApp();
+    state.active = true;
+    state.paused = false;
+    state.ooaDone = false;
+    state.artifactsShown = [];
+    state.panelSubstep = 0;
+    state.suppressArtifactsUntil = 0;
+    state.sapiensStart = sapiensStartTime();
+    state.ooaSpecies = firstOutOfAfricaSpecies();
+    state.demoPlayStart = (state.ooaSpecies && state.ooaSpecies.start) || -130000;
+    state.artifactQueue = demoArtifactQueue();
+    var t0 = timeToLinear(state.demoPlayStart);
+    var upper = (SPECIES_DATA || []).find(function (s) { return s.id === 'sapiens-upper-paleo'; });
+    var tEnd = timeToLinear(upper ? upper.end : -14000);
+    var span = Math.max(0.04, tEnd - t0);
+    state.playSpeed = span / (18 * 30);
+    var ov = overlay();
+    if (ov) ov.hidden = false;
+    var fin = finaleEl();
+    if (fin) fin.hidden = true;
+    resetFinaleLayout();
+    var pauseBtn = document.getElementById('demo-pause-btn');
+    if (pauseBtn) pauseBtn.hidden = !!state.reducedMotion;
+    hideNext();
+    setChromeCopy();
+    if (typeof resetMapToWorldView === 'function') resetMapToWorldView();
+    runIntro();
+  }
+
+  function start() {
+    function go() { prepareStart(); }
+    if (document.documentElement.getAttribute('data-map-ready') === '1' && SPECIES_DATA && SPECIES_DATA.length) {
+      go();
+      return;
+    }
+    document.addEventListener('ho:map-ready', function () { setTimeout(go, 60); }, { once: true });
+    setTimeout(function () {
+      if (state.active) return;
+      if (!SPECIES_DATA || !SPECIES_DATA.length) return;
+      if (document.documentElement.getAttribute('data-map-ready') !== '1') return;
+      go();
+    }, 2500);
+  }
+
+  function skipToFinale() {
+    if (!state.active) return;
+    clearTimers();
+    showFinale();
+  }
+
+  function exitDemo() {
+    if (!state.active && state.phase === PHASE.IDLE) return;
+    fullCleanup(true);
+  }
+
+  function refreshCopy() {
+    if (!state.active) return;
+    setChromeCopy();
+    if (state.phase === PHASE.FINALE) setFinaleCopy();
+    else if (state.currentTip) {
+      var el = tipEl();
+      if (el && !el.hidden) el.textContent = state.currentTip;
+    }
+  }
+
+  return {
+    start: start,
+    skipToFinale: skipToFinale,
+    exit: exitDemo,
+    refreshCopy: refreshCopy,
+    isActive: function () { return state.active; },
+    isFiltering: function () { return state.active && _demoSpeciesOnly; },
+    getState: function () {
+      return {
+        phase: state.phase,
+        active: state.active,
+        sapiensStart: state.sapiensStart,
+        demoPlayStart: state.demoPlayStart,
+        ooaId: state.ooaSpecies && state.ooaSpecies.id,
+        artifacts: state.artifactQueue.map(function (e) { return e.id; }),
+        artifactsShown: state.artifactsShown.slice()
+      };
+    }
+  };
+})();
+window.demoController = demoController;
+window.startGuidedDemo = function () { demoController.start(); };
+
 // =====================================================================
 // BOOT
 // =====================================================================
@@ -11443,6 +12704,7 @@ function bootApp() {
   initThemeToggle();
 
   function afterMapInited() {
+    if (window.demoController && window.demoController.isActive()) return;
     setTime(TIMELINE_MIN);
     updateMap();
     requestAnimationFrame(function () {
@@ -11459,6 +12721,7 @@ function bootApp() {
       afterMapInited();
       // Default species selection: brief delay so map + markers can attach
       setTimeout(function () {
+        if (window.demoController && window.demoController.isActive()) return;
         if (SPECIES_DATA.length) {
           window._suppressMobileSwitch = true;
           selectSpecies(SPECIES_DATA[0]);
@@ -11544,10 +12807,21 @@ document.addEventListener('DOMContentLoaded', function initBurger() {
     overlay.classList.remove('open');
     document.body.style.overflow = '';
   }
+  window.closeBurgerMenu = closeBurger;
+  window.openBurgerMenu = openBurger;
   btn.addEventListener('click', openBurger);
   if (closeBtn) closeBtn.addEventListener('click', closeBurger);
   overlay.addEventListener('click', closeBurger);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeBurger(); });
+  var replayBtn = document.getElementById('burger-replay-demo');
+  if (replayBtn) {
+    replayBtn.addEventListener('click', function () {
+      closeBurger();
+      if (window.demoController && typeof window.demoController.start === 'function') {
+        window.demoController.start();
+      }
+    });
+  }
 });
 
 </script>
@@ -11590,8 +12864,8 @@ const TRANSLATIONS = {
         pageTitle: 'Hominines — Evolution & Migrations on Earth',
         appSubtitle: 'Explore nearly seven and a half million years of human migrations',
         language: 'Language',
-        pageTranslateDesigned: 'This page is in English. Use <strong>Translate this page</strong> for any other language. Scientific catalogue text can be shown in the bundled French translation.',
-        browserTranslateHint: 'This page is in English. Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong>. Scientific catalogue text can be shown in the bundled French translation.',
+        pageTranslateDesigned: 'This page can be translated from its core languages (EN, FR) into any other language. Use a browser such as Chrome or Edge, then click the <strong>Translate this page</strong> icon to the right of the menu bar, next to the star (bookmark).',
+        browserTranslateHint: 'This page can be translated from its core languages (EN, FR) into any other language, including <strong>{lang}</strong> (<code>{code}</code>). Use a browser such as Chrome or Edge, then click the <strong>Translate this page</strong> icon to the right of the menu bar, next to the star (bookmark).',
         mapLayers: 'Map layers',
         displayBurgerSection: 'Display',
         aboutAppTitle: 'The project',
@@ -11716,7 +12990,27 @@ const TRANSLATIONS = {
         welcomeTipCursor: 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.',
         welcomeTipMarker: 'Click a <strong>marker</strong> on the map to show details for a species.',
         welcomeTipPlay: 'Press <strong>Play</strong> to animate migrations through time.',
-        welcomeStart: 'Start exploring',
+        welcomeStart: 'Discover',
+        welcomeIconHominin: 'Hominins',
+        welcomeIconHomininSub: '(The different human species)',
+        welcomeIconArt: 'Works and traces',
+        welcomeIconTools: 'Tools and objects',
+        welcomeBlurb: 'Discover the application in 30 seconds through the story of Homo sapiens.',
+        demoTitle: 'Discovering the application',
+        demoSkip: 'Skip introduction',
+        demoExit: 'Exit',
+        demoPause: 'Pause',
+        demoResume: 'Resume',
+        demoNext: 'Continue',
+        demoExplore: 'Explore the application',
+        demoReplay: 'Replay introduction',
+        demoReplayMenu: 'Watch the introduction again',
+        demoStep1: 'This is Homo sapiens. Its story begins in Africa.',
+        demoStep2: 'At the bottom, the timeline shows periods. The cursor indicates the moment being viewed.',
+        demoStep3: 'On the map, figures and paths show movements through time and space.',
+        demoStep4: 'Objects and traces are linked to a place and a period. Click them later to explore their source and interpretation.',
+        demoStep5: 'The panel on the right presents characteristics and information associated with selected items.',
+        demoFinale: 'Enjoy exploring different hominins, their time periods, and their movements across the world.',
       }
     }
   },
@@ -11728,8 +13022,8 @@ const TRANSLATIONS = {
         pageTitle: 'Hominines — Évolution et migrations sur Terre',
         appSubtitle: 'Explorer près de sept millions et demi d’années de migrations humaines',
         language: 'Langue',
-        pageTranslateDesigned: 'L’interface et le catalogue sont en français. Pour une autre langue, utilisez <strong>Traduire cette page</strong>.',
-        browserTranslateHint: 'Cette page est en anglais. Votre navigateur est en <strong>{lang}</strong> (<code>{code}</code>). Pour la lire en {lang}, utilisez <strong>Traduire cette page</strong>.',
+        pageTranslateDesigned: 'Cette page peut être traduite depuis ses langues d’origine (EN, FR) vers n’importe quelle autre langue. Utilisez un navigateur comme Chrome ou Edge, puis cliquez sur l’icône <strong>Traduire cette page</strong> à droite de la barre de menu, à côté de l’étoile (favoris).',
+        browserTranslateHint: 'Cette page peut être traduite depuis ses langues d’origine (EN, FR) vers n’importe quelle autre langue, y compris le <strong>{lang}</strong> (<code>{code}</code>). Utilisez un navigateur comme Chrome ou Edge, puis cliquez sur l’icône <strong>Traduire cette page</strong> à droite de la barre de menu, à côté de l’étoile (favoris).',
         mapLayers: 'Couches de la carte',
         displayBurgerSection: 'Affichage',
         aboutAppTitle: 'Le projet',
@@ -11851,7 +13145,27 @@ const TRANSLATIONS = {
         welcomeTipCursor: 'Déplacez le <strong>curseur de la frise</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.',
         welcomeTipMarker: 'Cliquez un <strong>marqueur</strong> sur la carte pour afficher le détail d’une espèce.',
         welcomeTipPlay: 'Appuyez sur <strong>Lecture</strong> pour animer les migrations dans le temps.',
-        welcomeStart: 'Commencer l’exploration',
+        welcomeStart: 'Découvrir',
+        welcomeIconHominin: 'Hominines',
+        welcomeIconHomininSub: '(Les différentes espèces humaines)',
+        welcomeIconArt: 'Œuvres et traces',
+        welcomeIconTools: 'Outils et objets',
+        welcomeBlurb: 'Découvrez l’application en 30 secondes, à travers l’histoire de Homo sapiens.',
+        demoTitle: 'Découverte de l’application',
+        demoSkip: 'Passer la démo',
+        demoExit: 'Quitter',
+        demoPause: 'Pause',
+        demoResume: 'Reprendre',
+        demoNext: 'Continuer',
+        demoExplore: 'Explorer l’application',
+        demoReplay: 'Rejouer la démo',
+        demoReplayMenu: 'Revoir la découverte',
+        demoStep1: 'Voici Homo sapiens. Sa présence commence en Afrique.',
+        demoStep2: 'En bas, la frise montre les périodes. Le curseur indique le moment observé.',
+        demoStep3: 'Sur la carte, les figures et leurs trajectoires montrent des déplacements dans le temps et l’espace.',
+        demoStep4: 'Les objets et traces sont reliés à un lieu et à une période. Cliquez-les ensuite pour en connaître la source et l’interprétation.',
+        demoStep5: 'Le panneau de droite présente les caractéristiques et les informations associées aux éléments sélectionnés.',
+        demoFinale: 'Bonne découverte des différents hominines, de leurs périodes et de leurs déplacements à travers le monde.',
       }
     }
   }
@@ -11957,7 +13271,7 @@ function i18nHtmlOrFallback(key, fallback) {
 function pageTranslateDesignedHtml() {
   return i18nHtmlOrFallback(
     'ui.pageTranslateDesigned',
-    'This page is in English. Use <strong>Translate this page</strong> for any other language. Scientific catalogue text can be shown in the bundled French translation.'
+    'This page can be translated from its core languages (EN, FR) into any other language. Use a browser such as Chrome or Edge, then click the <strong>Translate this page</strong> icon to the right of the menu bar, next to the star (bookmark).'
   );
 }
 
@@ -11965,7 +13279,7 @@ function browserTranslateHintHtml() {
   if (!browserWantsPageTranslate()) return '';
   const code = browserPrimaryLang();
   const name = humanBrowserLangName(code);
-  const fallback = 'This page is in English. Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong>. Scientific catalogue text can be shown in the bundled French translation.';
+  const fallback = 'This page can be translated from its core languages (EN, FR) into any other language, including <strong>{lang}</strong> (<code>{code}</code>). Use a browser such as Chrome or Edge, then click the <strong>Translate this page</strong> icon to the right of the menu bar, next to the star (bookmark).';
   const tpl = i18nHtmlOrFallback('ui.browserTranslateHint', fallback);
   return String(tpl).split('{lang}').join(name).split('{code}').join(code);
 }
@@ -11982,9 +13296,8 @@ function syncBrowserTranslateHint() {
     welcomePanel.hidden = !html;
   }
   if (burgerHint) {
-    const uiFr = typeof currentDataLang === 'function' && currentDataLang() === 'fr';
     burgerHint.innerHTML = pageTranslateDesignedHtml();
-    burgerHint.hidden = uiFr;
+    burgerHint.hidden = false;
   }
   if (banner) {
     let dismissed = false;
@@ -12020,13 +13333,29 @@ function setWelcomeCopy() {
     }
     return fb;
   };
+  var figHost = document.getElementById('welcome-hominin-figure');
+  if (figHost && typeof humanFigureSVG === 'function') {
+    figHost.innerHTML = '<svg class="human-figure-svg" viewBox="0 0 120 172" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      humanFigureSVG('#3a1800', '#2a1400', '#080400', 60) +
+      '</svg>';
+  }
+  function setTitle(id, key, fb) {
+    var el = document.getElementById(id);
+    if (el) el.setAttribute('title', t(key, fb));
+  }
+  setTitle('welcome-glyph-art', 'catArt', 'Cave art');
+  setTitle('welcome-glyph-beads', 'catSymbolic', 'Symbolic behaviour');
+  setTitle('welcome-glyph-burial', 'catSymbolic', 'Symbolic behaviour');
+  setTitle('welcome-glyph-tools', 'catTools', 'Lithic technology');
+  setTitle('welcome-glyph-stone', 'catTools', 'Lithic technology');
+  setTitle('welcome-glyph-fire', 'catFire', 'Fire mastery');
   setHtml('welcome-tagline', t('welcomeTagline', 'From African origins to the peopling of the world'));
   setHtml('welcome-critics-note', t('welcomeCriticsNote', 'Experimental — for critics'));
-  setHtml('welcome-body', t('welcomeBody', 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.'));
-  setHtml('tip-cursor', t('welcomeTipCursor', 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.'));
-  setHtml('tip-marker', t('welcomeTipMarker', 'Click a <strong>marker</strong> on the map to show details for a species.'));
-  setHtml('tip-play', t('welcomeTipPlay', 'Press <strong>Play</strong> to animate migrations through time.'));
-  setHtml('welcome-start-label', t('welcomeStart', 'Start exploring'));
+  setHtml('welcome-icon-hominin', t('welcomeIconHominin', 'Hominins') + '<span class="welcome-landmark-sub" id="welcome-icon-hominin-sub">' + t('welcomeIconHomininSub', '(The different human species)') + '</span>');
+  setHtml('welcome-icon-art', t('welcomeIconArt', 'Works and traces'));
+  setHtml('welcome-icon-tools', t('welcomeIconTools', 'Tools and objects'));
+  setHtml('welcome-blurb', t('welcomeBlurb', 'Discover the application in 30 seconds through the story of Homo sapiens.'));
+  setHtml('welcome-start-label', t('welcomeStart', 'Discover'));
 }
 
 function applyTranslations() {
@@ -12156,6 +13485,9 @@ function applyTranslations() {
 
   setWelcomeCopy();
   syncBrowserTranslateHint();
+  if (typeof window.demoController !== 'undefined' && window.demoController && typeof window.demoController.refreshCopy === 'function') {
+    window.demoController.refreshCopy();
+  }
   if (typeof syncDocsViewerTitles === 'function') syncDocsViewerTitles();
   const catTitle = document.getElementById('catalogue-lang-title');
   if (catTitle) catTitle.textContent = t('ui.catalogueLangSection');
@@ -12662,17 +13994,77 @@ function initWelcome() {
   function hideOverlay() {
     overlay.style.display = 'none';
     overlay.classList.add('hidden');
+    overlay.classList.remove('welcome-fold-to-burger');
+    overlay.style.removeProperty('--welcome-fold-dx');
+    overlay.style.removeProperty('--welcome-fold-dy');
+    var modal = document.getElementById('welcome-modal');
+    if (modal) {
+      modal.classList.remove('fold-to-burger-card');
+      ['position', 'left', 'top', 'right', 'bottom', 'margin', 'width', 'transform'].forEach(function (p) {
+        modal.style.removeProperty(p);
+      });
+      modal.style.removeProperty('--welcome-fold-dx');
+      modal.style.removeProperty('--welcome-fold-dy');
+    }
   }
 
-  function dismiss() {
+  function prefersReduced() {
+    try {
+      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch (e) { return false; }
+  }
+
+  function foldOverlayToBurger() {
+    if (overlay.classList.contains('hidden') || overlay.style.display === 'none') return;
+    var modal = document.getElementById('welcome-modal');
+    if (typeof foldUiToBurger === 'function' && modal) {
+      overlay.classList.add('welcome-fold-to-burger');
+      foldUiToBurger(modal, hideOverlay);
+      return;
+    }
+    hideOverlay();
+  }
+
+  function launchDemo() {
     storedSet();
-    afterMapReady(hideOverlay);
+    afterMapReady(function () {
+      if (window.demoController && typeof window.demoController.start === 'function') {
+        window.demoController.start();
+      } else {
+        hideOverlay();
+      }
+    });
   }
 
   var alreadyWelcomed = !!storedGet();
-  if (alreadyWelcomed) {
-    afterMapReady(function () { setTimeout(hideOverlay, 1000); });
+  var returningHeld = false;
+  var returningHideTimer = null;
+
+  function cancelReturningHide() {
+    if (returningHideTimer) {
+      clearTimeout(returningHideTimer);
+      returningHideTimer = null;
+    }
   }
+
+  if (alreadyWelcomed) {
+    afterMapReady(function () {
+      returningHideTimer = setTimeout(function () {
+        returningHideTimer = null;
+        if (returningHeld) return;
+        foldOverlayToBurger();
+      }, 1000);
+    });
+    var modal = document.getElementById('welcome-modal');
+    if (modal) {
+      modal.addEventListener('mouseenter', function () {
+        returningHeld = true;
+        cancelReturningHide();
+        overlay.classList.remove('welcome-fold-to-burger');
+      });
+    }
+  }
+
   try {
     if (typeof setWelcomeCopy === 'function') setWelcomeCopy();
     if (typeof syncBrowserTranslateHint === 'function') {
@@ -12694,16 +14086,29 @@ function initWelcome() {
       if (pageTranslateActive()) syncBrowserTranslateHint();
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   } catch (e) { /* ignore */ }
-  if (alreadyWelcomed) return;
 
   var btn = document.getElementById('welcome-start-btn');
   if (btn) {
     btn.removeAttribute('onclick');
-    btn.addEventListener('click', function (e) { e.stopPropagation(); dismiss(); });
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      cancelReturningHide();
+      launchDemo();
+    });
   }
-  overlay.addEventListener('click', function (e) { if (e.target === overlay) dismiss(); });
-  document.addEventListener('keydown', function onEsc(e) {
-    if (e.key === 'Escape') { dismiss(); document.removeEventListener('keydown', onEsc); }
+
+  if (alreadyWelcomed) {
+    overlay.addEventListener('click', function (e) {
+      if (e.target !== overlay) return;
+      if (!returningHeld) return;
+      cancelReturningHide();
+      hideOverlay();
+    });
+    return;
+  }
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) e.stopPropagation();
   });
 }
 
@@ -12774,7 +14179,13 @@ bootWelcome();
             <option value="fr">Français</option>
           </select>
         </div>
-        <p id="burger-translate-hint" data-testid="burger-translate-hint" translate="yes">This page is in English. Use <strong>Translate this page</strong> for any other language. Scientific catalogue text can be shown in the bundled French translation.</p>
+        <p id="burger-translate-hint" data-testid="burger-translate-hint" translate="yes">This page can be translated from its core languages (EN, FR) into any other language. Use a browser such as Chrome or Edge, then click the <strong>Translate this page</strong> icon to the right of the menu bar, next to the star (bookmark).</p>
+        <div class="burger-btn-row" style="margin-top:var(--space-3)">
+          <button id="burger-replay-demo" type="button" class="layer-btn" data-testid="burger-replay-demo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span data-i18n="ui.demoReplayMenu">Watch the introduction again</span>
+          </button>
+        </div>
       </div>
 
       <!-- Le projet + données JSON -->
@@ -12799,14 +14210,9 @@ bootWelcome();
         </div>
       </div>
 
-      <!-- GitHub + Warning -->
+      <!-- Project URL + warning -->
       <div class="burger-footer">
-        <a href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-          fdepierre/hominines-origins
-        </a>
+        <a href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer">github.com/fdepierre/hominines-origins</a>
         <div class="burger-footer-note" data-i18n="ui.experimentalWarning">
           Experimental · AI-generated · Check the sources
         </div>
@@ -12823,38 +14229,54 @@ bootWelcome();
         <div class="welcome-tagline" id="welcome-tagline">From African origins to the peopling of the world</div>
         <p class="welcome-critics" id="welcome-critics-note">Experimental — for critics</p>
       </div>
-      <div class="welcome-body" id="welcome-body">
-        From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.
+      <div class="welcome-landmarks" id="welcome-landmarks">
+        <div class="welcome-landmark">
+          <span class="welcome-landmark-icon welcome-landmark-icon--figure" id="welcome-hominin-figure" aria-hidden="true">
+            <!-- Same silhouette as map / panel figures; skin #3a1800 = SKIN_PERIODS dark ancestral state after MC1R ~1.2 Ma -->
+            <svg class="human-figure-svg" viewBox="0 0 120 172" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="60" cy="110" rx="22" ry="34" fill="#3a1800"/>
+              <ellipse cx="60" cy="45" rx="22" ry="26" fill="#3a1800"/>
+              <path d="M38 90 Q28 110 32 130" stroke="#3a1800" stroke-width="10" stroke-linecap="round" fill="none"/>
+              <path d="M82 90 Q92 110 88 130" stroke="#3a1800" stroke-width="10" stroke-linecap="round" fill="none"/>
+              <path d="M50 140 Q46 155 48 158" stroke="#3a1800" stroke-width="11" stroke-linecap="round" fill="none"/>
+              <path d="M70 140 Q74 155 72 158" stroke="#3a1800" stroke-width="11" stroke-linecap="round" fill="none"/>
+              <ellipse cx="60" cy="26" rx="22" ry="12" fill="#080400"/>
+              <ellipse cx="52" cy="44" rx="5" ry="4" fill="#2a1400" opacity="0.9"/>
+              <ellipse cx="68" cy="44" rx="5" ry="4" fill="#2a1400" opacity="0.9"/>
+              <ellipse cx="52" cy="44" rx="2" ry="2" fill="#000" opacity="0.8"/>
+              <ellipse cx="68" cy="44" rx="2" ry="2" fill="#000" opacity="0.8"/>
+              <path d="M46 38 Q52 35 58 38" stroke="#080400" stroke-width="2" stroke-linecap="round"/>
+              <path d="M62 38 Q68 35 74 38" stroke="#080400" stroke-width="2" stroke-linecap="round"/>
+              <path d="M57 48 Q60 54 63 48" stroke="#3a1800" stroke-width="1.5" fill="none" opacity="0.5"/>
+              <path d="M54 58 Q60 62 66 58" stroke="#3a1800" stroke-width="1.5" fill="none" opacity="0.4"/>
+            </svg>
+          </span>
+          <div class="welcome-landmark-label" id="welcome-icon-hominin">Hominins<span class="welcome-landmark-sub" id="welcome-icon-hominin-sub">(The different human species)</span></div>
+        </div>
+        <div class="welcome-landmark">
+          <span class="welcome-landmark-icon welcome-landmark-icon--cluster" aria-hidden="true">
+            <span class="welcome-glyph" id="welcome-glyph-art" title="Cave art">🎨</span>
+            <span class="welcome-glyph" id="welcome-glyph-beads" title="Symbolic behaviour">📿</span>
+            <span class="welcome-glyph" id="welcome-glyph-burial" title="Symbolic behaviour">⚰</span>
+          </span>
+          <div class="welcome-landmark-label" id="welcome-icon-art">Works and traces</div>
+        </div>
+        <div class="welcome-landmark">
+          <span class="welcome-landmark-icon welcome-landmark-icon--cluster" aria-hidden="true">
+            <span class="welcome-glyph" id="welcome-glyph-tools" title="Lithic technology">⚒</span>
+            <span class="welcome-glyph" id="welcome-glyph-stone" title="Lithic technology">🪨</span>
+            <span class="welcome-glyph" id="welcome-glyph-fire" title="Fire mastery">🔥</span>
+          </span>
+          <div class="welcome-landmark-label" id="welcome-icon-tools">Tools and objects</div>
+        </div>
       </div>
-      <div class="welcome-tips">
-        <div class="welcome-tip">
-          <span class="welcome-tip-icon">
-            <!-- timeline scrubber handle -->
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
-          </span>
-          <span id="tip-cursor">Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.</span>
-        </div>
-        <div class="welcome-tip">
-          <span class="welcome-tip-icon">
-            <!-- map marker pin -->
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          </span>
-          <span id="tip-marker">Click a <strong>marker</strong> on the map to show details for a species.</span>
-        </div>
-        <div class="welcome-tip">
-          <span class="welcome-tip-icon">
-            <!-- play triangle — matches app play button -->
-            <svg width="20" height="20" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>
-          </span>
-          <span id="tip-play">Press <strong>Play</strong> to animate migrations through time.</span>
-        </div>
-      </div>
+      <p class="welcome-blurb" id="welcome-blurb">Discover the application in 30 seconds through the story of Homo sapiens.</p>
       <div class="welcome-lang-panel" id="welcome-lang-panel" translate="yes" hidden>
         <p id="welcome-translate-hint" translate="yes"></p>
       </div>
-      <button id="welcome-start-btn" onclick="document.getElementById('welcome-modal-overlay').style.display='none'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        <span id="welcome-start-label">Start exploring</span>
+      <button id="welcome-start-btn" type="button" onclick="document.getElementById('welcome-modal-overlay').style.display='none'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span id="welcome-start-label">Discover</span>
       </button>
     </div>
   </div>
@@ -12872,6 +14294,33 @@ bootWelcome();
 
   <!-- Shared tooltip for events band (JS-driven, matches app tooltip style) -->
   <div id="band-tooltip"></div>
+
+  <div id="demo-overlay" hidden data-testid="demo-overlay" role="region" aria-label="Introduction">
+    <div class="demo-chrome">
+      <div class="demo-title" id="demo-title">Discovering the application</div>
+      <div class="demo-chrome-actions">
+        <button type="button" id="demo-pause-btn" hidden data-i18n="ui.demoPause">Pause</button>
+        <button type="button" id="demo-next-btn" hidden data-i18n="ui.demoNext">Continue</button>
+        <button type="button" id="demo-skip-btn" data-i18n="ui.demoSkip">Skip introduction</button>
+        <button type="button" id="demo-exit-btn" data-i18n="ui.demoExit">Exit</button>
+      </div>
+    </div>
+    <svg class="demo-svg-arrows" id="demo-svg-arrows" aria-hidden="true">
+      <defs>
+        <marker id="demo-arrow-head" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#d4820a"></path>
+        </marker>
+      </defs>
+    </svg>
+    <div class="demo-tooltip" id="demo-tooltip" role="status" hidden></div>
+    <div class="demo-finale" id="demo-finale" role="dialog" aria-labelledby="demo-finale-text" hidden>
+      <p id="demo-finale-text"></p>
+      <div class="demo-finale-actions">
+        <button type="button" id="demo-explore-btn" class="demo-btn-primary" data-i18n="ui.demoExplore">Explore the application</button>
+        <button type="button" id="demo-replay-btn" data-i18n="ui.demoReplay">Replay introduction</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

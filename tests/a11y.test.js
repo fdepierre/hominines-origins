@@ -414,7 +414,7 @@ async function runA11yTests(options = {}) {
         assert(!st.hintPanelVisible, 'FR locale does not show Translate this page hint');
         assert(!st.bannerVisible, 'FR locale does not show the on-map translate banner');
         assert(/origines africaines/i.test(st.tagline), `FR browser welcome is French (got "${st.tagline}")`);
-        assert(/commencer/i.test(st.startLabel), `FR browser welcome button is French (got "${st.startLabel}")`);
+        assert(/d[ée]couvrir/i.test(st.startLabel), `FR browser welcome button is French (got "${st.startLabel}")`);
       } finally {
         await bFr.close();
       }
@@ -451,7 +451,7 @@ async function runA11yTests(options = {}) {
         assert(!st.welcomeFrBtn && !st.welcomeEnBtn, 'Welcome screen has no language-choice buttons');
         assert(/african origins/i.test(st.tagline), `EN welcome tagline is English (got "${st.tagline}")`);
         assert(!/origines africaines/i.test(st.tagline), `EN welcome is not left in French (got "${st.tagline}")`);
-        assert(/start exploring/i.test(st.startLabel), `EN welcome button is English (got "${st.startLabel}")`);
+        assert(/discover/i.test(st.startLabel), `EN welcome button is English (got "${st.startLabel}")`);
       } finally {
         await bEn.close();
       }
