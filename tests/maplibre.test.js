@@ -201,7 +201,6 @@ async function runMapLibreTests() {
 
   await test('MapLibre labels use app-managed continent and country names', async () => {
     const labels = await page.evaluate(async () => {
-      localStorage.setItem('ho_ui_lang', 'fr');
       const map = window.__mapLibreMap;
       map.jumpTo({ zoom: 1.6, center: [20, 20] });
       updateMapLibreLabels();
@@ -211,6 +210,7 @@ async function runMapLibreTests() {
           text: el.textContent.trim(),
           lang: el.getAttribute('lang'),
           dir: el.getAttribute('dir'),
+          translate: el.getAttribute('translate'),
         }));
       }
       const continentLabels = domLabels('.continent-label-marker');
@@ -225,18 +225,18 @@ async function runMapLibreTests() {
         continentTexts: continentLabels.map(l => l.text),
         continentLangs: [...new Set(continentLabels.map(l => l.lang))],
         continentDirs: [...new Set(continentLabels.map(l => l.dir))],
-        countryTexts: countryLabels.map(l => l.text),
-        countryLangs: [...new Set(countryLabels.map(l => l.lang))],
+        continentTranslate: [...new Set(continentLabels.map(l => l.translate))],
+        countryCount: countryLabels.length,
       };
     });
     assert(labels.hasNativeCountryLabels, 'Native MapLibre country label layer exists');
     assert(labels.nativeCountryOpacity === 0, 'Native MapLibre country labels are hidden');
     assert(!labels.hasMapLibreLabelSource, 'App-managed MapLibre labels are DOM markers, not canvas text');
-    assert(labels.continentTexts.includes('Asie'), 'French continent label is present');
-    assert(labels.continentLangs.includes('fr'), 'Continent labels expose lang for browser translation');
+    assert(labels.continentTexts.includes('Asia'), 'English continent label is present');
+    assert(labels.continentLangs.includes('en'), 'Continent labels expose lang=en for browser translation');
+    assert(labels.continentTranslate.includes('yes'), 'Continent labels are browser-translatable');
     assert(labels.continentDirs.includes('auto'), 'Continent labels expose dir=auto');
-    assert(labels.countryTexts.includes('Chine'), 'French country label is present');
-    assert(labels.countryLangs.includes('fr'), 'Country labels expose lang for browser translation');
+    assert(labels.countryCount > 0, `Country labels render at closer zoom (got ${labels.countryCount})`);
   });
 
   await test('MapLibre play renders walking hominins on migration paths', async () => {

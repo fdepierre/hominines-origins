@@ -36,33 +36,34 @@
 <title>Hominines — Evolution & Migrations on Earth</title>
 <meta name="description" content="Interactive map of hominin evolution: emergence, migrations, pigmentation and tools from 4.1 Ma to 2,000 years BP.">
 <script>
-// Resolve the initial document language before the app paints.
+// Bundled UI is English or French only.
+// French browser (navigator.language starts with "fr") → French chrome + JSON.
+// Every other browser → English, so "Translate this page" can run.
+// ?lang=fr|en is a one-shot URL override. The burger Language select lasts
+// for this page view only — it is not stored, so an English Chrome session
+// cannot stay stuck on a leftover French key.
 (function() {
-  var lang = 'en';
+  function bootLang() {
+    try {
+      var q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+      if (q === 'fr' || q === 'en') return q;
+    } catch (e) { /* ignore */ }
+    try {
+      var nav = String(navigator.language || '').split('-')[0].toLowerCase();
+      if (nav === 'fr') return 'fr';
+    } catch (e) { /* ignore */ }
+    return 'en';
+  }
   try {
-    var q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
-    if (q === 'fr' || q === 'en') lang = q;
-    else {
-      var stored = localStorage.getItem('ho_ui_lang');
-      if (stored === 'fr' || stored === 'en') lang = stored;
-      else {
-        var raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
-        lang = raw.indexOf('fr') === 0 ? 'fr' : 'en';
-      }
-    }
-  } catch (e) { /* keep English default */ }
-  document.documentElement.lang = lang;
-  document.documentElement.setAttribute('data-initial-ui-lang', lang);
-  document.documentElement.setAttribute('data-i18n-pending', '1');
-  // Failsafe: the attribute below hides the body until applyTranslations() clears
-  // it. If anything ever prevents that, reveal an untranslated page rather than a
-  // blank one.
-  setTimeout(function() {
-    document.documentElement.removeAttribute('data-i18n-pending');
-  }, 2000);
+    localStorage.removeItem('ho_lang_override');
+    localStorage.removeItem('ho_lang_user');
+    localStorage.removeItem('ho_catalogue_lang');
+  } catch (e) { /* ignore */ }
+  var lng = bootLang();
+  document.documentElement.lang = lng;
+  document.documentElement.setAttribute('translate', lng === 'en' ? 'yes' : 'no');
 })();
 </script>
-<style>html[data-i18n-pending="1"] body { visibility: hidden; }</style>
 
 <!-- MapLibre: loaded on demand in JS (avoids blocking first paint on slow links). -->
 <!-- Google Fonts: non-blocking so shell + timeline can render with fallbacks first -->
@@ -139,11 +140,12 @@
   --color-purple:         #7a5e9b;
   --color-error:          #a84040;
 
-  /* Tri-icon certitude : vert / orange / rouge (lisible, identique pour toutes les espèces) */
-  --certainty-strong-consensus:   #4ade80;
-  --certainty-moderate-consensus: #fb923c;
-  --certainty-active-debate:      #f87171;
-  --certainty-speculative:        #f87171;
+  /* Certainty tri-icon: four hues far apart (not orange+red).
+     Light and dark share the same hue family so the key stays stable. */
+  --certainty-strong-consensus:   #3DDC82;
+  --certainty-moderate-consensus: #5BA3FF;
+  --certainty-active-debate:      #FF4B6B;
+  --certainty-speculative:        #E056FD;
   --certainty-unknown:          #78716a;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
@@ -174,10 +176,10 @@
   --color-purple:         #4a2e7a;
   --color-error:          #7a1a1a;
 
-  --certainty-strong-consensus:   #15803d;
-  --certainty-moderate-consensus: #c2410c;
-  --certainty-active-debate:      #b91c1c;
-  --certainty-speculative:        #b91c1c;
+  --certainty-strong-consensus:   #0B7A45;
+  --certainty-moderate-consensus: #185ABC;
+  --certainty-active-debate:      #D1002A;
+  --certainty-speculative:        #9D00C8;
   --certainty-unknown:          #78716a;
 
   --shadow-sm: 0 1px 4px rgba(0,0,0,0.18);
@@ -381,6 +383,7 @@ a { color: var(--color-primary); }
   position: relative;
   margin-top: 2px;
   justify-self: end;
+  z-index: 1201;
 }
 .certainty-tri-hit {
   display: block;
@@ -432,25 +435,29 @@ a { color: var(--color-primary); }
 }
 .certainty-tri-swatch {
   display: inline-block;
-  width: 0.7em;
-  height: 0.7em;
+  width: 0.9em;
+  height: 0.9em;
   border-radius: 2px;
   flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28);
+}
+[data-theme="dark"] .certainty-tri-swatch {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 .certainty-tri-swatch--strong { background: var(--certainty-strong-consensus); }
 .certainty-tri-swatch--moderate { background: var(--certainty-moderate-consensus); }
-.certainty-tri-swatch--weak { background: var(--certainty-active-debate); }
+.certainty-tri-swatch--active-debate { background: var(--certainty-active-debate); }
+.certainty-tri-swatch--speculative { background: var(--certainty-speculative); }
 .certainty-tri-pop {
   position: fixed;
   top: 0;
   right: 0;
-  width: min(420px, calc(100vw - 24px));
-  max-height: min(70vh, calc(100dvh - 5rem));
+  width: min(920px, calc(100vw - 40px));
+  max-height: none;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  padding: var(--space-3);
+  padding: var(--space-4) var(--space-5);
   background: var(--color-surface-offset);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -473,6 +480,15 @@ a { color: var(--color-primary); }
   visibility: visible;
   pointer-events: auto;
 }
+/* Invisible corridor so the cursor can leave the icon toward the popover without closing it. */
+.certainty-tri-pop-bridge {
+  position: fixed;
+  z-index: 1199;
+  pointer-events: none;
+}
+.certainty-tri-pop-bridge.is-open {
+  pointer-events: auto;
+}
 .certainty-tri-pop-title {
   font-size: 1.15rem;
   font-family: var(--font-body);
@@ -482,21 +498,59 @@ a { color: var(--color-primary); }
   line-height: 1.25;
   margin-bottom: var(--space-2);
 }
-.certainty-tri-row {
-  margin-bottom: var(--space-2);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-divider);
+.certainty-tri-pop-domains {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-5);
+  row-gap: var(--space-3);
+  align-items: start;
 }
-.certainty-tri-row:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
+.certainty-tri-row {
+  margin: 0;
+  padding: 0;
+  min-width: 0;
   border-bottom: none;
 }
+.certainty-tri-row--pigmentation {
+  grid-column: 1 / -1;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-divider);
+}
+@media (max-width: 720px) {
+  .certainty-tri-pop-domains {
+    grid-template-columns: 1fr;
+  }
+  .certainty-tri-row--pigmentation {
+    padding-top: 0;
+    border-top: none;
+  }
+}
 .certainty-tri-row strong {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
   color: var(--color-text);
   font-size: var(--text-xs);
   margin-bottom: 4px;
+}
+.certainty-tri-row-level {
+  margin: 0 0 0.35em;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.certainty-tri-row-gloss {
+  margin: 0 0 0.45em;
+  color: var(--color-text);
+  font-weight: 500;
+}
+.certainty-tri-row-fact {
+  margin: 0 0 0.35em;
+  color: var(--color-text-muted);
+}
+.certainty-tri-row-fact:last-child {
+  margin-bottom: 0;
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -1318,6 +1372,35 @@ html[data-map-ready="1"] #map {
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+/* Same downward caret as #events-peek — points at the hovered jalon in the loupe. */
+#band-tooltip.band-tooltip--peek {
+  overflow: visible;
+}
+.band-tooltip-caret {
+  display: none;
+  position: absolute;
+  left: var(--peek-caret-x, 50%);
+  bottom: -8px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid var(--tooltip-border);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+#band-tooltip.band-tooltip--peek > .band-tooltip-caret {
+  display: block;
+}
+.band-tooltip-caret::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: -9px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--tooltip-bg);
 }
 /* Peau + espèces : colonne étroite, texte replié (homogène thème clair/sombre, pas tooltip OS noir) */
 #band-tooltip.band-tooltip--skin,
@@ -2198,6 +2281,65 @@ html[data-map-ready="1"] #map {
 .data-viewer-pre{margin:0;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono);font-size:12px;line-height:1.7;}
 [data-theme="light"] .data-viewer-body{background:#1e1e2e;}
 
+.docs-article {
+  padding: var(--space-4) var(--space-5);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-text);
+  overflow: auto;
+  flex: 1;
+}
+.docs-article h1, .docs-article h2, .docs-article h3 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  margin: 1.2em 0 0.4em;
+}
+.docs-article h1 { font-size: 1.35em; margin-top: 0; }
+.docs-article p, .docs-article li { margin: 0.4em 0; }
+.docs-article table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+  margin: 0.8em 0;
+}
+.docs-article th, .docs-article td {
+  border: 1px solid var(--color-border);
+  padding: 0.35em 0.5em;
+  text-align: left;
+  vertical-align: top;
+}
+.docs-article blockquote {
+  margin: 0.8em 0;
+  padding: 0.2em 0.8em;
+  border-left: 3px solid var(--color-primary);
+  color: var(--color-text-muted);
+}
+.docs-article a { color: var(--color-primary); }
+.docs-article code { font-family: var(--font-mono); font-size: 0.9em; }
+.docs-fallback { padding: var(--space-4) var(--space-5); font-size: 14px; }
+.docs-article ul, .docs-article ol { padding-left: 1.4em; }
+.docs-article pre {
+  overflow: auto;
+  padding: var(--space-3);
+  background: var(--color-surface-offset);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.uncertainty-notes {
+  padding: 0 var(--space-6) var(--space-3);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+.uncertainty-note { margin: 0.35em 0; }
+.uncertainty-note--reviewed { font-style: italic; }
+.burger-docs-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.burger-docs-list button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
 /* Migration arrow marker */
 .mig-arrow-head {
   pointer-events: none;
@@ -2258,7 +2400,7 @@ html[data-map-ready="1"] #map {
   line-height: 1;
   flex-shrink: 0;
 }
-#lang-select {
+#catalogue-lang-select {
   background: none;
   border: none;
   outline: none;
@@ -2267,12 +2409,12 @@ html[data-map-ready="1"] #map {
   color: var(--color-text-muted);
   cursor: pointer;
   padding: 0;
-  max-width: 90px;
+  max-width: 110px;
   appearance: none;
   -webkit-appearance: none;
 }
-#lang-select:hover { color: var(--color-text); }
-[data-theme="light"] #lang-select { color: var(--color-text-muted); }
+#catalogue-lang-select:hover { color: var(--color-text); }
+[data-theme="light"] #catalogue-lang-select { color: var(--color-text-muted); }
 
 /* ==============================================================
    PLAY OVERLAY — hidden (single play button in timeline)
@@ -2562,12 +2704,12 @@ html[data-map-ready="1"] #map {
 
       <!-- Welcome hint -->
       <div id="welcome-hint">
-        ▶ Appuyez sur <strong style="color:var(--color-primary)">Play</strong> pour voir l'évolution en direct
+        ▶ Press <strong style="color:var(--color-primary)">Play</strong> to watch evolution unfold
       </div>
 
       <!-- Legend -->
       <div class="map-legend">
-        <div class="map-legend-title">Espèces visibles</div>
+        <div class="map-legend-title">Visible species</div>
         <div id="legend-content"></div>
       </div>
 
@@ -2591,8 +2733,8 @@ html[data-map-ready="1"] #map {
       <div id="panel-content" translate="yes" dir="auto">
         <div class="empty-state">
           <div class="empty-state-icon">🦴</div>
-          <div class="empty-state-title">Sélectionnez une espèce</div>
-          <div class="empty-state-desc">Cliquez sur un marqueur sur la carte ou déplacez la barre chronologique pour explorer</div>
+          <div class="empty-state-title">Select a species</div>
+          <div class="empty-state-desc">Click a marker on the map or drag the timeline to explore</div>
         </div>
       </div>
     </aside>
@@ -2611,14 +2753,14 @@ html[data-map-ready="1"] #map {
     <div id="tl-title-strip" class="timeline-header">
       <div class="timeline-header__title tl-title-brand">
         <span id="tl-app-name">Hominin<em>es</em> Origins</span>
-        <span id="tl-app-desc" data-i18n="ui.appSubtitle">Explorez près de 7,5&nbsp;millions d'années de migrations humaines</span>
+        <span id="tl-app-desc" data-i18n="ui.appSubtitle">Explore nearly seven and a half million years of human migrations</span>
       </div>
       <div class="timeline-view-switch" id="timeline-view-mode-group" role="group">
         <div class="timeline-segmented" role="presentation"><button type="button" id="timeline-view-mode-simple" class="timeline-segmented__button is-active"
             data-testid="timeline-view-simple" data-timeline-mode="simple" aria-pressed="true" tabindex="0"
-            data-i18n="ui.timelineViewSimple">Vue simple</button><button type="button" id="timeline-view-mode-detailed" class="timeline-segmented__button"
+            data-i18n="ui.timelineViewSimple">Simple view</button><button type="button" id="timeline-view-mode-detailed" class="timeline-segmented__button"
             data-testid="timeline-view-detailed" data-timeline-mode="detailed" aria-pressed="false" tabindex="-1"
-            data-i18n="ui.timelineViewDetailed">Vue détaillée</button></div>
+            data-i18n="ui.timelineViewDetailed">Detailed view</button></div>
       </div>
     </div>
 
@@ -2636,7 +2778,7 @@ html[data-map-ready="1"] #map {
         </span>
       </button>
       <!-- Time label floats next to play btn -->
-      <span class="timeline-current-label" id="timeline-current-label">— 4 100 000 ans</span>
+      <span class="timeline-current-label" id="timeline-current-label">— 4.1 Ma</span>
 
       <!-- Vertical needle shaft UNDER species lanes so lane labels aren't covered; handle is sibling below -->
       <div class="timeline-full-needle" id="timeline-full-needle" aria-hidden="true"></div>
@@ -2652,13 +2794,13 @@ html[data-map-ready="1"] #map {
 
       <!-- Row 4: skin tones band -->
       <div class="timeline-band" id="skin-band">
-        <div class="timeline-band-label">Peau</div>
+        <div class="timeline-band-label">Skin</div>
         <div class="timeline-band-track" id="skin-band-track"></div>
       </div>
 
       <!-- Row 5: technology / events band -->
       <div class="events-band" id="events-band">
-        <div class="timeline-band-label">Jalons</div>
+        <div class="timeline-band-label">Milestones</div>
         <div class="events-band-track" id="events-band-track"></div>
       </div>
 
@@ -2673,7 +2815,7 @@ html[data-map-ready="1"] #map {
   <nav id="mobile-tab-bar">
     <button class="mobile-tab mobile-tab-active" data-view="map" id="tab-map">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
-      <span>Carte</span>
+      <span>Map</span>
     </button>
     <button type="button" class="mobile-tab-bar-play" id="mobile-play-btn" data-i18n-title="ui.playTitle">
       <svg id="mobile-play-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="8,5 20,12 8,19"></polygon></svg>
@@ -2684,7 +2826,7 @@ html[data-map-ready="1"] #map {
     </button>
     <button class="mobile-tab" data-view="detail" id="tab-detail">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"></circle><path d="M20 21a8 8 0 1 0-16 0"></path></svg>
-      <span>Détail</span>
+      <span>Detail</span>
     </button>
   </nav>
 
@@ -3043,7 +3185,7 @@ function groupLaneTooltipHtml(model) {
     '<br><span style="color:var(--color-text-muted);font-size:10px;font-family:var(--font-mono)">' +
     bandTipEscapeHtml(formatTime(model.start)) + ' → ' + bandTipEscapeHtml(formatTime(model.end)) + '</span>' +
     '<br><span style="color:var(--color-text);font-size:11px">' +
-    '<span translate="yes">' + (currentDataLang() === 'en' ? 'Includes:' : 'Comprend :') + '</span><br>' + membersLines + '</span>'
+    '<span translate="yes">Includes:</span><br>' + membersLines + '</span>'
   );
 }
 
@@ -3052,17 +3194,11 @@ function syncTimelineViewToggleUI() {
   var simpleBtn = document.getElementById('timeline-view-mode-simple');
   var detailedBtn = document.getElementById('timeline-view-mode-detailed');
   var grp = document.getElementById('timeline-view-mode-group');
-  if (grp && typeof i18next !== 'undefined' && i18next.isInitialized) {
-    grp.setAttribute('aria-label', i18next.t('ui.timelineViewGroupAria'));
-  } else if (grp) {
-    var alFr = 'Niveau de détail affiché sur la chronologie';
-    var alEn = 'How timeline rows are grouped: merged catalogue view or every lineage.';
-    try {
-      if (localStorage.getItem('ho_ui_lang') === 'en') grp.setAttribute('aria-label', alEn);
-      else grp.setAttribute('aria-label', alFr);
-    } catch (e) {
-      grp.setAttribute('aria-label', alFr);
-    }
+  if (grp) {
+    grp.setAttribute('aria-label',
+      (typeof i18next !== 'undefined' && i18next.isInitialized)
+        ? i18next.t('ui.timelineViewGroupAria')
+        : 'How timeline rows are grouped: merged catalogue view or every lineage.');
   }
   if (!simpleBtn || !detailedBtn) return;
   var isSimple = timelineViewMode === 'simple';
@@ -3231,30 +3367,25 @@ const CONTINENT_LABEL_POINTS = [
 const CONTINENT_LABEL_NAMES = {
   en: { americas: 'Americas', europe: 'Europe', africa: 'Africa', asia: 'Asia', oceania: 'Oceania' },
   fr: { americas: 'Amériques', europe: 'Europe', africa: 'Afrique', asia: 'Asie', oceania: 'Océanie' },
-  zh: { americas: '美洲', europe: '欧洲', africa: '非洲', asia: '亚洲', oceania: '大洋洲' },
-  ar: { americas: 'الأمريكيتان', europe: 'أوروبا', africa: 'أفريقيا', asia: 'آسيا', oceania: 'أوقيانوسيا' },
-  ja: { americas: 'アメリカ大陸', europe: 'ヨーロッパ', africa: 'アフリカ', asia: 'アジア', oceania: 'オセアニア' },
-  de: { americas: 'Amerika', europe: 'Europa', africa: 'Afrika', asia: 'Asien', oceania: 'Ozeanien' },
-  it: { americas: 'Americhe', europe: 'Europa', africa: 'Africa', asia: 'Asia', oceania: 'Oceania' },
-  es: { americas: 'Américas', europe: 'Europa', africa: 'África', asia: 'Asia', oceania: 'Oceanía' },
 };
 
-/** BCP 47 tag from the browser (for Intl.DisplayNames), stripped of odd characters. */
-function browserCountryLabelLocale() {
-  const raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en');
-  return String(raw).replace(/[^a-zA-Z0-9-]/g, '') || 'en';
+/** Browser UI language (Chrome/Edge settings), not the full Accept-Language list. */
+function browserUiLang() {
+  try {
+    return String(navigator.language || 'en').split('-')[0].toLowerCase();
+  } catch (e) {
+    return 'en';
+  }
 }
 
-/** Locale for map labels: stored FR/EN override, else the browser language. */
+/** BCP 47 tag for Intl.DisplayNames — follows the active UI language. */
+function browserCountryLabelLocale() {
+  return (typeof currentDataLang === 'function' && currentDataLang() === 'fr') ? 'fr' : 'en';
+}
+
+/** Country labels follow the active UI language (Intl.DisplayNames). */
 function countryLabelLocale() {
-  try {
-    const stored = localStorage.getItem('ho_ui_lang');
-    if (stored === 'fr' || stored === 'en') return stored;
-  } catch (e) { /* ignore */ }
-  const browserLocale = browserCountryLabelLocale();
-  const primary = browserLocale.split('-')[0].toLowerCase();
-  if (primary === 'fr' || primary === 'en') return primary;
-  return browserLocale;
+  return browserCountryLabelLocale();
 }
 
 /** Localised country name from an ISO code (Intl.DisplayNames). */
@@ -3273,12 +3404,10 @@ function countryLabelName(code) {
   }
 }
 
-/** Continent caption from CONTINENT_LABEL_NAMES, falling back to English. */
+/** Continent caption in the active UI language. */
 function continentLabelName(code) {
-  const lang = countryLabelLocale();
-  const primary = String(lang).split('-')[0].toLowerCase();
-  const names = CONTINENT_LABEL_NAMES[primary] || CONTINENT_LABEL_NAMES.en;
-  return names[code] || CONTINENT_LABEL_NAMES.en[code] || code;
+  const pack = CONTINENT_LABEL_NAMES[(typeof currentDataLang === 'function' && currentDataLang() === 'fr') ? 'fr' : 'en'];
+  return (pack && pack[code]) || code;
 }
 
 /** Zoom level at which a country label appears (large countries sooner). */
@@ -3554,7 +3683,9 @@ function uiT(key, fallback) {
 function eventCertaintyHtml(ev) {
   const dl = ev && ev['hominin:debateLevel'];
   const et = ev && ev['hominin:evidenceType'];
-  if (!dl && !et) return '';
+  const note = ev && ev['hominin:uncertaintyNote'];
+  const reviewed = ev && ev['hominin:lastReviewed'];
+  if (!dl && !et && !note && !reviewed) return '';
   const debateFb = dl === 'UNASSESSED'
     ? 'Not yet assessed in the editorial synthesis.'
     : (dl || '');
@@ -3564,10 +3695,21 @@ function eventCertaintyHtml(ev) {
   const debate = dl ? uiT('uncertaintyDebate_' + dl, debateFb) : '';
   const evid = et ? uiT('uncertaintyEvid_' + et, evidFb) : '';
   const parts = [debate, evid].filter(Boolean);
-  if (!parts.length) return '';
-  return '<br><span style="color:var(--color-text-faint)">' +
-    parts.map(function (p) { return bandTipEscapeHtml(p); }).join(' · ') +
-    '</span>';
+  let html = '';
+  if (parts.length) {
+    html += '<br><span style="color:var(--color-text-faint)">' +
+      parts.map(function (p) { return bandTipEscapeHtml(p); }).join(' · ') +
+      '</span>';
+  }
+  if (note) {
+    html += '<br><span style="color:var(--color-text-faint)">' +
+      bandTipEscapeHtml(note) + '</span>';
+  }
+  if (reviewed) {
+    html += '<br><span style="color:var(--color-text-faint)">Last reviewed ' +
+      bandTipEscapeHtml(reviewed) + '</span>';
+  }
+  return html;
 }
 
 /** HTML for a milestone popup (label, category, description, source). */
@@ -3728,9 +3870,11 @@ function updateMapLibreLabels() {
       : 'data-country-code="' + bandTipEscapeHtml(p.code) + '"';
     // data-source: canonical i18n string. If it still matches, do not replace innerHTML so browser
     // "Translate this page" output (e.g. Greek) survives zoomend / event flyTo re-renders.
+    const spanLang = (typeof currentDataLang === 'function' ? currentDataLang() : 'en');
+    const canTranslate = spanLang === 'en' ? 'yes' : 'no';
     const html = '<span class="' + className + '" ' + dataAttr
-      + ' data-source="' + bandTipEscapeHtml(p.label) + '" translate="yes" lang="'
-      + bandTipEscapeHtml(labelLocale) + '" dir="auto">' + bandTipEscapeHtml(p.label) + '</span>';
+      + ' data-source="' + bandTipEscapeHtml(p.label) + '" translate="' + canTranslate + '" lang="'
+      + bandTipEscapeHtml(spanLang) + '" dir="auto">' + bandTipEscapeHtml(p.label) + '</span>';
     const existing = mapLibreLabelMarkers.get(p.id);
     if (existing) {
       existing.setLngLat(p.lngLat);
@@ -3999,7 +4143,7 @@ function getSkinSwatch(pig, T) {
   if (pig.variant === 'spectrum' && pig.spectrumColors) {
     const stops = pig.spectrumColors.join(', ');
     const spectrumLabel = typeof T === 'function'
-      ? T('pigmentationSpectrumLabel', 'Spectre synthétique illustrant la diversité de pigmentation humaine')
+      ? T('pigmentationSpectrumLabel', 'Synthetic spectrum illustrating human pigmentation diversity')
       : ((typeof i18next !== 'undefined' && i18next.isInitialized)
         ? i18next.t('ui.pigmentationSpectrumLabel', { defaultValue: 'Spectre synthétique illustrant la diversité de pigmentation humaine' })
         : 'Spectre synthétique illustrant la diversité de pigmentation humaine');
@@ -4021,10 +4165,10 @@ function getSkinSwatch(pig, T) {
   if (pig.variant === 'fur' || pig.variant === 'partial-fur') {
     const furLabel = pig.variant === 'fur'
       ? (typeof T === 'function'
-        ? T('skinFurSwatchLabel', 'Peau claire sous fourrure')
+        ? T('skinFurSwatchLabel', 'Light skin under fur')
         : 'Peau claire sous fourrure')
       : (typeof T === 'function'
-        ? T('skinPartialFurSwatchLabel', 'Peau claire sous pelage partiel')
+        ? T('skinPartialFurSwatchLabel', 'Light skin under partial pelage')
         : 'Peau claire sous pelage partiel');
     return `<div class="pig-swatch ${pig.variant}" role="img" aria-label="${escapeHtmlAttr(furLabel)}" style="background:${pig.color}"></div>`;
   }
@@ -4177,6 +4321,116 @@ function certaintyDebateLevelWedgeClass(level) {
   }
 }
 
+function certaintyDebateLevelSwatchClass(level) {
+  switch (level) {
+    case 'STRONG_CONSENSUS': return 'certainty-tri-swatch certainty-tri-swatch--strong';
+    case 'MODERATE_CONSENSUS': return 'certainty-tri-swatch certainty-tri-swatch--moderate';
+    case 'ACTIVE_DEBATE': return 'certainty-tri-swatch certainty-tri-swatch--active-debate';
+    case 'SPECULATIVE_HYPOTHESIS': return 'certainty-tri-swatch certainty-tri-swatch--speculative';
+    default: return 'certainty-tri-swatch';
+  }
+}
+
+function certaintyDebateLevelLabel(level, T) {
+  switch (level) {
+    case 'STRONG_CONSENSUS': return T('certaintyTriLegendStrong', 'strong consensus');
+    case 'MODERATE_CONSENSUS': return T('certaintyTriLegendModerate', 'moderate consensus');
+    case 'ACTIVE_DEBATE': return T('certaintyTriLegendDebate', 'active debate');
+    case 'SPECULATIVE_HYPOTHESIS': return T('certaintyTriLegendSpeculative', 'speculative hypothesis');
+    default: return '';
+  }
+}
+
+function certaintyEvidShortLabel(et, T) {
+  switch (et) {
+    case 'DIRECT_DATA': return T('certaintyEvidShort_DIRECT_DATA', 'direct data');
+    case 'INDIRECT_DATA': return T('certaintyEvidShort_INDIRECT_DATA', 'fossils / archaeology');
+    case 'EVOLUTIONARY_INFERENCE': return T('certaintyEvidShort_EVOLUTIONARY_INFERENCE', 'evolutionary inference');
+    case 'MEDIA_NARRATIVE': return T('certaintyEvidShort_MEDIA_NARRATIVE', 'media narrative');
+    default: return '';
+  }
+}
+
+function certaintyRefLabel(ref) {
+  if (!ref) return '';
+  return String(ref.name || '').replace(/\s*10\.\d{4,}[^\s]*/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function certaintyRefsForDomain(species, domain) {
+  const refs = species && species['hominin:references'];
+  if (!Array.isArray(refs)) return [];
+  return refs.filter(function (r) { return r && r['hominin:supports'] === domain; })
+    .map(certaintyRefLabel).filter(Boolean).slice(0, 2);
+}
+
+function certaintyGeneticSites(species) {
+  return (species.sites || []).filter(function (s) {
+    const blob = String((s && s.name) || '') + ' ' + String((s && s.note) || '');
+    return /adn|dna|g[ée]nome|genome|mc1r|slc24|slc45|oca2|haplotype|pigment/i.test(blob);
+  }).slice(0, 3);
+}
+
+function certaintyDebateFitsDomain(debate, key) {
+  if (!debate) return false;
+  if (key === 'pigmentation') return /peau|skin|mc1r|pigment|œil|oeil|eye|hair|cheveu|pelage|fur/i.test(debate);
+  if (key === 'taxonomy') return /taxon|esp[eè]ce|species|split|lump|prometheus|juluensis|nomenclature|clade/i.test(debate);
+  if (key === 'behavior') return /outil|tool|buria|s[ée]pulture|art|feu|fire|symbol|industrie|oldowan|acheul/i.test(debate);
+  return false;
+}
+
+function certaintyFactP(text) {
+  if (!text) return '';
+  return '<p class="certainty-tri-row-fact">' + bandTipEscapeHtml(text) + '</p>';
+}
+
+/** Species-specific “why this rating” lines from the catalogue (not the generic enum gloss). */
+function certaintyDomainFactsHtml(species, key, T) {
+  const parts = [];
+  if (key === 'pigmentation') {
+    const pig = species.pigmentation || {};
+    const look = [];
+    if (pig.skin && pig.skin.desc) look.push(T('certaintySkin', 'Skin') + ': ' + pig.skin.desc);
+    if (pig.eyes && pig.eyes.desc) look.push(T('certaintyEyes', 'Eyes') + ': ' + pig.eyes.desc);
+    if (pig.hair && pig.hair.desc) look.push(T('certaintyHair', 'Hair / coat') + ': ' + pig.hair.desc);
+    if (look.length) parts.push(look.join(' · '));
+    if (pig.certLabel) parts.push(pig.certLabel);
+    const sites = certaintyGeneticSites(species).map(function (s) {
+      return s.name + (s.note ? ' — ' + s.note : '');
+    });
+    if (sites.length) parts.push(T('certaintySites', 'Sites') + ': ' + sites.join('; '));
+    const refs = certaintyRefsForDomain(species, 'pigmentation');
+    if (refs.length) parts.push(T('certaintyCited', 'Cited') + ': ' + refs.join('; '));
+    if (certaintyDebateFitsDomain(species.debate, 'pigmentation')) parts.push(species.debate);
+  } else if (key === 'taxonomy') {
+    const named = (species.name || '') + (species.common ? ' — ' + species.common : '');
+    if (named) parts.push(T('certaintyCataloguedAs', 'Listed as') + ' ' + named + '.');
+    const note = species['hominin:taxonomyUncertaintyNote'];
+    if (note) parts.push(note);
+    else if (certaintyDebateFitsDomain(species.debate, 'taxonomy')) parts.push(species.debate);
+    const sites = (species.sites || []).slice(0, 2).map(function (s) {
+      return s.name + (s.note ? ' — ' + s.note : '');
+    });
+    if (sites.length) parts.push(T('certaintySites', 'Sites') + ': ' + sites.join('; '));
+    const refs = certaintyRefsForDomain(species, 'taxonomy');
+    if (refs.length) parts.push(T('certaintyCited', 'Cited') + ': ' + refs.join('; '));
+  } else {
+    const note = species['hominin:behaviorUncertaintyNote'];
+    if (note) parts.push(note);
+    const tools = (species.tools || []).slice(0, 3);
+    if (tools.length) parts.push(T('certaintyTraces', 'Material traces') + ': ' + tools.join('; '));
+    if (certaintyDebateFitsDomain(species.debate, 'behavior')) parts.push(species.debate);
+    const refs = certaintyRefsForDomain(species, 'behavior');
+    if (refs.length) parts.push(T('certaintyCited', 'Cited') + ': ' + refs.join('; '));
+  }
+  return parts.map(certaintyFactP).join('');
+}
+
+function certaintyDomainGloss(key, T) {
+  if (key === 'taxonomy') return T('certaintyDomainGlossTax', 'How this group is named and classified.');
+  if (key === 'behavior') return T('certaintyDomainGlossBehavior', 'Tools, burials, art and other traces of how they lived.');
+  return T('certaintyDomainGlossPig', 'Skin colour, eyes, and hair or coat.');
+}
+
 /** One 120° pie sector path, i = 0..2 from top (-90°), clockwise. */
 function certaintyTriSectorPath(cx, cy, r, i) {
   const a0 = -Math.PI / 2 + (i * 2 * Math.PI) / 3;
@@ -4203,8 +4457,8 @@ function escapeHtmlAttr(s) {
 function renderCertaintyTriIcon(species, T) {
   if (!species['hominin:taxonomyDebateLevel']) return '';
   const domains = [
-    { key: 'taxonomy', label: T('certaintyDomainTax', 'Taxonomie') },
-    { key: 'behavior', label: T('certaintyDomainBehavior', 'Comportement') },
+    { key: 'taxonomy', label: T('certaintyDomainTax', 'Taxonomy') },
+    { key: 'behavior', label: T('certaintyDomainBehavior', 'Behaviour') },
     { key: 'pigmentation', label: T('certaintyDomainPig', 'Pigmentation') },
   ];
   const cx = 24;
@@ -4218,12 +4472,18 @@ function renderCertaintyTriIcon(species, T) {
   const popRows = domains.map(function (d) {
     const dl = species['hominin:' + d.key + 'DebateLevel'];
     const et = species['hominin:' + d.key + 'EvidenceType'];
-    const line1 = T('uncertaintyDebate_' + dl, '');
-    const line2 = T('uncertaintyEvid_' + et, '');
-    return '<div class="certainty-tri-row"><strong>' + d.label + '</strong><span>' + line1 + '</span><br><span>' + line2 + '</span></div>';
+    const level = certaintyDebateLevelLabel(dl, T);
+    const evid = certaintyEvidShortLabel(et, T);
+    const status = [level, evid].filter(Boolean).join(' · ');
+    return '<div class="certainty-tri-row' + (d.key === 'pigmentation' ? ' certainty-tri-row--pigmentation' : '') + '">' +
+      '<strong><span class="' + certaintyDebateLevelSwatchClass(dl) + '" aria-hidden="true"></span>' + d.label + '</strong>' +
+      (status ? '<p class="certainty-tri-row-level">' + bandTipEscapeHtml(status) + '</p>' : '') +
+      '<p class="certainty-tri-row-gloss">' + bandTipEscapeHtml(certaintyDomainGloss(d.key, T)) + '</p>' +
+      certaintyDomainFactsHtml(species, d.key, T) +
+      '</div>';
   }).join('');
   const aria = T('certaintyTriAria',
-    'Certitude par thème : secteur supérieur taxonomie, puis comportement, puis pigmentation (sens horaire). Survolez ou activez pour le détail.');
+    'Certainty by topic: top sector taxonomy, then behaviour, then pigmentation (clockwise). Hover or focus the icon for full detail.');
   return (
     '<div class="certainty-tri-slot">' +
     '<button type="button" class="certainty-tri-hit">' +
@@ -4232,48 +4492,110 @@ function renderCertaintyTriIcon(species, T) {
     paths +
     '</svg></button>' +
     '<div class="certainty-tri-pop" role="tooltip">' +
-    '<div class="certainty-tri-pop-title">' + T('certaintyPanelTitle', 'Certitude par thème') + '</div>' +
+    '<div class="certainty-tri-pop-title">' + T('certaintyPanelTitle', 'Certainty by topic') + '</div>' +
     '<div class="certainty-tri-pop-legend">' +
-    '<div>' + T('certaintyTriLegendIntro', 'Même code pour toutes les espèces :') + '</div>' +
+    '<div>' + T('certaintyTriLegendIntro', 'Same key for every species:') + '</div>' +
     '<div class="certainty-tri-legend-keys">' +
-    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--strong" aria-hidden="true"></span>' + T('certaintyTriLegendStrong', 'fort consensus') + '</span>' +
-    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--moderate" aria-hidden="true"></span>' + T('certaintyTriLegendModerate', 'modéré') + '</span>' +
-    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--weak" aria-hidden="true"></span>' + T('certaintyTriLegendWeak', 'débat actif ou hypothèse fragile') + '</span>' +
+    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--strong" aria-hidden="true"></span>' + T('certaintyTriLegendStrong', 'strong consensus') + '</span>' +
+    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--moderate" aria-hidden="true"></span>' + T('certaintyTriLegendModerate', 'moderate consensus') + '</span>' +
+    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--active-debate" aria-hidden="true"></span>' + T('certaintyTriLegendDebate', 'active debate') + '</span>' +
+    '<span class="certainty-tri-legend-key"><span class="certainty-tri-swatch certainty-tri-swatch--speculative" aria-hidden="true"></span>' + T('certaintyTriLegendSpeculative', 'speculative hypothesis') + '</span>' +
     '</div></div>' +
+    '<div class="certainty-tri-pop-domains">' +
     popRows +
-    '</div></div>'
+    '</div></div></div>'
   );
 }
 
-/** Pin the certainty popover to the icon in viewport coords so it can overlap the map. */
+/** Compact domain notes under the certainty triangle — does not replace `debate`. */
+function renderSpeciesUncertaintyNotes(species, T) {
+  if (!species) return '';
+  const chunks = [];
+  const tax = species['hominin:taxonomyUncertaintyNote'];
+  const beh = species['hominin:behaviorUncertaintyNote'];
+  const reviewed = species['hominin:lastReviewed'];
+  if (tax) {
+    chunks.push('<p class="uncertainty-note"><strong>' +
+      bandTipEscapeHtml(T('certaintyDomainTax', 'Taxonomy')) +
+      '.</strong> ' + bandTipEscapeHtml(tax) + '</p>');
+  }
+  if (beh) {
+    chunks.push('<p class="uncertainty-note"><strong>' +
+      bandTipEscapeHtml(T('certaintyDomainBehavior', 'Behaviour')) +
+      '.</strong> ' + bandTipEscapeHtml(beh) + '</p>');
+  }
+  if (reviewed) {
+    chunks.push('<p class="uncertainty-note uncertainty-note--reviewed">Last reviewed ' +
+      bandTipEscapeHtml(reviewed) + '</p>');
+  }
+  if (!chunks.length) return '';
+  return '<div class="uncertainty-notes">' + chunks.join('') + '</div>';
+}
+
+/** Place the certainty popover over the map, left of the trigger icon so it stays visible. */
 function layoutCertaintyTriPop(slot, pop) {
   const hit = slot && slot.querySelector('.certainty-tri-hit');
   if (!pop || !hit) return;
   const r = hit.getBoundingClientRect();
-  const gap = 6;
   const margin = 12;
-  const maxH = Math.max(140, window.innerHeight - r.bottom - gap - margin);
-  pop.style.top = Math.round(r.bottom + gap) + 'px';
-  pop.style.right = Math.round(Math.max(margin, window.innerWidth - r.right)) + 'px';
+  /* Wider than --shadow-md blur (16px) so the popover shadow cannot cover the icon. */
+  const gap = 28;
+  const map = document.getElementById('map');
+  const timeline = document.getElementById('timeline');
+  const mapBox = map ? map.getBoundingClientRect() : { top: margin, left: 0 };
+  const top = Math.max(margin, Math.round(mapBox.top + 8));
+  const bottomLimit = timeline ? timeline.getBoundingClientRect().top : window.innerHeight;
+  const avail = Math.max(160, bottomLimit - top - margin);
+  const maxRight = r.left - gap;
+  const cssW = Math.min(920, Math.max(160, maxRight - margin));
+  pop.style.width = cssW + 'px';
   pop.style.left = 'auto';
-  pop.style.maxHeight = maxH + 'px';
+  pop.style.right = Math.round(Math.max(margin, window.innerWidth - maxRight)) + 'px';
+  pop.style.top = top + 'px';
+  pop.style.maxHeight = 'none';
+  pop.style.overflowY = 'hidden';
+  const needed = pop.scrollHeight;
+  if (needed > avail + 2) {
+    pop.style.maxHeight = Math.round(avail) + 'px';
+    pop.style.overflowY = 'auto';
+  }
+  const bridge = pop._hoverBridge;
+  if (bridge) {
+    const popR = pop.getBoundingClientRect();
+    const topEdge = Math.min(popR.top, r.top);
+    const bottomEdge = Math.max(popR.bottom, r.bottom);
+    bridge.style.top = Math.round(topEdge) + 'px';
+    bridge.style.height = Math.max(0, Math.round(bottomEdge - topEdge)) + 'px';
+    bridge.style.left = Math.round(popR.right) + 'px';
+    bridge.style.width = Math.max(0, Math.round(r.left - popR.right)) + 'px';
+    bridge.classList.toggle('is-open', pop.classList.contains('is-open'));
+  }
 }
 
 function bindCertaintyTriPops() {
-  document.querySelectorAll('body > .certainty-tri-pop').forEach(function (p) { p.remove(); });
+  document.querySelectorAll('body > .certainty-tri-pop, body > .certainty-tri-pop-bridge').forEach(function (p) { p.remove(); });
   document.querySelectorAll('.certainty-tri-slot').forEach(function (slot) {
     const pop = slot.querySelector('.certainty-tri-pop');
     if (!pop) return;
     document.body.appendChild(pop);
+    const bridge = document.createElement('div');
+    bridge.className = 'certainty-tri-pop-bridge';
+    bridge.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(bridge);
+    pop._hoverBridge = bridge;
     let hideTimer = null;
     function show() {
       clearTimeout(hideTimer);
-      layoutCertaintyTriPop(slot, pop);
       pop.classList.add('is-open');
+      layoutCertaintyTriPop(slot, pop);
+      requestAnimationFrame(function () { layoutCertaintyTriPop(slot, pop); });
     }
     function hideSoon() {
       clearTimeout(hideTimer);
-      hideTimer = setTimeout(function () { pop.classList.remove('is-open'); }, 160);
+      hideTimer = setTimeout(function () {
+        pop.classList.remove('is-open');
+        if (pop._hoverBridge) pop._hoverBridge.classList.remove('is-open');
+      }, 400);
     }
     slot.addEventListener('mouseenter', show);
     slot.addEventListener('focusin', show);
@@ -4281,6 +4603,8 @@ function bindCertaintyTriPops() {
     slot.addEventListener('focusout', hideSoon);
     pop.addEventListener('mouseenter', show);
     pop.addEventListener('mouseleave', hideSoon);
+    bridge.addEventListener('mouseenter', show);
+    bridge.addEventListener('mouseleave', hideSoon);
   });
 }
 
@@ -4306,12 +4630,14 @@ function renderPanel(species) {
   const T = (key, fb) => (typeof i18next !== 'undefined' && i18next.isInitialized)
     ? i18next.t('ui.' + key, { defaultValue: fb }) : fb;
 
+  const catLang = currentDataLang();
+  const catTranslate = catLang === 'fr' ? 'no' : 'yes';
   const hasTri = !!species['hominin:taxonomyDebateLevel'];
   const bioMorphoRows = [
-    [T('heightM', 'Taille ♂'), bio.heightM],
-    [T('heightF', 'Taille ♀'), bio.heightF],
-    [T('weightM', 'Poids ♂'), bio.weightM],
-    [T('brainVol', 'Cerveau'), bio.brain],
+    [T('heightM', 'Height ♂'), bio.heightM],
+    [T('heightF', 'Height ♀'), bio.heightF],
+    [T('weightM', 'Weight ♂'), bio.weightM],
+    [T('brainVol', 'Brain'), bio.brain],
   ];
   const morphoBioHtml = '<table class="figure-bio-table"><tbody>' +
     bioMorphoRows.map(function (pair) {
@@ -4321,15 +4647,16 @@ function renderPanel(species) {
     }).join('') +
     '</tbody></table>';
   const html = `
-    <div class="animate-in" lang="${currentDataLang()}" dir="auto" translate="yes">
+    <div class="animate-in" lang="${catLang}" dir="auto" translate="${catTranslate}">
       <div class="side-panel-header${hasTri ? ' side-panel-header--certainty' : ''}">
         <div class="side-panel-header-text">
-          <div class="period-label">${formatTime(species.start)} ${T('periodTo','à')} ${formatTime(species.end)}</div>
+          <div class="period-label">${formatTime(species.start)} ${T('periodTo','to')} ${formatTime(species.end)}</div>
           <div class="species-name" translate="no" style="color:${species.color}">${bandTipEscapeHtml(species.name)}</div>
-          <div class="species-name-common" lang="${currentDataLang()}" dir="auto" translate="yes">${bandTipEscapeHtml(species.common)}</div>
+          <div class="species-name-common" lang="${catLang}" dir="auto" translate="${catTranslate}">${bandTipEscapeHtml(species.common)}</div>
         </div>
         ${renderCertaintyTriIcon(species, T)}
       </div>
+      ${renderSpeciesUncertaintyNotes(species, T)}
 
       <!-- Human figure + biometrics table (label | value) -->
       <div class="human-figure-container">
@@ -4347,49 +4674,49 @@ function renderPanel(species) {
           <!-- Spectrum skin: full-width row above eyes/hair -->
           <div class="pig-card" style="grid-column:1/-1;flex-direction:row;align-items:flex-start;gap:var(--space-3)">
             <div style="flex-shrink:0">
-              <div class="pig-label" style="text-align:left;margin-bottom:4px">${T('skinLabel','Peau')}</div>
+              <div class="pig-label" style="text-align:left;margin-bottom:4px">${T('skinLabel','Skin')}</div>
               ${getSkinSwatch(pig.skin, T)}
             </div>
             <div class="pig-desc" style="text-align:left;flex:1;margin-top:20px">${bandTipEscapeHtml(pig.skin.desc)}</div>
           </div>
           <div class="pig-card">
-            <div class="pig-label">${T('eyesLabel','Yeux')}</div>
+            <div class="pig-label">${T('eyesLabel','Eyes')}</div>
             ${getEyeSwatch(pig.eyes)}
             <div class="pig-desc">${bandTipEscapeHtml(pig.eyes.desc)}</div>
           </div>
           <div class="pig-card">
-            <div class="pig-label">${T('hairLabel','Cheveux / Pelage')}</div>
+            <div class="pig-label">${T('hairLabel','Hair / pelage')}</div>
             ${getHairSwatch(pig.hair)}
             <div class="pig-desc">${bandTipEscapeHtml(pig.hair.desc)}</div>
           </div>
           <div class="pig-card" style="grid-column:3"></div>
           ` : `
           <div class="pig-card">
-            <div class="pig-label">${T('skinLabel','Peau')}</div>
+            <div class="pig-label">${T('skinLabel','Skin')}</div>
             ${getSkinSwatch(pig.skin, T)}
             <div class="pig-desc">${bandTipEscapeHtml(pig.skin.desc)}</div>
           </div>
           <div class="pig-card">
-            <div class="pig-label">${T('eyesLabel','Yeux')}</div>
+            <div class="pig-label">${T('eyesLabel','Eyes')}</div>
             ${getEyeSwatch(pig.eyes)}
             <div class="pig-desc">${bandTipEscapeHtml(pig.eyes.desc)}</div>
           </div>
           <div class="pig-card">
-            <div class="pig-label">${T('hairLabel','Cheveux / Pelage')}</div>
+            <div class="pig-label">${T('hairLabel','Hair / pelage')}</div>
             ${getHairSwatch(pig.hair)}
             <div class="pig-desc">${bandTipEscapeHtml(pig.hair.desc)}</div>
           </div>
           `}
         </div>
         <p class="panel-note">
-          ${hasSplitPigmentation(pig) ? T('splitVariant', 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.') : ''}
+          ${hasSplitPigmentation(pig) ? T('splitVariant', 'Shared swatches (☯) mark variability within the species.') : ''}
         </p>
       </div>
 
 
       <!-- Tools -->
       <div class="tools-section">
-        <div class="section-title">${T('toolsTitle','Technologies & Comportements')}</div>
+        <div class="section-title">${T('toolsTitle','Technologies & behaviours')}</div>
         <div style="flex-wrap:wrap;display:flex;gap:var(--space-1)">
           ${species.tools.map(t => `<span class="tool-tag">⛒ ${bandTipEscapeHtml(t)}</span>`).join('')}
         </div>
@@ -4398,7 +4725,7 @@ function renderPanel(species) {
       <!-- Debate -->
       ${species.debate ? `
       <div class="debate-section">
-        <div class="section-title">${T('debateSection','Débats scientifiques actifs')}</div>
+        <div class="section-title">${T('debateSection','Active scientific debates')}</div>
         <div class="debate-item">❓ ${bandTipEscapeHtml(species.debate)}</div>
       </div>` : ''}
 
@@ -4416,7 +4743,8 @@ function renderPanel(species) {
     </div>
   `;
   const panelContent = document.getElementById('panel-content');
-  panelContent.setAttribute('lang', currentDataLang());
+  panelContent.setAttribute('lang', catLang);
+  panelContent.setAttribute('translate', catTranslate);
   panelContent.innerHTML = html;
   const panelEl = document.getElementById('side-panel');
   /* Ne pas défiler vers le bas automatiquement : priorité à la silhouette pendant le défilement du temps. */
@@ -4634,7 +4962,7 @@ function initTimeline() {
       if (isMobileViewport()) return;
       const tipEl = document.getElementById('band-tooltip');
       if (!tipEl) return;
-      tipEl.classList.remove('band-tooltip--skin');
+      tipEl.classList.remove('band-tooltip--skin', 'band-tooltip--peek');
       tipEl.classList.add('band-tooltip--species');
       tipEl.innerHTML = tipHtml;
       tipEl.style.display = 'block';
@@ -4651,7 +4979,7 @@ function initTimeline() {
       if (isMobileViewport()) {
         const tipEl = document.getElementById('band-tooltip');
         if (tipEl) {
-          tipEl.classList.remove('band-tooltip--skin');
+          tipEl.classList.remove('band-tooltip--skin', 'band-tooltip--peek');
           tipEl.classList.add('band-tooltip--species');
           tipEl.innerHTML = model.kind === 'group' ? groupLaneTooltipHtml(model) : speciesLaneTooltipHtml(sp);
           tipEl.style.display = 'block';
@@ -4914,7 +5242,7 @@ function buildSkinBand() {
 
     el.addEventListener('mouseenter', function () {
       if (isMobileViewport() || !tip) return;
-      tip.classList.remove('band-tooltip--species');
+      tip.classList.remove('band-tooltip--species', 'band-tooltip--peek');
       tip.classList.add('band-tooltip--skin');
       tip.innerHTML = skinBandTooltipHtml(seg);
       tip.style.display = 'block';
@@ -4932,7 +5260,7 @@ function buildSkinBand() {
         closeMobileBandTooltip();
         return;
       }
-      tip.classList.remove('band-tooltip--species');
+      tip.classList.remove('band-tooltip--species', 'band-tooltip--peek');
       tip.classList.add('band-tooltip--skin');
       tip.innerHTML = skinBandTooltipHtml(seg);
       tip.style.display = 'block';
@@ -5037,18 +5365,96 @@ function closeMobileBandTooltip() {
   const tip = document.getElementById('band-tooltip');
   if (tip) {
     tip.style.display = 'none';
-    tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
+    tip.classList.remove('band-tooltip--skin', 'band-tooltip--species', 'band-tooltip--peek');
   }
   _bandTipPinKey = null;
 }
 
 /**
+ * Keep a downward caret on #band-tooltip after innerHTML replacements.
+ */
+function ensureBandTipCaret(tip) {
+  if (!tip) return null;
+  let caret = tip.querySelector(':scope > .band-tooltip-caret');
+  if (!caret) {
+    caret = document.createElement('span');
+    caret.className = 'band-tooltip-caret';
+    caret.setAttribute('aria-hidden', 'true');
+    tip.appendChild(caret);
+  }
+  return caret;
+}
+
+/**
+ * Place #band-tooltip above (or beside) the open jalon peek so it never covers the loupe.
+ */
+function positionBandTipClearOfPeek(anchorEl, peekEl) {
+  const tip = document.getElementById('band-tooltip');
+  if (!tip || !peekEl) return;
+  const pad = 8;
+  const caretH = typeof EVENTS_PEEK_CARET === 'number' ? EVENTS_PEEK_CARET : 8;
+  const gap = caretH + 2;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const pr = peekEl.getBoundingClientRect();
+  const ar = (anchorEl || peekEl).getBoundingClientRect();
+  const tw = tip.offsetWidth || Math.min(260, vw - 24);
+  const th = tip.offsetHeight || 100;
+  const cx = ar.left + ar.width / 2;
+  let x = cx - tw / 2;
+  if (x < pad) x = pad;
+  if (x + tw > vw - pad) x = vw - tw - pad;
+  let y = pr.top - th - gap;
+  let above = y >= pad;
+  const overlapsPeek = (tx, ty) => tx < pr.right && tx + tw > pr.left && ty < pr.bottom && ty + th > pr.top;
+  if (!above || overlapsPeek(x, y)) {
+    const sideY = Math.max(pad, Math.min(pr.top, vh - th - pad));
+    const rightX = pr.right + gap;
+    const leftX = pr.left - tw - gap;
+    if (rightX + tw <= vw - pad) {
+      x = rightX;
+      y = sideY;
+      above = false;
+    } else if (leftX >= pad) {
+      x = leftX;
+      y = sideY;
+      above = false;
+    } else {
+      y = Math.max(pad, pr.top - th - gap);
+      above = y + th <= pr.top + 0.5;
+    }
+  }
+  tip.style.position = 'fixed';
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+  tip.style.right = 'auto';
+  tip.style.bottom = 'auto';
+  ensureBandTipCaret(tip);
+  if (above) {
+    const caretX = Math.max(14, Math.min(tw - 14, cx - x));
+    tip.style.setProperty('--peek-caret-x', caretX + 'px');
+    tip.classList.add('band-tooltip--peek');
+  } else {
+    tip.classList.remove('band-tooltip--peek');
+    tip.style.removeProperty('--peek-caret-x');
+  }
+}
+
+/**
  * Positions #band-tooltip next to markerEl (.skin / .species-lane / .event-marker …).
  * Species lanes stack vertically — prefer BELOW the bar so the panel does not crush labels on rows above.
+ * Peek icons: keep the tooltip entirely outside the square loupe.
  */
 function positionBandTipNearIcon(markerEl) {
   const tip = document.getElementById('band-tooltip');
   if (!tip || !markerEl) return;
+  const peek = markerEl.closest && markerEl.closest('#events-peek');
+  if (peek && peek.classList.contains('is-open')) {
+    positionBandTipClearOfPeek(markerEl, peek);
+    return;
+  }
+  tip.classList.remove('band-tooltip--peek');
+  tip.style.removeProperty('--peek-caret-x');
   const pad = 8;
   const vh = window.innerHeight;
   const rect = markerEl.getBoundingClientRect();
@@ -5267,6 +5673,8 @@ function hideEventsPeek() {
     const tip = document.getElementById('band-tooltip');
     if (tip && !tip.classList.contains('band-tooltip--skin') && !tip.classList.contains('band-tooltip--species')) {
       tip.style.display = 'none';
+      tip.classList.remove('band-tooltip--peek');
+      tip.style.removeProperty('--peek-caret-x');
     }
     _eventsPeek.ownsTip = false;
     _eventsPeek.pinnedTipId = null;
@@ -5342,7 +5750,11 @@ function showEventsPeekTooltip(ev, cx, cy) {
   _eventsPeek.ownsTip = true;
   _eventsPeek.pinnedTipId = null;
   _eventsPeek.tipEvId = ev.id;
-  requestAnimationFrame(function () { positionBandTipAtCursor(cx, cy); });
+  requestAnimationFrame(function () {
+    const peekItem = eventPeekItemById(ev.id);
+    if (peekItem) positionBandTipNearIcon(peekItem);
+    else positionBandTipAtCursor(cx, cy);
+  });
 }
 
 /** Reposition the peek tooltip onto the given event. */
@@ -5372,9 +5784,9 @@ function bindEventsPeekItem(itemEl) {
     const ev = EVENTS_DATA.find(function (item) { return item.id === id; });
     if (ev) showEventsPeekTooltip(ev, e.clientX, e.clientY);
   });
-  itemEl.addEventListener('mousemove', function (e) {
+  itemEl.addEventListener('mousemove', function () {
     if (isMobileViewport() || !_eventsPeek.ownsTip) return;
-    positionBandTipAtCursor(e.clientX, e.clientY);
+    positionBandTipNearIcon(itemEl);
   });
   itemEl.addEventListener('click', function (e) {
     e.preventDefault();
@@ -5901,8 +6313,8 @@ function setTime(time) {
       if (panelContent) {
         const T = (k, fb) => (typeof i18next !== 'undefined' && i18next.isInitialized) ? i18next.t('ui.' + k) : fb;
         panelContent.innerHTML = `<div class="empty-state">
-          <div class="empty-state-title">${T('selectSpecies', 'Sélectionnez une espèce')}</div>
-          <div class="empty-state-desc">${T('noSpecies', 'Aucune espèce à cette période')}</div>
+          <div class="empty-state-title">${T('selectSpecies', 'Select a species')}</div>
+          <div class="empty-state-desc">${T('noSpecies', 'No species in this period')}</div>
         </div>`;
       }
     }
@@ -6035,15 +6447,8 @@ function updatePlayControlAccessibility() {
 }
 /** Set lang= on the play/pause label spans so page-translate sees the source. */
 function syncPlayToggleLabelLang() {
-  var lang = 'en';
-  try {
-    if (typeof currentDataLang === 'function') {
-      lang = currentDataLang();
-    } else if (typeof i18next !== 'undefined' && i18next.language) {
-      lang = String(i18next.language).toLowerCase().startsWith('en') ? 'en' : 'fr';
-    }
-  } catch (e) { /* ignore */ }
-  document.querySelectorAll('.play-toggle-label').forEach(function (el) { el.setAttribute('lang', lang); });
+  const lng = (typeof currentDataLang === 'function') ? currentDataLang() : 'en';
+  document.querySelectorAll('.play-toggle-label').forEach(function (el) { el.setAttribute('lang', lng); });
 }
 /** Fills “Play” + “Pause” on all .play-toggle-label children; keeps both in the DOM for browser page translation. */
 function fillPlayToggleLabelTexts() {
@@ -6760,6 +7165,11 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorEvidenceType": "EVOLUTIONARY_INFERENCE",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:taxonomyUncertaintyNote": {
+        "fr": "Deux questions ouvertes, à ne pas fusionner : le taxon (attribution à A. prometheus rejetée sans nouveau nom d'espèce) versus la date (nucléides cosmogéniques ~3,67 Ma contre des lectures plus jeunes du Member 2).",
+        "en": "Two open questions, not to be merged: taxon (A. prometheus assignment rejected without a new species name) versus date (cosmogenic nuclides ~3.67 Ma vs younger Member 2 readings)."
+      },
       "hominin:references": [
         {
           "name": "Martin et al. (2025) 10.1002/ajpa.70177",
@@ -7531,6 +7941,11 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:taxonomyUncertaintyNote": {
+        "fr": "Population sœur — non ancêtre — du clade menant à Thomas Quarry I dans la lecture de 2026 (Hublin et al.). La face moderne peut être une convergence ; la phylogénie reste débattue.",
+        "en": "Sister population — not ancestor — to the clade leading to Thomas Quarry I in the 2026 reading (Hublin et al.). The modern face may be convergence; phylogeny remains debated."
+      },
       "hominin:references": [
         {
           "name": "Carbonell et al. (2008) 10.1038/nature06815",
@@ -7695,6 +8110,11 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:taxonomyUncertaintyNote": {
+        "fr": "Trois positions concurrentes, aucune consensuelle : H. longi (priorité de nomenclature), H. juluensis (reclassement Bae & Wu 2024), ou données insuffisantes pour un taxon supplémentaire (Ni). H. juluensis est un reclassement de fossiles connus, pas une découverte de terrain.",
+        "en": "Three competing positions, none consensual: H. longi (nomenclatural priority), H. juluensis (Bae & Wu 2024 reclassification), or data insufficient for an additional taxon (Ni). H. juluensis is a reclassification of known fossils, not a field discovery."
+      },
       "hominin:references": [
         {
           "name": "Bae & Wu (2024) 10.1038/s41467-024-53918-7",
@@ -8494,6 +8914,11 @@ const _EMBEDDED_SPECIES = {
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:behaviorUncertaintyNote": {
+        "fr": "La pratique funéraire est revendiquée, non établie : Berger et al. proposent des dépôts intentionnels ; les critiques taphonomiques et stratigraphiques demeurent. Ne pas affirmer une sépulture comme un fait tranché.",
+        "en": "Funerary practice is claimed, not established: Berger et al. propose intentional deposits; taphonomic and stratigraphic critiques remain. Do not state burial as settled fact."
+      },
       "hominin:references": [
         {
           "name": "Martinon-Torres et al. (2024) 10.1016/j.jhevol.2023.103464",
@@ -9782,6 +10207,11 @@ const _EMBEDDED_EVENTS = {
       "hominin:category": "phylo",
       "hominin:debateLevel": "ACTIVE_DEBATE",
       "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:uncertaintyNote": {
+        "fr": "Deux débats distincts : le taxon (prometheus écarté sans nouveau nom) et la date (cosmogénique ~3,67 Ma vs lectures plus jeunes). Les lectures journalistiques d'une « troisième espèce » dépassent l'article.",
+        "en": "Two distinct debates: taxon (prometheus ruled out without a new name) and date (cosmogenic ~3.67 Ma vs younger readings). Journalistic “third species” readings overstate the paper."
+      },
       "hominin:dateReference": "Martin et al., Am. J. Biol. Anthropol. 188:e70177 (2025) 10.1002/ajpa.70177; Granger et al., Nature 522:85 (2015) 10.1038/nature14268",
       "description": {
         "fr": "Squelette quasi complet de Sterkfontein (Silberberg Grotto). Datation cosmogénique ~3,67 Ma ; attribution à A. prometheus rejetée par Martin et al. 2025 — ni prometheus ni clairement africanus. Débat actif taxon + datation.",
@@ -10034,6 +10464,11 @@ const _EMBEDDED_EVENTS = {
       "hominin:category": "phylo",
       "hominin:debateLevel": "ACTIVE_DEBATE",
       "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:uncertaintyNote": {
+        "fr": "Trois positions concurrentes (H. longi, H. juluensis, données insuffisantes) ; pas d'ADN nucléaire hors Harbin. H. juluensis est un reclassement de fossiles connus, pas une découverte de terrain.",
+        "en": "Three competing positions (H. longi, H. juluensis, insufficient data); no nuclear DNA outside Harbin. H. juluensis is a reclassification of known fossils, not a field discovery."
+      },
       "hominin:dateReference": "Feng et al., Science 389:1320 (2025) 10.1126/science.ado9202",
       "description": {
         "fr": "Reconstruction numérique de Yunxian 2 (Hubei) : membre précoce du clade asiatique H. longi (incl. Dénisoviens), groupe frère de H. sapiens. Débat concurrent H. juluensis (Bae & Wu 2024) ; pas d'ADN nucléaire.",
@@ -10062,6 +10497,11 @@ const _EMBEDDED_EVENTS = {
       "hominin:category": "phylo",
       "hominin:debateLevel": "MODERATE_CONSENSUS",
       "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:uncertaintyNote": {
+        "fr": "La datation à 773 ka (Brunhes/Matuyama) est robuste ; la phylogénie (population basale aux trois lignées vs H. erectus en divergence) reste un consensus modéré. Cela ne tranche pas un ancêtre partagé des trois lignées.",
+        "en": "The 773 ka date (Brunhes/Matuyama) is robust; phylogeny (basal to the three lineages vs diverging H. erectus) remains moderate consensus. That does not settle a shared ancestor of the three lineages."
+      },
       "hominin:dateReference": "Hublin et al., Nature (2026) 10.1038/s41586-025-09914-y",
       "description": {
         "fr": "Thomas Quarry I, Casablanca — 773 ka (Brunhes/Matuyama, datation robuste). Population souvent présentée comme basale aux 3 lignées ; alternative : H. erectus en divergence. Datation = consensus fort ; phylogénie = consensus modéré.",
@@ -10146,6 +10586,11 @@ const _EMBEDDED_EVENTS = {
       "hominin:category": "symbolic",
       "hominin:debateLevel": "ACTIVE_DEBATE",
       "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:uncertaintyNote": {
+        "fr": "Sépulture intentionnelle revendiquée, non établie — pas de consensus (Martinón-Torres et al. 2024). Ne pas écrire une pratique funéraire comme un fait tranché.",
+        "en": "Intentional burial is claimed, not established — no consensus (Martinón-Torres et al. 2024). Do not write funerary practice as settled fact."
+      },
       "hominin:dateReference": "Berger et al., eLife (2025) 10.7554/eLife.89106; Martinon-Torres et al., J. Hum. Evol. (2024) 10.1016/j.jhevol.2023.103464",
       "description": {
         "fr": "Squelettes d'H. naledi dans les chambres profondes de Rising Star (Afrique du Sud). Berger et al. proposent des dépôts intentionnels de corps, foyers et gravures symboliques chez un hominine à cerveau réduit (~465–610 cm³). Contesté vigoureusement sur les plans taphonomique et stratigraphique — pas de consensus sur les sépultures intentionnelles (Martinón-Torres et al. 2024, J. Hum. Evol.).",
@@ -10651,26 +11096,40 @@ async function loadData() {
 async function ej_json(r) { return r.json(); }
 
 // Language helpers --------------------------------------------------------
-// Prefer the initialised i18n language. Until init(), i18next.language is the
-// English fallback and must be ignored — otherwise loadData() freezes the
-// catalogue in English while a French browser still gets French chrome.
+// Chrome UI and catalogue share one language (en | fr).
+// Default: navigator.language starts with "fr" → French; otherwise English
+// (so non-FR browsers can use Translate this page).
+// ?lang= wins. The burger select sets `_userLangOverride` for this view only.
+let _userLangOverride = null;
+
+function browserPrefersFrenchCatalogue() {
+  return browserUiLang() === 'fr';
+}
+
 function currentDataLang() {
   try {
-    if (typeof i18next !== 'undefined' && i18next.isInitialized && i18next.language) {
-      const raw = String(i18next.language).toLowerCase();
-      return raw.startsWith('fr') ? 'fr' : 'en';
-    }
+    const q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+    if (q === 'fr' || q === 'en') return q;
   } catch (e) { /* ignore */ }
+  if (_userLangOverride === 'fr' || _userLangOverride === 'en') return _userLangOverride;
+  return browserPrefersFrenchCatalogue() ? 'fr' : 'en';
+}
+
+function setCatalogueLang(lng) {
+  const next = lng === 'fr' ? 'fr' : 'en';
+  _userLangOverride = next;
   try {
-    const initial = document.documentElement.getAttribute('data-initial-ui-lang');
-    if (initial === 'fr' || initial === 'en') return initial;
+    localStorage.removeItem('ho_lang_override');
+    localStorage.removeItem('ho_lang_user');
+    localStorage.removeItem('ho_catalogue_lang');
   } catch (e) { /* ignore */ }
-  try {
-    const stored = localStorage.getItem('ho_ui_lang');
-    if (stored === 'fr' || stored === 'en') return stored;
-  } catch (e) { /* ignore */ }
-  const nav = (((navigator.languages && navigator.languages[0]) || navigator.language || 'en')).toLowerCase();
-  return nav.startsWith('fr') ? 'fr' : 'en';
+  const sel = document.getElementById('catalogue-lang-select');
+  if (sel && sel.value !== next) sel.value = next;
+  if (typeof i18next !== 'undefined' && i18next.isInitialized && i18next.language !== next) {
+    i18next.changeLanguage(next);
+  } else if (typeof relocaliseData === 'function') {
+    relocaliseData();
+  }
 }
 
 // Picks the localised string from an {fr,en} object; tolerates plain strings
@@ -10762,6 +11221,13 @@ function adaptSpecies(item) {
   HOMININ_CERTAINTY_KEYS.forEach((k) => {
     if (item[k] !== undefined && item[k] !== null) sp[k] = item[k];
   });
+  if (item['hominin:lastReviewed']) {
+    sp['hominin:lastReviewed'] = item['hominin:lastReviewed'];
+  }
+  const taxNote = pickLang(item['hominin:taxonomyUncertaintyNote']);
+  if (taxNote) sp['hominin:taxonomyUncertaintyNote'] = taxNote;
+  const behNote = pickLang(item['hominin:behaviorUncertaintyNote']);
+  if (behNote) sp['hominin:behaviorUncertaintyNote'] = behNote;
   if (Array.isArray(item['hominin:references'])) {
     sp['hominin:references'] = item['hominin:references'];
   }
@@ -10786,6 +11252,11 @@ function adaptEvent(item) {
   EVENT_CERTAINTY_KEYS.forEach((k) => {
     if (item[k] !== undefined && item[k] !== null) ev[k] = item[k];
   });
+  if (item['hominin:lastReviewed']) {
+    ev['hominin:lastReviewed'] = item['hominin:lastReviewed'];
+  }
+  const uNote = pickLang(item['hominin:uncertaintyNote']);
+  if (uNote) ev['hominin:uncertaintyNote'] = uNote;
   return ev;
 }
 
@@ -11111,131 +11582,23 @@ document.addEventListener('DOMContentLoaded', function initBurger() {
 // Scientific narrative is NOT here — it lives in species.json / events.json.
 // =====================================================================
 const TRANSLATIONS = {
-  fr: {
-    translation: {
-      ui: {
-        toggleTheme: 'Basculer mode clair/sombre',
-        play: 'Play', pause: 'Pause',
-        appSubtitle: 'Explorez près de 7,5 millions d\'années de migrations humaines',
-        language: 'Langue',
-        pageTranslateDesigned: 'L\'interface existe en français et en anglais. Pour toute autre langue, l\'application est conçue pour que <strong>Google Traduction</strong> (ou « Traduire cette page » dans Chrome, Edge, Safari…) traduise automatiquement le contenu.',
-        browserTranslateHint: 'Cette page est en anglais (le français est aussi intégré). Votre navigateur est en <strong>{lang}</strong> (<code>{code}</code>). Pour la lire en {lang}, utilisez <strong>Traduire cette page</strong> — l\'icône Google Traduction dans la barre d\'adresse, ou le bandeau de traduction.',
-        mapLayers: 'Couches carte',
-        displayBurgerSection: 'Affichage',
-        aboutAppTitle: 'Le projet',
-        criticsIntro: 'Expérimental — destiné aux critiques',
-        aboutAppBody: 'Hominines Origins est une collecte de données issues d’articles scientifiques, assistée par l’IA, et une application interactive générée à partir de cette connaissance. Les faits restent traçables et rattachés à des sources, avec un DOI lorsque c’est possible.',
-        aboutAppShows: 'La carte et la frise montrent où chaque groupe a vécu, quand, comment il s’est déplacé, et ce que les traces matérielles disent de l’apparence et des techniques. L’application tourne dans le navigateur, sans serveur ni compte.',
-        aboutAppData: 'Sous l’affichage, le catalogue est en JSON-LD : c’est ce que l’application charge. Vous pouvez le lire ici.',
-        selectSpecies: 'Sélectionnez une espèce',
-        selectSpeciesDesc: 'Cliquez sur un marqueur sur la carte ou déplacez la barre chronologique pour explorer',
-        slideTimeline: '◄ glissez ou tapez sur la timeline ►',
-        welcomeHint: '▶ Appuyez sur <strong style="color:var(--color-primary)">Play</strong> pour voir l\'\u00e9volution en direct',
-        legendTitle: 'Espèces visibles',
-        skinBand: 'Peau', eventsBand: 'Jalons',
-        layerSites: 'Sites fossiles', layerMigrations: 'Migrations',
-        layerRange: 'Zones', layerEvents: 'Jalons culturels',
-        pigmentation: 'Pigmentation', skin: 'Peau', eyes: 'Yeux', hair: 'Cheveux',
-        certaintyDna: 'ADN direct', certaintyGenetic: 'Génétique', certaintyInference: 'Inférence', certaintyDebate: 'Débat',
-        debateTitle: 'Débat scientifique',
-        logoSub: 'Évolution · Migrations · Pigmentation',
-        noSpecies: 'Aucune espèce à cette période',
-        // Panel details
-        period: 'Période', pigmentationTitle: 'Pigmentation',
-        skinLabel: 'Peau', eyesLabel: 'Yeux', hairLabel: 'Cheveux / Pelage',
-        splitVariant: 'Les nuanciers partagés (☯) indiquent une variabilité au sein de l\'espèce.',
-        biometricsTitle: 'Biométrie',
-        heightM: 'Taille (♂)', heightF: 'Taille (♀)',
-        weightM: 'Poids (♂)', brainVol: 'Volume cérébral',
-        toolsTitle: 'Technologies & Comportements',
-        debateSection: 'Débats scientifiques actifs',
-        periodTo: 'à',
-        oneSpecies: 'Homo sapiens — une seule espèce',
-        tabMap: 'Carte', tabDetail: 'Détail',
-        dataViewerTitle: 'Données JSON', dataViewerHeading: 'Données brutes (JSON-LD)',
-        tabSpecies: 'Espèces', tabEvents: 'Jalons', copyJSON: 'Copier', copied: 'Copié !',
-        experimentalWarning: 'Expérimental · Généré par IA · Vérifiez les sources',
-        // Tooltips UI
-        playTitle: 'Lecture automatique — voir les migrations en direct',
-        scrubberTitle: 'Glissez pour naviguer dans le temps',
-        layerSitesTitle: 'Afficher / masquer les sites fossiles',
-        layerMigrationsTitle: 'Afficher / masquer les routes de migration',
-        layerRangeTitle: 'Afficher / masquer les zones géographiques',
-        layerEventsTitle: 'Afficher / masquer les jalons culturels',
-        // Event categories (used in map tooltips)
-        catTools: 'Technologie lithique', catFire: 'Maîtrise du feu',
-        catPhylo: 'Phylogénie', catSymbolic: 'Comportements symboliques',
-        catArt: 'Art pariétal', catMigration: 'Migrations', catNeolithic: 'Néolithique',
-        infoMenuTitle: 'Contexte du projet et certitude scientifique',
-        infoDrawerTitle: 'Informations',
-        infoDrawerClose: 'Fermer le panneau',
-        closeButton: 'Fermer',
-        menu: 'Menu',
-        pigmentationSpectrumLabel: 'Spectre synthétique illustrant la diversité de pigmentation humaine',
-        skinFurSwatchLabel: 'Peau claire sous fourrure',
-        skinPartialFurSwatchLabel: 'Peau claire sous pelage partiel',
-        infoAboutBody: 'Hominines présente l\'évolution humaine à partir de travaux publiés (fossiles, génomique, archéologie). Les cartes et silhouettes sont des synthèses : elles évoluent lorsque de nouvelles preuves apparaissent.',
-        uncertaintySectionTitle: 'Comprendre les niveaux de certitude',
-        uncertaintyIntro: 'Pour chaque espèce, trois thèmes sont évalués : la taxonomie (comment les spécialistes classent le groupe), les comportements déduits des traces matérielles, et la pigmentation. Deux axes complètent l\'image : à quel point la communauté est alignée, et quel type de preuve soutient l\'affichage.',
-        uncertaintyAxis1Title: '1. Degré d\'accord entre scientifiques',
-        uncertaintyAxis1Body: 'Va d\'un consensus fort (cadre largement partagé) à une hypothèse encore spéculative, en passant par un débat actif lorsque plusieurs interprétations sérieuses coexistent.',
-        uncertaintyAxis2Title: '2. Nature des preuves',
-        uncertaintyAxis2Body: 'Les données directes (restes, ADN ancien ciblé) pèsent plus lourd que les inférences comparatives. Les récits médiatiques, s\'ils anticipent ou simplifient la recherche, sont signalés à part.',
-        uncertaintyDebateIntro: 'Niveaux d\'accord possibles :',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Consensus fort — la majorité des chercheurs partage le même cadre.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Consensus modéré — large accord avec des nuances ou débats de détail.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Débat actif — plusieurs thèses publiées coexistent.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Hypothèse spéculative — pistes plausibles encore peu testées.',
-        uncertaintyDebateList_UNASSESSED: 'Non évalué — pas encore rattaché à une synthèse éditoriale ; l\'absence n\'est pas un consensus.',
-        uncertaintyEvidIntro: 'Types de preuves possibles :',
-        uncertaintyEvidList_DIRECT_DATA: 'Données directes — observation directe sur restes ou molécules anciennes.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Données indirectes — fossiles, contextes archéologiques ou indices sans lecture moléculaire directe du trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Inférence évolutive — raisonnement à partir de parentés, d\'écologie ou de modèles comparés.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Récit médiatique — relais souvent simplifié ou anticipé par rapport aux publications spécialisées.',
-        uncertaintyEvidList_UNASSESSED: 'Non évalué — le type de preuve n\'a pas encore été rattaché à une source éditoriale.',
-        uncertaintyWhy: 'L’icône à trois secteurs du panneau reprend les mêmes couleurs que la liste ci‑dessous, pour toute espèce. La teinte sur la carte et sur la frise chronologique identifie le groupe taxonomique ; elle ne remplace pas ces niveaux d’accord.',
-        certaintyPanelTitle: 'Certitude par thème',
-        certaintyTriAria: 'Certitude par thème : secteur supérieur taxonomie, puis comportement, puis pigmentation (sens horaire). Survolez ou activez pour le détail.',
-        certaintyTriLegend: 'Même code pour toutes les espèces : vert = fort consensus · orange = modéré · rouge = débat actif ou hypothèse fragile.',
-        certaintyTriLegendIntro: 'Même code pour toutes les espèces :',
-        certaintyTriLegendStrong: 'fort consensus',
-        certaintyTriLegendModerate: 'modéré',
-        certaintyTriLegendWeak: 'débat actif ou hypothèse fragile',
-        certaintyDomainTax: 'Taxonomie',
-        certaintyDomainBehavior: 'Comportement',
-        certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Large accord entre chercheurs sur ce point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Bon accord général, avec des nuances actives.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Plusieurs positions défendues dans la littérature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Piste encore fragile ou peu testée.',
-        uncertaintyDebate_UNASSESSED: 'Pas encore évalué dans la synthèse éditoriale.',
-        uncertaintyEvid_DIRECT_DATA: 'Preuve directe (ex. ADN ancien ou restes très informatifs).',
-        uncertaintyEvid_INDIRECT_DATA: 'Preuves solides mais indirectes pour ce trait précis.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Déduit par comparaison évolutive ou modélisation.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Surtout relais médiatique, peu ancré dans les sources primaires.',
-        uncertaintyEvid_UNASSESSED: 'Type de preuve non encore évalué.',
-        timelineViewGroupAria: 'Contrôle du niveau de lecture sur la chronologie (vue fusionnée ou toutes les lignées).',
-        timelineViewSimple: 'Vue simple',
-        timelineViewDetailed: 'Vue détaillée',
-      }
-    }
-  },
   en: {
     translation: {
       ui: {
         toggleTheme: 'Toggle light/dark mode',
         play: 'Play', pause: 'Pause',
+        pageTitle: 'Hominines — Evolution & Migrations on Earth',
         appSubtitle: 'Explore nearly seven and a half million years of human migrations',
         language: 'Language',
-        pageTranslateDesigned: 'The interface is available in English and French. For any other language, the app is designed so <strong>Google Translate</strong> (or your browser\'s <strong>Translate this page</strong>) can automatically translate the content.',
-        browserTranslateHint: 'This page is in English (French is also built in). Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong> — the Google Translate icon in the address bar, or the translate popup.',
+        pageTranslateDesigned: 'This page is in English. Use <strong>Translate this page</strong> for any other language. Scientific catalogue text can be shown in the bundled French translation.',
+        browserTranslateHint: 'This page is in English. Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong>. Scientific catalogue text can be shown in the bundled French translation.',
         mapLayers: 'Map layers',
         displayBurgerSection: 'Display',
         aboutAppTitle: 'The project',
         criticsIntro: 'Experimental — for critics',
-        aboutAppBody: 'Hominines Origins is a structured collection of data extracted from research papers with the help of AI, and an interactive app generated from that knowledge. Claims stay traceable and linked to sources, with a DOI when one is available.',
+        aboutAppBody: 'Hominines Origins is a revisable editorial synthesis, not a certified scientific database. Primary literature (DOI) remains the reference. The app is generated from a structured collection of data extracted from research papers with the help of AI. Claims stay traceable and linked to sources, with a DOI when one is available.',
         aboutAppShows: 'The map and timeline show where each group lived, when, how they moved, and what material traces say about appearance and technology. The app runs in the browser: no server, no login.',
-        aboutAppData: 'Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here.',
+        aboutAppData: 'Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here. Editorial syntheses are also opened from this menu.',
         selectSpecies: 'Select a species',
         selectSpeciesDesc: 'Click a marker on the map or drag the timeline to explore',
         slideTimeline: '◄ drag or tap the timeline ►',
@@ -11305,14 +11668,29 @@ const TRANSLATIONS = {
         uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
         certaintyPanelTitle: 'Certainty by topic',
         certaintyTriAria: 'Certainty by topic: top sector taxonomy, then behaviour, then pigmentation (clockwise). Hover or focus the icon for full detail.',
-        certaintyTriLegend: 'Same key for every species: green = strong consensus · orange = moderate · red = active debate or fragile hypothesis.',
+        certaintyTriLegend: 'Same key for every species: green = strong consensus · blue = moderate · red = active debate · magenta = speculative hypothesis.',
         certaintyTriLegendIntro: 'Same key for every species:',
         certaintyTriLegendStrong: 'strong consensus',
-        certaintyTriLegendModerate: 'moderate',
-        certaintyTriLegendWeak: 'active debate or fragile hypothesis',
+        certaintyTriLegendModerate: 'moderate consensus',
+        certaintyTriLegendDebate: 'active debate',
+        certaintyTriLegendSpeculative: 'speculative hypothesis',
         certaintyDomainTax: 'Taxonomy',
         certaintyDomainBehavior: 'Behaviour',
         certaintyDomainPig: 'Pigmentation',
+        certaintyDomainGlossTax: 'How this group is named and classified.',
+        certaintyDomainGlossBehavior: 'Tools, burials, art and other traces of how they lived.',
+        certaintyDomainGlossPig: 'Skin colour, eyes, and hair or coat.',
+        certaintyCataloguedAs: 'Listed as',
+        certaintySkin: 'Skin',
+        certaintyEyes: 'Eyes',
+        certaintyHair: 'Hair / coat',
+        certaintySites: 'Sites',
+        certaintyCited: 'Cited',
+        certaintyTraces: 'Material traces',
+        certaintyEvidShort_DIRECT_DATA: 'direct data',
+        certaintyEvidShort_INDIRECT_DATA: 'fossils / archaeology',
+        certaintyEvidShort_EVOLUTIONARY_INFERENCE: 'evolutionary inference',
+        certaintyEvidShort_MEDIA_NARRATIVE: 'media narrative',
         uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
         uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
         uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
@@ -11326,737 +11704,158 @@ const TRANSLATIONS = {
         timelineViewGroupAria: 'Control how timeline rows are grouped (merged view or full catalogue rows).',
         timelineViewSimple: 'Simple view',
         timelineViewDetailed: 'Detailed view',
+        catalogueLangSection: 'Language',
+        sourcesSection: 'Sources',
+        docHowToRead: 'How to read the data',
+        docMorphology: 'Morphology & pigmentation',
+        docChronology: 'Chronology',
+        docReadme: 'Project README',
+        welcomeTagline: 'From African origins to the peopling of the world',
+        welcomeCriticsNote: 'Experimental — for critics',
+        welcomeBody: 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.',
+        welcomeTipCursor: 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.',
+        welcomeTipMarker: 'Click a <strong>marker</strong> on the map to show details for a species.',
+        welcomeTipPlay: 'Press <strong>Play</strong> to animate migrations through time.',
+        welcomeStart: 'Start exploring',
       }
     }
   },
-  es: {
+  fr: {
     translation: {
       ui: {
-        toggleTheme: 'Cambiar modo claro/oscuro',
-        play: 'Play', pause: 'Pausa',
-        appSubtitle: 'Explora casi siete millones y medio de años de migraciones humanas',
-        language: 'Idioma',
-        mapLayers: 'Capas del mapa',
-        displayBurgerSection: 'Visualización',
-        selectSpecies: 'Selecciona una especie',
-        selectSpeciesDesc: 'Haz clic en un marcador del mapa o arrastra la barra cronológica',
-        slideTimeline: '◄ desliza o toca la línea de tiempo ►',
-        welcomeHint: '▶ Pulsa <strong style="color:var(--color-primary)">Play</strong> para ver la evolución en directo',
-        legendTitle: 'Especies visibles',
-        skinBand: 'Piel', eventsBand: 'Hitos',
-        layerSites: 'Sitios fósiles', layerMigrations: 'Migraciones',
-        layerRange: 'Zonas', layerEvents: 'Hitos culturales',
-        pigmentation: 'Pigmentación', skin: 'Piel', eyes: 'Ojos', hair: 'Pelo',
-        certaintyDna: 'ADN directo', certaintyGenetic: 'Genético', certaintyInference: 'Inferencia', certaintyDebate: 'Debate',
-        debateTitle: 'Debate científico',
-        logoSub: 'Evolución · Migraciones · Pigmentación',
-        noSpecies: 'Sin especie en este período',
-        // Panel details
-        period: 'Período', pigmentationTitle: 'Pigmentación',
-        skinLabel: 'Piel', eyesLabel: 'Ojos', hairLabel: 'Pelo / Pelaje',
-        splitVariant: 'Las muestras divididas (☯) indican variabilidad dentro de la especie.',
-        biometricsTitle: 'Biometría',
-        heightM: 'Altura (♂)', heightF: 'Altura (♀)',
-        weightM: 'Peso (♂)', brainVol: 'Volumen cerebral',
-        toolsTitle: 'Tecnologías y Comportamientos',
-        debateSection: 'Debates científicos activos',
-        periodTo: 'a',
-        oneSpecies: 'Homo sapiens — una sola especie',
-        tabMap: 'Mapa', tabDetail: 'Detalle',
-        dataViewerTitle: 'Datos JSON', dataViewerHeading: 'Datos brutos (JSON-LD)',
-        tabSpecies: 'Especies', tabEvents: 'Hitos', copyJSON: 'Copiar', copied: '¡Copiado!',
-        experimentalWarning: 'Experimental · Generado por IA · Verifica las fuentes',
-        // Tooltips UI
-        playTitle: 'Reproducción automática — ver migraciones en directo',
-        scrubberTitle: 'Arrastra para navegar en el tiempo',
-        layerSitesTitle: 'Mostrar / ocultar sitios fósiles',
-        layerMigrationsTitle: 'Mostrar / ocultar rutas de migración',
-        layerRangeTitle: 'Mostrar / ocultar zonas geográficas',
-        layerEventsTitle: 'Mostrar / ocultar hitos culturales',
-        // Event categories
-        catTools: 'Tecnología lítica', catFire: 'Dominio del fuego',
-        catPhylo: 'Filogenia', catSymbolic: 'Comportamientos simbólicos',
-        catArt: 'Arte rupestre', catMigration: 'Migraciones', catNeolithic: 'Neolítico',
-        infoMenuTitle: 'Project context and scientific certainty',
-        infoDrawerTitle: 'Information',
-        infoDrawerClose: 'Close panel',
-        closeButton: 'Close',
-        menu: 'Menú',
-        pigmentationSpectrumLabel: 'Degradado sintético que ilustra la diversidad de pigmentación humana',
-        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
-        uncertaintySectionTitle: 'How to read certainty here',
-        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
-        uncertaintyAxis1Title: '1. How much scientists agree',
-        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
-        uncertaintyAxis2Title: '2. What kind of evidence it is',
-        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
-        uncertaintyDebateIntro: 'Agreement levels you may see:',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Strong consensus — most of the field shares the same framing.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
-        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
-        uncertaintyEvidIntro: 'Evidence types you may see:',
-        uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
-        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
-        certaintyPanelTitle: 'Certainty by topic',
-        certaintyDomainTax: 'Taxonomy',
-        certaintyDomainBehavior: 'Behaviour',
-        certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
-        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
-        uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
-        uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
-        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
-      }
-    }
-  },
-  de: {
-    translation: {
-      ui: {
-        toggleTheme: 'Hell-/Dunkelmodus umschalten',
-        play: 'Play', pause: 'Pause',
-        appSubtitle: 'Erkunden Sie fast 7,5 Millionen Jahre menschlicher Migrationen',
-        language: 'Sprache',
-        mapLayers: 'Kartenebenen',
-        displayBurgerSection: 'Anzeige',
-        selectSpecies: 'Art auswählen',
-        selectSpeciesDesc: 'Klicken Sie auf einen Marker oder ziehen Sie die Zeitleiste',
-        slideTimeline: '◄ Zeitleiste ziehen oder tippen ►',
-        welcomeHint: '▶ Klicke <strong style="color:var(--color-primary)">Play</strong> um die Evolution live zu sehen',
-        legendTitle: 'Sichtbare Arten',
-        skinBand: 'Haut', eventsBand: 'Meilensteine',
-        layerSites: 'Fundorte', layerMigrations: 'Migrationen',
-        layerRange: 'Verbreitung', layerEvents: 'Kulturelle Meilensteine',
-        pigmentation: 'Pigmentierung', skin: 'Haut', eyes: 'Augen', hair: 'Haare',
-        certaintyDna: 'Direkte DNA', certaintyGenetic: 'Genetisch', certaintyInference: 'Schlussfolgerung', certaintyDebate: 'Debatte',
-        debateTitle: 'Wissenschaftliche Debatte',
-        logoSub: 'Evolution · Migrationen · Pigmentierung',
-        noSpecies: 'Keine Art in diesem Zeitraum',
-        // Panel details
-        period: 'Zeitraum', pigmentationTitle: 'Pigmentierung',
-        skinLabel: 'Haut', eyesLabel: 'Augen', hairLabel: 'Haar / Fell',
-        splitVariant: 'Geteilte Farbfelder (☯) zeigen Variabilität innerhalb der Art.',
-        biometricsTitle: 'Biometrie',
-        heightM: 'Größe (♂)', heightF: 'Größe (♀)',
-        weightM: 'Gewicht (♂)', brainVol: 'Hirnvolumen',
-        toolsTitle: 'Technologien & Verhaltensweisen',
-        debateSection: 'Aktive wissenschaftliche Debatten',
-        periodTo: 'bis',
-        oneSpecies: 'Homo sapiens — eine einzige Spezies',
-        tabMap: 'Karte', tabDetail: 'Detail',
-        dataViewerTitle: 'JSON-Daten', dataViewerHeading: 'Rohdaten (JSON-LD)',
-        tabSpecies: 'Arten', tabEvents: 'Meilensteine', copyJSON: 'Kopieren', copied: 'Kopiert!',
-        experimentalWarning: 'Experimentell · KI-generiert · Quellen prüfen',
-        // Tooltips UI
-        playTitle: 'Automatische Wiedergabe — Migrationen in Echtzeit',
-        scrubberTitle: 'Ziehen zum Navigieren durch die Zeit',
-        layerSitesTitle: 'Fundorte ein-/ausblenden',
-        layerMigrationsTitle: 'Migrationsrouten ein-/ausblenden',
-        layerRangeTitle: 'Verbreitung ein-/ausblenden',
-        layerEventsTitle: 'Kulturelle Meilensteine ein-/ausblenden',
-        // Event categories
-        catTools: 'Steinzeittechnologie', catFire: 'Feuerbeherrschung',
-        catPhylo: 'Phylogenie', catSymbolic: 'Symbolisches Verhalten',
-        catArt: 'Höhlenmalerei', catMigration: 'Migrationen',         catNeolithic: 'Neolithikum',
-        infoMenuTitle: 'Project context and scientific certainty',
-        infoDrawerTitle: 'Information',
-        infoDrawerClose: 'Close panel',
-        closeButton: 'Close',
-        menu: 'Menü',
-        pigmentationSpectrumLabel: 'Synthetischer Farbverlauf zur menschlichen Pigmentationsvielfalt',
-        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
-        uncertaintySectionTitle: 'How to read certainty here',
-        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
-        uncertaintyAxis1Title: '1. How much scientists agree',
-        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
-        uncertaintyAxis2Title: '2. What kind of evidence it is',
-        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
-        uncertaintyDebateIntro: 'Agreement levels you may see:',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Strong consensus — most of the field shares the same framing.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
-        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
-        uncertaintyEvidIntro: 'Evidence types you may see:',
-        uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
-        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
-        certaintyPanelTitle: 'Certainty by topic',
-        certaintyDomainTax: 'Taxonomy',
-        certaintyDomainBehavior: 'Behaviour',
-        certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
-        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
-        uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
-        uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
-        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
-      }
-    }
-  },
-  zh: {
-    translation: {
-      ui: {
-        toggleTheme: '切换亮色/暗色模式',
-        play: '播放', pause: '暂停',
-        appSubtitle: '探索约750万年的人类迁徙',
-        language: '语言',
-        mapLayers: '地图图层',
-        displayBurgerSection: '显示',
-        selectSpecies: '选择物种',
-        selectSpeciesDesc: '点击地图上的标记或拖动时间轴进行探索',
-        slideTimeline: '◄ 拖动或点击时间轴 ►',
-        welcomeHint: '▶ 点击 <strong style="color:var(--color-primary)">播放</strong> 观看进化历程',
-        legendTitle: '可见物种',
-        skinBand: '肤色', eventsBand: '里程碑',
-        layerSites: '化石遗址', layerMigrations: '迁徙路线',
-        layerRange: '地理范围', layerEvents: '文化里程碑',
-        pigmentation: '色素', skin: '肤色', eyes: '眼色', hair: '发色',
-        certaintyDna: '直接DNA', certaintyGenetic: '基因', certaintyInference: '推断', certaintyDebate: '争议',
-        debateTitle: '科学争议',
-        logoSub: '进化 · 迁徙 · 色素',
-        noSpecies: '此时期无物种',
-        // Panel details
-        period: '时期', pigmentationTitle: '色素',
-        skinLabel: '肤色', eyesLabel: '眼色', hairLabel: '毛发 / 体毛',
-        splitVariant: '分色色块 (☯) 表示该物种内部存在变异。',
-        biometricsTitle: '生物测量',
-        heightM: '身高 (♂)', heightF: '身高 (♀)',
-        weightM: '体重 (♂)', brainVol: '脑容量',
-        toolsTitle: '技术与行为',
-        debateSection: '活跃科学争议',
-        periodTo: '至',
-        oneSpecies: 'Homo sapiens — 同一物种',
-        tabMap: '地图', tabDetail: '详情',
-        dataViewerTitle: 'JSON数据', dataViewerHeading: '原始数据 (JSON-LD)',
-        tabSpecies: '物种', tabEvents: '里程碑', copyJSON: '复制', copied: '已复制！',
-        experimentalWarning: '实验性 · AI生成 · 请核实来源',
-        // Tooltips UI
-        playTitle: '自动播放 — 实时观看迁徙',
-        scrubberTitle: '拖动以在时间中导航',
-        layerSitesTitle: '显示/隐藏化石遗址',
-        layerMigrationsTitle: '显示/隐藏迁徙路线',
-        layerRangeTitle: '显示/隐藏地理范围',
-        layerEventsTitle: '显示/隐藏文化里程碑',
-        // Event categories
-        catTools: '石器技术', catFire: '火的掌握',
-        catPhylo: '系统发育', catSymbolic: '象征行为',
-        catArt: '洞穴艺术', catMigration: '迁徙',         catNeolithic: '新石器时代',
-        infoMenuTitle: 'Project context and scientific certainty',
-        infoDrawerTitle: 'Information',
-        infoDrawerClose: 'Close panel',
-        closeButton: 'Close',
-        menu: '菜单',
-        pigmentationSpectrumLabel: '示意性渐变，展示人类肤色多样性',
-        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
-        uncertaintySectionTitle: 'How to read certainty here',
-        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
-        uncertaintyAxis1Title: '1. How much scientists agree',
-        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
-        uncertaintyAxis2Title: '2. What kind of evidence it is',
-        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
-        uncertaintyDebateIntro: 'Agreement levels you may see:',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Strong consensus — most of the field shares the same framing.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
-        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
-        uncertaintyEvidIntro: 'Evidence types you may see:',
-        uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
-        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
-        certaintyPanelTitle: 'Certainty by topic',
-        certaintyDomainTax: 'Taxonomy',
-        certaintyDomainBehavior: 'Behaviour',
-        certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
-        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
-        uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
-        uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
-        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
-      }
-    }
-  },
-  ar: {
-    translation: {
-      ui: {
-        toggleTheme: 'تبديل الوضع الفاتح/الداكن',
-        play: 'تشغيل', pause: 'توقف',
-        appSubtitle: 'استكشف نحو 7.5 مليون سنة من هجرات البشر',
-        language: 'اللغة',
-        mapLayers: 'طبقات الخريطة',
-        displayBurgerSection: 'العرض',
-        selectSpecies: 'اختر نوعًا',
-        selectSpeciesDesc: 'انقر على علامة على الخريطة أو اسحب الجدول الزمني',
-        slideTimeline: '◄ اسحب أو المس الجدول الزمني ►',
-        welcomeHint: '▶ اضغط على <strong style="color:var(--color-primary)">تشغيل</strong> لمشاهدة التطور مباشرة',
-        legendTitle: 'الأنواع الظاهرة',
-        skinBand: 'بشرة', eventsBand: 'معالم',
-        layerSites: 'مواقع الأحفور', layerMigrations: 'الهجرات',
-        layerRange: 'المناطق', layerEvents: 'معالم ثقافية',
-        pigmentation: 'التصبغ', skin: 'بشرة', eyes: 'عيون', hair: 'شعر',
-        certaintyDna: 'DNA مباشر', certaintyGenetic: 'جيني', certaintyInference: 'استنتاج', certaintyDebate: 'جدال',
-        debateTitle: 'جدال علمي',
-        logoSub: 'تطور · هجرة · تصبغ',
-        noSpecies: 'لا توجد أنواع في هذه الفترة',
-        // Panel details
-        period: 'الفترة', pigmentationTitle: 'التصبغ',
-        skinLabel: 'بشرة', eyesLabel: 'عيون', hairLabel: 'شعر / فراء',
-        splitVariant: 'عينات الألوان المقسمة (☯) تشير إلى تباين داخل النوع.',
-        biometricsTitle: 'القياسات الحيوية',
-        heightM: 'الطول (♂)', heightF: 'الطول (♀)',
-        weightM: 'الوزن (♂)', brainVol: 'حجم الدماغ',
-        toolsTitle: 'التقنيات والسلوكيات',
-        debateSection: 'نقاشات علمية نشطة',
-        periodTo: 'إلى',
-        oneSpecies: 'Homo sapiens — نوع واحد',
-        tabMap: 'خريطة', tabDetail: 'تفاصيل',
-        dataViewerTitle: 'بيانات JSON', dataViewerHeading: 'البيانات الخام (JSON-LD)',
-        tabSpecies: 'الأنواع', tabEvents: 'المعالم', copyJSON: 'نسخ', copied: 'تم النسخ!',
-        experimentalWarning: 'تجريبي · توليد ذكاء اصطناعي · تحقق من المصادر',
-        // Tooltips UI
-        playTitle: 'تشغيل تلقائي — شاهد الهجرات في الوقت الفعلي',
-        scrubberTitle: 'اسحب للتنقل عبر الزمن',
-        layerSitesTitle: 'إظهار / إخفاء مواقع الأحفور',
-        layerMigrationsTitle: 'إظهار / إخفاء مسارات الهجرة',
-        layerRangeTitle: 'إظهار / إخفاء المناطق الجغرافية',
-        layerEventsTitle: 'إظهار / إخفاء المعالم الثقافية',
-        // Event categories
-        catTools: 'التكنولوجيا الحجرية', catFire: 'إتقان النار',
-        catPhylo: 'علم الأنساب', catSymbolic: 'السلوك الرمزي',
-        catArt: 'فن الكهوف', catMigration: 'الهجرات',         catNeolithic: 'العصر الحجري الحديث',
-        infoMenuTitle: 'Project context and scientific certainty',
-        infoDrawerTitle: 'Information',
-        infoDrawerClose: 'Close panel',
-        closeButton: 'Close',
-        menu: 'القائمة',
-        pigmentationSpectrumLabel: 'تدرج لوني توضيحي يمثل تنوع صبغة البشرة البشرية',
-        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
-        uncertaintySectionTitle: 'How to read certainty here',
-        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
-        uncertaintyAxis1Title: '1. How much scientists agree',
-        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
-        uncertaintyAxis2Title: '2. What kind of evidence it is',
-        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
-        uncertaintyDebateIntro: 'Agreement levels you may see:',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Strong consensus — most of the field shares the same framing.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
-        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
-        uncertaintyEvidIntro: 'Evidence types you may see:',
-        uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
-        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
-        certaintyPanelTitle: 'Certainty by topic',
-        certaintyDomainTax: 'Taxonomy',
-        certaintyDomainBehavior: 'Behaviour',
-        certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
-        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
-        uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
-        uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
-        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
-      }
-    }
-  },
-  pt: {
-    translation: {
-      ui: {
-        toggleTheme: 'Alternar modo claro/escuro',
-        play: 'Play', pause: 'Pausar',
-        appSubtitle: 'Explore quase sete milhões e meio de anos de migrações humanas',
-        language: 'Idioma',
-        mapLayers: 'Camadas do mapa',
-        displayBurgerSection: 'Visualização',
-        selectSpecies: 'Selecione uma espécie',
-        selectSpeciesDesc: 'Clique num marcador no mapa ou arraste a linha do tempo',
-        slideTimeline: '◄ arraste ou toque na linha do tempo ►',
-        welcomeHint: '▶ Carregue em <strong style="color:var(--color-primary)">Play</strong> para ver a evolução ao vivo',
-        legendTitle: 'Espécies visíveis',
-        skinBand: 'Pele', eventsBand: 'Marcos',
-        layerSites: 'Sítios fósseis', layerMigrations: 'Migrações',
-        layerRange: 'Zonas', layerEvents: 'Marcos culturais',
-        pigmentation: 'Pigmentação', skin: 'Pele', eyes: 'Olhos', hair: 'Cabelo',
-        certaintyDna: 'ADN direto', certaintyGenetic: 'Genético', certaintyInference: 'Inferência', certaintyDebate: 'Debate',
-        debateTitle: 'Debate científico',
-        logoSub: 'Evolução · Migrações · Pigmentação',
-        noSpecies: 'Nenhuma espécie neste período',
-        // Panel details
-        period: 'Período', pigmentationTitle: 'Pigmentação',
-        skinLabel: 'Pele', eyesLabel: 'Olhos', hairLabel: 'Cabelo / Pelagem',
-        splitVariant: 'Amostras divididas (☯) indicam variabilidade dentro da espécie.',
-        biometricsTitle: 'Biometria',
-        heightM: 'Altura (♂)', heightF: 'Altura (♀)',
-        weightM: 'Peso (♂)', brainVol: 'Volume cerebral',
-        toolsTitle: 'Tecnologias e Comportamentos',
-        debateSection: 'Debates científicos ativos',
-        periodTo: 'a',
-        oneSpecies: 'Homo sapiens — uma única espécie',
-        tabMap: 'Mapa', tabDetail: 'Detalhe',
-        dataViewerTitle: 'Dados JSON', dataViewerHeading: 'Dados brutos (JSON-LD)',
-        tabSpecies: 'Espécies', tabEvents: 'Marcos', copyJSON: 'Copiar', copied: 'Copiado!',
-        experimentalWarning: 'Experimental · Gerado por IA · Verifique as fontes',
-        // Tooltips UI
-        playTitle: 'Reprodução automática — ver migrações em direto',
-        scrubberTitle: 'Arraste para navegar no tempo',
-        layerSitesTitle: 'Mostrar / ocultar sítios fósseis',
-        layerMigrationsTitle: 'Mostrar / ocultar rotas de migração',
-        layerRangeTitle: 'Mostrar / ocultar zonas geográficas',
-        layerEventsTitle: 'Mostrar / ocultar marcos culturais',
-        // Event categories
-        catTools: 'Tecnologia lítica', catFire: 'Domínio do fogo',
-        catPhylo: 'Filogenia', catSymbolic: 'Comportamentos simbólicos',
-        catArt: 'Arte rupestre', catMigration: 'Migrações', catNeolithic: 'Neolítico',
-        infoMenuTitle: 'Project context and scientific certainty',
-        infoDrawerTitle: 'Information',
-        infoDrawerClose: 'Close panel',
-        closeButton: 'Close',
+        toggleTheme: 'Thème clair / sombre',
+        play: 'Lecture', pause: 'Pause',
+        pageTitle: 'Hominines — Évolution et migrations sur Terre',
+        appSubtitle: 'Explorer près de sept millions et demi d’années de migrations humaines',
+        language: 'Langue',
+        pageTranslateDesigned: 'L’interface et le catalogue sont en français. Pour une autre langue, utilisez <strong>Traduire cette page</strong>.',
+        browserTranslateHint: 'Cette page est en anglais. Votre navigateur est en <strong>{lang}</strong> (<code>{code}</code>). Pour la lire en {lang}, utilisez <strong>Traduire cette page</strong>.',
+        mapLayers: 'Couches de la carte',
+        displayBurgerSection: 'Affichage',
+        aboutAppTitle: 'Le projet',
+        criticsIntro: 'Expérimental — pour les lecteurs critiques',
+        aboutAppBody: 'Hominines Origins est une synthèse éditoriale révisable, non une base scientifique certifiée. La littérature primaire (DOI) reste la référence. L’application est générée à partir d’un corpus structuré extrait d’articles de recherche, avec l’aide de l’IA. Les affirmations restent traçables et liées aux sources, avec un DOI lorsqu’il existe.',
+        aboutAppShows: 'La carte et la frise montrent où chaque groupe a vécu, quand, comment il s’est déplacé, et ce que les traces matérielles disent de l’apparence et des techniques. L’application tourne dans le navigateur : pas de serveur, pas de compte.',
+        aboutAppData: 'Sous l’affichage, le catalogue est du JSON-LD : c’est ce que l’application charge. Vous pouvez le lire ici. Les synthèses éditoriales s’ouvrent aussi depuis ce menu.',
+        selectSpecies: 'Choisir une espèce',
+        selectSpeciesDesc: 'Cliquez un marqueur sur la carte ou faites glisser la frise pour explorer',
+        slideTimeline: '◄ glissez ou touchez la frise ►',
+        welcomeHint: '▶ Appuyez sur <strong style="color:var(--color-primary)">Lecture</strong> pour voir l’évolution se dérouler',
+        legendTitle: 'Espèces visibles',
+        skinBand: 'Peau', eventsBand: 'Jalons',
+        layerSites: 'Sites fossiles', layerMigrations: 'Migrations',
+        layerRange: 'Aires de répartition', layerEvents: 'Jalons culturels',
+        pigmentation: 'Pigmentation', skin: 'Peau', eyes: 'Yeux', hair: 'Cheveux',
+        certaintyDna: 'ADN direct', certaintyGenetic: 'Génétique', certaintyInference: 'Inférence', certaintyDebate: 'Débat',
+        debateTitle: 'Débat scientifique',
+        logoSub: 'Évolution · Migrations · Pigmentation',
+        noSpecies: 'Aucune espèce à cette période',
+        period: 'Période', pigmentationTitle: 'Pigmentation',
+        skinLabel: 'Peau', eyesLabel: 'Yeux', hairLabel: 'Cheveux / pelage',
+        splitVariant: 'Les pastilles partagées (☯) signalent une variabilité au sein de l’espèce.',
+        biometricsTitle: 'Biométrie',
+        heightM: 'Taille (♂)', heightF: 'Taille (♀)',
+        weightM: 'Poids (♂)', brainVol: 'Volume cérébral',
+        toolsTitle: 'Techniques et comportements',
+        debateSection: 'Débats scientifiques ouverts',
+        periodTo: 'à',
+        oneSpecies: 'Homo sapiens — une seule espèce',
+        tabMap: 'Carte', tabDetail: 'Détail',
+        dataViewerTitle: 'Données JSON', dataViewerHeading: 'Données brutes (JSON-LD)',
+        tabSpecies: 'Espèces', tabEvents: 'Jalons', copyJSON: 'Copier', copied: 'Copié !',
+        experimentalWarning: 'Expérimental · Généré avec l’IA · Vérifier les sources',
+        playTitle: 'Lecture automatique — voir les migrations en temps réel',
+        scrubberTitle: 'Glisser pour parcourir le temps',
+        layerSitesTitle: 'Afficher / masquer les sites fossiles',
+        layerMigrationsTitle: 'Afficher / masquer les routes de migration',
+        layerRangeTitle: 'Afficher / masquer les aires géographiques',
+        layerEventsTitle: 'Afficher / masquer les jalons culturels',
+        catTools: 'Technologie lithique', catFire: 'Maîtrise du feu',
+        catPhylo: 'Phylogénie', catSymbolic: 'Comportement symbolique',
+        catArt: 'Art pariétal', catMigration: 'Migrations', catNeolithic: 'Néolithique',
+        infoMenuTitle: 'Contexte du projet et certitude scientifique',
+        infoDrawerTitle: 'Informations',
+        infoDrawerClose: 'Fermer le panneau',
+        closeButton: 'Fermer',
         menu: 'Menu',
-        pigmentationSpectrumLabel: 'Gradiente sintético que ilustra a diversidade de pigmentação humana',
-        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
-        uncertaintySectionTitle: 'How to read certainty here',
-        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
-        uncertaintyAxis1Title: '1. How much scientists agree',
-        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
-        uncertaintyAxis2Title: '2. What kind of evidence it is',
-        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
-        uncertaintyDebateIntro: 'Agreement levels you may see:',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Strong consensus — most of the field shares the same framing.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
-        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
-        uncertaintyEvidIntro: 'Evidence types you may see:',
-        uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
-        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
-        certaintyPanelTitle: 'Certainty by topic',
-        certaintyDomainTax: 'Taxonomy',
-        certaintyDomainBehavior: 'Behaviour',
+        pigmentationSpectrumLabel: 'Dégradé synthétique illustrant la diversité de pigmentation humaine',
+        skinFurSwatchLabel: 'Peau claire sous fourrure',
+        skinPartialFurSwatchLabel: 'Peau claire sous fourrure partielle',
+        infoAboutBody: 'Hominines résume l’évolution humaine à partir de la science publiée (fossiles, génomique, archéologie). Cartes et figures sont des synthèses prudentes, révisées quand de nouvelles preuves apparaissent.',
+        uncertaintySectionTitle: 'Comment lire la certitude ici',
+        uncertaintyIntro: 'Pour chaque espèce, trois domaines : la taxonomie (comment les chercheurs classent le groupe), le comportement inféré des traces matérielles, et la pigmentation. Deux axes complètent le tableau : le degré d’accord des spécialistes, et le type de preuves.',
+        uncertaintyAxis1Title: '1. Degré d’accord scientifique',
+        uncertaintyAxis1Body: 'Du consensus fort (la plupart des chercheurs partagent le même cadrage) aux hypothèses encore spéculatives, en passant par le débat actif lorsque plusieurs interprétations sérieuses coexistent.',
+        uncertaintyAxis2Title: '2. Type de preuve',
+        uncertaintyAxis2Body: 'Les données directes (os, ADN ancien ciblé) pèsent plus que l’inférence évolutive comparative. Les récits médiatiques en avance sur les publications sont signalés à part.',
+        uncertaintyDebateIntro: 'Niveaux d’accord possibles :',
+        uncertaintyDebateList_STRONG_CONSENSUS: 'Consensus fort — la plus grande partie du champ partage le même cadrage.',
+        uncertaintyDebateList_MODERATE_CONSENSUS: 'Consensus modéré — accord large, avec des nuances encore discutées.',
+        uncertaintyDebateList_ACTIVE_DEBATE: 'Débat actif — plusieurs interprétations publiées coexistent.',
+        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Hypothèse spéculative — pistes plausibles encore peu testées.',
+        uncertaintyDebateList_UNASSESSED: 'Non évalué — pas encore rattaché à une synthèse éditoriale ; l’absence n’est pas un consensus.',
+        uncertaintyEvidIntro: 'Types de preuves possibles :',
+        uncertaintyEvidList_DIRECT_DATA: 'Donnée directe — observation directe sur des restes ou des molécules anciennes.',
+        uncertaintyEvidList_INDIRECT_DATA: 'Donnée indirecte — fossiles, contexte archéologique, ou indices sans lecture moléculaire directe du trait.',
+        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Inférence évolutive — raisonnement à partir d’espèces apparentées, de l’écologie ou de modèles comparatifs.',
+        uncertaintyEvidList_MEDIA_NARRATIVE: 'Récit médiatique — souvent simplifié ou en avance sur les publications spécialisées.',
+        uncertaintyEvidList_UNASSESSED: 'Non évalué — le type de preuve n’a pas encore été rattaché à une source éditoriale.',
+        uncertaintyWhy: 'L’icône à trois secteurs utilise exactement les mêmes couleurs que la liste ci-dessous, pour chaque espèce. Les couleurs de la carte et de la frise identifient le groupe taxonomique ; ce ne sont pas ces niveaux d’accord.',
+        certaintyPanelTitle: 'Certitude par domaine',
+        certaintyTriAria: 'Certitude par domaine : secteur du haut taxonomie, puis comportement, puis pigmentation (sens horaire). Survolez ou focalisez l’icône pour le détail.',
+        certaintyTriLegend: 'Même clé pour chaque espèce : vert = consensus fort · bleu = modéré · rouge = débat actif · magenta = hypothèse spéculative.',
+        certaintyTriLegendIntro: 'Même clé pour chaque espèce :',
+        certaintyTriLegendStrong: 'consensus fort',
+        certaintyTriLegendModerate: 'consensus modéré',
+        certaintyTriLegendDebate: 'débat actif',
+        certaintyTriLegendSpeculative: 'hypothèse spéculative',
+        certaintyDomainTax: 'Taxonomie',
+        certaintyDomainBehavior: 'Comportement',
         certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
-        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
-        uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
-        uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
-        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
+        certaintyDomainGlossTax: 'Comment on nomme et classe ce groupe.',
+        certaintyDomainGlossBehavior: 'Outils, sépultures, art et autres traces du mode de vie.',
+        certaintyDomainGlossPig: 'Couleur de la peau, des yeux, et cheveux ou pelage.',
+        certaintyCataloguedAs: 'Fiche catalogue :',
+        certaintySkin: 'Peau',
+        certaintyEyes: 'Yeux',
+        certaintyHair: 'Cheveux / pelage',
+        certaintySites: 'Sites',
+        certaintyCited: 'Références',
+        certaintyTraces: 'Traces matérielles',
+        certaintyEvidShort_DIRECT_DATA: 'donnée directe',
+        certaintyEvidShort_INDIRECT_DATA: 'fossiles / archéologie',
+        certaintyEvidShort_EVOLUTIONARY_INFERENCE: 'inférence évolutive',
+        certaintyEvidShort_MEDIA_NARRATIVE: 'récit médiatique',
+        uncertaintyDebate_STRONG_CONSENSUS: 'Large accord des chercheurs sur ce point.',
+        uncertaintyDebate_MODERATE_CONSENSUS: 'Globalement alignés, avec des nuances encore discutées.',
+        uncertaintyDebate_ACTIVE_DEBATE: 'Plusieurs positions défendues dans la littérature.',
+        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Piste encore fragile ou peu testée.',
+        uncertaintyDebate_UNASSESSED: 'Pas encore évalué dans la synthèse éditoriale.',
+        uncertaintyEvid_DIRECT_DATA: 'Preuve directe (p. ex. ADN ancien ou restes très informatifs).',
+        uncertaintyEvid_INDIRECT_DATA: 'Preuve solide mais indirecte pour ce trait précis.',
+        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inféré par comparaison évolutive ou modélisation.',
+        uncertaintyEvid_MEDIA_NARRATIVE: 'Surtout un relais médiatique, faiblement ancré dans les sources primaires.',
+        uncertaintyEvid_UNASSESSED: 'Type de preuve pas encore évalué.',
+        timelineViewGroupAria: 'Regroupement des lignes de la frise (vue fusionnée ou catalogue complet).',
+        timelineViewSimple: 'Vue simple',
+        timelineViewDetailed: 'Vue détaillée',
+        catalogueLangSection: 'Langue',
+        sourcesSection: 'Sources',
+        docHowToRead: 'Lire les données',
+        docMorphology: 'Morphologie et pigmentation',
+        docChronology: 'Chronologie',
+        docReadme: 'README du projet',
+        welcomeTagline: 'Des origines africaines au peuplement de la Terre',
+        welcomeCriticsNote: 'Expérimental — pour les lecteurs critiques',
+        welcomeBody: 'Depuis les plus anciennes lignées d’hominines d’Afrique de l’Est, il y a quelque <strong>7,5&nbsp;millions d’années</strong>, différentes espèces&nbsp;— nos ancêtres et leurs cousins&nbsp;— se sont progressivement répandues sur la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.',
+        welcomeTipCursor: 'Déplacez le <strong>curseur de la frise</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.',
+        welcomeTipMarker: 'Cliquez un <strong>marqueur</strong> sur la carte pour afficher le détail d’une espèce.',
+        welcomeTipPlay: 'Appuyez sur <strong>Lecture</strong> pour animer les migrations dans le temps.',
+        welcomeStart: 'Commencer l’exploration',
       }
     }
-  },
-  it: {
-    translation: {
-      ui: {
-        toggleTheme: 'Passa modalità chiara/scura',
-        play: 'Play', pause: 'Pausa',
-        appSubtitle: 'Esplora quasi sette milioni e mezzo di anni di migrazioni umane',
-        language: 'Lingua',
-        mapLayers: 'Livelli mappa',
-        displayBurgerSection: 'Schermo',
-        selectSpecies: 'Seleziona una specie',
-        selectSpeciesDesc: 'Clicca su un marker sulla mappa o trascina la timeline',
-        slideTimeline: '◄ trascina o tocca la timeline ►',
-        welcomeHint: '▶ Premi <strong style="color:var(--color-primary)">Play</strong> per vedere l\'evoluzione in diretta',
-        legendTitle: 'Specie visibili',
-        skinBand: 'Pelle', eventsBand: 'Tappe',
-        layerSites: 'Siti fossili', layerMigrations: 'Migrazioni',
-        layerRange: 'Zone', layerEvents: 'Tappe culturali',
-        pigmentation: 'Pigmentazione', skin: 'Pelle', eyes: 'Occhi', hair: 'Capelli',
-        certaintyDna: 'DNA diretto', certaintyGenetic: 'Genetico', certaintyInference: 'Inferenza', certaintyDebate: 'Dibattito',
-        debateTitle: 'Dibattito scientifico',
-        logoSub: 'Evoluzione · Migrazioni · Pigmentazione',
-        noSpecies: 'Nessuna specie in questo periodo',
-        // Panel details
-        period: 'Periodo', pigmentationTitle: 'Pigmentazione',
-        skinLabel: 'Pelle', eyesLabel: 'Occhi', hairLabel: 'Capelli / Pelliccia',
-        splitVariant: 'I campioni divisi (☯) indicano variabilità all\'interno della specie.',
-        biometricsTitle: 'Biometria',
-        heightM: 'Altezza (♂)', heightF: 'Altezza (♀)',
-        weightM: 'Peso (♂)', brainVol: 'Volume cerebrale',
-        toolsTitle: 'Tecnologie e Comportamenti',
-        debateSection: 'Dibattiti scientifici attivi',
-        periodTo: 'a',
-        oneSpecies: 'Homo sapiens — un\'unica specie',
-        tabMap: 'Mappa', tabDetail: 'Dettaglio',
-        dataViewerTitle: 'Dati JSON', dataViewerHeading: 'Dati grezzi (JSON-LD)',
-        tabSpecies: 'Specie', tabEvents: 'Tappe', copyJSON: 'Copia', copied: 'Copiato!',
-        experimentalWarning: 'Sperimentale · Generato da IA · Verificare le fonti',
-        // Tooltips UI
-        playTitle: 'Riproduzione automatica — guarda le migrazioni in tempo reale',
-        scrubberTitle: 'Trascina per navigare nel tempo',
-        layerSitesTitle: 'Mostra / nascondi siti fossili',
-        layerMigrationsTitle: 'Mostra / nascondi rotte di migrazione',
-        layerRangeTitle: 'Mostra / nascondi zone geografiche',
-        layerEventsTitle: 'Mostra / nascondi tappe culturali',
-        // Event categories
-        catTools: 'Tecnologia litica', catFire: 'Padronanza del fuoco',
-        catPhylo: 'Filogenesi', catSymbolic: 'Comportamenti simbolici',
-        catArt: 'Arte rupestre', catMigration: 'Migrazioni', catNeolithic: 'Neolitico',
-        infoMenuTitle: 'Project context and scientific certainty',
-        infoDrawerTitle: 'Information',
-        infoDrawerClose: 'Close panel',
-        closeButton: 'Close',
-        menu: 'Menu',
-        pigmentationSpectrumLabel: 'Gradiente sintetico che illustra la diversità della pigmentazione umana',
-        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
-        uncertaintySectionTitle: 'How to read certainty here',
-        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
-        uncertaintyAxis1Title: '1. How much scientists agree',
-        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
-        uncertaintyAxis2Title: '2. What kind of evidence it is',
-        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
-        uncertaintyDebateIntro: 'Agreement levels you may see:',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Strong consensus — most of the field shares the same framing.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
-        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
-        uncertaintyEvidIntro: 'Evidence types you may see:',
-        uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
-        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
-        certaintyPanelTitle: 'Certainty by topic',
-        certaintyDomainTax: 'Taxonomy',
-        certaintyDomainBehavior: 'Behaviour',
-        certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
-        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
-        uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
-        uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
-        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
-      }
-    }
-  },
-  ja: {
-    translation: {
-      ui: {
-        toggleTheme: 'ライト/ダーク切替',
-        play: '再生', pause: '一時停止',
-        appSubtitle: '約750万年にわたる人類の移動を探る',
-        language: '言語',
-        mapLayers: '地図のレイヤー',
-        displayBurgerSection: '表示',
-        selectSpecies: '種を選択',
-        selectSpeciesDesc: '地図のマーカーをクリック、またはタイムラインをドラッグして探索',
-        slideTimeline: '◄ タイムラインをドラッグまたはタップ ►',
-        welcomeHint: '▶ <strong style="color:var(--color-primary)">再生</strong> を押して進化の歴史を見る',
-        legendTitle: '表示種',
-        skinBand: '肌色', eventsBand: '里程標',
-        layerSites: '化石遂跡', layerMigrations: '移動ルート',
-        layerRange: '分布域', layerEvents: '文化里程標',
-        pigmentation: '色素', skin: '肌', eyes: '矢', hair: '髪',
-        certaintyDna: '直接DNA', certaintyGenetic: '遣伝', certaintyInference: '推定', certaintyDebate: '議論',
-        debateTitle: '科学議論',
-        logoSub: '進化 · 移動 · 色素',
-        noSpecies: 'この時期に種はない',
-        // Panel details
-        period: '時期', pigmentationTitle: '色素',
-        skinLabel: '肌', eyesLabel: '目', hairLabel: '髪 / 体毛',
-        splitVariant: '分割スウォッチ (☯) は種内の変異を示します。',
-        biometricsTitle: '生体測定',
-        heightM: '身長 (♂)', heightF: '身長 (♀)',
-        weightM: '体重 (♂)', brainVol: '脳容量',
-        toolsTitle: '技術と行動',
-        debateSection: '現在進行中の科学的議論',
-        periodTo: 'から',
-        oneSpecies: 'Homo sapiens — ひとつの種',
-        tabMap: '地図', tabDetail: '詳細',
-        dataViewerTitle: 'JSONデータ', dataViewerHeading: '生データ (JSON-LD)',
-        tabSpecies: '種', tabEvents: '里程標', copyJSON: 'コピー', copied: 'コピー済み！',
-        experimentalWarning: '実験的 · AI生成 · ソースを確認',
-        // Tooltips UI
-        playTitle: '自動再生 — リアルタイムで移動を見る',
-        scrubberTitle: 'ドラッグして時間をナビゲート',
-        layerSitesTitle: '化石遺跡を表示/非表示',
-        layerMigrationsTitle: '移動ルートを表示/非表示',
-        layerRangeTitle: '分布域を表示/非表示',
-        layerEventsTitle: '文化里程標を表示/非表示',
-        // Event categories
-        catTools: '石器技術', catFire: '火の制御',
-        catPhylo: '系統発生', catSymbolic: '象徴的行動',
-        catArt: '洞窟芸術', catMigration: '移動', catNeolithic: '新石器時代',
-        infoMenuTitle: 'Project context and scientific certainty',
-        infoDrawerTitle: 'Information',
-        infoDrawerClose: 'Close panel',
-        closeButton: 'Close',
-        menu: 'メニュー',
-        pigmentationSpectrumLabel: '人類の色素多様性を示す合成的なグラデーション',
-        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
-        uncertaintySectionTitle: 'How to read certainty here',
-        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
-        uncertaintyAxis1Title: '1. How much scientists agree',
-        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
-        uncertaintyAxis2Title: '2. What kind of evidence it is',
-        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
-        uncertaintyDebateIntro: 'Agreement levels you may see:',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Strong consensus — most of the field shares the same framing.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
-        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
-        uncertaintyEvidIntro: 'Evidence types you may see:',
-        uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
-        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
-        certaintyPanelTitle: 'Certainty by topic',
-        certaintyDomainTax: 'Taxonomy',
-        certaintyDomainBehavior: 'Behaviour',
-        certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
-        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
-        uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
-        uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
-        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
-      }
-    }
-  },
-  ko: {
-    translation: {
-      ui: {
-        toggleTheme: '라이트/다크 모드 전환',
-        play: '재생', pause: '일시정지',
-        appSubtitle: '약 750만 년에 걸친 인류 이동 탐색',
-        language: '언어',
-        mapLayers: '지도 레이어',
-        displayBurgerSection: '표시',
-        selectSpecies: '종 선택',
-        selectSpeciesDesc: '지도의 마커를 클릭하거나 타임라인을 드래그하여 탐색',
-        slideTimeline: '◄ 타임라인 드래그 또는 탭 ►',
-        welcomeHint: '▶ <strong style="color:var(--color-primary)">재생</strong>을 눌러 진화 역사 보기',
-        legendTitle: '보이는 종',
-        skinBand: '피부', eventsBand: '이정표',
-        layerSites: '화석 유적', layerMigrations: '이동 경로',
-        layerRange: '분포 지역', layerEvents: '문화 이정표',
-        pigmentation: '색소', skin: '피부', eyes: '눈', hair: '머리카라',
-        certaintyDna: '직접 DNA', certaintyGenetic: '유전', certaintyInference: '추론', certaintyDebate: '논의',
-        debateTitle: '과학적 논의',
-        logoSub: '진화 · 이동 · 색소',
-        noSpecies: '이 시기에 종 없음',
-        // Panel details
-        period: '기간', pigmentationTitle: '색소',
-        skinLabel: '피부', eyesLabel: '눈', hairLabel: '머리카락 / 털',
-        splitVariant: '분할 견본 (☯)은 종 내의 변이를 나타냅니다.',
-        biometricsTitle: '생체 측정',
-        heightM: '키 (♂)', heightF: '키 (♀)',
-        weightM: '체중 (♂)', brainVol: '뇌 용량',
-        toolsTitle: '기술 및 행동',
-        debateSection: '활발한 과학적 논쟁',
-        periodTo: '까지',
-        oneSpecies: 'Homo sapiens — 하나의 종',
-        tabMap: '지도', tabDetail: '상세',
-        dataViewerTitle: 'JSON 데이터', dataViewerHeading: '원시 데이터 (JSON-LD)',
-        tabSpecies: '종', tabEvents: '이정표', copyJSON: '복사', copied: '복사됨!',
-        experimentalWarning: '실험적 · AI 생성 · 출처 확인 필요',
-        // Tooltips UI
-        playTitle: '자동 재생 — 실시간 이동 경로 보기',
-        scrubberTitle: '드래그하여 시간 탐색',
-        layerSitesTitle: '화석 유적 표시/숨기기',
-        layerMigrationsTitle: '이동 경로 표시/숨기기',
-        layerRangeTitle: '분포 지역 표시/숨기기',
-        layerEventsTitle: '문화 이정표 표시/숨기기',
-        // Event categories
-        catTools: '석기 기술', catFire: '불의 통제',
-        catPhylo: '계통 발생', catSymbolic: '상징적 행동',
-        catArt: '동굴 예술', catMigration: '이동', catNeolithic: '신석기 시대',
-        infoMenuTitle: 'Project context and scientific certainty',
-        infoDrawerTitle: 'Information',
-        infoDrawerClose: 'Close panel',
-        closeButton: 'Close',
-        menu: '메뉴',
-        pigmentationSpectrumLabel: '인류 색소 다양성을 보여 주는 개념적 색상 그라데이션',
-        infoAboutBody: 'Hominines summarises human evolution from published science (fossils, genomics, archaeology). Maps and figures are cautious syntheses and change when new evidence appears.',
-        uncertaintySectionTitle: 'How to read certainty here',
-        uncertaintyIntro: 'For each species we assess three topics: taxonomy (how researchers classify the group), behaviour inferred from material traces, and pigmentation. Two axes complete the picture: how aligned specialists are, and what kind of evidence supports what you see.',
-        uncertaintyAxis1Title: '1. How much scientists agree',
-        uncertaintyAxis1Body: 'Ranges from strong consensus (most researchers share the same framing) to still-speculative hypotheses, including active debate when serious competing interpretations coexist.',
-        uncertaintyAxis2Title: '2. What kind of evidence it is',
-        uncertaintyAxis2Body: 'Direct data (bones, targeted ancient DNA) weigh more than comparative evolutionary inference. Media narratives that run ahead of peer-reviewed work are flagged separately.',
-        uncertaintyDebateIntro: 'Agreement levels you may see:',
-        uncertaintyDebateList_STRONG_CONSENSUS: 'Strong consensus — most of the field shares the same framing.',
-        uncertaintyDebateList_MODERATE_CONSENSUS: 'Moderate consensus — broad agreement with active nuance on details.',
-        uncertaintyDebateList_ACTIVE_DEBATE: 'Active debate — several published interpretations coexist.',
-        uncertaintyDebateList_SPECULATIVE_HYPOTHESIS: 'Speculative hypothesis — plausible leads still thinly tested.',
-        uncertaintyDebateList_UNASSESSED: 'Not yet assessed — not yet tied to an editorial synthesis; absence is not consensus.',
-        uncertaintyEvidIntro: 'Evidence types you may see:',
-        uncertaintyEvidList_DIRECT_DATA: 'Direct data — direct observation on remains or ancient molecules.',
-        uncertaintyEvidList_INDIRECT_DATA: 'Indirect data — fossils, archaeological context, or clues without a direct molecular read-out of the trait.',
-        uncertaintyEvidList_EVOLUTIONARY_INFERENCE: 'Evolutionary inference — reasoning from related species, ecology, or comparative models.',
-        uncertaintyEvidList_MEDIA_NARRATIVE: 'Media narrative — often simplified or ahead of specialist publications.',
-        uncertaintyEvidList_UNASSESSED: 'Not yet assessed — evidence type has not yet been tied to an editorial source.',
-        uncertaintyWhy: 'The three-sector panel icon uses exactly the same colours as the list below, for every species. Map and timeline colours identify the taxonomic group; they are not the same as these agreement levels.',
-        certaintyPanelTitle: 'Certainty by topic',
-        certaintyDomainTax: 'Taxonomy',
-        certaintyDomainBehavior: 'Behaviour',
-        certaintyDomainPig: 'Pigmentation',
-        uncertaintyDebate_STRONG_CONSENSUS: 'Broad researcher agreement on this point.',
-        uncertaintyDebate_MODERATE_CONSENSUS: 'Generally aligned, with meaningful nuance still discussed.',
-        uncertaintyDebate_ACTIVE_DEBATE: 'Multiple defended positions in the literature.',
-        uncertaintyDebate_SPECULATIVE_HYPOTHESIS: 'Still a fragile or lightly tested lead.',
-        uncertaintyDebate_UNASSESSED: 'Not yet assessed in the editorial synthesis.',
-        uncertaintyEvid_DIRECT_DATA: 'Direct evidence (e.g. ancient DNA or highly informative remains).',
-        uncertaintyEvid_INDIRECT_DATA: 'Strong but indirect evidence for this specific trait.',
-        uncertaintyEvid_EVOLUTIONARY_INFERENCE: 'Inferred via evolutionary comparison or modelling.',
-        uncertaintyEvid_MEDIA_NARRATIVE: 'Mostly media relay, weakly anchored in primary sources.',
-        uncertaintyEvid_UNASSESSED: 'Evidence type not yet assessed.',
-      }
-    }
-  },
+  }
+
 };
 
 // =====================================================================
@@ -12124,13 +11923,17 @@ function pageTranslateActive() {
 }
 
 function browserPrimaryLang() {
-  const raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en');
-  return String(raw).split('-')[0].toLowerCase();
+  try {
+    return String(navigator.language || 'en').split('-')[0].toLowerCase();
+  } catch (e) {
+    return 'en';
+  }
 }
 
 function browserWantsPageTranslate() {
-  const bl = browserPrimaryLang();
-  return bl !== 'en' && bl !== 'fr';
+  const ui = (typeof currentDataLang === 'function') ? currentDataLang() : 'en';
+  if (ui === 'fr') return false;
+  return browserPrimaryLang() !== 'en';
 }
 
 function humanBrowserLangName(code) {
@@ -12154,7 +11957,7 @@ function i18nHtmlOrFallback(key, fallback) {
 function pageTranslateDesignedHtml() {
   return i18nHtmlOrFallback(
     'ui.pageTranslateDesigned',
-    'The interface is available in English and French. For any other language, the app is designed so <strong>Google Translate</strong> (or your browser\'s <strong>Translate this page</strong>) can automatically translate the content.'
+    'This page is in English. Use <strong>Translate this page</strong> for any other language. Scientific catalogue text can be shown in the bundled French translation.'
   );
 }
 
@@ -12162,7 +11965,7 @@ function browserTranslateHintHtml() {
   if (!browserWantsPageTranslate()) return '';
   const code = browserPrimaryLang();
   const name = humanBrowserLangName(code);
-  const fallback = 'This page is in English (French is also built in). Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong> — the Google Translate icon in the address bar, or the translate popup.';
+  const fallback = 'This page is in English. Your browser is <strong>{lang}</strong> (<code>{code}</code>). To read it in {lang}, use <strong>Translate this page</strong>. Scientific catalogue text can be shown in the bundled French translation.';
   const tpl = i18nHtmlOrFallback('ui.browserTranslateHint', fallback);
   return String(tpl).split('{lang}').join(name).split('{code}').join(code);
 }
@@ -12179,8 +11982,9 @@ function syncBrowserTranslateHint() {
     welcomePanel.hidden = !html;
   }
   if (burgerHint) {
+    const uiFr = typeof currentDataLang === 'function' && currentDataLang() === 'fr';
     burgerHint.innerHTML = pageTranslateDesignedHtml();
-    burgerHint.hidden = false;
+    burgerHint.hidden = uiFr;
   }
   if (banner) {
     let dismissed = false;
@@ -12194,48 +11998,35 @@ function syncBrowserTranslateHint() {
   }
 }
 
-function applyDocumentSourceLang(lng) {
+function applyDocumentSourceLang() {
   if (pageTranslateActive()) return;
-  if (document.documentElement.getAttribute('lang') === lng) return;
+  const lng = (typeof currentDataLang === 'function') ? currentDataLang() : 'en';
   document.documentElement.setAttribute('lang', lng);
+  document.documentElement.setAttribute('translate', lng === 'en' ? 'yes' : 'no');
 }
 
-/** Same EN/FR source as the rest of the app — not a separate navigator guess. */
 function welcomeUiLang() {
-  try {
-    if (typeof i18next !== 'undefined' && i18next.isInitialized && i18next.language) {
-      return String(i18next.language).toLowerCase().startsWith('fr') ? 'fr' : 'en';
-    }
-  } catch (e) { /* ignore */ }
-  if (typeof getInitialUiLang === 'function') return getInitialUiLang();
-  const initial = document.documentElement.getAttribute('data-initial-ui-lang');
-  if (initial === 'fr' || initial === 'en') return initial;
-  return 'en';
+  return (typeof currentDataLang === 'function') ? currentDataLang() : 'en';
 }
 
-function setWelcomeCopy(lang) {
-  const fr = String(lang || welcomeUiLang()).toLowerCase().startsWith('fr');
+function setWelcomeCopy() {
   function setHtml(id, html) {
     const el = document.getElementById(id);
     if (el) el.innerHTML = html;
   }
-  if (fr) {
-    setHtml('welcome-tagline', 'Des origines africaines à la conquête du monde');
-    setHtml('welcome-critics-note', 'Expérimental — destiné aux critiques');
-    setHtml('welcome-body', 'À partir des premières lignées en <strong>Afrique orientale</strong>, soit il y a près de <strong>7,5&nbsp;millions d\'années</strong>, différentes espèces d\'hominines&nbsp;— nos ancêtres et leurs cousins&nbsp;— ont progressivement colonisé toute la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.');
-    setHtml('tip-cursor', 'Déplacez le <strong>curseur de la timeline</strong> pour voyager dans le temps et voir quelles espèces étaient présentes à chaque période.');
-    setHtml('tip-marker', 'Cliquez sur un <strong>marqueur</strong> sur la carte pour afficher le détail d\'une espèce.');
-    setHtml('tip-play', 'Appuyez sur <strong>Play</strong> pour animer les migrations au fil du temps.');
-    setHtml('welcome-start-label', 'Commencer l\'exploration');
-    return;
-  }
-  setHtml('welcome-tagline', 'From African origins to the peopling of the world');
-  setHtml('welcome-critics-note', 'Experimental — for critics');
-  setHtml('welcome-body', 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.');
-  setHtml('tip-cursor', 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.');
-  setHtml('tip-marker', 'Click a <strong>marker</strong> on the map to show details for a species.');
-  setHtml('tip-play', 'Press <strong>Play</strong> to animate migrations through time.');
-  setHtml('welcome-start-label', 'Start exploring');
+  const t = function (key, fb) {
+    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+      return i18next.t('ui.' + key, { defaultValue: fb });
+    }
+    return fb;
+  };
+  setHtml('welcome-tagline', t('welcomeTagline', 'From African origins to the peopling of the world'));
+  setHtml('welcome-critics-note', t('welcomeCriticsNote', 'Experimental — for critics'));
+  setHtml('welcome-body', t('welcomeBody', 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.'));
+  setHtml('tip-cursor', t('welcomeTipCursor', 'Move the <strong>timeline cursor</strong> to travel through time and see which species were present in each period.'));
+  setHtml('tip-marker', t('welcomeTipMarker', 'Click a <strong>marker</strong> on the map to show details for a species.'));
+  setHtml('tip-play', t('welcomeTipPlay', 'Press <strong>Play</strong> to animate migrations through time.'));
+  setHtml('welcome-start-label', t('welcomeStart', 'Start exploring'));
 }
 
 function applyTranslations() {
@@ -12247,8 +12038,13 @@ function applyTranslations() {
   // map controls and panels). A future RTL mode would need mirrored controls, attribution, and QA —
   // do not infer dir from navigator.language alone.
   document.documentElement.dir = 'ltr';
-  applyDocumentSourceLang(lng);
+  applyDocumentSourceLang();
   document.documentElement.removeAttribute('data-i18n-pending');
+
+  try { document.title = t('ui.pageTitle'); } catch (e) { /* ignore */ }
+
+  const burgerPanel = document.getElementById('burger-panel');
+  if (burgerPanel) burgerPanel.setAttribute('aria-label', t('ui.menu'));
 
   // Logo subtitle
   const logoSub = document.querySelector('.logo-sub');
@@ -12358,73 +12154,48 @@ function applyTranslations() {
 
   if (typeof syncTimelineViewToggleUI === 'function') syncTimelineViewToggleUI();
 
-  setWelcomeCopy(String(lng).toLowerCase().startsWith('fr') ? 'fr' : 'en');
+  setWelcomeCopy();
   syncBrowserTranslateHint();
+  if (typeof syncDocsViewerTitles === 'function') syncDocsViewerTitles();
+  const catTitle = document.getElementById('catalogue-lang-title');
+  if (catTitle) catTitle.textContent = t('ui.catalogueLangSection');
+  const catSel = document.getElementById('catalogue-lang-select');
+  if (catSel) catSel.setAttribute('aria-label', t('ui.catalogueLangSection'));
+  const srcTitle = document.getElementById('sources-section-title');
+  if (srcTitle) srcTitle.textContent = t('ui.sourcesSection');
 }
 
-// =====================================================================
-// INIT
-// =====================================================================
 function getLangFromBrowser() {
-  const raw = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en');
-  return raw.split('-')[0].toLowerCase();
+  return browserPrimaryLang();
 }
 
-/** FR or EN for chrome: stored override, then <html data-initial-ui-lang>, then browser. */
-function getInitialUiLang() {
-  const supported = I18N_SUPPORTED;
-  const initial = document.documentElement.getAttribute('data-initial-ui-lang');
-  if (supported.includes(initial)) return initial;
-  try {
-    const stored = localStorage.getItem('ho_ui_lang');
-    if (supported.includes(stored)) return stored;
-  } catch (e) { /* ignore */ }
-  const browserLang = getLangFromBrowser();
-  if (browserLang === 'fr') return 'fr';
-  return 'en';
-}
-
-/** Init the inline i18n shim, apply strings, bind #lang-select. */
+/** Init chrome strings (en/fr) and bind the language selector. */
 function initI18n() {
-  const detected = getInitialUiLang();
-
-  // Sync the selector
-  const sel = document.getElementById('lang-select');
-  if (sel) sel.value = detected;
-
+  const startLng = (typeof currentDataLang === 'function') ? currentDataLang() : 'en';
+  i18next.on('languageChanged', function () {
+    applyTranslations();
+    if (typeof relocaliseData === 'function') relocaliseData();
+  });
   i18next
-    .init({ lng: detected })
+    .init({ lng: startLng })
     .then(() => {
       applyTranslations();
-      document.documentElement.setAttribute('translate', 'yes');
-      // init() does not fire languageChanged. Re-adapt only when the catalogue
-      // was frozen in the wrong language — a redundant rebuild dismisses Chrome's
-      // Translate this page bar.
       try {
-        if (!pageTranslateActive() && typeof relocaliseData === 'function'
+        if (typeof relocaliseData === 'function'
             && window._RAW_SPECIES_JSON && SPECIES_DATA && SPECIES_DATA[0]) {
           const sample = window._RAW_SPECIES_JSON.itemListElement[0];
           const want = typeof pickLang === 'function' ? pickLang(sample && sample.name) : '';
           if (want && want !== SPECIES_DATA[0].common) relocaliseData();
         }
       } catch (e) { /* ignore */ }
+      const sel = document.getElementById('catalogue-lang-select');
+      if (sel) {
+        sel.value = currentDataLang();
+        sel.addEventListener('change', function () {
+          setCatalogueLang(this.value);
+        });
+      }
     });
-
-  i18next.on('languageChanged', (lng) => {
-    if (!pageTranslateActive()) applyDocumentSourceLang(lng);
-    document.documentElement.setAttribute('translate', 'yes');
-    try {
-      if (!pageTranslateActive() && typeof relocaliseData === 'function') relocaliseData();
-    } catch (e) { /* ignore */ }
-  });
-
-  // Language selector change handler
-  if (sel) {
-    sel.addEventListener('change', function() {
-      try { localStorage.setItem('ho_ui_lang', this.value); } catch (e) { /* ignore */ }
-      i18next.changeLanguage(this.value).then(applyTranslations);
-    });
-  }
 }
 
 // Wait for DOM + app scripts to be ready
@@ -12445,6 +12216,7 @@ const _dv = { open: false, tab: 'species' };
 function openDataViewer(tab) {
   const ov = document.getElementById('data-viewer-overlay');
   const dr = document.getElementById('data-viewer-drawer');
+  if (typeof closeDocsViewer === 'function' && _docs && _docs.open) closeDocsViewer();
   ov.hidden = false; dr.hidden = false;
   requestAnimationFrame(() => { ov.classList.add('visible'); dr.classList.add('open'); });
   ov.setAttribute('aria-hidden','false');
@@ -12467,7 +12239,7 @@ function switchDataTab(tab) {
   const raw = tab==='species' ? window._RAW_SPECIES_JSON : window._RAW_EVENTS_JSON;
   const el = document.getElementById('json-code');
   if (!el) return;
-  if (!raw) { el.textContent='// Chargement...'; return; }
+  if (!raw) { el.textContent='// Loading…'; return; }
   el.textContent = JSON.stringify(raw,null,2);
   if (window.Prism) Prism.highlightElement(el);
 }
@@ -12486,13 +12258,267 @@ function initDataViewer() {
       const lbl = document.getElementById('copy-label');
       if (!lbl) return;
       const orig = lbl.textContent;
-      lbl.textContent = '\u2713 ' + (typeof i18next!=='undefined' && i18next.isInitialized ? i18next.t('ui.copied') : 'Copi\u00e9');
+      lbl.textContent = '\u2713 ' + (typeof i18next!=='undefined' && i18next.isInitialized ? i18next.t('ui.copied') : 'Copied');
       setTimeout(() => lbl.textContent=orig, 2000);
     }).catch(() => { /* clipboard permission denied or unavailable — leave the label alone */ });
   });
   document.addEventListener('keydown', e => { if (e.key==='Escape' && _dv.open) closeDataViewer(); });
 }
 window.addEventListener('load', initDataViewer);
+
+// =====================================================================
+// DOCS VIEWER — burger Sources drawer (English Markdown → translatable HTML)
+// =====================================================================
+const DOCS_GITHUB = {
+  'README.md': 'https://github.com/fdepierre/hominines-origins/blob/main/README.md',
+  'data-README.md': 'https://github.com/fdepierre/hominines-origins/blob/main/data/README.md',
+  'Hominins-Morphology-Pigmentation.md':
+    'https://github.com/fdepierre/hominines-origins/blob/main/data/Hominins-Morphology-Pigmentation.md',
+  'Prehistoric-Chronology-Scientific-Reference.md':
+    'https://github.com/fdepierre/hominines-origins/blob/main/data/Prehistoric-Chronology-Scientific-Reference.md',
+};
+const DOCS_TITLES = {
+  'README.md': 'Project README',
+  'data-README.md': 'How to read the data',
+  'Hominins-Morphology-Pigmentation.md': 'Morphology & pigmentation',
+  'Prehistoric-Chronology-Scientific-Reference.md': 'Chronology',
+};
+
+function docsTitleFor(filename) {
+  const t = function (key, fb) {
+    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+      return i18next.t('ui.' + key, { defaultValue: fb });
+    }
+    return fb;
+  };
+  const map = {
+    'README.md': t('docReadme', DOCS_TITLES['README.md']),
+    'data-README.md': t('docHowToRead', DOCS_TITLES['data-README.md']),
+    'Hominins-Morphology-Pigmentation.md': t('docMorphology', DOCS_TITLES['Hominins-Morphology-Pigmentation.md']),
+    'Prehistoric-Chronology-Scientific-Reference.md': t('docChronology', DOCS_TITLES['Prehistoric-Chronology-Scientific-Reference.md']),
+  };
+  return map[filename] || DOCS_TITLES[filename] || 'Sources';
+}
+
+function syncDocsViewerTitles() {
+  document.querySelectorAll('[data-doc]').forEach(function (btn) {
+    const name = btn.getAttribute('data-doc');
+    if (name && DOCS_TITLES[name]) btn.textContent = docsTitleFor(name);
+  });
+  const title = document.getElementById('docs-viewer-title');
+  const openName = title && title.getAttribute('data-doc');
+  if (title && openName) title.textContent = docsTitleFor(openName);
+}
+
+function mdEscapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function mdInline(text) {
+  let s = mdEscapeHtml(text);
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, lab, href) {
+    const safe = String(href).replace(/"/g, '').trim();
+    if (!/^(https?:|mailto:|#|\.\/|[\w./-]+)/i.test(safe)) return lab;
+    return '<a href="' + safe + '" rel="noopener noreferrer">' + lab + '</a>';
+  });
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em translate="no">$2</em>');
+  s = s.replace(/(^|[^_])_([^_\n]+)_/g, '$1<em translate="no">$2</em>');
+  return s;
+}
+
+function mdTable(rows) {
+  if (rows.length < 2) return '';
+  function cells(line) {
+    const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '');
+    return trimmed.split('|').map(function (c) { return c.trim(); });
+  }
+  const head = cells(rows[0]);
+  const body = rows.slice(2);
+  let html = '<table><thead><tr>';
+  head.forEach(function (c) { html += '<th>' + mdInline(c) + '</th>'; });
+  html += '</tr></thead><tbody>';
+  body.forEach(function (row) {
+    html += '<tr>';
+    cells(row).forEach(function (c) { html += '<td>' + mdInline(c) + '</td>'; });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+/** Minimal Markdown → HTML (headings, tables, lists, links, emphasis, quotes). */
+function renderMarkdownLite(src) {
+  const lines = String(src || '').replace(/\r\n/g, '\n').split('\n');
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (/^```/.test(line)) {
+      const buf = [];
+      i += 1;
+      while (i < lines.length && !/^```/.test(lines[i])) {
+        buf.push(lines[i]);
+        i += 1;
+      }
+      i += 1;
+      out.push('<pre><code>' + mdEscapeHtml(buf.join('\n')) + '</code></pre>');
+      continue;
+    }
+    if (/^\s*\|/.test(line) && i + 1 < lines.length && /^\s*\|?\s*:?-/.test(lines[i + 1])) {
+      const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) {
+        rows.push(lines[i]);
+        i += 1;
+      }
+      out.push(mdTable(rows));
+      continue;
+    }
+    if (/^#{1,6}\s/.test(line)) {
+      const m = line.match(/^(#{1,6})\s+(.*)$/);
+      const n = m[1].length;
+      out.push('<h' + n + '>' + mdInline(m[2].replace(/#+\s*$/, '').trim()) + '</h' + n + '>');
+      i += 1;
+      continue;
+    }
+    if (/^\s*---+\s*$/.test(line)) {
+      out.push('<hr>');
+      i += 1;
+      continue;
+    }
+    if (/^\s*>/.test(line)) {
+      const buf = [];
+      while (i < lines.length && /^\s*>/.test(lines[i])) {
+        buf.push(lines[i].replace(/^\s*>\s?/, ''));
+        i += 1;
+      }
+      out.push('<blockquote>' + buf.map(function (l) {
+        return l.trim() === '' ? '' : '<p>' + mdInline(l) + '</p>';
+      }).join('') + '</blockquote>');
+      continue;
+    }
+    if (/^\s*[-*+]\s/.test(line) || /^\s*\d+\.\s/.test(line)) {
+      const ordered = /^\s*\d+\.\s/.test(line);
+      const items = [];
+      while (i < lines.length && (ordered
+        ? /^\s*\d+\.\s/.test(lines[i])
+        : /^\s*[-*+]\s/.test(lines[i]))) {
+        items.push(lines[i].replace(/^\s*(?:[-*+]|\d+\.)\s/, ''));
+        i += 1;
+      }
+      const tag = ordered ? 'ol' : 'ul';
+      out.push('<' + tag + '>' + items.map(function (it) {
+        return '<li>' + mdInline(it) + '</li>';
+      }).join('') + '</' + tag + '>');
+      continue;
+    }
+    if (line.trim() === '') { i += 1; continue; }
+    const buf = [line];
+    i += 1;
+    while (i < lines.length && lines[i].trim() !== '' &&
+      !/^#{1,6}\s/.test(lines[i]) &&
+      !/^\s*[-*+]\s/.test(lines[i]) &&
+      !/^\s*\d+\.\s/.test(lines[i]) &&
+      !/^\s*>/.test(lines[i]) &&
+      !/^```/.test(lines[i]) &&
+      !/^\s*\|/.test(lines[i]) &&
+      !/^\s*---+\s*$/.test(lines[i])) {
+      buf.push(lines[i]);
+      i += 1;
+    }
+    out.push('<p>' + mdInline(buf.join(' ')) + '</p>');
+  }
+  return out.join('\n');
+}
+
+const _docs = { open: false };
+
+function closeBurgerIfOpen() {
+  const panel = document.getElementById('burger-panel');
+  const overlay = document.getElementById('burger-overlay');
+  if (panel) panel.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeDocsViewer() {
+  const ov = document.getElementById('docs-viewer-overlay');
+  const dr = document.getElementById('docs-viewer-drawer');
+  if (!ov || !dr) return;
+  ov.classList.remove('visible');
+  dr.classList.remove('open');
+  setTimeout(function () {
+    ov.hidden = true;
+    dr.hidden = true;
+    ov.setAttribute('aria-hidden', 'true');
+  }, 300);
+  _docs.open = false;
+}
+
+function showDocsFallback(filename) {
+  const body = document.getElementById('docs-viewer-body');
+  const fallback = document.getElementById('docs-viewer-fallback');
+  const gh = document.getElementById('docs-viewer-github');
+  if (body) { body.innerHTML = ''; body.hidden = true; }
+  if (fallback) fallback.hidden = false;
+  if (gh && DOCS_GITHUB[filename]) gh.href = DOCS_GITHUB[filename];
+}
+
+async function openDocsViewer(filename) {
+  if (!DOCS_GITHUB[filename]) return;
+  if (typeof closeDataViewer === 'function' && _dv.open) closeDataViewer();
+  closeBurgerIfOpen();
+  const ov = document.getElementById('docs-viewer-overlay');
+  const dr = document.getElementById('docs-viewer-drawer');
+  const title = document.getElementById('docs-viewer-title');
+  const body = document.getElementById('docs-viewer-body');
+  const fallback = document.getElementById('docs-viewer-fallback');
+  if (!ov || !dr || !body) return;
+  if (title) {
+    title.textContent = docsTitleFor(filename);
+    title.setAttribute('data-doc', filename);
+  }
+  body.hidden = false;
+  if (fallback) fallback.hidden = true;
+  ov.hidden = false;
+  dr.hidden = false;
+  requestAnimationFrame(function () {
+    ov.classList.add('visible');
+    dr.classList.add('open');
+  });
+  ov.setAttribute('aria-hidden', 'false');
+  _docs.open = true;
+  try {
+    const res = await fetch('./docs/' + filename);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const md = await res.text();
+    body.innerHTML = renderMarkdownLite(md);
+    body.setAttribute('translate', 'yes');
+    body.setAttribute('lang', 'en');
+  } catch (err) {
+    showDocsFallback(filename);
+  }
+}
+
+function initDocsViewer() {
+  document.querySelectorAll('[data-doc]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      openDocsViewer(btn.getAttribute('data-doc'));
+    });
+  });
+  const closeBtn = document.getElementById('btn-close-docs-viewer');
+  if (closeBtn) closeBtn.addEventListener('click', closeDocsViewer);
+  const ov = document.getElementById('docs-viewer-overlay');
+  if (ov) ov.addEventListener('click', closeDocsViewer);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && _docs.open) closeDocsViewer();
+  });
+}
+window.addEventListener('load', initDocsViewer);
 
 })();
 
@@ -12648,7 +12674,7 @@ function initWelcome() {
     afterMapReady(function () { setTimeout(hideOverlay, 1000); });
   }
   try {
-    if (typeof setWelcomeCopy === 'function') setWelcomeCopy(welcomeUiLang());
+    if (typeof setWelcomeCopy === 'function') setWelcomeCopy();
     if (typeof syncBrowserTranslateHint === 'function') {
       syncBrowserTranslateHint();
       setTimeout(syncBrowserTranslateHint, 0);
@@ -12697,18 +12723,33 @@ bootWelcome();
 <div id="data-viewer-overlay" class="data-viewer-overlay" hidden aria-hidden="true"></div>
 <aside id="data-viewer-drawer" class="data-viewer-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dvh">
   <div class="data-viewer-header">
-    <h2 id="dvh" class="data-viewer-title">Données brutes (JSON-LD)</h2>
-    <button id="btn-copy-json" class="btn-copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span id="copy-label">Copier</span></button>
+    <h2 id="dvh" class="data-viewer-title">Raw data (JSON-LD)</h2>
+    <button id="btn-copy-json" class="btn-copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span id="copy-label">Copy</span></button>
     <button id="btn-close-data-viewer" type="button" class="btn-icon" data-testid="close-data-viewer">
-      <span class="sr-only" data-i18n="ui.closeButton">Fermer</span>
+      <span class="sr-only" data-i18n="ui.closeButton">Close</span>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
   </div>
   <div class="data-viewer-tabs" role="tablist">
-    <button role="tab" aria-selected="true"  data-tab="species" class="dv-tab dv-tab-active">Espèces</button>
-    <button role="tab" aria-selected="false" data-tab="events"  class="dv-tab">Jalons</button>
+    <button role="tab" aria-selected="true"  data-tab="species" class="dv-tab dv-tab-active">Species</button>
+    <button role="tab" aria-selected="false" data-tab="events"  class="dv-tab">Milestones</button>
   </div>
   <div class="data-viewer-body"><pre class="data-viewer-pre"><code class="language-json" id="json-code" translate="no"></code></pre></div>
+</aside>
+<div id="docs-viewer-overlay" class="data-viewer-overlay" hidden aria-hidden="true"></div>
+<aside id="docs-viewer-drawer" class="data-viewer-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="docs-viewer-title">
+  <div class="data-viewer-header">
+    <h2 id="docs-viewer-title" class="data-viewer-title">Sources</h2>
+    <button id="btn-close-docs-viewer" type="button" class="btn-icon" data-testid="close-docs-viewer">
+      <span class="sr-only">Close</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+  <article id="docs-viewer-body" class="docs-article" data-testid="docs-viewer-body" translate="yes" lang="en"></article>
+  <p id="docs-viewer-fallback" class="docs-fallback" hidden>
+    Could not load this document here.
+    <a id="docs-viewer-github" href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer">Read it on GitHub</a>
+  </p>
 </aside>
 
   <!-- ===== BURGER PANEL ===== -->
@@ -12717,37 +12758,44 @@ bootWelcome();
     <div id="burger-panel-header">
       <div id="burger-app-title">Hominin<span>es</span></div>
       <button id="burger-close" type="button" data-testid="burger-close">
-        <span class="sr-only" data-i18n="ui.closeButton">Fermer</span>
+        <span class="sr-only" data-i18n="ui.closeButton">Close</span>
         <span aria-hidden="true">✕</span>
       </button>
     </div>
     <div id="burger-panel-body">
 
-      <!-- Langue -->
+      <!-- Language (JSON + chrome en/fr) + browser translate hint -->
       <div>
-        <div class="burger-section-title" data-i18n="ui.language">Langue</div>
+        <div class="burger-section-title" id="catalogue-lang-title">Language</div>
         <div class="burger-lang-wrap" translate="no">
           <span>🌐</span>
-          <select id="lang-select" data-testid="lang-select" aria-label="Language" translate="no">
+          <select id="catalogue-lang-select" data-testid="catalogue-lang-select" aria-label="Language" translate="no">
             <option value="en">English</option>
             <option value="fr">Français</option>
           </select>
         </div>
-        <p id="burger-translate-hint" data-testid="burger-translate-hint" translate="yes">The interface is available in English and French. For any other language, the app is designed so <strong>Google Translate</strong> (or your browser's <strong>Translate this page</strong>) can automatically translate the content.</p>
+        <p id="burger-translate-hint" data-testid="burger-translate-hint" translate="yes">This page is in English. Use <strong>Translate this page</strong> for any other language. Scientific catalogue text can be shown in the bundled French translation.</p>
       </div>
 
       <!-- Le projet + données JSON -->
       <div>
         <div class="burger-section-title" data-i18n-text="aboutAppTitle">The project</div>
         <p class="burger-critics" data-i18n-text="criticsIntro">Experimental — for critics</p>
-        <p class="burger-about-p" data-i18n-text="aboutAppBody">Hominines Origins is a structured collection of data extracted from research papers with the help of AI, and an interactive app generated from that knowledge. Claims stay traceable and linked to sources, with a DOI when one is available.</p>
+        <p class="burger-about-p" data-i18n-text="aboutAppBody">Hominines Origins is a revisable editorial synthesis, not a certified scientific database. Primary literature (DOI) remains the reference. The app is generated from a structured collection of data extracted from research papers with the help of AI. Claims stay traceable and linked to sources, with a DOI when one is available.</p>
         <p class="burger-about-p" data-i18n-text="aboutAppShows">The map and timeline show where each group lived, when, how they moved, and what material traces say about appearance and technology. The app runs in the browser: no server, no login.</p>
-        <p class="burger-about-p" data-i18n-text="aboutAppData">Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here.</p>
+        <p class="burger-about-p" data-i18n-text="aboutAppData">Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here. Editorial syntheses are also opened from this menu.</p>
         <div class="burger-btn-row">
           <button id="btn-data-viewer" class="layer-btn" data-i18n-title="ui.dataViewerTitle" style="flex:1; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
             <span data-i18n="ui.dataViewerTitle">JSON data</span>
           </button>
+        </div>
+        <div class="burger-section-title" id="sources-section-title" style="margin-top:1rem">Sources</div>
+        <div class="burger-docs-list">
+          <button type="button" class="layer-btn" data-testid="open-doc-data-readme" data-doc="data-README.md">How to read the data</button>
+          <button type="button" class="layer-btn" data-doc="Hominins-Morphology-Pigmentation.md">Morphology &amp; pigmentation</button>
+          <button type="button" class="layer-btn" data-doc="Prehistoric-Chronology-Scientific-Reference.md">Chronology</button>
+          <button type="button" class="layer-btn" data-doc="README.md">Project README</button>
         </div>
       </div>
 
@@ -12760,7 +12808,7 @@ bootWelcome();
           fdepierre/hominines-origins
         </a>
         <div class="burger-footer-note" data-i18n="ui.experimentalWarning">
-          Expérimental · Généré par IA · Vérifiez les sources
+          Experimental · AI-generated · Check the sources
         </div>
       </div>
 

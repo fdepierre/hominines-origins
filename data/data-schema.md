@@ -17,7 +17,7 @@ Each `itemListElement` entry is a `Species`-shaped node (custom `hominin:` and `
 |-----|------|
 | `@id` | Slug used as runtime `id` (e.g. `erectus`, `sapiens-africa`) |
 | `taxon:scientificName` | Latin binomial → runtime `name` |
-| `name` | Object with `fr` / `en` common labels → runtime `common` uses **`fr`** first |
+| `name` | Object with `fr` / `en` common labels → runtime `common` follows the catalogue language (`en` or `fr`) |
 | `hominin:periodStart`, `hominin:periodEnd` | Years BP (negative integers) → `start`, `end` |
 | `hominin:color` | Hex lane colour → `color` |
 | `hominin:regions` | Geographic ranges → `regions` |
@@ -29,6 +29,8 @@ Each `itemListElement` entry is a `Species`-shaped node (custom `hominin:` and `
 | `hominin:heightM`, `hominin:heightF`, `hominin:weightM`, `hominin:brain`, `hominin:dimorphism` | → `biometrics.*` |
 | `hominin:tools`, `hominin:debate`, `hominin:migrations` | Arrays / strings → same names on runtime object |
 | `hominin:taxonomyDebateLevel`, `hominin:taxonomyEvidenceType`, `hominin:behaviorDebateLevel`, `hominin:behaviorEvidenceType`, `hominin:pigmentationDebateLevel`, `hominin:pigmentationEvidenceType` | Uncertainty axes → copied onto runtime object by `adaptSpecies()` (`HOMININ_CERTAINTY_KEYS`) |
+| `hominin:lastReviewed` | Optional ISO date (`YYYY-MM-DD`). Copy the editorial **Last reviewed** when the entry is touched. Copied by `adaptSpecies()`. |
+| `hominin:taxonomyUncertaintyNote`, `hominin:behaviorUncertaintyNote` | Optional `{en,fr}` notes where two theses coexist. Shown under the certainty triangle; they **do not** replace `hominin:debate`. `adaptSpecies()` unwraps them with `pickLang()`. |
 | `hominin:references` | Array of `{name, identifier, hominin:supports}`. `identifier` is a DOI; `name` must include the first-author surname on the **same JSON line** as the DOI (`check_dois.py`). `hominin:supports` is `taxonomy` \| `behavior` \| `pigmentation` \| `debate`. Copied by `adaptSpecies()`. |
 | `hominin:lane` | **Present in JSON only** — not copied by `adaptSpecies()`; timeline layout uses **one row per species** via `buildRowOrder(SPECIES_DATA)` |
 
@@ -71,6 +73,9 @@ count, this document does not. Shape:
   "hominin:behaviorEvidenceType":     String,
   "hominin:pigmentationDebateLevel":  String,
   "hominin:pigmentationEvidenceType": String,
+  "hominin:lastReviewed":             String,  // optional ISO date
+  "hominin:taxonomyUncertaintyNote":  String,  // optional; pickLang of {en,fr}
+  "hominin:behaviorUncertaintyNote":  String,  // optional; pickLang of {en,fr}
   "hominin:references": Array[{ name, identifier, "hominin:supports" }],
 }
 ```
@@ -118,6 +123,8 @@ Each `itemListElement` is an `Event` with `hominin:*` fields and `location.geo` 
 | `hominin:dateYearsBP` | Years BP (negative) → `time` |
 | `hominin:dateReference` | Display citation **and** DOI, with the first-author surname on the same line |
 | `hominin:debateLevel`, `hominin:evidenceType` | Uncertainty axes for the displayed claim. Required on every event. Copied by `adaptEvent()`. `UNASSESSED` only when the chronology Markdown has no synthesis yet. |
+| `hominin:lastReviewed` | Optional ISO date. Copied by `adaptEvent()`. |
+| `hominin:uncertaintyNote` | Optional `{en,fr}` note (e.g. date vs phylogeny). Shown with the certainty lines; does **not** replace `description`. `adaptEvent()` unwraps it with `pickLang()`. |
 
 ---
 
@@ -139,6 +146,8 @@ One object per milestone in `app/data/events.json`. Shape:
   source:   String,   // hominin:dateReference (DOI / citation)
   "hominin:debateLevel":   String,  // copied by adaptEvent
   "hominin:evidenceType":  String,
+  "hominin:lastReviewed":  String,  // optional ISO date
+  "hominin:uncertaintyNote": String, // optional; pickLang of {en,fr}
 }
 ```
 

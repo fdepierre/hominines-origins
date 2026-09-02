@@ -20,6 +20,7 @@ An interactive single-page web application that visualises human evolution from 
 hominines-origins/
 ├── app/
 │   ├── index.html              ← THE ENTIRE APPLICATION (single file; JS/CSS/HTML inline)
+│   ├── docs/                   ← copies of editorial Markdown for GitHub Pages (scripts/sync_docs.py)
 │   └── data/
 │       ├── species.json        ← JSON-LD ItemList → runtime SPECIES_DATA (six hominin certainty keys per species)
 │       └── events.json         ← JSON-LD ItemList → runtime EVENTS_DATA
@@ -37,6 +38,7 @@ hominines-origins/
 │   └── ROADMAP.md
 ├── scripts/
 │   ├── sync_embedded.py        ← JSON → embedded mirrors in app/index.html (one-way); --check for CI
+│   ├── sync_docs.py            ← editorial Markdown → app/docs/ for in-app Sources; --check for CI
 │   ├── check_dois.py           ← Resolves every cited DOI against Crossref; --quiet for CI
 │   └── check_md_json.py        ← Catalogue ids, DOI sets, debate/evidence tokens Markdown↔JSON
 ├── tests/
@@ -110,13 +112,13 @@ Longitude deltas that feed `getBearing` (and the migration polyline / walking-fi
 
 **Goal:** any visitor should be able to read the app in **their** language. Two mechanisms work together:
 
-1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for languages **outside** the bundled list. Keep `<html translate="yes">` (re-applied after the inline i18n `init` and on `languageChanged`). Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands (e.g. `#json-code`, `#welcome-translate-hint`, **Latin taxon names** via `scientificNameHtml()` / `translate="no"` on timeline lane labels and the side-panel `.species-name`, so auto-translate does not corrupt `Homo sapiens`-style strings), the `#lang-select` block so option labels are not double-translated.
+1. **Browser page translation** (Chrome / Edge / Safari / Firefox “Translate this page”) — primary path for every UI language other than English. Keep `<html lang="en" translate="yes">`. Do **not** blanket `translate="no"` on panels or map chrome. Reserve `translate="no"` for machine-stable islands (`#json-code`, **Latin taxon names**, the catalogue-language `<select>`, and bundled French catalogue narrative when `ho_catalogue_lang` is `fr`).
 
-2. **Inline i18n shim** (`window.i18next` in `app/index.html`, no CDN) — instant UI for **English and French** only (menu / controls / uncertainty explainer). The object exposes the same small API the old library used (`t`, `language`, `isInitialized`, `on`, `changeLanguage`, `init`) so call sites and tests stay unchanged. `applyTranslations()` updates `[data-i18n]`, `[data-i18n-text]`, `[data-i18n-title]` (keys may be `ui.*` or bare keys — the handler avoids double `ui.ui`), and rebuilds bands/map when needed. Any HTML built from JSON for MapLibre popups/markers or `#band-tooltip` must go through **`bandTipEscapeHtml()`**; roster names use **`scientificNameHtml()`** (`translate="no"`). Scientific narrative from JSON is **English-first** in the DOM (`fr` is a bundled translation). Optional `localStorage` key **`ho_ui_lang`** (`en` \| `fr`) stores the manual language override. Missing keys and missing `{fr,en}` fields fall back to **English**.
+2. **Catalogue language** (`#catalogue-lang-select`, `localStorage` `ho_catalogue_lang`, `?lang=fr|en`) — switches JSON `{en,fr}` via `pickLang()` / `relocaliseData()`. A French browser (`navigator.language` starting with `fr`) selects **Français** automatically until the visitor overrides it. Chrome strings stay English. Missing `{fr,en}` fields fall back to **English**.
 
-The `TRANSLATIONS` object holds **fr** and **en** blocks only.
+The `TRANSLATIONS` object holds **English chrome strings** only. Do not add a third bundled UI language — use browser page translation.
 
-To add a **third** bundled language: copy the `en` block, translate every `ui.*` string, add an `<option>` in `#lang-select`, add the code to `I18N_SUPPORTED`, and keep `translate="no"` on the selector wrapper so option labels are not double-translated when users run page translation.
+Any HTML built from JSON for MapLibre popups/markers or `#band-tooltip` must go through **`bandTipEscapeHtml()`**; roster names use **`scientificNameHtml()`** (`translate="no"`).
 
 ### Theme
 
@@ -124,7 +126,7 @@ The app has dark (default) and light modes controlled by `data-theme` on `<html>
 
 ### npm / Playwright
 
-The **application** has no npm dependency at runtime. MapLibre, Prism and Google Fonts still load from CDNs (with SRI on the script/CSS files); FR/EN UI strings are inlined. The **repository** uses **`package.json`** and Playwright for automated tests. Contributors run `npx playwright install chromium` once, then `node tests/run-all.js` (or `npm test`).
+The **application** has no npm dependency at runtime. MapLibre, Prism and Google Fonts still load from CDNs (with SRI on the script/CSS files); chrome UI strings are English in the DOM. The **repository** uses **`package.json`** and Playwright for automated tests. Contributors run `npx playwright install chromium` once, then `node tests/run-all.js` (or `npm test`).
 
 ---
 
@@ -135,10 +137,11 @@ When new research is published:
 1. Update the relevant English scientific reference Markdown file in `data/` (see [`data/README.md`](../data/README.md) for the reading order and table conventions).
 2. Update the corresponding JSON-LD in `app/data/` (`species.json` and/or `events.json` as appropriate). For species, keep the six certainty keys and `hominin:references` on the same object as the rest of the catalogue data. For events, set `hominin:debateLevel` and `hominin:evidenceType` (use `UNASSESSED` only when the chronology Markdown has no synthesis yet).
 3. Regenerate the embedded mirrors: `python scripts/sync_embedded.py`. Never hand-edit **`_EMBEDDED_SPECIES`** / **`_EMBEDDED_EVENTS`** — the next sync overwrites them.
-4. Verify correspondence and citations: `python scripts/check_md_json.py` then `python scripts/check_dois.py`.
-5. Run tests: `node tests/run-all.js`.
-6. If the visual layout changed intentionally, update snapshots: `UPDATE_SNAPSHOTS=1 node tests/visual.test.js`.
-7. Open a pull request with the DOI of the new source.
+4. If editorial Markdown changed, copy it into the app: `python scripts/sync_docs.py`. Never hand-edit **`app/docs/`**.
+5. Verify correspondence and citations: `python scripts/check_md_json.py` then `python scripts/check_dois.py`.
+6. Run tests: `node tests/run-all.js`.
+7. If the visual layout changed intentionally, update snapshots: `UPDATE_SNAPSHOTS=1 node tests/visual.test.js`.
+8. Open a pull request with the DOI of the new source.
 
 **Rule:** Every factual claim must have a DOI. If you cannot find a DOI, mark the claim as `debate` or `inference`. Do not strengthen or silently drop epistemic qualifications when mirroring into JSON.
 
@@ -154,6 +157,7 @@ Always run before committing:
 
 ```bash
 python scripts/sync_embedded.py --check   # JSON ↔ embedded mirrors agree
+python scripts/sync_docs.py --check       # editorial Markdown copies in app/docs/
 python scripts/check_md_json.py           # Markdown ids, DOIs, debate/evidence tokens
 python scripts/check_dois.py              # every cited DOI resolves and matches
 node tests/run-all.js                     # four browser suites
@@ -188,9 +192,9 @@ not require editing tests.
 
 ## Typical AI-assisted tasks
 
-### Adding a new bundled UI language (optional)
+### Improving a French catalogue translation
 
-"Add Russian as a **third** bundled UI language: copy the `en` block in `TRANSLATIONS`, translate every `ui.*` string, add `<option value="ru">Русский</option>` to `#lang-select`, add `ru` to `I18N_SUPPORTED`, then run `node tests/run-all.js`. For most classrooms, prefer **browser page translation** instead of growing `TRANSLATIONS`."
+"In `app/data/species.json`, improve the `fr` string for `hominin:debate` on `@id` `longi` without making the controversy more definite than the English. Do not add a third bundled UI language — chrome stays English and uses browser page translation."
 
 ### Updating a species' pigmentation data
 

@@ -18,12 +18,9 @@ const { launch, loadApp, setTime, screenshot, pixelDiff,
 const SNAPSHOT_DIR  = path.resolve(__dirname, 'snapshots');
 const UPDATE_MODE   = process.env.UPDATE_SNAPSHOTS === '1';
 
-// The app picks its UI language from navigator.language, which Chromium inherits
-// from the host machine unless pinned. Without this every string in a snapshot
-// depends on the developer's system locale, so a French desktop and an English
-// CI runner can never agree. Snapshots are pinned to French (bundled translation)
-// so pixel baselines stay stable; the a11y suite covers English and other locales.
-const SNAPSHOT_LOCALE = 'fr-FR';
+// The app chrome is English. Pin snapshots to en-US so a French desktop and an
+// English CI runner agree. Catalogue FR/EN is covered by unit and a11y tests.
+const SNAPSHOT_LOCALE = 'en-US';
 
 // Text rasterisation (hinting, antialiasing, font fallback) differs per OS, so a
 // single set of reference PNGs cannot be shared across platforms. Keep one
@@ -72,10 +69,10 @@ async function runVisualTests(options = {}) {
     const ids = ['main', 'burger-btn', 'map', 'side-panel', 'timeline', 'play-btn',
                   'timeline-full-needle', 'timeline-scrubber',
                   'skin-band', 'events-band', 'timeline-lanes',
-                  'legend-content', 'lang-select'];
+                  'legend-content', 'catalogue-lang-select'];
     /* #welcome-hint is removed after ~8s or first play interaction — not stable for this check */
     const testids = ['map', 'burger-menu-button', 'side-panel', 'timeline', 'play-toggle',
-      'burger-translate-hint', 'lang-select', 'timeline-needle-row'];
+      'burger-translate-hint', 'catalogue-lang-select', 'timeline-needle-row'];
     const { missingId, missingTid } = await page.evaluate(({ ids, testids }) => ({
       missingId: ids.filter((id) => !document.getElementById(id)),
       missingTid: testids.filter((t) => !document.querySelector(`[data-testid="${t}"]`)),
@@ -119,9 +116,9 @@ async function runVisualTests(options = {}) {
   });
 
   // Language selector is visible
-  await test('Language selector exists (burger menu)', async () => {
-    const ok = await page.evaluate(() => !!document.querySelector('[data-testid="lang-select"]'));
-    assert(ok, 'Language selector [data-testid="lang-select"] is in the DOM');
+  await test('Catalogue language selector exists (burger menu)', async () => {
+    const ok = await page.evaluate(() => !!document.querySelector('[data-testid="catalogue-lang-select"]'));
+    assert(ok, 'Catalogue language selector [data-testid="catalogue-lang-select"] is in the DOM');
   });
 
   // Skin band has segments rendered

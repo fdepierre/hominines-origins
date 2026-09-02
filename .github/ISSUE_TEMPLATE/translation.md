@@ -1,6 +1,6 @@
 ---
 name: New translation
-about: Improve French/English UI strings or discuss a third bundled language
+about: Improve French catalogue JSON or discuss browser translation of the English UI
 title: '[TRANSLATION] '
 labels: translation, good first issue
 assignees: ''
@@ -8,27 +8,27 @@ assignees: ''
 
 ## Language
 
-**Language name:** <!-- e.g. Russian -->
-**Language code (BCP 47):** <!-- e.g. ru -->
+**Language name:** <!-- e.g. French -->
+**Language code (BCP 47):** <!-- e.g. fr -->
 **Native speaker?** <!-- Yes / No / Partial -->
 
 ## Type of contribution
 
-- [ ] Improve **French** (`fr`) `TRANSLATIONS` strings
-- [ ] Improve **English** (`en`) `TRANSLATIONS` strings
-- [ ] Propose a **third bundled UI language** (requires full `TRANSLATIONS` block + `initI18n` `supported` + `<option>` — large PR; browser page translation is usually enough)
+- [ ] Improve **French** (`fr`) catalogue strings in `app/data/species.json` or `events.json`
+- [ ] Improve **English** (`en`) catalogue strings
+- [ ] Report a browser “Translate this page” problem on the English chrome or Sources drawer
 
 ## Notes
 
-<!-- Any special considerations for this language (RTL? special characters? regional variants?) -->
+<!-- Do not flatten debates. Homo longi / juluensis, Little Foot, Thomas Quarry I, and Homo naledi funerary claims must stay open in both languages. -->
 
 ---
 
 **How to contribute:**
 
-1. Open `app/index.html` — only **`fr`** and **`en`** blocks in `TRANSLATIONS` are shipped for menu chrome.
-2. Edit the relevant `ui.*` keys; keep scientific narrative in JSON **English-first** (French is a bundled translation, separate from i18next).
+1. Chrome UI is English only. Readers use **Translate this page**.
+2. Scientific narrative lives in JSON `{en,fr}` fields. Edit `fr` there; keep the same epistemic status as `en`.
 3. Run `node tests/run-all.js`.
 4. Open a pull request.
 
-**Readers in other languages:** use the browser’s **Translate this page** after picking FR or EN in the burger (welcome dialog explains this).
+**Readers in other languages:** use the browser’s **Translate this page**. Optionally set **Catalogue language** to Français for the bundled scientific translation.

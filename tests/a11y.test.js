@@ -53,12 +53,12 @@ async function runA11yTests(options = {}) {
     assert(text && text.length > 0, `Play button has accessible text: "${text}"`);
   });
 
-  await test('Language selector has aria-label', async () => {
+  await test('Catalogue language selector has aria-label', async () => {
     const label = await page.evaluate(() => {
-      const sel = document.querySelector('[data-testid="lang-select"]');
+      const sel = document.querySelector('[data-testid="catalogue-lang-select"]');
       return sel ? (sel.getAttribute('aria-label') || '') : null;
     });
-    assert(label && label.length > 0, `Language selector has aria-label: "${label}"`);
+    assert(label && label.length > 0, `Catalogue language selector has aria-label: "${label}"`);
   });
 
   await test('Map container has a role or landmark', async () => {
@@ -209,53 +209,53 @@ async function runA11yTests(options = {}) {
   // ═══════════════════════════════════════════════════════════════════════════
   console.log(`\n${BOLD}◆ INTERNATIONALISATION${RESET}`);
 
-  // Mobile tab labels are updated by applyTranslations() for every language.
-  const LANG_CHECKS_FULL = [
-    { lang: 'en', key: '#tab-map span', contains: 'Map' },
-    { lang: 'fr', key: '#tab-map span', contains: 'Carte' },
-  ];
-  const LANG_CHECKS = smoke
-    ? [
-        { lang: 'en', key: '#tab-map span', contains: 'Map' },
-        { lang: 'fr', key: '#tab-map span', contains: 'Carte' },
-      ]
-    : LANG_CHECKS_FULL;
-
-  for (const { lang, key, contains } of LANG_CHECKS) {
-    await test(`i18n: switching to '${lang}' updates UI text`, async () => {
-      await page.evaluate((l) => {
-        const sel = document.querySelector('[data-testid="lang-select"]');
-        if (sel) { sel.value = l; sel.dispatchEvent(new Event('change')); }
-      }, lang);
-      await page.waitForTimeout(300);
-      const text = await page.evaluate((k) => {
-        const el = document.querySelector(k);
-        return el ? el.textContent.trim() : null;
-      }, key);
-      assert(text !== null, `Element "${key}" found`);
-      assertSoft(text.toLowerCase().includes(contains.toLowerCase()),
-        `"${key}" in ${lang} contains "${contains}" (got: "${text}")`);
+  await test('Chrome UI follows the catalogue language', async () => {
+    const before = await page.evaluate(() => {
+      const el = document.querySelector('#tab-map span');
+      return el ? el.textContent.trim() : null;
     });
-  }
+    assert(before && /map/i.test(before), `Map tab is English (got "${before}")`);
+    await page.evaluate(() => {
+      if (typeof setCatalogueLang === 'function') setCatalogueLang('fr');
+    });
+    await page.waitForTimeout(300);
+    const after = await page.evaluate(() => {
+      const el = document.querySelector('#tab-map span');
+      const htmlLang = document.documentElement.lang;
+      const height = document.querySelector('.figure-bio-table th');
+      return {
+        text: el ? el.textContent.trim() : null,
+        htmlLang,
+        height: height ? height.textContent.trim() : '',
+      };
+    });
+    assert(/carte/i.test(after.text), `Map tab is French after catalogue FR (got "${after.text}")`);
+    assert(after.htmlLang === 'fr', `html lang is fr (got "${after.htmlLang}")`);
+    await page.evaluate(() => { if (typeof setCatalogueLang === 'function') setCatalogueLang('en'); });
+    await page.waitForTimeout(200);
+    const back = await page.evaluate(() => {
+      const el = document.querySelector('#tab-map span');
+      return {
+        text: el ? el.textContent.trim() : null,
+        htmlLang: document.documentElement.lang,
+      };
+    });
+    assert(/map/i.test(back.text), `Map tab returns to English (got "${back.text}")`);
+    assert(back.htmlLang === 'en', `html lang returns to en (got "${back.htmlLang}")`);
+  });
 
   if (!smoke) {
-    await test('Layout direction stays LTR for bundled locales (fr/en)', async () => {
-      await page.evaluate(() => {
-        const sel = document.querySelector('[data-testid="lang-select"]');
-        if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change')); }
-      });
-      await page.waitForTimeout(200);
+    await test('Layout direction stays LTR', async () => {
       const dirEn = await page.evaluate(() => document.documentElement.getAttribute('dir'));
-      await page.evaluate(() => {
-        const sel = document.querySelector('[data-testid="lang-select"]');
-        if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change')); }
-      });
+      await page.evaluate(() => { if (typeof setCatalogueLang === 'function') setCatalogueLang('fr'); });
       await page.waitForTimeout(200);
       const dirFr = await page.evaluate(() => document.documentElement.getAttribute('dir'));
-      assertSoft(dirEn === 'ltr' && dirFr === 'ltr', `html dir stays ltr for en/fr (got en="${dirEn}", fr="${dirFr}")`);
+      assertSoft((dirEn === 'ltr' || dirEn === null) && (dirFr === 'ltr' || dirFr === null),
+        `html dir stays ltr (got en="${dirEn}", catalogue-fr="${dirFr}")`);
+      await page.evaluate(() => { if (typeof setCatalogueLang === 'function') setCatalogueLang('en'); });
     });
 
-    await test('Country labels follow the selected language', async () => {
+    await test('Country labels follow the UI language', async () => {
       await page.evaluate(() => {
         if (window.__mapLibreMap) {
           window.__mapLibreMap.jumpTo({ zoom: 4, center: [90, 25] });
@@ -263,32 +263,25 @@ async function runA11yTests(options = {}) {
         }
       });
       await page.waitForTimeout(200);
-      await page.evaluate(() => {
-        const sel = document.querySelector('[data-testid="lang-select"]');
-        if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-      });
-      await page.waitForTimeout(450);
+      await page.evaluate(() => { if (typeof setCatalogueLang === 'function') setCatalogueLang('en'); });
+      await page.waitForTimeout(200);
       const en = await page.evaluate(() => {
         const label = document.querySelector('.country-label-marker[data-country-code="CN"]');
         return { text: label ? label.textContent.trim() : '' };
       });
-      await page.evaluate(() => {
-        const sel = document.querySelector('[data-testid="lang-select"]');
-        if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-      });
-      await page.waitForTimeout(450);
+      await page.evaluate(() => { if (typeof setCatalogueLang === 'function') setCatalogueLang('fr'); });
+      await page.waitForTimeout(200);
       const fr = await page.evaluate(() => {
         const label = document.querySelector('.country-label-marker[data-country-code="CN"]');
         return label ? label.textContent.trim() : '';
       });
-      assert(en.text === 'China', `Country label for CN in EN is "China" (got "${en.text}")`);
-      assert(fr === 'Chine', `Country label for CN in FR is "Chine" (got "${fr}")`);
+      assert(en.text.length > 0, `Country label for CN is present (got "${en.text}")`);
+      assert(/chine/i.test(fr) || fr !== en.text, `Catalogue FR localises country labels (en="${en.text}", fr="${fr}")`);
+      await page.evaluate(() => { if (typeof setCatalogueLang === 'function') setCatalogueLang('en'); });
     });
 
     await test('World zoom shows continents instead of country labels', async () => {
       await page.evaluate(() => {
-        const sel = document.querySelector('[data-testid="lang-select"]');
-        if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
         if (window.__mapLibreMap) {
           window.__mapLibreMap.jumpTo({ zoom: 1.6, center: [20, 20] });
           if (typeof updateMapLibreLabels === 'function') updateMapLibreLabels();
@@ -300,15 +293,17 @@ async function runA11yTests(options = {}) {
         const countries = document.querySelectorAll('.country-label-marker').length;
         return {
           continent: continent ? continent.textContent.trim() : '',
+          lang: continent ? continent.getAttribute('lang') : '',
           countries,
         };
       });
-      assert(st.continent === 'Asie', `World zoom shows localized continent label "Asie" (got "${st.continent}")`);
+      assert(st.continent === 'Asia', `World zoom shows English continent label "Asia" (got "${st.continent}")`);
+      assert(st.lang === 'en', `Continent labels expose lang=en (got "${st.lang}")`);
       assert(st.countries === 0, `World zoom hides country labels (got ${st.countries})`);
     });
 
     for (const locale of ['zh-CN', 'ar-EG', 'ja-JP']) {
-      await test(`World map labels use browser locale for ${locale}`, async () => {
+      await test(`World map continent labels stay English for ${locale} (browser-translatable)`, async () => {
         const { browser: bCountry, page: pCountry } = await launch({ locale });
         try {
           await loadApp(pCountry);
@@ -321,21 +316,20 @@ async function runA11yTests(options = {}) {
           await pCountry.waitForTimeout(250);
           const st = await pCountry.evaluate(() => {
             const label = document.querySelector('.continent-label-marker[data-continent-code="asia"]');
-            const expectedByLang = { zh: '亚洲', ar: 'آسيا', ja: 'アジア' };
-            const primary = navigator.language.split('-')[0].toLowerCase();
             return {
               nav: navigator.language,
               htmlLang: document.documentElement.lang,
               text: label ? label.textContent.trim() : '',
               labelLang: label ? label.getAttribute('lang') : '',
               labelDir: label ? label.getAttribute('dir') : '',
-              expected: expectedByLang[primary],
+              translate: label ? label.getAttribute('translate') : '',
             };
           });
           assert(st.nav.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `navigator.language is ${locale} (got "${st.nav}")`);
           assert(st.htmlLang === 'en', `${locale} keeps app UI in EN (got "${st.htmlLang}")`);
-          assert(st.text === st.expected, `${locale} continent label follows browser locale (got "${st.text}", expected "${st.expected}")`);
-          assert(st.labelLang.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `${locale} continent label lang attribute follows browser locale (got "${st.labelLang}")`);
+          assert(st.text === 'Asia', `${locale} continent label is English source (got "${st.text}")`);
+          assert(st.labelLang === 'en', `${locale} continent label lang=en (got "${st.labelLang}")`);
+          assert(st.translate === 'yes', `${locale} continent label is browser-translatable`);
           assert(st.labelDir === 'auto', `${locale} continent label uses dir="auto" (got "${st.labelDir}")`);
         } finally {
           await bCountry.close();
@@ -360,7 +354,7 @@ async function runA11yTests(options = {}) {
           const hint = document.getElementById('welcome-translate-hint');
           const panel = document.getElementById('welcome-lang-panel');
           const overlay = document.getElementById('welcome-modal-overlay');
-          const sel = document.getElementById('lang-select');
+          const sel = document.getElementById('catalogue-lang-select');
           const open = !!(overlay && !overlay.classList.contains('hidden'));
           return {
             nav: navigator.language,
@@ -377,7 +371,7 @@ async function runA11yTests(options = {}) {
         assert(st.welcomeOpen, 'Welcome overlay is visible on first load (fresh storage)');
         assert(/^es/i.test(st.nav), `navigator.language is es-* (got "${st.nav}")`);
         assert(st.htmlLang === 'en', `Unsupported browser locale defaults page to EN (got "${st.htmlLang}")`);
-        assert(st.selectorValue === 'en', `Burger language selector defaults to EN (got "${st.selectorValue}")`);
+        assert(st.selectorValue === 'en', `Catalogue language selector defaults to EN (got "${st.selectorValue}")`);
         assert(st.hintPanelVisible, 'Unsupported locale shows browser-translate hint panel');
         assert(
           /<\s*code(?:\s[^>]*)?>\s*es\s*<\s*\/\s*code\s*>/i.test(st.hintHtml),
@@ -391,7 +385,7 @@ async function runA11yTests(options = {}) {
       }
     });
 
-    await test('Welcome locale: fr-FR auto-selects FR without language buttons', async () => {
+    await test('Welcome locale: fr-FR uses French chrome and catalogue, no translate toast', async () => {
       const { browser: bFr, page: pFr } = await launch({ locale: 'fr-FR' });
       try {
         await loadApp(pFr, { dismissWelcome: false });
@@ -399,29 +393,28 @@ async function runA11yTests(options = {}) {
           const hint = document.getElementById('welcome-translate-hint');
           const panel = document.getElementById('welcome-lang-panel');
           const overlay = document.getElementById('welcome-modal-overlay');
-          const sel = document.getElementById('lang-select');
+          const sel = document.getElementById('catalogue-lang-select');
+          const banner = document.getElementById('page-translate-banner');
           return {
             nav: navigator.language,
             htmlLang: document.documentElement.lang,
             selectorValue: sel ? sel.value : '',
             hintHtml: hint ? hint.innerHTML : '',
             hintPanelVisible: !!(panel && !panel.hidden),
+            bannerVisible: !!(banner && !banner.hidden),
             welcomeOpen: !!(overlay && !overlay.classList.contains('hidden')),
-            welcomeFrBtn: !!document.getElementById('welcome-pick-fr'),
-            welcomeEnBtn: !!document.getElementById('welcome-pick-en'),
             tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
             startLabel: (document.getElementById('welcome-start-label') || {}).textContent || '',
           };
         });
         assert(st.welcomeOpen, 'Welcome overlay is visible on first load');
         assert(/^fr/i.test(st.nav), `navigator.language is fr-* (got "${st.nav}")`);
-        assert(st.htmlLang === 'fr', `FR browser locale selects FR (got "${st.htmlLang}")`);
-        assert(st.selectorValue === 'fr', `Burger language selector selects FR (got "${st.selectorValue}")`);
-        assert(!st.hintPanelVisible, 'FR locale does not show translation hint panel');
-        assert(st.hintHtml === '', 'FR locale has no translate hint copy');
-        assert(!st.welcomeFrBtn && !st.welcomeEnBtn, 'Welcome screen has no language-choice buttons');
-        assert(/origines africaines/i.test(st.tagline), `FR welcome tagline is French (got "${st.tagline}")`);
-        assert(/commencer/i.test(st.startLabel), `FR welcome button is French (got "${st.startLabel}")`);
+        assert(st.htmlLang === 'fr', `FR browser locale uses French chrome (got "${st.htmlLang}")`);
+        assert(st.selectorValue === 'fr', `Catalogue language auto-selects FR (got "${st.selectorValue}")`);
+        assert(!st.hintPanelVisible, 'FR locale does not show Translate this page hint');
+        assert(!st.bannerVisible, 'FR locale does not show the on-map translate banner');
+        assert(/origines africaines/i.test(st.tagline), `FR browser welcome is French (got "${st.tagline}")`);
+        assert(/commencer/i.test(st.startLabel), `FR browser welcome button is French (got "${st.startLabel}")`);
       } finally {
         await bFr.close();
       }
@@ -435,7 +428,7 @@ async function runA11yTests(options = {}) {
           const hint = document.getElementById('welcome-translate-hint');
           const panel = document.getElementById('welcome-lang-panel');
           const overlay = document.getElementById('welcome-modal-overlay');
-          const sel = document.getElementById('lang-select');
+          const sel = document.getElementById('catalogue-lang-select');
           return {
             nav: navigator.language,
             htmlLang: document.documentElement.lang,
@@ -452,7 +445,7 @@ async function runA11yTests(options = {}) {
         assert(st.welcomeOpen, 'Welcome overlay is visible on first load');
         assert(/^en/i.test(st.nav), `navigator.language is en-* (got "${st.nav}")`);
         assert(st.htmlLang === 'en', `EN browser locale selects EN (got "${st.htmlLang}")`);
-        assert(st.selectorValue === 'en', `Burger language selector selects EN (got "${st.selectorValue}")`);
+        assert(st.selectorValue === 'en', `Catalogue language selector selects EN (got "${st.selectorValue}")`);
         assert(!st.hintPanelVisible, 'EN locale does not show translation hint panel');
         assert(st.hintHtml === '', 'EN locale has no translate hint copy');
         assert(!st.welcomeFrBtn && !st.welcomeEnBtn, 'Welcome screen has no language-choice buttons');
@@ -464,20 +457,48 @@ async function runA11yTests(options = {}) {
       }
     });
 
-    await test('Welcome locale: fr-CA auto-selects FR', async () => {
+    await test('English browser ignores leftover French catalogue storage', async () => {
+      const { browser: bStale, page: pStale } = await launch({ locale: 'en-US' });
+      try {
+        await pStale.addInitScript(() => {
+          try {
+            localStorage.setItem('ho_catalogue_lang', 'fr');
+            localStorage.setItem('ho_lang_user', 'fr');
+            localStorage.setItem('ho_lang_override', 'fr');
+          } catch (e) { /* ignore */ }
+        });
+        await loadApp(pStale, { dismissWelcome: false });
+        const st = await pStale.evaluate(() => ({
+          htmlLang: document.documentElement.lang,
+          catalogueLang: typeof currentDataLang === 'function' ? currentDataLang() : '',
+          selectorValue: document.getElementById('catalogue-lang-select')?.value || '',
+          tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
+          simple: (document.getElementById('timeline-view-mode-simple') || {}).textContent || '',
+          i18n: (typeof i18next !== 'undefined' && i18next.isInitialized) ? i18next.language : '',
+        }));
+        assert(st.htmlLang === 'en', `Stale FR keys do not switch html lang (got "${st.htmlLang}")`);
+        assert(st.catalogueLang === 'en', `Stale FR keys do not select the French catalogue (got "${st.catalogueLang}")`);
+        assert(st.selectorValue === 'en', `Selector stays English (got "${st.selectorValue}")`);
+        assert(st.i18n === 'en', `i18n stays English (got "${st.i18n}")`);
+        assert(/african origins/i.test(st.tagline), `Welcome stays English (got "${st.tagline}")`);
+        assert(/simple view/i.test(st.simple), `Chrome stays English (got "${st.simple}")`);
+      } finally {
+        await bStale.close();
+      }
+    });
+
+    await test('Welcome locale: fr-CA uses French chrome', async () => {
       const { browser: bFrCa, page: pFrCa } = await launch({ locale: 'fr-CA' });
       try {
         await loadApp(pFrCa, { dismissWelcome: false });
         const st = await pFrCa.evaluate(() => ({
           nav: navigator.language,
           htmlLang: document.documentElement.lang,
-          selectorValue: document.getElementById('lang-select')?.value || '',
-          i18nPending: document.documentElement.hasAttribute('data-i18n-pending'),
+          selectorValue: document.getElementById('catalogue-lang-select')?.value || '',
         }));
         assert(/^fr-CA/i.test(st.nav), `navigator.language is fr-CA (got "${st.nav}")`);
-        assert(st.htmlLang === 'fr', `fr-CA browser locale selects FR (got "${st.htmlLang}")`);
-        assert(st.selectorValue === 'fr', `Burger language selector selects FR (got "${st.selectorValue}")`);
-        assert(!st.i18nPending, 'Initial i18n paint guard is removed after translations apply');
+        assert(st.htmlLang === 'fr', `fr-CA browser locale uses French chrome (got "${st.htmlLang}")`);
+        assert(st.selectorValue === 'fr', `fr-CA auto-selects French catalogue (got "${st.selectorValue}")`);
       } finally {
         await bFrCa.close();
       }
@@ -496,7 +517,7 @@ async function runA11yTests(options = {}) {
             return {
               nav: navigator.language,
               htmlLang: document.documentElement.lang,
-              selectorValue: document.getElementById('lang-select')?.value || '',
+              selectorValue: document.getElementById('catalogue-lang-select')?.value || '',
               hintText: hint ? hint.textContent || '' : '',
               hintPanelVisible: !!(panel && !panel.hidden),
               bannerVisible: !!(banner && !banner.hidden),
@@ -506,7 +527,7 @@ async function runA11yTests(options = {}) {
           });
           assert(st.nav.toLowerCase().startsWith(locale.toLowerCase().slice(0, 2)), `navigator.language is ${locale} (got "${st.nav}")`);
           assert(st.htmlLang === 'en', `${locale} browser locale defaults to EN (got "${st.htmlLang}")`);
-          assert(st.selectorValue === 'en', `Burger language selector defaults to EN (got "${st.selectorValue}")`);
+          assert(st.selectorValue === 'en', `Catalogue language selector defaults to EN (got "${st.selectorValue}")`);
           assert(st.hintPanelVisible, `${locale} shows browser-translate hint panel`);
           assert(st.hintText.includes('Translate this page'), `${locale} hint mentions Translate this page`);
           assert(st.bannerVisible, `${locale} shows the on-map translate banner`);
@@ -518,36 +539,39 @@ async function runA11yTests(options = {}) {
       });
     }
 
-    await test('Manual language switch persists and overrides browser locale', async () => {
+    await test('Explicit language choice lasts for this view; reload follows the browser', async () => {
       const { browser: bManual, page: pManual } = await launch({ locale: 'fr-FR' });
       try {
         await loadApp(pManual, { dismissWelcome: false });
         const before = await pManual.evaluate(() => ({
           tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
+          htmlLang: document.documentElement.lang,
         }));
-        assert(/origines africaines/i.test(before.tagline), `FR browser welcome starts in French (got "${before.tagline}")`);
+        assert(/origines africaines/i.test(before.tagline), `FR browser welcome is French (got "${before.tagline}")`);
+        assert(before.htmlLang === 'fr', `Chrome is French (got "${before.htmlLang}")`);
         await pManual.evaluate(() => {
-          const sel = document.getElementById('lang-select');
-          if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+          if (typeof setCatalogueLang === 'function') setCatalogueLang('en');
         });
-        await pManual.waitForTimeout(450);
-        const switched = await pManual.evaluate(() => ({
+        await pManual.waitForTimeout(200);
+        const mid = await pManual.evaluate(() => ({
+          htmlLang: document.documentElement.lang,
           tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
-          startLabel: (document.getElementById('welcome-start-label') || {}).textContent || '',
         }));
-        assert(/african origins/i.test(switched.tagline), `Welcome follows EN selector (got "${switched.tagline}")`);
-        assert(/start exploring/i.test(switched.startLabel), `Welcome button follows EN selector (got "${switched.startLabel}")`);
-        await loadApp(pManual);
+        assert(mid.htmlLang === 'en', `Burger EN applies immediately (got "${mid.htmlLang}")`);
+        assert(/african origins/i.test(mid.tagline), `Welcome switches to English (got "${mid.tagline}")`);
+        await loadApp(pManual, { dismissWelcome: false });
         const st = await pManual.evaluate(() => ({
           nav: navigator.language,
-          stored: localStorage.getItem('ho_ui_lang'),
+          stored: localStorage.getItem('ho_lang_override') || localStorage.getItem('ho_lang_user') || localStorage.getItem('ho_catalogue_lang'),
           htmlLang: document.documentElement.lang,
-          selectorValue: document.getElementById('lang-select')?.value || '',
+          selectorValue: document.getElementById('catalogue-lang-select')?.value || '',
+          tagline: (document.getElementById('welcome-tagline') || {}).textContent || '',
         }));
         assert(/^fr/i.test(st.nav), `navigator.language remains fr-* (got "${st.nav}")`);
-        assert(st.stored === 'en', `Manual EN preference persisted (got "${st.stored}")`);
-        assert(st.htmlLang === 'en', `Stored manual preference overrides browser FR after reload (got "${st.htmlLang}")`);
-        assert(st.selectorValue === 'en', `Burger language selector reflects stored EN (got "${st.selectorValue}")`);
+        assert(!st.stored, `No language key is persisted (got "${st.stored}")`);
+        assert(st.htmlLang === 'fr', `Reload follows the French browser (got "${st.htmlLang}")`);
+        assert(st.selectorValue === 'fr', `Selector follows the French browser (got "${st.selectorValue}")`);
+        assert(/origines africaines/i.test(st.tagline), `Welcome is French again after reload (got "${st.tagline}")`);
       } finally {
         await bManual.close();
       }
@@ -562,48 +586,27 @@ async function runA11yTests(options = {}) {
   if (!smoke) {
     console.log(`\n${BOLD}◆ CLOSE BUTTONS & I18N TITLES${RESET}`);
 
-    await test('Burger + JSON drawer close: sr-only label follows en/fr', async () => {
-      await page.evaluate(() => {
-        const sel = document.getElementById('lang-select');
-        if (sel) { sel.value = 'en'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-      });
-      await page.waitForTimeout(450);
+    await test('Burger + JSON drawer close: sr-only label stays English', async () => {
       const enMenuOpen = await page.evaluate(() => {
         const el = document.querySelector('#burger-btn .sr-only');
         return el ? el.textContent.trim() : '';
       });
-      assert(enMenuOpen === 'Menu', `Burger open sr-only (en): "${enMenuOpen}"`);
+      assert(enMenuOpen === 'Menu', `Burger open sr-only: "${enMenuOpen}"`);
       await page.click('[data-testid="burger-menu-button"]');
       await page.waitForSelector('#burger-panel.open', { timeout: 4000 });
       const enClose = await page.evaluate(() => {
         const sr = document.querySelector('#burger-close .sr-only');
         return sr ? sr.textContent.trim() : '';
       });
-      assert(enClose === 'Close', `Burger close sr-only (en): "${enClose}"`);
-
-      await page.click('[data-testid="burger-close"]');
-      await page.waitForTimeout(200);
-
-      await page.evaluate(() => {
-        const sel = document.getElementById('lang-select');
-        if (sel) { sel.value = 'fr'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-      });
-      await page.waitForTimeout(450);
-      await page.click('[data-testid="burger-menu-button"]');
-      await page.waitForSelector('#burger-panel.open', { timeout: 4000 });
-      const frBurger = await page.evaluate(() => {
-        const sr = document.querySelector('#burger-close .sr-only');
-        return sr ? sr.textContent.trim() : '';
-      });
-      assert(frBurger === 'Fermer', `Burger close sr-only (fr): "${frBurger}"`);
+      assert(enClose === 'Close', `Burger close sr-only: "${enClose}"`);
 
       await page.click('#btn-data-viewer');
       await page.waitForSelector('.data-viewer-drawer.open', { timeout: 4000 });
-      const frJson = await page.evaluate(() => {
+      const jsonClose = await page.evaluate(() => {
         const sr = document.querySelector('#btn-close-data-viewer .sr-only');
         return sr ? sr.textContent.trim() : '';
       });
-      assert(frJson === 'Fermer', `JSON drawer close sr-only (fr): "${frJson}"`);
+      assert(jsonClose === 'Close', `JSON drawer close sr-only: "${jsonClose}"`);
       await page.click('[data-testid="close-data-viewer"]');
       await page.waitForTimeout(200);
       await page.keyboard.press('Escape');

@@ -6,6 +6,8 @@ Compares:
 * every species/event ``@id`` to a Markdown catalogue ``id``
 * JSON DOIs to the DOI set of the paired Markdown row or footnote list
 * event ``hominin:debateLevel`` / ``hominin:evidenceType`` to Markdown tokens
+* species taxonomy / behavior / pigmentation DebateLevel and EvidenceType tokens
+  to the catalogue identifier map
 
 Editorial-only rows (id ``—`` or empty) are ignored. ``UNASSESSED`` is allowed
 on events only when the Markdown row says so.
@@ -120,9 +122,19 @@ def footnote_dois(text: str) -> dict[str, set[str]]:
     return found
 
 
-def morphology_index(text: str) -> dict[str, set[str]]:
+SPECIES_TOKEN_COLS = (
+    ("TaxonomyDebateLevel", "hominin:taxonomyDebateLevel"),
+    ("TaxonomyEvidenceType", "hominin:taxonomyEvidenceType"),
+    ("BehaviorDebateLevel", "hominin:behaviorDebateLevel"),
+    ("BehaviorEvidenceType", "hominin:behaviorEvidenceType"),
+    ("PigmentationDebateLevel", "hominin:pigmentationDebateLevel"),
+    ("PigmentationEvidenceType", "hominin:pigmentationEvidenceType"),
+)
+
+
+def morphology_index(text: str) -> dict[str, dict]:
     notes = footnote_dois(text)
-    found: dict[str, set[str]] = {}
+    found: dict[str, dict] = {}
     for row in parse_tables(text):
         if "Footnotes" not in row:
             continue
@@ -138,7 +150,11 @@ def morphology_index(text: str) -> dict[str, set[str]]:
                 dois.add(f"MISSING_FOOTNOTE:{key}")
                 continue
             dois |= notes[key]
-        found[cid] = dois
+        tokens = {
+            json_key: row.get(md_col, "").strip().strip("`")
+            for md_col, json_key in SPECIES_TOKEN_COLS
+        }
+        found[cid] = {"dois": dois, "tokens": tokens}
     return found
 
 
@@ -214,9 +230,10 @@ def main() -> int:
 
     for item in species:
         sid = item["@id"]
-        allowed = morpho.get(sid)
-        if allowed is None:
+        row = morpho.get(sid)
+        if row is None:
             continue
+        allowed = row["dois"]
         missing_notes = sorted(x for x in allowed if x.startswith("MISSING_FOOTNOTE:"))
         if missing_notes:
             problems.append(f"species {sid}: {', '.join(missing_notes)}")
@@ -235,6 +252,21 @@ def main() -> int:
         ):
             if item.get(key) == "UNASSESSED":
                 problems.append(f"species {sid}: UNASSESSED is forbidden on species ({key})")
+        for md_col, json_key in SPECIES_TOKEN_COLS:
+            md_val = row["tokens"].get(json_key, "")
+            js_val = item.get(json_key)
+            if not md_val:
+                problems.append(f"species {sid}: Markdown missing {md_col}")
+                continue
+            valid = DEBATE_VALUES if json_key.endswith("DebateLevel") else EVIDENCE_VALUES
+            if md_val not in valid:
+                problems.append(f"species {sid}: invalid Markdown {md_col} {md_val!r}")
+            if js_val not in valid:
+                problems.append(f"species {sid}: invalid JSON {json_key} {js_val!r}")
+            if md_val and js_val != md_val:
+                problems.append(
+                    f"species {sid}: {json_key} JSON {js_val!r} != Markdown {md_val!r}"
+                )
 
     if not args.quiet:
         print(

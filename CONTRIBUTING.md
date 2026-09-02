@@ -29,27 +29,22 @@ When updating data:
 - Do not remove debate entries — science works by exposing uncertainty, not hiding it
 - Do not strengthen, simplify, or silently drop epistemic qualifications when moving a claim from the reference document into JSON
 
-### 2. Translations (interface vs browser)
+### 2. Translations (interface vs catalogue)
 
-**Bundled in the app:** French and English only for menu buttons, tooltips, and the uncertainty explainer (`TRANSLATIONS` + `#lang-select` in `app/index.html`).
+**Chrome UI:** English in `app/index.html`. Readers use the browser’s **Translate this page** feature; the root document stays `translate="yes"` on purpose.
 
-**Everything else:** contributors and readers use the browser’s **Translate this page** feature; the root document stays `translate="yes"` on purpose.
+**Catalogue narrative:** `{en,fr}` fields in `app/data/species.json` and `events.json`. Improve the `fr` strings there — do not flatten debates. The burger **Catalogue language** control switches them.
 
-To add a **third** bundled UI language (not required for coverage):
+**Editorial Markdown:** English only. It is copied into `app/docs/` for in-app reading (browser-translatable HTML). Do not add a parallel French Markdown source of truth.
 
-1. Open `app/index.html`
-2. Copy the `en` block inside `TRANSLATIONS`, translate every `ui.*` string, and add the locale code to `I18N_SUPPORTED`
-3. Add an `<option>` to `#lang-select`
-4. Run `node tests/run-all.js`
-
-For one-off classroom use, **do not** add a pack — tell users to pick FR or EN in the burger, then translate the page.
+For one-off classroom use, tell users to run **Translate this page**, then optionally set Catalogue language to Français.
 
 #### Browser “Translate this page” — manual QA (before a release)
 
 Chrome / Edge / Firefox can translate the static DOM; **MapLibre DOM markers/popups** and the **#band-tooltip** panel are filled in JavaScript, so behaviour varies by browser and timing.
 
 1. Set the browser UI to a language you do not maintain (e.g. Spanish).
-2. Open the app over HTTP, pick **FR** or **EN** for menu chrome, then run **Translate this page**.
+2. Open the app over HTTP, set **Catalogue language** to English or Français, then run **Translate this page**.
 3. Check: burger labels, timeline play/pause, layer **titles** on hover, **map tooltips** (sites, ranges, migrations, events), **timeline band** tooltips (skin + events), side panel narrative after selecting a species.
 4. Confirm **Latin taxon names** still look correct (they are marked `translate="no"` or escaped where injected).
 5. If a string shows raw HTML entities or a missing key, fix the template (prefer `bandTipEscapeHtml()` / `scientificNameHtml()` in `app/index.html`) rather than loosening `translate="yes"` on `<html>`.
@@ -106,6 +101,7 @@ If you see content that violates these values, open an issue.
 
 - [ ] Tests pass: `node tests/run-all.js`
 - [ ] Data lineage intact: `python scripts/sync_embedded.py --check`
+- [ ] In-app editorial copies: `python scripts/sync_docs.py --check`
 - [ ] Markdown↔JSON correspondence: `python scripts/check_md_json.py`
 - [ ] Citations verified: `python scripts/check_dois.py`
 - [ ] New data has DOI references

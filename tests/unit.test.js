@@ -54,7 +54,7 @@ async function runUnitTests() {
 
   await test('Stable data-testid hooks exist for automation', async () => {
     const testids = ['map', 'burger-menu-button', 'side-panel', 'timeline', 'play-toggle',
-      'burger-translate-hint', 'lang-select', 'timeline-needle-row'];
+      'burger-translate-hint', 'catalogue-lang-select', 'timeline-needle-row'];
     const missing = await page.evaluate((ids) =>
       ids.filter((t) => !document.querySelector(`[data-testid="${t}"]`)), testids);
     assert(missing.length === 0, `data-testid hooks present (missing: ${missing.join(', ') || 'none'})`);
@@ -74,7 +74,7 @@ async function runUnitTests() {
   await test('Species panel keeps scientific names stable and common names translatable', async () => {
     async function panelState(lang) {
       return page.evaluate(async (lng) => {
-        if (window.i18next) await i18next.changeLanguage(lng);
+        if (typeof setCatalogueLang === 'function') setCatalogueLang(lng);
         const species = SPECIES_DATA.find(sp => sp.id === 'erectus') || SPECIES_DATA[0];
         renderPanel(species);
         const scientific = document.querySelector('.species-name');
@@ -105,14 +105,17 @@ async function runUnitTests() {
     assert(/upright man/i.test(enState.commonText), `English common name rendered as source (got "${enState.commonText}")`);
 
     const frState = await panelState('fr');
-    assert(frState.panelLang === 'fr', `French translation exposes lang=fr (got "${frState.panelLang}")`);
+    assert(frState.panelLang === 'fr', `French catalogue exposes lang=fr (got "${frState.panelLang}")`);
+    assert(frState.panelTranslate === 'no', 'Bundled French catalogue is protected from re-translation');
     assert(frState.rootLang === 'fr', `French block exposes lang=fr (got "${frState.rootLang}")`);
+    assert(frState.rootTranslate === 'no', 'French narrative is not re-translated');
     assert(frState.commonLang === 'fr', `French common name exposes lang=fr (got "${frState.commonLang}")`);
-    assert(frState.scientificTranslate === 'no', 'Scientific taxon name stays protected in French UI');
+    assert(frState.scientificTranslate === 'no', 'Scientific taxon name stays protected in French catalogue');
     assert(/homme debout/i.test(frState.commonText), `French common name still rendered (got "${frState.commonText}")`);
+    await page.evaluate(() => { if (typeof setCatalogueLang === 'function') setCatalogueLang('en'); });
   });
 
-  await test('French browser locale adapts catalogue narrative without a manual language switch', async () => {
+  await test('French browser auto-selects the French catalogue', async () => {
     const { browser: bFr, page: pFr } = await launch({ locale: 'fr-FR' });
     try {
       await loadApp(pFr);
@@ -120,20 +123,60 @@ async function runUnitTests() {
         const species = SPECIES_DATA.find(sp => sp.id === 'sahelanthropus') || SPECIES_DATA[0];
         renderPanel(species);
         const common = document.querySelector('.species-name-common');
+        const sel = document.getElementById('catalogue-lang-select');
         return {
           htmlLang: document.documentElement.lang,
-          uiLang: (window.i18next && i18next.language) || '',
+          catalogueLang: typeof currentDataLang === 'function' ? currentDataLang() : '',
+          selectorValue: sel ? sel.value : '',
           common: species.common,
           commonText: common ? common.textContent.trim() : '',
-          heightM: (species.biometrics && species.biometrics.heightM) || '',
+          panelLang: document.getElementById('panel-content') ? document.getElementById('panel-content').getAttribute('lang') : '',
         };
       });
       assert(state.htmlLang === 'fr', `French browser sets html lang=fr (got "${state.htmlLang}")`);
-      assert(String(state.uiLang).startsWith('fr'), `i18n language is French (got "${state.uiLang}")`);
-      assert(/plus ancien/i.test(state.common), `Catalogue common name is French (got "${state.common}")`);
-      assert(!/earliest known/i.test(state.common), `Catalogue common name is not left in English (got "${state.common}")`);
-      assert(/estimé/i.test(state.heightM), `Biometrics use French copy (got "${state.heightM}")`);
-      assert(/plus ancien/i.test(state.commonText), `Panel renders French common name (got "${state.commonText}")`);
+      assert(state.catalogueLang === 'fr', `Catalogue auto-selects fr (got "${state.catalogueLang}")`);
+      assert(state.selectorValue === 'fr', `Catalogue selector is Français (got "${state.selectorValue}")`);
+      assert(state.panelLang === 'fr', `Panel lang=fr (got "${state.panelLang}")`);
+      assert(/plus ancien préhumain/i.test(state.common), `Catalogue defaults to French (got "${state.common}")`);
+      assert(/plus ancien préhumain/i.test(state.commonText), `Panel renders French common name (got "${state.commonText}")`);
+      await pFr.evaluate(() => {
+        const species = SPECIES_DATA.find(sp => sp.id === 'habilis') || SPECIES_DATA[0];
+        renderPanel(species);
+        if (window.__mapLibreMap) {
+          window.__mapLibreMap.jumpTo({ zoom: 1.6, center: [20, 20] });
+          if (typeof updateMapLibreLabels === 'function') updateMapLibreLabels();
+        }
+      });
+      await pFr.waitForTimeout(300);
+      const chrome = await pFr.evaluate(() => {
+        const africa = document.querySelector('.continent-label-marker[data-continent-code="africa"]');
+        return {
+          simple: (document.getElementById('timeline-view-mode-simple') || {}).textContent || '',
+          detailed: (document.getElementById('timeline-view-mode-detailed') || {}).textContent || '',
+          subtitle: (document.getElementById('tl-app-desc') || {}).textContent || '',
+          events: (document.querySelector('#events-band .timeline-band-label') || {}).textContent || '',
+          skinBand: (document.querySelector('#skin-band .timeline-band-label') || {}).textContent || '',
+          period: (document.querySelector('.period-label') || {}).textContent || '',
+          height: (document.querySelector('.figure-bio-table th') || {}).textContent || '',
+          pig: (document.querySelector('.pig-label') || {}).textContent || '',
+          tools: (document.querySelector('.section-title') || {}).textContent || '',
+          play: (document.querySelector('[data-testid="play-label-paused"]') || {}).textContent || '',
+          africa: africa ? africa.textContent.trim() : '',
+          i18n: (typeof i18next !== 'undefined' && i18next.isInitialized) ? i18next.language : '',
+        };
+      });
+      assert(chrome.i18n === 'fr', `i18n language is fr (got "${chrome.i18n}")`);
+      assert(/vue simple/i.test(chrome.simple), `Simple view is French (got "${chrome.simple}")`);
+      assert(/vue détaillée|vue detaillee/i.test(chrome.detailed), `Detailed view is French (got "${chrome.detailed}")`);
+      assert(/migrations humaines/i.test(chrome.subtitle), `Header subtitle is French (got "${chrome.subtitle}")`);
+      assert(/jalons/i.test(chrome.events), `Milestones band is French (got "${chrome.events}")`);
+      assert(/peau/i.test(chrome.skinBand), `Skin band is French (got "${chrome.skinBand}")`);
+      assert(/\sà\s/i.test(chrome.period), `Period separator is « à » (got "${chrome.period}")`);
+      assert(/taille/i.test(chrome.height), `Height label is French (got "${chrome.height}")`);
+      assert(/peau/i.test(chrome.pig), `Pigmentation label is French (got "${chrome.pig}")`);
+      assert(/techniques|comportements/i.test(chrome.tools), `Tools heading is French (got "${chrome.tools}")`);
+      assert(/lecture/i.test(chrome.play), `Play label is French (got "${chrome.play}")`);
+      assert(/afrique/i.test(chrome.africa), `Continent label is French (got "${chrome.africa}")`);
     } finally {
       await bFr.close();
     }
@@ -537,6 +580,395 @@ async function runUnitTests() {
       return ids.filter((id) => !document.getElementById('lane-' + id));
     });
     assert(missing.length === 0, `Expected lane-* for 2026 additions (missing: ${missing.join(', ') || 'none'})`);
+  });
+
+  await test('Certainty triangle wedges match JSON debate levels (ACTIVE_DEBATE must remain visible)', async () => {
+    const WEDGE = {
+      STRONG_CONSENSUS: 'certainty-tri-wedge--strong',
+      MODERATE_CONSENSUS: 'certainty-tri-wedge--moderate',
+      ACTIVE_DEBATE: 'certainty-tri-wedge--active-debate',
+      SPECULATIVE_HYPOTHESIS: 'certainty-tri-wedge--speculative',
+    };
+    const ids = ['stw573', 'longi', 'naledi'];
+    const issues = await page.evaluate(({ ids: speciesIds, WEDGE: wedgeMap }) => {
+      const bad = [];
+      speciesIds.forEach((id) => {
+        const sp = SPECIES_DATA.find((s) => s.id === id);
+        if (!sp) { bad.push(id + ' missing from SPECIES_DATA'); return; }
+        renderPanel(sp);
+        const paths = [...document.querySelectorAll('.certainty-tri-svg path')];
+        if (paths.length !== 3) {
+          bad.push(id + ' expected 3 wedges, got ' + paths.length);
+          return;
+        }
+        const domains = ['taxonomy', 'behavior', 'pigmentation'];
+        domains.forEach((dom, i) => {
+          const level = sp['hominin:' + dom + 'DebateLevel'];
+          const want = wedgeMap[level];
+          const got = paths[i].getAttribute('class') || '';
+          if (!want || !got.split(/\s+/).includes(want)) {
+            bad.push(id + ' ' + dom + ' JSON ' + level + ' not in class "' + got + '"');
+          }
+        });
+      });
+      const legend = document.querySelector('.certainty-tri-pop-legend');
+      const legendText = legend ? legend.textContent : '';
+      if (!/active debate/i.test(legendText) || !/speculative/i.test(legendText)) {
+        bad.push('legend must name active debate and speculative separately (got: ' + legendText + ')');
+      }
+      if (/active debate or fragile/i.test(legendText)) {
+        bad.push('legend still merges debate and speculative');
+      }
+      return bad;
+    }, { ids, WEDGE });
+    assert(issues.length === 0, `Wedges match JSON (issues: ${issues.join('; ') || 'none'})`);
+  });
+
+  await test('Certainty popover explains each domain with catalogue facts, not only generic agreement', async () => {
+    const st = await page.evaluate(() => {
+      const sp = SPECIES_DATA.find((s) => s.id === 'sapiens-upper-paleo');
+      if (!sp) return { missing: true };
+      renderPanel(sp);
+      const pop = document.querySelector('.certainty-tri-pop');
+      const text = pop ? pop.textContent : '';
+      const pigRow = pop && [...pop.querySelectorAll('.certainty-tri-row')].find((row) => /pigmentation/i.test(row.textContent || ''));
+      const behRow = pop && [...pop.querySelectorAll('.certainty-tri-row')].find((row) => /behaviour|comportement/i.test(row.textContent || ''));
+      return {
+        missing: false,
+        text,
+        pigText: pigRow ? pigRow.textContent : '',
+        behText: behRow ? behRow.textContent : '',
+        genericOnly: /Broad researcher agreement/.test(text) && !/Dark \(347/.test(text),
+      };
+    });
+    assert(!st.missing, 'sapiens-upper-paleo is in SPECIES_DATA');
+    assert(/skin colour|couleur de la peau/i.test(st.text), `Pigmentation domain is defined (got "${st.text.slice(0, 180)}")`);
+    assert(/how this group is named|comment on nomme/i.test(st.text), 'Taxonomy domain is defined');
+    assert(/tools, burials|outils, sépultures/i.test(st.text), 'Behaviour domain is defined');
+    assert(/dark \(347\/348/i.test(st.pigText), `Pigmentation cites skin colour from the catalogue (got "${st.pigText.slice(0, 240)}")`);
+    assert(/ust/i.test(st.pigText), `Pigmentation cites a genome site (got "${st.pigText.slice(0, 280)}")`);
+    assert(/348 genomes|348 génomes|direct dna/i.test(st.pigText), `Pigmentation cites the DNA evidence label (got "${st.pigText.slice(0, 280)}")`);
+    assert(/aurignacian|gravettian|cave art/i.test(st.behText), `Behaviour cites material traces (got "${st.behText.slice(0, 240)}")`);
+    assert(!st.genericOnly, 'Popover is not limited to generic “researchers agree” copy');
+  });
+
+  await test('Certainty popover sits left of the triangle so the icon stays visible', async () => {
+    const st = await page.evaluate(() => {
+      const sp = SPECIES_DATA.find((s) => s.id === 'sapiens-upper-paleo');
+      if (!sp) return { missing: true };
+      renderPanel(sp);
+      const slot = document.querySelector('.certainty-tri-slot');
+      const hit = slot && slot.querySelector('.certainty-tri-hit');
+      const pop = document.querySelector('body > .certainty-tri-pop');
+      if (!hit || !pop) return { missing: true };
+      pop.classList.add('is-open');
+      layoutCertaintyTriPop(slot, pop);
+      const pr = pop.getBoundingClientRect();
+      const hr = hit.getBoundingClientRect();
+      return {
+        missing: false,
+        gap: hr.left - pr.right,
+        hitW: hr.width,
+        hitH: hr.height,
+      };
+    });
+    assert(!st.missing, 'icon and popover present after renderPanel');
+    assert(st.hitW >= 40 && st.hitH >= 40, `triangle hit target stays laid out (got ${st.hitW}×${st.hitH})`);
+    assert(st.gap >= 24, `popover must stop left of the icon including its shadow (gap ${st.gap})`);
+  });
+
+  await test('Certainty colours are far apart in hue (moderate vs active debate)', async () => {
+    const st = await page.evaluate(() => {
+      function hue(hex) {
+        const h = String(hex || '').replace('#', '').trim();
+        if (h.length < 6) return null;
+        const r = parseInt(h.slice(0, 2), 16) / 255;
+        const g = parseInt(h.slice(2, 4), 16) / 255;
+        const b = parseInt(h.slice(4, 6), 16) / 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        if (max === min) return 0;
+        const d = max - min;
+        let deg = 0;
+        if (max === r) deg = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+        else if (max === g) deg = ((b - r) / d + 2) * 60;
+        else deg = ((r - g) / d + 4) * 60;
+        return deg;
+      }
+      function hueDist(a, b) {
+        const ha = hue(a);
+        const hb = hue(b);
+        if (ha == null || hb == null) return 0;
+        const d = Math.abs(ha - hb);
+        return Math.min(d, 360 - d);
+      }
+      const css = getComputedStyle(document.documentElement);
+      const colors = {
+        strong: css.getPropertyValue('--certainty-strong-consensus').trim(),
+        moderate: css.getPropertyValue('--certainty-moderate-consensus').trim(),
+        debate: css.getPropertyValue('--certainty-active-debate').trim(),
+        speculative: css.getPropertyValue('--certainty-speculative').trim(),
+      };
+      const keys = Object.keys(colors);
+      const pairs = [];
+      for (let i = 0; i < keys.length; i++) {
+        for (let j = i + 1; j < keys.length; j++) {
+          pairs.push({
+            a: keys[i],
+            b: keys[j],
+            dist: hueDist(colors[keys[i]], colors[keys[j]]),
+          });
+        }
+      }
+      return { colors, pairs };
+    });
+    const moderateDebate = st.pairs.find((p) => p.a === 'moderate' && p.b === 'debate');
+    assert(moderateDebate && moderateDebate.dist >= 80,
+      `moderate vs active-debate hue gap ≥ 80° (got ${moderateDebate ? moderateDebate.dist.toFixed(1) : 'missing'}°, colors ${st.colors.moderate} / ${st.colors.debate})`);
+    const tooClose = st.pairs.filter((p) => p.dist < 50);
+    assert(tooClose.length === 0,
+      `every certainty pair ≥ 50° apart (close: ${tooClose.map((p) => p.a + '/' + p.b + ' ' + p.dist.toFixed(1) + '°').join(', ') || 'none'})`);
+  });
+
+  await test('Hot-case event certainty HTML carries the JSON debateLevel label', async () => {
+    const ids = ['little-foot', 'naledi-burial', 'yunxian-longi', 'thomas-quarry'];
+    const issues = await page.evaluate((eventIds) => {
+      const bad = [];
+      eventIds.forEach((id) => {
+        const ev = EVENTS_DATA.find((e) => e.id === id);
+        if (!ev) { bad.push(id + ' missing from EVENTS_DATA'); return; }
+        const html = eventCertaintyHtml(ev);
+        if (!html) { bad.push(id + ' eventCertaintyHtml is empty'); return; }
+        const dl = ev['hominin:debateLevel'];
+        const expected = (typeof i18next !== 'undefined' && i18next.isInitialized)
+          ? i18next.t('ui.uncertaintyDebate_' + dl, { defaultValue: dl })
+          : dl;
+        if (!html.includes(expected) && html.indexOf(dl) === -1) {
+          bad.push(id + ' JSON ' + dl + ' not in certainty HTML');
+        }
+      });
+      return bad;
+    }, ids);
+    assert(issues.length === 0, `Event certainty visible (issues: ${issues.join('; ') || 'none'})`);
+  });
+
+  await test('Sources drawer opens How to read the data as translatable HTML', async () => {
+    await page.click('[data-testid="burger-menu-button"]');
+    await page.waitForSelector('#burger-panel.open', { timeout: 4000 });
+    await page.click('[data-testid="open-doc-data-readme"]');
+    await page.waitForFunction(() => {
+      const el = document.querySelector('[data-testid="docs-viewer-body"]');
+      return !!(el && /Scientific data — start here/.test(el.textContent || ''));
+    }, { timeout: 8000 });
+    const st = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="docs-viewer-body"]');
+      const h1 = el && el.querySelector('h1');
+      return {
+        heading: h1 ? h1.textContent.trim() : '',
+        translate: el ? el.getAttribute('translate') : null,
+        lang: el ? el.getAttribute('lang') : null,
+      };
+    });
+    assert(st.heading === 'Scientific data — start here',
+      `docs drawer heading is Scientific data — start here (got "${st.heading}")`);
+    assert(st.translate === 'yes', `docs article is translate=yes (got ${st.translate})`);
+    assert(st.lang === 'en', `docs article lang=en (got ${st.lang})`);
+    await page.click('[data-testid="close-docs-viewer"]');
+  });
+
+  await test('Controversy red-list: hot cases must not flatten debates (en and fr JSON)', async () => {
+    const speciesDoc = JSON.parse(fs.readFileSync(SPECIES_JSON_PATH, 'utf8'));
+    const eventsDoc = JSON.parse(fs.readFileSync(EVENTS_JSON_PATH, 'utf8'));
+    function stringsOfLang(node, lang) {
+      const out = [];
+      function walk(v, key) {
+        if (v == null) return;
+        if (typeof v === 'string') { out.push({ key, text: v }); return; }
+        if (Array.isArray(v)) { v.forEach((x, i) => walk(x, key + '[' + i + ']')); return; }
+        if (typeof v === 'object') {
+          if (typeof v.en === 'string' || typeof v.fr === 'string') {
+            if (v[lang]) out.push({ key, text: v[lang] });
+            Object.keys(v).forEach((k) => {
+              if (k !== 'en' && k !== 'fr') walk(v[k], key + '.' + k);
+            });
+            return;
+          }
+          Object.keys(v).forEach((k) => walk(v[k], key + '.' + k));
+        }
+      }
+      walk(node, node['@id'] || '');
+      return out;
+    }
+    function findItem(list, id) {
+      return list.itemListElement.find((it) => it['@id'] === id);
+    }
+    const bad = [];
+    ['longi', 'stw573', 'antecessor', 'naledi'].forEach((id) => {
+      if (!findItem(speciesDoc, id)) bad.push(id + ' missing from species.json');
+    });
+    ['yunxian-longi', 'little-foot', 'thomas-quarry', 'naledi-burial'].forEach((id) => {
+      if (!findItem(eventsDoc, id)) bad.push(id + ' missing from events.json');
+    });
+    if (bad.length) {
+      assert(false, `Red-list missing items: ${bad.join('; ')}`);
+      return;
+    }
+    function forbid(id, lang, strings, re, label) {
+      strings.forEach(({ key, text }) => {
+        if (re.test(text)) bad.push(`${id} ${lang} ${key} contains ${label}`);
+      });
+    }
+    function forbidBareBurial(id, lang, strings) {
+      const phrase = lang === 'fr'
+        ? /enterrait(?:ent)? (?:leurs|ses) morts|enterraient (?:leurs|ses) morts|ont enterré (?:leurs|ses) morts/i
+        : /\bbur(?:y|ied) their dead\b/i;
+      const marker = lang === 'fr'
+        ? /revendiqu|contest|débat|pas de consensus|non établ|proposent|prétend/i
+        : /claim|contest|debat|no consensus|not established|propos|remain contested/i;
+      strings.forEach(({ key, text }) => {
+        if (phrase.test(text) && !marker.test(text)) {
+          bad.push(`${id} ${lang} ${key} states burial in the indicative without a debate marker`);
+        }
+      });
+    }
+
+    ['en', 'fr'].forEach((lang) => {
+      const longi = stringsOfLang(findItem(speciesDoc, 'longi'), lang);
+      const yunxian = stringsOfLang(findItem(eventsDoc, 'yunxian-longi'), lang);
+      const juluEn = /newly discovered species/i;
+      const juluFr = /nouvelle espèce découverte/i;
+      forbid('longi', lang, longi, lang === 'fr' ? juluFr : juluEn, 'juluensis-as-discovery');
+      forbid('yunxian-longi', lang, yunxian, lang === 'fr' ? juluFr : juluEn, 'juluensis-as-discovery');
+
+      const stw = stringsOfLang(findItem(speciesDoc, 'stw573'), lang);
+      const littleFoot = stringsOfLang(findItem(eventsDoc, 'little-foot'), lang);
+      const thirdEn = /third established species/i;
+      const thirdFr = /troisième espèce établie/i;
+      forbid('stw573', lang, stw, lang === 'fr' ? thirdFr : thirdEn, 'Little Foot as established species');
+      forbid('little-foot', lang, littleFoot, lang === 'fr' ? thirdFr : thirdEn, 'Little Foot as established species');
+
+      const ante = stringsOfLang(findItem(speciesDoc, 'antecessor'), lang);
+      const tq = stringsOfLang(findItem(eventsDoc, 'thomas-quarry'), lang);
+      const ancEn = /proves the common ancestor/i;
+      const ancFr = /prouve l['’]ancêtre commun/i;
+      forbid('antecessor', lang, ante, lang === 'fr' ? ancFr : ancEn, 'Thomas Quarry proves ancestor');
+      forbid('thomas-quarry', lang, tq, lang === 'fr' ? ancFr : ancEn, 'Thomas Quarry proves ancestor');
+
+      const naledi = stringsOfLang(findItem(speciesDoc, 'naledi'), lang);
+      const burial = stringsOfLang(findItem(eventsDoc, 'naledi-burial'), lang);
+      forbidBareBurial('naledi', lang, naledi);
+      forbidBareBurial('naledi-burial', lang, burial);
+    });
+    assert(bad.length === 0, `Red-list clean (issues: ${bad.join('; ') || 'none'})`);
+  });
+
+  await test('Hot-case provenance fields survive adaptSpecies / adaptEvent and show in the UI', async () => {
+    const issues = await page.evaluate(() => {
+      const bad = [];
+      const speciesIds = ['stw573', 'longi', 'naledi', 'antecessor'];
+      speciesIds.forEach((id) => {
+        const sp = SPECIES_DATA.find((s) => s.id === id);
+        if (!sp) { bad.push(id + ' missing'); return; }
+        if (sp['hominin:lastReviewed'] !== '2026-08-30') {
+          bad.push(id + ' lastReviewed=' + sp['hominin:lastReviewed']);
+        }
+      });
+      const stw = SPECIES_DATA.find((s) => s.id === 'stw573');
+      if (stw && !stw['hominin:taxonomyUncertaintyNote']) bad.push('stw573 missing taxonomyUncertaintyNote');
+      const longi = SPECIES_DATA.find((s) => s.id === 'longi');
+      if (longi && !longi['hominin:taxonomyUncertaintyNote']) bad.push('longi missing taxonomyUncertaintyNote');
+      const naledi = SPECIES_DATA.find((s) => s.id === 'naledi');
+      if (naledi && !naledi['hominin:behaviorUncertaintyNote']) bad.push('naledi missing behaviorUncertaintyNote');
+      const ante = SPECIES_DATA.find((s) => s.id === 'antecessor');
+      if (ante && !ante['hominin:taxonomyUncertaintyNote']) bad.push('antecessor missing taxonomyUncertaintyNote');
+
+      if (stw) {
+        renderPanel(stw);
+        const notes = document.querySelector('.uncertainty-notes');
+        const text = notes ? notes.textContent : '';
+        if (!text) bad.push('stw573 panel missing uncertainty-notes');
+        if (!/Last reviewed 2026-08-30/.test(text)) bad.push('stw573 panel missing lastReviewed');
+        if (stw.debate && text === stw.debate) bad.push('uncertainty notes replaced debate');
+      }
+
+      const eventIds = ['little-foot', 'yunxian-longi', 'thomas-quarry', 'naledi-burial'];
+      eventIds.forEach((id) => {
+        const ev = EVENTS_DATA.find((e) => e.id === id);
+        if (!ev) { bad.push(id + ' event missing'); return; }
+        if (ev['hominin:lastReviewed'] !== '2026-08-30') {
+          bad.push(id + ' event lastReviewed=' + ev['hominin:lastReviewed']);
+        }
+        if (!ev['hominin:uncertaintyNote']) bad.push(id + ' missing uncertaintyNote');
+        const html = eventCertaintyHtml(ev);
+        if (!html || html.indexOf(ev['hominin:uncertaintyNote']) === -1) {
+          bad.push(id + ' uncertaintyNote not in eventCertaintyHtml');
+        }
+      });
+      return bad;
+    });
+    assert(issues.length === 0, `Provenance visible (issues: ${issues.join('; ') || 'none'})`);
+  });
+
+  await test('Artifact tooltip stays clear of the square events peek', async () => {
+    const st = await page.evaluate(() => {
+      const peek = document.getElementById('events-peek');
+      const tip = document.getElementById('band-tooltip');
+      const host = document.getElementById('events-peek-items');
+      const ev = EVENTS_DATA.find((e) => e.id === 'art-sulawesi-old') || EVENTS_DATA[0];
+      if (!peek || !tip || !host || !ev) return { missing: true };
+      const prevPeek = {
+        className: peek.className,
+        left: peek.style.left,
+        top: peek.style.top,
+        width: peek.style.width,
+        height: peek.style.height,
+      };
+      const prevHost = host.innerHTML;
+      peek.classList.add('is-open');
+      peek.style.left = '420px';
+      peek.style.top = '620px';
+      peek.style.width = '300px';
+      peek.style.height = '80px';
+      host.innerHTML = '<button type="button" class="events-peek-item" data-event-id="' + ev.id +
+        '" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:28px;height:28px"></button>';
+      const item = host.querySelector('.events-peek-item');
+      tip.classList.remove('band-tooltip--skin', 'band-tooltip--species');
+      tip.innerHTML = eventTooltipHtml(ev);
+      tip.style.display = 'block';
+      positionBandTipNearIcon(item);
+      const pr = peek.getBoundingClientRect();
+      const tr = tip.getBoundingClientRect();
+      const overlap = tr.bottom > pr.top + 0.5 && tr.top < pr.bottom - 0.5 &&
+        tr.left < pr.right - 0.5 && tr.right > pr.left + 0.5;
+      const caretEl = tip.querySelector('.band-tooltip-caret');
+      const caretShown = !!(caretEl && getComputedStyle(caretEl).display !== 'none');
+      const peekClass = tip.classList.contains('band-tooltip--peek');
+      const caretX = tip.style.getPropertyValue('--peek-caret-x');
+      peek.className = prevPeek.className;
+      peek.style.left = prevPeek.left;
+      peek.style.top = prevPeek.top;
+      peek.style.width = prevPeek.width;
+      peek.style.height = prevPeek.height;
+      host.innerHTML = prevHost;
+      tip.style.display = 'none';
+      tip.innerHTML = '';
+      tip.classList.remove('band-tooltip--peek');
+      return {
+        missing: false,
+        overlap: overlap,
+        gap: pr.top - tr.bottom,
+        tipH: tr.height,
+        peekClass: peekClass,
+        caretX: caretX,
+        caretShown: caretShown,
+      };
+    });
+    assert(!st.missing, 'peek, tooltip and Sulawesi art event are present');
+    assert(!st.overlap, `tooltip must not cover the square loupe (gap ${st.gap}, tipH ${st.tipH})`);
+    assert(st.gap >= 6 && st.gap <= 14, `tooltip sits just above the loupe for the linking caret (gap ${st.gap})`);
+    assert(st.peekClass, 'tooltip has the peek caret class');
+    assert(st.caretShown, 'downward caret is visible under the tooltip');
+    assert(!!st.caretX, `caret is aligned to the hovered icon (--peek-caret-x ${st.caretX})`);
   });
 
   // ─── close ────────────────────────────────────────────────────────────────

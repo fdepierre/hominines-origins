@@ -113,7 +113,7 @@ function getStats() { return { pass: _pass, fail: _fail, warn: _warn }; }
 function resetStats() { _pass = 0; _fail = 0; _warn = 0; }
 
 // ─── browser helpers ──────────────────────────────────────────────────────────
-async function launch({ width = 1440, height = 900, mobile = false, locale = null } = {}) {
+async function launch({ width = 1440, height = 900, mobile = false, locale = 'en-US' } = {}) {
   // Let Playwright find the browser automatically.
   // The env var override is kept for unusual local setups only.
   const headed = process.env.HEADED === '1' || process.env.PLAYWRIGHT_HEADED === '1';
@@ -131,8 +131,8 @@ async function launch({ width = 1440, height = 900, mobile = false, locale = nul
   const contextOpts = {
     viewport: { width: mobile ? 768 : width, height: mobile ? 1024 : height },
     deviceScaleFactor: 1,
+    locale,
   };
-  if (locale) contextOpts.locale = locale;
   const context = await browser.newContext(contextOpts);
 
   const page = await context.newPage();
@@ -156,8 +156,6 @@ async function loadApp(page, { lang = null, theme = null, dismissWelcome = true 
   await page.waitForFunction(() => typeof SPECIES_DATA !== 'undefined' && typeof EVENTS_DATA !== 'undefined', { timeout: 10000 });
   // `loadData()` sets this after `adaptSpecies` maps JSON (certainty keys live on each species in `species.json`)
   await page.waitForFunction(() => window.__HOMININ_CERTAINTY_READY === true, { timeout: 10000 });
-  // Wait for timeline to be rendered
-  await page.waitForSelector('#timeline-lanes', { state: 'attached', timeout: 8000 });
   // Small extra tick for everything to settle
   await page.waitForTimeout(300);
 
@@ -177,8 +175,7 @@ async function loadApp(page, { lang = null, theme = null, dismissWelcome = true 
   // Override language if requested
   if (lang) {
     await page.evaluate((l) => {
-      const sel = document.getElementById('lang-select');
-      if (sel) { sel.value = l; sel.dispatchEvent(new Event('change')); }
+      if (typeof setCatalogueLang === 'function') setCatalogueLang(l);
     }, lang);
     await page.waitForTimeout(300);
   }

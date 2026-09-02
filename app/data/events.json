@@ -23,6 +23,11 @@
       "hominin:category": "phylo",
       "hominin:debateLevel": "ACTIVE_DEBATE",
       "hominin:evidenceType": "DIRECT_DATA",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:uncertaintyNote": {
+        "fr": "Deux débats distincts : le taxon (prometheus écarté sans nouveau nom) et la date (cosmogénique ~3,67 Ma vs lectures plus jeunes). Les lectures journalistiques d'une « troisième espèce » dépassent l'article.",
+        "en": "Two distinct debates: taxon (prometheus ruled out without a new name) and date (cosmogenic ~3.67 Ma vs younger readings). Journalistic “third species” readings overstate the paper."
+      },
       "hominin:dateReference": "Martin et al., Am. J. Biol. Anthropol. 188:e70177 (2025) 10.1002/ajpa.70177; Granger et al., Nature 522:85 (2015) 10.1038/nature14268",
       "description": {
         "fr": "Squelette quasi complet de Sterkfontein (Silberberg Grotto). Datation cosmogénique ~3,67 Ma ; attribution à A. prometheus rejetée par Martin et al. 2025 — ni prometheus ni clairement africanus. Débat actif taxon + datation.",
@@ -275,6 +280,11 @@
       "hominin:category": "phylo",
       "hominin:debateLevel": "ACTIVE_DEBATE",
       "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:uncertaintyNote": {
+        "fr": "Trois positions concurrentes (H. longi, H. juluensis, données insuffisantes) ; pas d'ADN nucléaire hors Harbin. H. juluensis est un reclassement de fossiles connus, pas une découverte de terrain.",
+        "en": "Three competing positions (H. longi, H. juluensis, insufficient data); no nuclear DNA outside Harbin. H. juluensis is a reclassification of known fossils, not a field discovery."
+      },
       "hominin:dateReference": "Feng et al., Science 389:1320 (2025) 10.1126/science.ado9202",
       "description": {
         "fr": "Reconstruction numérique de Yunxian 2 (Hubei) : membre précoce du clade asiatique H. longi (incl. Dénisoviens), groupe frère de H. sapiens. Débat concurrent H. juluensis (Bae & Wu 2024) ; pas d'ADN nucléaire.",
@@ -303,6 +313,11 @@
       "hominin:category": "phylo",
       "hominin:debateLevel": "MODERATE_CONSENSUS",
       "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:uncertaintyNote": {
+        "fr": "La datation à 773 ka (Brunhes/Matuyama) est robuste ; la phylogénie (population basale aux trois lignées vs H. erectus en divergence) reste un consensus modéré. Cela ne tranche pas un ancêtre partagé des trois lignées.",
+        "en": "The 773 ka date (Brunhes/Matuyama) is robust; phylogeny (basal to the three lineages vs diverging H. erectus) remains moderate consensus. That does not settle a shared ancestor of the three lineages."
+      },
       "hominin:dateReference": "Hublin et al., Nature (2026) 10.1038/s41586-025-09914-y",
       "description": {
         "fr": "Thomas Quarry I, Casablanca — 773 ka (Brunhes/Matuyama, datation robuste). Population souvent présentée comme basale aux 3 lignées ; alternative : H. erectus en divergence. Datation = consensus fort ; phylogénie = consensus modéré.",
@@ -387,6 +402,11 @@
       "hominin:category": "symbolic",
       "hominin:debateLevel": "ACTIVE_DEBATE",
       "hominin:evidenceType": "INDIRECT_DATA",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:uncertaintyNote": {
+        "fr": "Sépulture intentionnelle revendiquée, non établie — pas de consensus (Martinón-Torres et al. 2024). Ne pas écrire une pratique funéraire comme un fait tranché.",
+        "en": "Intentional burial is claimed, not established — no consensus (Martinón-Torres et al. 2024). Do not write funerary practice as settled fact."
+      },
       "hominin:dateReference": "Berger et al., eLife (2025) 10.7554/eLife.89106; Martinon-Torres et al., J. Hum. Evol. (2024) 10.1016/j.jhevol.2023.103464",
       "description": {
         "fr": "Squelettes d'H. naledi dans les chambres profondes de Rising Star (Afrique du Sud). Berger et al. proposent des dépôts intentionnels de corps, foyers et gravures symboliques chez un hominine à cerveau réduit (~465–610 cm³). Contesté vigoureusement sur les plans taphonomique et stratigraphique — pas de consensus sur les sépultures intentionnelles (Martinón-Torres et al. 2024, J. Hum. Evol.).",

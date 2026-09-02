@@ -532,6 +532,11 @@
       "hominin:behaviorEvidenceType": "EVOLUTIONARY_INFERENCE",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:taxonomyUncertaintyNote": {
+        "fr": "Deux questions ouvertes, à ne pas fusionner : le taxon (attribution à A. prometheus rejetée sans nouveau nom d'espèce) versus la date (nucléides cosmogéniques ~3,67 Ma contre des lectures plus jeunes du Member 2).",
+        "en": "Two open questions, not to be merged: taxon (A. prometheus assignment rejected without a new species name) versus date (cosmogenic nuclides ~3.67 Ma vs younger Member 2 readings)."
+      },
       "hominin:references": [
         {
           "name": "Martin et al. (2025) 10.1002/ajpa.70177",
@@ -1303,6 +1308,11 @@
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "MODERATE_CONSENSUS",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:taxonomyUncertaintyNote": {
+        "fr": "Population sœur — non ancêtre — du clade menant à Thomas Quarry I dans la lecture de 2026 (Hublin et al.). La face moderne peut être une convergence ; la phylogénie reste débattue.",
+        "en": "Sister population — not ancestor — to the clade leading to Thomas Quarry I in the 2026 reading (Hublin et al.). The modern face may be convergence; phylogeny remains debated."
+      },
       "hominin:references": [
         {
           "name": "Carbonell et al. (2008) 10.1038/nature06815",
@@ -1467,6 +1477,11 @@
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "SPECULATIVE_HYPOTHESIS",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:taxonomyUncertaintyNote": {
+        "fr": "Trois positions concurrentes, aucune consensuelle : H. longi (priorité de nomenclature), H. juluensis (reclassement Bae & Wu 2024), ou données insuffisantes pour un taxon supplémentaire (Ni). H. juluensis est un reclassement de fossiles connus, pas une découverte de terrain.",
+        "en": "Three competing positions, none consensual: H. longi (nomenclatural priority), H. juluensis (Bae & Wu 2024 reclassification), or data insufficient for an additional taxon (Ni). H. juluensis is a reclassification of known fossils, not a field discovery."
+      },
       "hominin:references": [
         {
           "name": "Bae & Wu (2024) 10.1038/s41467-024-53918-7",
@@ -2266,6 +2281,11 @@
       "hominin:behaviorEvidenceType": "INDIRECT_DATA",
       "hominin:pigmentationDebateLevel": "ACTIVE_DEBATE",
       "hominin:pigmentationEvidenceType": "EVOLUTIONARY_INFERENCE",
+      "hominin:lastReviewed": "2026-08-30",
+      "hominin:behaviorUncertaintyNote": {
+        "fr": "La pratique funéraire est revendiquée, non établie : Berger et al. proposent des dépôts intentionnels ; les critiques taphonomiques et stratigraphiques demeurent. Ne pas affirmer une sépulture comme un fait tranché.",
+        "en": "Funerary practice is claimed, not established: Berger et al. propose intentional deposits; taphonomic and stratigraphic critiques remain. Do not state burial as settled fact."
+      },
       "hominin:references": [
         {
           "name": "Martinon-Torres et al. (2024) 10.1016/j.jhevol.2023.103464",
