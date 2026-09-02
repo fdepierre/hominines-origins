@@ -272,6 +272,99 @@ async function runMapLibreTests() {
     assert(result.moved, 'At least one MapLibre figure moves along a migration path during play');
   });
 
+  await test('Map hover popup stays in the map and does not scroll the layout', async () => {
+    const result = await page.evaluate(async () => {
+      if (typeof setTime === 'function') setTime(-743000);
+      if (typeof updateMap === 'function') updateMap();
+      await new Promise(resolve => setTimeout(resolve, 250));
+      const main = document.getElementById('main');
+      const mapEl = document.getElementById('map');
+      const timeline = document.getElementById('timeline');
+      const ev = (EVENTS_DATA || []).find(e => e.id === 'little-foot') || (EVENTS_DATA || [])[0];
+      const marker = ev && mapLibreEventMarkers.get(ev.id);
+      const el = marker && marker.getElement && marker.getElement();
+      if (!el || !main || !mapEl || !timeline) {
+        return { hasMarker: !!el };
+      }
+      main.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise(resolve => setTimeout(resolve, 60));
+      const popup = document.querySelector('.maplibregl-popup');
+      const tip = popup ? popup.getBoundingClientRect() : null;
+      const mapRect = mapEl.getBoundingClientRect();
+      const tlRect = timeline.getBoundingClientRect();
+      return {
+        hasMarker: true,
+        hasPopup: !!popup,
+        focusAfterOpen: mapLibreEventPopup && mapLibreEventPopup.options
+          ? mapLibreEventPopup.options.focusAfterOpen
+          : null,
+        mainScroll: main.scrollTop,
+        pageScroll: document.documentElement.scrollTop || document.body.scrollTop || 0,
+        tipBottom: tip ? Math.round(tip.bottom) : null,
+        mapBottom: Math.round(mapRect.bottom),
+        timelineTop: Math.round(tlRect.top),
+        overlapsTimeline: !!(tip && tip.bottom > tlRect.top + 1 && tip.top < tlRect.bottom),
+        pointerEvents: popup ? getComputedStyle(popup).pointerEvents : null,
+        popupH: tip ? Math.round(tip.height) : null,
+      };
+    });
+    assert(result.hasMarker, 'Little Foot map marker exists at −743 ka');
+    assert(result.hasPopup, 'Hover opens a MapLibre popup');
+    assert(result.focusAfterOpen === false, 'Popup must not steal focus (would scroll the map)');
+    assert(result.mainScroll === 0, `hover must not scroll #main (scrollTop ${result.mainScroll})`);
+    assert(result.pageScroll === 0, `hover must not scroll the page (scrollTop ${result.pageScroll})`);
+    assert(!result.overlapsTimeline,
+      `popup must not sit under the timeline (tipBottom ${result.tipBottom}, timelineTop ${result.timelineTop})`);
+    assert(result.tipBottom <= result.mapBottom + 1,
+      `popup stays in the map (tipBottom ${result.tipBottom}, mapBottom ${result.mapBottom})`);
+    assert(result.pointerEvents === 'none', `popup must not steal the mouse (pointer-events ${result.pointerEvents})`);
+    assert(result.popupH > 0 && result.popupH <= 160, `popup stays compact (height ${result.popupH}px)`);
+  });
+
+  await test('Hovering a clustered event leaves the neighbouring icon reachable', async () => {
+    const result = await page.evaluate(async () => {
+      if (typeof setTime === 'function') setTime(-743000);
+      if (typeof updateMap === 'function') updateMap();
+      await new Promise(resolve => setTimeout(resolve, 250));
+      const fire = mapLibreEventMarkers.get('fire-use');
+      const bone = mapLibreEventMarkers.get('little-foot');
+      const fireEl = fire && fire.getElement && fire.getElement();
+      const boneEl = bone && bone.getElement && bone.getElement();
+      if (!fireEl || !boneEl) return { hasPair: false };
+      fireEl.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise(resolve => setTimeout(resolve, 60));
+      const popup = document.querySelector('.maplibregl-popup');
+      const boneRect = boneEl.getBoundingClientRect();
+      const zPopup = popup ? Number(getComputedStyle(popup).zIndex) : 0;
+      const zBone = Number(getComputedStyle(boneEl).zIndex);
+      const zFire = Number(getComputedStyle(fireEl).zIndex);
+      boneEl.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise(resolve => setTimeout(resolve, 60));
+      const popup2 = document.querySelector('.maplibregl-popup');
+      const html2 = popup2 ? popup2.innerText : '';
+      return {
+        hasPair: true,
+        hasFirePopup: !!popup,
+        popupAboveIcons: zPopup > zBone && zPopup > zFire,
+        pointerEvents: popup2 ? getComputedStyle(popup2).pointerEvents : null,
+        boneStillVisible: boneRect.width > 0 && boneRect.height > 0,
+        switchedToLittleFoot: /Little Foot|StW 573/i.test(html2),
+      };
+    });
+    assert(result.hasPair, 'Fire and Little Foot markers are both on the map');
+    assert(result.hasFirePopup, 'Fire hover opens a popup');
+    assert(result.popupAboveIcons, 'Popup paints above the neighbouring map icons');
+    assert(result.pointerEvents === 'none', 'Popup must not block the mouse on the next icon');
+    assert(result.boneStillVisible, 'Little Foot icon stays laid out during the fire popup');
+    assert(result.switchedToLittleFoot, 'Moving to the bone shows the Little Foot popup');
+  });
+
   await test('Timeline event click creates an immediately pulsing MapLibre marker', async () => {
     const result = await page.evaluate(async () => {
       mapLibreEventMarkers.forEach(marker => marker.remove());

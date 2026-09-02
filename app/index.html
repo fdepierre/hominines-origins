@@ -557,9 +557,9 @@ a { color: var(--color-primary); }
 #main {
   display: grid;
   grid-template-columns: 1fr 300px;
-  /* x: clip wide panes; y: visible so map tooltips can extend slightly above the map without being cut off */
-  overflow-x: hidden;
-  overflow-y: visible;
+  /* Both axes hidden. overflow-x:hidden + overflow-y:visible computes to overflow-y:auto,
+     so the browser then scrolls the map to reveal hover popups that sat under #timeline. */
+  overflow: hidden;
   position: relative;
   min-height: 0;
   align-items: stretch;
@@ -2041,14 +2041,15 @@ html[data-map-ready="1"] #map {
   flex-shrink: 0;
 }
 
-/* Map container relative position — overflow visible so map overlays are not clipped at top/sides */
+/* Clip the map so hover popups cannot leak under #timeline (which would also scroll #main). */
 .map-container {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   min-height: 0;
 }
+#map,
 .map-container .maplibregl-map {
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* Section title shared */
@@ -2602,12 +2603,43 @@ html.demo-active .event-marker.demo-artifact-spotlight {
   z-index: 1;
 }
 
-/* MapLibre: HTML popups (sites, jalons) must stack above all .maplibregl-marker (flèches / points de migration) */
+/* MapLibre: the hover card paints above markers; pointer-events: none lets the
+   mouse still reach a neighbouring jalon (flame → Little Foot) through the card. */
 .maplibregl-map .maplibregl-popup {
   z-index: 2000 !important;
 }
+.maplibregl-map .maplibregl-popup,
+.maplibregl-map .maplibregl-popup-content,
+.maplibregl-map .maplibregl-popup-tip {
+  pointer-events: none !important;
+}
+.maplibregl-map .maplibregl-popup-content {
+  padding: 7px 10px;
+  max-width: 200px;
+}
 .maplibregl-map .maplibregl-marker {
   z-index: 1 !important;
+}
+.map-event-popup {
+  font-size: 12px;
+  line-height: 1.35;
+  max-width: 200px;
+}
+.map-event-popup strong { display: block; }
+.map-event-popup em {
+  display: block;
+  margin-top: 1px;
+  color: #9a8f7a;
+  font-size: 11px;
+}
+.map-event-popup-desc,
+.map-event-popup-meta {
+  display: block;
+  margin-top: 4px;
+}
+.map-event-popup-meta {
+  color: var(--color-text-faint);
+  font-size: 11px;
 }
 
 /* Speed selector — hidden, speed is fixed */
@@ -3928,7 +3960,7 @@ function ensureMapLibreSitesLayer() {
     });
   }
   if (!mapLibreSiteHandlersReady) {
-    mapLibreSitePopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: '280px' });
+    mapLibreSitePopup = new maplibregl.Popup(mapLibreHoverPopupOptions(12));
     mapLibreMap.on('mouseenter', 'hominine-sites', function (e) {
       mapLibreMap.getCanvas().style.cursor = 'pointer';
       const f = e.features && e.features[0];
@@ -3944,6 +3976,7 @@ function ensureMapLibreSitesLayer() {
           '</div>'
         )
         .addTo(mapLibreMap);
+      pinMapLibrePopupInMap(mapLibreSitePopup);
     });
     mapLibreMap.on('mouseleave', 'hominine-sites', function () {
       mapLibreMap.getCanvas().style.cursor = '';
@@ -3968,6 +4001,47 @@ function uiT(key, fallback) {
     return i18next.t('ui.' + key, { defaultValue: fallback });
   }
   return fallback;
+}
+
+/** Hover popups must not steal focus: the browser would scroll the map to show them. */
+function mapLibreHoverPopupOptions(offsetPx) {
+  return {
+    closeButton: false,
+    closeOnClick: false,
+    focusAfterOpen: false,
+    offset: offsetPx,
+    maxWidth: '200px'
+  };
+}
+
+/** Flip anchor if needed; never slide the box across the map (that hid other icons). */
+function pinMapLibrePopupInMap(popup) {
+  if (!popup || !mapLibreMap) return;
+  requestAnimationFrame(function () {
+    var el = popup.getElement && popup.getElement();
+    var mapEl = mapLibreMap.getContainer();
+    if (!el || !mapEl) return;
+    var mapRect = mapEl.getBoundingClientRect();
+    var tipRect = el.getBoundingClientRect();
+    var next = popup.options.anchor;
+    if (tipRect.bottom > mapRect.bottom - 2) next = 'bottom';
+    else if (tipRect.top < mapRect.top + 2) next = 'top';
+    else if (tipRect.left < mapRect.left + 2) next = 'left';
+    else if (tipRect.right > mapRect.right - 2) next = 'right';
+    if (next && next !== popup.options.anchor) {
+      popup.options.anchor = next;
+      popup.setOffset(10);
+    }
+  });
+}
+
+function mapPopupShortText(text, maxLen) {
+  var s = String(text || '').replace(/\s+/g, ' ').trim();
+  var limit = maxLen || 90;
+  if (s.length <= limit) return s;
+  var cut = s.lastIndexOf(' ', limit - 1);
+  if (cut < Math.floor(limit * 0.55)) cut = limit - 1;
+  return s.slice(0, cut).replace(/[.,;:–—-]+\s*$/, '') + '…';
 }
 
 /** Debate / evidence lines for a milestone. Absence is labelled, never silent. */
@@ -4003,15 +4077,21 @@ function eventCertaintyHtml(ev) {
   return html;
 }
 
-/** HTML for a milestone popup (label, category, description, source). */
+/** Compact hover card: title, category, short line. Full note stays on the timeline tooltip. */
 function mapLibreEventPopupHtml(ev) {
+  var dl = ev && ev['hominin:debateLevel'];
+  var et = ev && ev['hominin:evidenceType'];
+  var debate = dl ? certaintyDebateLevelLabel(dl, uiT) : '';
+  var evid = et ? certaintyEvidShortLabel(et, uiT) : '';
+  var meta = [debate, evid].filter(Boolean).join(' · ');
+  var desc = mapPopupShortText(ev && ev.desc, 90);
   return (
-    '<div style="font-size:13px;line-height:1.5;max-width:240px">' +
-    '<strong style="color:' + bandTipEscapeHtml(ev.color || '#d2a45f') + '">' + bandTipEscapeHtml(ev.label || '') + '</strong><br>' +
-    '<em style="color:#9a8f7a">' + bandTipEscapeHtml(getCategoryLabel(ev.category || '')) + '</em><br>' +
-    bandTipEscapeHtml(ev.desc || '') +
-    eventCertaintyHtml(ev) +
-    (ev.source ? '<br><span style="color:#5a5248;font-style:italic">' + bandTipEscapeHtml(ev.source) + '</span>' : '') +
+    '<div class="map-event-popup">' +
+    '<strong style="color:' + bandTipEscapeHtml((ev && ev.color) || '#d2a45f') + '">' +
+      bandTipEscapeHtml((ev && ev.label) || '') + '</strong>' +
+    '<em>' + bandTipEscapeHtml(getCategoryLabel((ev && ev.category) || '')) + '</em>' +
+    (desc ? '<span class="map-event-popup-desc">' + bandTipEscapeHtml(desc) + '</span>' : '') +
+    (meta ? '<span class="map-event-popup-meta">' + bandTipEscapeHtml(meta) + '</span>' : '') +
     '</div>'
   );
 }
@@ -4054,14 +4134,16 @@ function ensureMapLibreEventMarker(ev) {
   }
   const el = document.createElement('div');
   el.className = 'maplibre-event-marker';
+  el.dataset.eventId = ev.id;
   el.style.cssText = 'display:flex;align-items:center;justify-content:center;min-width:26px;min-height:26px;font-size:18px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.72));will-change:transform;';
   el.innerHTML = '<span class="maplibre-event-marker-inner" style="display:flex;align-items:center;justify-content:center;will-change:transform;">' + eventMapMarkerInnerContent(ev) + '</span>';
   el.addEventListener('mouseenter', function () {
-    mapLibreEventPopup = mapLibreEventPopup || new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 14, maxWidth: '280px' });
+    mapLibreEventPopup = mapLibreEventPopup || new maplibregl.Popup(mapLibreHoverPopupOptions(14));
     mapLibreEventPopup
       .setLngLat([ev.lng, ev.lat])
       .setHTML(mapLibreEventPopupHtml(ev))
       .addTo(mapLibreMap);
+    pinMapLibrePopupInMap(mapLibreEventPopup);
   });
   el.addEventListener('mouseleave', function () {
     if (mapLibreEventPopup) mapLibreEventPopup.remove();

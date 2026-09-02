@@ -947,6 +947,49 @@ async function runUnitTests() {
     assert(!!st.caretX, `caret is aligned to the hovered icon (--peek-caret-x ${st.caretX})`);
   });
 
+  await test('Map pane overflow is hidden so hover popups cannot scroll the layout', async () => {
+    const st = await page.evaluate(() => {
+      const main = document.getElementById('main');
+      const mapEl = document.getElementById('map');
+      const wrap = document.querySelector('.map-container');
+      const mainCs = main ? getComputedStyle(main) : null;
+      const mapCs = mapEl ? getComputedStyle(mapEl) : null;
+      const wrapCs = wrap ? getComputedStyle(wrap) : null;
+      return {
+        mainX: mainCs && mainCs.overflowX,
+        mainY: mainCs && mainCs.overflowY,
+        mapY: mapCs && mapCs.overflowY,
+        wrapY: wrapCs && wrapCs.overflowY,
+      };
+    });
+    assert(st.mainX === 'hidden' && st.mainY === 'hidden',
+      `#main overflow is hidden on both axes (got ${st.mainX}/${st.mainY})`);
+    assert(st.mapY === 'hidden', `#map overflow-y is hidden (got ${st.mapY})`);
+    assert(st.wrapY === 'hidden', `.map-container overflow-y is hidden (got ${st.wrapY})`);
+  });
+
+  await test('Map event popup stays compact so neighbouring icons stay visible', async () => {
+    const st = await page.evaluate(() => {
+      const ev = (EVENTS_DATA || []).find((e) => e.id === 'little-foot');
+      const html = typeof mapLibreEventPopupHtml === 'function' ? mapLibreEventPopupHtml(ev) : '';
+      const note = ev && ev['hominin:uncertaintyNote'];
+      const noteEn = note && typeof note === 'object' ? (note.en || note.fr || '') : String(note || '');
+      const source = ev && (ev.source || ev['hominin:dateReference'] || '');
+      return {
+        hasLabel: /Little Foot|StW 573/i.test(html),
+        hasNote: !!(noteEn && html.indexOf(noteEn.slice(0, 28)) !== -1),
+        hasReviewed: html.indexOf('Last reviewed') !== -1,
+        hasSource: !!(source && html.indexOf(String(source).slice(0, 18)) !== -1),
+        hasLongDebate: html.indexOf('Multiple defended positions') !== -1,
+      };
+    });
+    assert(st.hasLabel, 'compact popup still names Little Foot');
+    assert(!st.hasNote, 'map popup omits the long uncertainty note');
+    assert(!st.hasReviewed, 'map popup omits last-reviewed');
+    assert(!st.hasSource, 'map popup omits the full citation');
+    assert(!st.hasLongDebate, 'map popup uses the short certainty labels');
+  });
+
   await test('Guided demo is wired to real Homo sapiens catalogue data', async () => {
     const st = await page.evaluate(() => {
       const sapiens = (SPECIES_DATA || []).filter((s) => /^sapiens-/i.test(String(s.id)));
