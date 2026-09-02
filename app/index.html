@@ -2565,51 +2565,6 @@ html.demo-active .event-marker.demo-artifact-spotlight {
 .data-viewer-pre{margin:0;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono);font-size:12px;line-height:1.7;}
 [data-theme="light"] .data-viewer-body{background:#1e1e2e;}
 
-.docs-article {
-  padding: var(--space-4) var(--space-5);
-  font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--color-text);
-  overflow: auto;
-  flex: 1;
-}
-.docs-article h1, .docs-article h2, .docs-article h3 {
-  font-family: var(--font-body);
-  font-weight: 600;
-  margin: 1.2em 0 0.4em;
-}
-.docs-article h1 { font-size: 1.35em; margin-top: 0; }
-.docs-article p, .docs-article li { margin: 0.4em 0; }
-.docs-article table {
-  border-collapse: collapse;
-  width: 100%;
-  font-size: 12px;
-  margin: 0.8em 0;
-}
-.docs-article th, .docs-article td {
-  border: 1px solid var(--color-border);
-  padding: 0.35em 0.5em;
-  text-align: left;
-  vertical-align: top;
-}
-.docs-article blockquote {
-  margin: 0.8em 0;
-  padding: 0.2em 0.8em;
-  border-left: 3px solid var(--color-primary);
-  color: var(--color-text-muted);
-}
-.docs-article a { color: var(--color-primary); }
-.docs-article code { font-family: var(--font-mono); font-size: 0.9em; }
-.docs-fallback { padding: var(--space-4) var(--space-5); font-size: 14px; }
-.docs-article ul, .docs-article ol { padding-left: 1.4em; }
-.docs-article pre {
-  overflow: auto;
-  padding: var(--space-3);
-  background: var(--color-surface-offset);
-  font-size: 12px;
-  line-height: 1.5;
-}
 .uncertainty-notes {
   padding: 0 var(--space-6) var(--space-3);
   font-size: 12px;
@@ -2618,11 +2573,6 @@ html.demo-active .event-marker.demo-artifact-spotlight {
 }
 .uncertainty-note { margin: 0.35em 0; }
 .uncertainty-note--reviewed { font-style: italic; }
-.burger-docs-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-.burger-docs-list button {
-  justify-content: flex-start;
-  text-align: left;
-}
 
 /* Migration arrow marker */
 .mig-arrow-head {
@@ -12854,7 +12804,7 @@ const TRANSLATIONS = {
         criticsIntro: 'Experimental - Draft for comments',
         aboutAppBody: 'Hominines Origins is a revisable editorial synthesis, not a certified scientific database. Primary literature (DOI) remains the reference. The app is generated from a structured collection of data extracted from research papers with the help of AI. Claims stay traceable and linked to sources, with a DOI when one is available.',
         aboutAppShows: 'The map and timeline show where each group lived, when, how they moved, and what material traces say about appearance and technology. The app runs in the browser: no server, no login.',
-        aboutAppData: 'Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here. Editorial syntheses are also opened from this menu.',
+        aboutAppData: 'Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here.',
         selectSpecies: 'Select a species',
         selectSpeciesDesc: 'Click a marker on the map or drag the timeline to explore',
         slideTimeline: '◄ drag or tap the timeline ►',
@@ -12961,11 +12911,6 @@ const TRANSLATIONS = {
         timelineViewSimple: 'Simple view',
         timelineViewDetailed: 'Detailed view',
         catalogueLangSection: 'Language',
-        sourcesSection: 'Sources',
-        docHowToRead: 'How to read the data',
-        docMorphology: 'Morphology & pigmentation',
-        docChronology: 'Chronology',
-        docReadme: 'Project README',
         welcomeTagline: 'From African origins to the peopling of the world',
         welcomeCriticsNote: 'Experimental - Draft for comments',
         welcomeBody: 'From the earliest East African hominin lineages, starting some <strong>7.5&nbsp;million years</strong> ago, different species&nbsp;— our ancestors and their cousins&nbsp;— gradually spread across the Earth. Explore their migrations, adaptations and the scientific debates surrounding their history.',
@@ -13012,7 +12957,7 @@ const TRANSLATIONS = {
         criticsIntro: 'Expérimental - Ébauche pour commentaires',
         aboutAppBody: 'Hominines Origins est une synthèse éditoriale révisable, non une base scientifique certifiée. La littérature primaire (DOI) reste la référence. L’application est générée à partir d’un corpus structuré extrait d’articles de recherche, avec l’aide de l’IA. Les affirmations restent traçables et liées aux sources, avec un DOI lorsqu’il existe.',
         aboutAppShows: 'La carte et la frise montrent où chaque groupe a vécu, quand, comment il s’est déplacé, et ce que les traces matérielles disent de l’apparence et des techniques. L’application tourne dans le navigateur : pas de serveur, pas de compte.',
-        aboutAppData: 'Sous l’affichage, le catalogue est du JSON-LD : c’est ce que l’application charge. Vous pouvez le lire ici. Les synthèses éditoriales s’ouvrent aussi depuis ce menu.',
+        aboutAppData: 'Sous l’affichage, le catalogue est du JSON-LD : c’est ce que l’application charge. Vous pouvez le lire ici.',
         selectSpecies: 'Choisir une espèce',
         selectSpeciesDesc: 'Cliquez un marqueur sur la carte ou faites glisser la frise pour explorer',
         slideTimeline: '◄ glissez ou touchez la frise ►',
@@ -13116,11 +13061,6 @@ const TRANSLATIONS = {
         timelineViewSimple: 'Vue simple',
         timelineViewDetailed: 'Vue détaillée',
         catalogueLangSection: 'Langue',
-        sourcesSection: 'Sources',
-        docHowToRead: 'Lire les données',
-        docMorphology: 'Morphologie et pigmentation',
-        docChronology: 'Chronologie',
-        docReadme: 'README du projet',
         welcomeTagline: 'Des origines africaines au peuplement de la Terre',
         welcomeCriticsNote: 'Expérimental - Ébauche pour commentaires',
         welcomeBody: 'Depuis les plus anciennes lignées d’hominines d’Afrique de l’Est, il y a quelque <strong>7,5&nbsp;millions d’années</strong>, différentes espèces&nbsp;— nos ancêtres et leurs cousins&nbsp;— se sont progressivement répandues sur la Terre. Explorez leurs migrations, leurs adaptations et les débats scientifiques qui entourent leur histoire.',
@@ -13470,13 +13410,10 @@ function applyTranslations() {
   if (typeof window.demoController !== 'undefined' && window.demoController && typeof window.demoController.refreshCopy === 'function') {
     window.demoController.refreshCopy();
   }
-  if (typeof syncDocsViewerTitles === 'function') syncDocsViewerTitles();
   const catTitle = document.getElementById('catalogue-lang-title');
   if (catTitle) catTitle.textContent = t('ui.catalogueLangSection');
   const catSel = document.getElementById('catalogue-lang-select');
   if (catSel) catSel.setAttribute('aria-label', t('ui.catalogueLangSection'));
-  const srcTitle = document.getElementById('sources-section-title');
-  if (srcTitle) srcTitle.textContent = t('ui.sourcesSection');
 }
 
 function getLangFromBrowser() {
@@ -13530,7 +13467,6 @@ const _dv = { open: false, tab: 'species' };
 function openDataViewer(tab) {
   const ov = document.getElementById('data-viewer-overlay');
   const dr = document.getElementById('data-viewer-drawer');
-  if (typeof closeDocsViewer === 'function' && _docs && _docs.open) closeDocsViewer();
   ov.hidden = false; dr.hidden = false;
   requestAnimationFrame(() => { ov.classList.add('visible'); dr.classList.add('open'); });
   ov.setAttribute('aria-hidden','false');
@@ -13579,260 +13515,6 @@ function initDataViewer() {
   document.addEventListener('keydown', e => { if (e.key==='Escape' && _dv.open) closeDataViewer(); });
 }
 window.addEventListener('load', initDataViewer);
-
-// =====================================================================
-// DOCS VIEWER — burger Sources drawer (English Markdown → translatable HTML)
-// =====================================================================
-const DOCS_GITHUB = {
-  'README.md': 'https://github.com/fdepierre/hominines-origins/blob/main/README.md',
-  'data-README.md': 'https://github.com/fdepierre/hominines-origins/blob/main/data/README.md',
-  'Hominins-Morphology-Pigmentation.md':
-    'https://github.com/fdepierre/hominines-origins/blob/main/data/Hominins-Morphology-Pigmentation.md',
-  'Prehistoric-Chronology-Scientific-Reference.md':
-    'https://github.com/fdepierre/hominines-origins/blob/main/data/Prehistoric-Chronology-Scientific-Reference.md',
-};
-const DOCS_TITLES = {
-  'README.md': 'Project README',
-  'data-README.md': 'How to read the data',
-  'Hominins-Morphology-Pigmentation.md': 'Morphology & pigmentation',
-  'Prehistoric-Chronology-Scientific-Reference.md': 'Chronology',
-};
-
-function docsTitleFor(filename) {
-  const t = function (key, fb) {
-    if (typeof i18next !== 'undefined' && i18next.isInitialized) {
-      return i18next.t('ui.' + key, { defaultValue: fb });
-    }
-    return fb;
-  };
-  const map = {
-    'README.md': t('docReadme', DOCS_TITLES['README.md']),
-    'data-README.md': t('docHowToRead', DOCS_TITLES['data-README.md']),
-    'Hominins-Morphology-Pigmentation.md': t('docMorphology', DOCS_TITLES['Hominins-Morphology-Pigmentation.md']),
-    'Prehistoric-Chronology-Scientific-Reference.md': t('docChronology', DOCS_TITLES['Prehistoric-Chronology-Scientific-Reference.md']),
-  };
-  return map[filename] || DOCS_TITLES[filename] || 'Sources';
-}
-
-function syncDocsViewerTitles() {
-  document.querySelectorAll('[data-doc]').forEach(function (btn) {
-    const name = btn.getAttribute('data-doc');
-    if (name && DOCS_TITLES[name]) btn.textContent = docsTitleFor(name);
-  });
-  const title = document.getElementById('docs-viewer-title');
-  const openName = title && title.getAttribute('data-doc');
-  if (title && openName) title.textContent = docsTitleFor(openName);
-}
-
-function mdEscapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-function mdInline(text) {
-  let s = mdEscapeHtml(text);
-  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, lab, href) {
-    const safe = String(href).replace(/"/g, '').trim();
-    if (!/^(https?:|mailto:|#|\.\/|[\w./-]+)/i.test(safe)) return lab;
-    return '<a href="' + safe + '" rel="noopener noreferrer">' + lab + '</a>';
-  });
-  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em translate="no">$2</em>');
-  s = s.replace(/(^|[^_])_([^_\n]+)_/g, '$1<em translate="no">$2</em>');
-  return s;
-}
-
-function mdTable(rows) {
-  if (rows.length < 2) return '';
-  function cells(line) {
-    const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '');
-    return trimmed.split('|').map(function (c) { return c.trim(); });
-  }
-  const head = cells(rows[0]);
-  const body = rows.slice(2);
-  let html = '<table><thead><tr>';
-  head.forEach(function (c) { html += '<th>' + mdInline(c) + '</th>'; });
-  html += '</tr></thead><tbody>';
-  body.forEach(function (row) {
-    html += '<tr>';
-    cells(row).forEach(function (c) { html += '<td>' + mdInline(c) + '</td>'; });
-    html += '</tr>';
-  });
-  html += '</tbody></table>';
-  return html;
-}
-
-/** Minimal Markdown → HTML (headings, tables, lists, links, emphasis, quotes). */
-function renderMarkdownLite(src) {
-  const lines = String(src || '').replace(/\r\n/g, '\n').split('\n');
-  const out = [];
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i];
-    if (/^```/.test(line)) {
-      const buf = [];
-      i += 1;
-      while (i < lines.length && !/^```/.test(lines[i])) {
-        buf.push(lines[i]);
-        i += 1;
-      }
-      i += 1;
-      out.push('<pre><code>' + mdEscapeHtml(buf.join('\n')) + '</code></pre>');
-      continue;
-    }
-    if (/^\s*\|/.test(line) && i + 1 < lines.length && /^\s*\|?\s*:?-/.test(lines[i + 1])) {
-      const rows = [];
-      while (i < lines.length && /^\s*\|/.test(lines[i])) {
-        rows.push(lines[i]);
-        i += 1;
-      }
-      out.push(mdTable(rows));
-      continue;
-    }
-    if (/^#{1,6}\s/.test(line)) {
-      const m = line.match(/^(#{1,6})\s+(.*)$/);
-      const n = m[1].length;
-      out.push('<h' + n + '>' + mdInline(m[2].replace(/#+\s*$/, '').trim()) + '</h' + n + '>');
-      i += 1;
-      continue;
-    }
-    if (/^\s*---+\s*$/.test(line)) {
-      out.push('<hr>');
-      i += 1;
-      continue;
-    }
-    if (/^\s*>/.test(line)) {
-      const buf = [];
-      while (i < lines.length && /^\s*>/.test(lines[i])) {
-        buf.push(lines[i].replace(/^\s*>\s?/, ''));
-        i += 1;
-      }
-      out.push('<blockquote>' + buf.map(function (l) {
-        return l.trim() === '' ? '' : '<p>' + mdInline(l) + '</p>';
-      }).join('') + '</blockquote>');
-      continue;
-    }
-    if (/^\s*[-*+]\s/.test(line) || /^\s*\d+\.\s/.test(line)) {
-      const ordered = /^\s*\d+\.\s/.test(line);
-      const items = [];
-      while (i < lines.length && (ordered
-        ? /^\s*\d+\.\s/.test(lines[i])
-        : /^\s*[-*+]\s/.test(lines[i]))) {
-        items.push(lines[i].replace(/^\s*(?:[-*+]|\d+\.)\s/, ''));
-        i += 1;
-      }
-      const tag = ordered ? 'ol' : 'ul';
-      out.push('<' + tag + '>' + items.map(function (it) {
-        return '<li>' + mdInline(it) + '</li>';
-      }).join('') + '</' + tag + '>');
-      continue;
-    }
-    if (line.trim() === '') { i += 1; continue; }
-    const buf = [line];
-    i += 1;
-    while (i < lines.length && lines[i].trim() !== '' &&
-      !/^#{1,6}\s/.test(lines[i]) &&
-      !/^\s*[-*+]\s/.test(lines[i]) &&
-      !/^\s*\d+\.\s/.test(lines[i]) &&
-      !/^\s*>/.test(lines[i]) &&
-      !/^```/.test(lines[i]) &&
-      !/^\s*\|/.test(lines[i]) &&
-      !/^\s*---+\s*$/.test(lines[i])) {
-      buf.push(lines[i]);
-      i += 1;
-    }
-    out.push('<p>' + mdInline(buf.join(' ')) + '</p>');
-  }
-  return out.join('\n');
-}
-
-const _docs = { open: false };
-
-function closeBurgerIfOpen() {
-  const panel = document.getElementById('burger-panel');
-  const overlay = document.getElementById('burger-overlay');
-  if (panel) panel.classList.remove('open');
-  if (overlay) overlay.classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function closeDocsViewer() {
-  const ov = document.getElementById('docs-viewer-overlay');
-  const dr = document.getElementById('docs-viewer-drawer');
-  if (!ov || !dr) return;
-  ov.classList.remove('visible');
-  dr.classList.remove('open');
-  setTimeout(function () {
-    ov.hidden = true;
-    dr.hidden = true;
-    ov.setAttribute('aria-hidden', 'true');
-  }, 300);
-  _docs.open = false;
-}
-
-function showDocsFallback(filename) {
-  const body = document.getElementById('docs-viewer-body');
-  const fallback = document.getElementById('docs-viewer-fallback');
-  const gh = document.getElementById('docs-viewer-github');
-  if (body) { body.innerHTML = ''; body.hidden = true; }
-  if (fallback) fallback.hidden = false;
-  if (gh && DOCS_GITHUB[filename]) gh.href = DOCS_GITHUB[filename];
-}
-
-async function openDocsViewer(filename) {
-  if (!DOCS_GITHUB[filename]) return;
-  if (typeof closeDataViewer === 'function' && _dv.open) closeDataViewer();
-  closeBurgerIfOpen();
-  const ov = document.getElementById('docs-viewer-overlay');
-  const dr = document.getElementById('docs-viewer-drawer');
-  const title = document.getElementById('docs-viewer-title');
-  const body = document.getElementById('docs-viewer-body');
-  const fallback = document.getElementById('docs-viewer-fallback');
-  if (!ov || !dr || !body) return;
-  if (title) {
-    title.textContent = docsTitleFor(filename);
-    title.setAttribute('data-doc', filename);
-  }
-  body.hidden = false;
-  if (fallback) fallback.hidden = true;
-  ov.hidden = false;
-  dr.hidden = false;
-  requestAnimationFrame(function () {
-    ov.classList.add('visible');
-    dr.classList.add('open');
-  });
-  ov.setAttribute('aria-hidden', 'false');
-  _docs.open = true;
-  try {
-    const res = await fetch('./docs/' + filename);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const md = await res.text();
-    body.innerHTML = renderMarkdownLite(md);
-    body.setAttribute('translate', 'yes');
-    body.setAttribute('lang', 'en');
-  } catch (err) {
-    showDocsFallback(filename);
-  }
-}
-
-function initDocsViewer() {
-  document.querySelectorAll('[data-doc]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      openDocsViewer(btn.getAttribute('data-doc'));
-    });
-  });
-  const closeBtn = document.getElementById('btn-close-docs-viewer');
-  if (closeBtn) closeBtn.addEventListener('click', closeDocsViewer);
-  const ov = document.getElementById('docs-viewer-overlay');
-  if (ov) ov.addEventListener('click', closeDocsViewer);
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && _docs.open) closeDocsViewer();
-  });
-}
-window.addEventListener('load', initDocsViewer);
 
 })();
 
@@ -14123,21 +13805,6 @@ bootWelcome();
   </div>
   <div class="data-viewer-body"><pre class="data-viewer-pre"><code class="language-json" id="json-code" translate="no"></code></pre></div>
 </aside>
-<div id="docs-viewer-overlay" class="data-viewer-overlay" hidden aria-hidden="true"></div>
-<aside id="docs-viewer-drawer" class="data-viewer-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="docs-viewer-title">
-  <div class="data-viewer-header">
-    <h2 id="docs-viewer-title" class="data-viewer-title">Sources</h2>
-    <button id="btn-close-docs-viewer" type="button" class="btn-icon" data-testid="close-docs-viewer">
-      <span class="sr-only">Close</span>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-    </button>
-  </div>
-  <article id="docs-viewer-body" class="docs-article" data-testid="docs-viewer-body" translate="yes" lang="en"></article>
-  <p id="docs-viewer-fallback" class="docs-fallback" hidden>
-    Could not load this document here.
-    <a id="docs-viewer-github" href="https://github.com/fdepierre/hominines-origins" target="_blank" rel="noopener noreferrer">Read it on GitHub</a>
-  </p>
-</aside>
 
   <!-- ===== BURGER PANEL ===== -->
   <div id="burger-overlay"></div>
@@ -14176,19 +13843,12 @@ bootWelcome();
         <p class="burger-critics" data-i18n-text="criticsIntro">Experimental - Draft for comments</p>
         <p class="burger-about-p" data-i18n-text="aboutAppBody">Hominines Origins is a revisable editorial synthesis, not a certified scientific database. Primary literature (DOI) remains the reference. The app is generated from a structured collection of data extracted from research papers with the help of AI. Claims stay traceable and linked to sources, with a DOI when one is available.</p>
         <p class="burger-about-p" data-i18n-text="aboutAppShows">The map and timeline show where each group lived, when, how they moved, and what material traces say about appearance and technology. The app runs in the browser: no server, no login.</p>
-        <p class="burger-about-p" data-i18n-text="aboutAppData">Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here. Editorial syntheses are also opened from this menu.</p>
+        <p class="burger-about-p" data-i18n-text="aboutAppData">Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here.</p>
         <div class="burger-btn-row">
           <button id="btn-data-viewer" class="layer-btn" data-i18n-title="ui.dataViewerTitle" style="flex:1; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
             <span data-i18n="ui.dataViewerTitle">JSON data</span>
           </button>
-        </div>
-        <div class="burger-section-title" id="sources-section-title" style="margin-top:1rem">Sources</div>
-        <div class="burger-docs-list">
-          <button type="button" class="layer-btn" data-testid="open-doc-data-readme" data-doc="data-README.md">How to read the data</button>
-          <button type="button" class="layer-btn" data-doc="Hominins-Morphology-Pigmentation.md">Morphology &amp; pigmentation</button>
-          <button type="button" class="layer-btn" data-doc="Prehistoric-Chronology-Scientific-Reference.md">Chronology</button>
-          <button type="button" class="layer-btn" data-doc="README.md">Project README</button>
         </div>
       </div>
 

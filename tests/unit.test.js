@@ -752,30 +752,6 @@ async function runUnitTests() {
     assert(issues.length === 0, `Event certainty visible (issues: ${issues.join('; ') || 'none'})`);
   });
 
-  await test('Sources drawer opens How to read the data as translatable HTML', async () => {
-    await page.click('[data-testid="burger-menu-button"]');
-    await page.waitForSelector('#burger-panel.open', { timeout: 4000 });
-    await page.click('[data-testid="open-doc-data-readme"]');
-    await page.waitForFunction(() => {
-      const el = document.querySelector('[data-testid="docs-viewer-body"]');
-      return !!(el && /Scientific data — start here/.test(el.textContent || ''));
-    }, { timeout: 8000 });
-    const st = await page.evaluate(() => {
-      const el = document.querySelector('[data-testid="docs-viewer-body"]');
-      const h1 = el && el.querySelector('h1');
-      return {
-        heading: h1 ? h1.textContent.trim() : '',
-        translate: el ? el.getAttribute('translate') : null,
-        lang: el ? el.getAttribute('lang') : null,
-      };
-    });
-    assert(st.heading === 'Scientific data — start here',
-      `docs drawer heading is Scientific data — start here (got "${st.heading}")`);
-    assert(st.translate === 'yes', `docs article is translate=yes (got ${st.translate})`);
-    assert(st.lang === 'en', `docs article lang=en (got ${st.lang})`);
-    await page.click('[data-testid="close-docs-viewer"]');
-  });
-
   await test('Controversy red-list: hot cases must not flatten debates (en and fr JSON)', async () => {
     const speciesDoc = JSON.parse(fs.readFileSync(SPECIES_JSON_PATH, 'utf8'));
     const eventsDoc = JSON.parse(fs.readFileSync(EVENTS_JSON_PATH, 'utf8'));
