@@ -3503,6 +3503,8 @@ let _demoSpeciesOnly = false;
 let _demoEventAllow = null;
 /** When true, setTime() does not auto-change the side-panel selection. */
 let _demoLockSelection = false;
+/** When set, the map and Play only keep these catalogue ids (timeline lane click). */
+let _mapFocusSpeciesIds = null;
 
 const MAP_WORLD_CENTER = [20, 15];
 const MAP_WORLD_ZOOM_DESKTOP = 1.15;
@@ -3767,7 +3769,52 @@ function getVisibleSpecies() {
   if (_demoSpeciesOnly) {
     list = list.filter(function (s) { return /^sapiens-/i.test(String(s.id)); });
   }
+  if (_mapFocusSpeciesIds && _mapFocusSpeciesIds.size) {
+    list = list.filter(function (s) { return _mapFocusSpeciesIds.has(s.id); });
+  }
   return list;
+}
+
+function setMapSpeciesFocus(ids) {
+  var next = new Set((ids || []).filter(Boolean));
+  _mapFocusSpeciesIds = next.size ? next : null;
+}
+
+/** Jalons have no species id. With a species focus, hide all of them (including 🦴). */
+function eventFitsMapSpeciesFocus() {
+  return !_mapFocusSpeciesIds || !_mapFocusSpeciesIds.size;
+}
+
+function clearMapSpeciesFocus() {
+  if (!_mapFocusSpeciesIds) return;
+  _mapFocusSpeciesIds = null;
+  _lastVisibleIds = '';
+  if (typeof updateMap === 'function') updateMap();
+  if (typeof syncFigureVisibility === 'function') syncFigureVisibility();
+  if (typeof isPlaying !== 'undefined' && isPlaying && typeof checkAndSpawnFigures === 'function') {
+    checkAndSpawnFigures();
+  }
+}
+
+function mapSpeciesFocusClickIsKeep(target) {
+  if (!target || !target.closest) return false;
+  return !!(
+    target.closest('.species-lane') ||
+    target.closest('#play-btn') ||
+    target.closest('#mobile-play-btn') ||
+    target.closest('#play-overlay-btn') ||
+    target.closest('#play-speed')
+  );
+}
+
+function wireMapSpeciesFocusClear() {
+  if (wireMapSpeciesFocusClear._wired) return;
+  wireMapSpeciesFocusClear._wired = true;
+  document.addEventListener('click', function (e) {
+    if (!_mapFocusSpeciesIds) return;
+    if (mapSpeciesFocusClickIsKeep(e.target)) return;
+    clearMapSpeciesFocus();
+  });
 }
 
 /** Fill the (usually hidden) map legend with dots + taxon names. */
@@ -4056,6 +4103,7 @@ function updateMapLibreEvents() {
     ? EVENTS_DATA.filter(function (ev) {
       if (ev.time < TIMELINE_MIN || ev.time > eventCumulativeTimeMax()) return false;
       if (_demoEventAllow && !_demoEventAllow.has(ev.id)) return false;
+      if (!eventFitsMapSpeciesFocus(ev)) return false;
       return true;
     })
     : [];
@@ -5224,6 +5272,10 @@ function initTimeline() {
 
     lane.addEventListener('click', function () {
       const sp = model.kind === 'group' ? speciesForGroupedLaneClick(model, currentTime) : onClickSpecies;
+      var focusIds = model.kind === 'group'
+        ? (model.members || []).map(function (m) { return m.id; })
+        : (sp ? [sp.id] : []);
+      setMapSpeciesFocus(focusIds);
       if (isMobileViewport()) {
         const tipEl = document.getElementById('band-tooltip');
         if (tipEl) {
@@ -6743,6 +6795,8 @@ function startPlay() {
 
   // Init figure markers; resume any paused walks (no-op on fresh start)
   resumeAllFigureWalks();
+  if (typeof syncFigureVisibility === 'function') syncFigureVisibility();
+  checkAndSpawnFigures();
 
   // Play favours a stable world view so long-range migrations stay readable,
   // especially on narrow mobile screens.
@@ -12019,6 +12073,7 @@ var demoController = (function () {
     _demoSpeciesOnly = false;
     _demoEventAllow = null;
     _demoLockSelection = false;
+    _mapFocusSpeciesIds = null;
     document.documentElement.classList.remove('demo-active');
     if (typeof stopPlay === 'function') stopPlay();
     if (snap && snap.timelineView && typeof setTimelineViewMode === 'function') {
@@ -12037,6 +12092,7 @@ var demoController = (function () {
 
   function applyDemoFilters() {
     _demoSpeciesOnly = true;
+    _mapFocusSpeciesIds = null;
     var allow = new Set();
     sapiensDemoEvents().forEach(function (ev) { allow.add(ev.id); });
     _demoEventAllow = allow;
@@ -12054,6 +12110,7 @@ var demoController = (function () {
     _demoSpeciesOnly = false;
     _demoEventAllow = null;
     _demoLockSelection = false;
+    _mapFocusSpeciesIds = null;
     document.documentElement.classList.remove('demo-active');
     clearHighlights();
     if (typeof updateMap === 'function') updateMap();
@@ -12626,6 +12683,7 @@ function bootApp() {
   loadTimelineViewModeFromStorage();
   initTimeline();
   initTimelineViewControls();
+  wireMapSpeciesFocusClear();
   window.addEventListener('resize', function () {
     if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
     if (typeof updateNeedlePosition === 'function') updateNeedlePosition();
