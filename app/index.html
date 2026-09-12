@@ -63,6 +63,21 @@
   document.documentElement.lang = lng;
   document.documentElement.setAttribute('translate', lng === 'en' ? 'yes' : 'no');
 })();
+
+// Theme: a stored choice wins, otherwise follow the OS. Runs before first paint
+// so a dark-mode visitor never sees a flash of the light palette.
+(function() {
+  var stored = null;
+  try { stored = localStorage.getItem('ho_theme'); } catch (e) { /* ignore */ }
+  if (stored !== 'light' && stored !== 'dark') {
+    var dark = false;
+    try {
+      dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    } catch (e) { /* ignore */ }
+    stored = dark ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-theme', stored);
+})();
 </script>
 
 <!-- MapLibre: loaded on demand in JS (avoids blocking first paint on slow links). -->
@@ -2032,6 +2047,11 @@ html[data-map-ready="1"] #map {
   background: var(--color-primary-highlight); 
   border-color: var(--color-primary);
   color: var(--color-primary);
+}
+[data-theme-toggle] [data-theme-icon] {
+  display: flex;
+  line-height: 0;
+  flex-shrink: 0;
 }
 .layer-btn-dot {
   width: 8px;
@@ -6735,16 +6755,19 @@ function initLayerToggles() {
 // THEME TOGGLE
 // =====================================================================
 // Persists on <html data-theme="light|dark"> and localStorage ho_theme.
+// First visit has no stored value and follows prefers-color-scheme; the boot
+// script in <head> applies that before first paint.
 // CSS variables flip; MapLibre palette is reapplied in applyMapLibreNeutralBasemap.
-const SVG_SUN  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
-const SVG_MOON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+const SVG_SUN  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+const SVG_MOON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 
 /** Apply light or dark theme to <html> and restyle the map palette. */
 function setTheme(theme) {
   const root = document.documentElement;
   root.setAttribute('data-theme', theme);
-  document.querySelectorAll('[data-theme-toggle]').forEach(b => {
-    b.innerHTML = theme === 'light' ? SVG_MOON : SVG_SUN;
+  try { localStorage.setItem('ho_theme', theme); } catch (e) { /* ignore */ }
+  document.querySelectorAll('[data-theme-toggle] [data-theme-icon]').forEach(i => {
+    i.innerHTML = theme === 'light' ? SVG_MOON : SVG_SUN;
   });
   if (mapLibreMap) {
     applyMapLibreNeutralBasemap(mapLibreMap, theme === 'dark');
@@ -6756,7 +6779,7 @@ function setTheme(theme) {
   });
 }
 
-/** Bind the sun/moon button; persist theme in localStorage. */
+/** Bind the sun/moon button; setTheme persists the choice. */
 function initThemeToggle() {
   const root = document.documentElement;
   function readTheme() {
@@ -6765,7 +6788,9 @@ function initThemeToggle() {
   // Always derive next theme from the DOM so external setAttribute / setTheme stay in sync with clicks
   document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
     const t = readTheme();
-    btn.innerHTML = t === 'light' ? SVG_MOON : SVG_SUN;
+    btn.querySelectorAll('[data-theme-icon]').forEach(i => {
+      i.innerHTML = t === 'light' ? SVG_MOON : SVG_SUN;
+    });
     btn.addEventListener('click', () => {
       const cur = readTheme();
       const next = cur === 'dark' ? 'light' : 'dark';
@@ -12932,6 +12957,7 @@ const TRANSLATIONS = {
     translation: {
       ui: {
         toggleTheme: 'Toggle light/dark mode',
+        themeLabel: 'Theme',
         play: 'Play', pause: 'Pause',
         pageTitle: 'Hominines — Evolution & Migrations on Earth',
         appSubtitle: 'Explore nearly seven and a half million years of human migrations',
@@ -13085,6 +13111,7 @@ const TRANSLATIONS = {
     translation: {
       ui: {
         toggleTheme: 'Thème clair / sombre',
+        themeLabel: 'Thème',
         play: 'Lecture', pause: 'Pause',
         pageTitle: 'Hominines — Évolution et migrations sur Terre',
         appSubtitle: 'Explorer près de sept millions et demi d’années de migrations humaines',
@@ -13985,6 +14012,10 @@ bootWelcome();
         <p class="burger-about-p" data-i18n-text="aboutAppShows">The map and timeline show where each group lived, when, how they moved, and what material traces say about appearance and technology. The app runs in the browser: no server, no login.</p>
         <p class="burger-about-p" data-i18n-text="aboutAppData">Under the display, the catalogue is JSON-LD: that is what the app loads. You can read it here.</p>
         <div class="burger-btn-row">
+          <button type="button" class="layer-btn" data-testid="theme-toggle" data-theme-toggle data-i18n-title="ui.toggleTheme" style="flex:1; justify-content:center;">
+            <span data-theme-icon aria-hidden="true"></span>
+            <span data-i18n="ui.themeLabel">Theme</span>
+          </button>
           <button id="btn-data-viewer" class="layer-btn" data-i18n-title="ui.dataViewerTitle" style="flex:1; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
             <span data-i18n="ui.dataViewerTitle">JSON data</span>
