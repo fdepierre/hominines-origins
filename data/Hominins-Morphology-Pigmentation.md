@@ -5,6 +5,9 @@
 > **Maintenance:** keep this filename stable (no year stamp). When new papers appear, update this document in place and record the review date below — then check whether `app/data/` needs a corresponding change. New to this folder? Start at [`README.md`](README.md).
 >
 > **Last reviewed:** 30 August 2026 — catalogue identifier map added so Markdown footnotes and `species.json` `hominin:references` can be checked against each other. Citation audit of 29 August 2026 still stands.
+> **Citation update:** Footnote ^17 promoted from bioRxiv preprint to
+> published PNAS article (Perretti S. et al., *PNAS* 2025,
+> DOI 10.1073/pnas.2502158122) — 23 September 2026.
 
 Reference table integrating osteological, genomic, and evolutionary-inference data for each key taxon or period. The original columns cover phylogeny, biometrics, morphology, pigmentation, confidence level, active debates, and DOIs.
 
@@ -25,11 +28,13 @@ Reference table integrating osteological, genomic, and evolutionary-inference da
 
 **Biometrics:** cranial volume 320–380 cm³; estimated height ~110–120 cm; estimated weight ~35 kg (inferred from femur TM 266-01-063).
 
-**Morphology:** short, flat face (rare for this antiquity), very pronounced brow ridges, canines reduced compared to contemporary great apes. The centred foramen magnum suggests habitual bipedalism, but the position of the later-discovered femur remains contested (Macchiarelli et al. 2020).[^T1][^T2]
+**Morphology:** short, flat face (rare for this antiquity), very pronounced brow ridges, canines reduced compared to contemporary great apes. The centred foramen magnum suggests habitual bipedalism, but the position of the later-discovered femur remains contested and is the subject of two competing peer-reviewed analyses published in 2026.[^T1][^T2][^T2b]
 
 **Pigmentation ⚠️ Evolutionary inference:** No retrievable DNA at this depth. Population probably fully fur-covered, with lightly pigmented underlying skin, as in living chimpanzees.
 
 **Debate:** Truly bipedal hominin status contested (Wolpoff et al. 2002; Macchiarelli et al. 2020). Exact phylogenetic position undecided — pre-hominin or simple Miocene great ape?
+
+**2026 update — two competing analyses of the same femur (TM 266-01-063):** Williams et al. (*Science Advances*, 2026)[^T2b] applied morphometric analysis to the femur and identified three features — a femoral tubercle at the iliofemoral ligament attachment, strong femoral antetorsion, and a derived gluteal complex morphology — which the authors argue are found exclusively in bipedal hominins. They interpret TM 266-01-063 as consistent with non-obligatory terrestrial bipedalism. A near-simultaneous peer-reviewed response by Macchiarelli and co-workers (*Journal of Human Evolution*, 2026)[^T2c] disputes this reading, concluding that no feature of the femur provides compelling evidence of habitual bipedalism. The two studies examine the same specimen and reach opposing conclusions; no consensus has emerged. Status: ACTIVE_DEBATE / INDIRECT_DATA (tokens unchanged).
 
 ***
 ## 0b. *Ardipithecus ramidus* — ~4.4 million years
@@ -203,7 +208,7 @@ Each catalogue `@id` is listed once. Footnotes named here are the only DOIs that
 
 | id | Footnotes | TaxonomyDebateLevel | TaxonomyEvidenceType | BehaviorDebateLevel | BehaviorEvidenceType | PigmentationDebateLevel | PigmentationEvidenceType |
 |---|---|---|---|---|---|---|---|
-| sahelanthropus | T1, T2 | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | EVOLUTIONARY_INFERENCE |
+| sahelanthropus | T1, T2, T2b, T2c | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | EVOLUTIONARY_INFERENCE |
 | ardipithecus | T3 | MODERATE_CONSENSUS | INDIRECT_DATA | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | EVOLUTIONARY_INFERENCE |
 | afarensis | 1, 2, 3 | MODERATE_CONSENSUS | INDIRECT_DATA | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | EVOLUTIONARY_INFERENCE |
 | stw573 | LF1, LF2 | ACTIVE_DEBATE | INDIRECT_DATA | SPECULATIVE_HYPOTHESIS | EVOLUTIONARY_INFERENCE | SPECULATIVE_HYPOTHESIS | EVOLUTIONARY_INFERENCE |
@@ -216,7 +221,7 @@ Each catalogue `@id` is listed once. Footnotes named here are the only DOIs that
 | neanderthal | 7, 8, 9, 10 | STRONG_CONSENSUS | INDIRECT_DATA | MODERATE_CONSENSUS | INDIRECT_DATA | STRONG_CONSENSUS | DIRECT_DATA |
 | denisovan | 11, 12, 13, 14 | MODERATE_CONSENSUS | DIRECT_DATA | ACTIVE_DEBATE | INDIRECT_DATA | MODERATE_CONSENSUS | DIRECT_DATA |
 | longi | HJ1, HJ2, HJ3 | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | INDIRECT_DATA | SPECULATIVE_HYPOTHESIS | EVOLUTIONARY_INFERENCE |
-| naledi | T8 | MODERATE_CONSENSUS | INDIRECT_DATA | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | EVOLUTIONARY_INFERENCE |
+| naledi | T8, T8b, T8c | MODERATE_CONSENSUS | INDIRECT_DATA | ACTIVE_DEBATE | INDIRECT_DATA | ACTIVE_DEBATE | EVOLUTIONARY_INFERENCE |
 | floresiensis | FL1, FL2 | ACTIVE_DEBATE | INDIRECT_DATA | MODERATE_CONSENSUS | INDIRECT_DATA | MODERATE_CONSENSUS | EVOLUTIONARY_INFERENCE |
 | sapiens-africa | 15, 16, 2 | STRONG_CONSENSUS | INDIRECT_DATA | MODERATE_CONSENSUS | INDIRECT_DATA | STRONG_CONSENSUS | DIRECT_DATA |
 | sapiens-levant | 2 | STRONG_CONSENSUS | INDIRECT_DATA | MODERATE_CONSENSUS | INDIRECT_DATA | MODERATE_CONSENSUS | EVOLUTIONARY_INFERENCE |
@@ -273,11 +278,15 @@ that verification over the whole repository.
 [^16]: Vidal C.M., Lane C.S., Asrat A. et al., "Age of the oldest known *Homo sapiens* from eastern Africa", *Nature* 601:579–583 (2022). DOI [10.1038/s41586-021-04275-8](https://doi.org/10.1038/s41586-021-04275-8)
 [^T1]: Brunet M., Guy F., Pilbeam D. et al., "A new hominid from the Upper Miocene of Chad, Central Africa", *Nature* 418:145–151 (2002). DOI [10.1038/nature00879](https://doi.org/10.1038/nature00879)
 [^T2]: Macchiarelli R., Bergeret-Medina A., Marchi D., Wood B., "Nature and relationships of *Sahelanthropus tchadensis*", *Journal of Human Evolution* 149:102898 (2020). DOI [10.1016/j.jhevol.2020.102898](https://doi.org/10.1016/j.jhevol.2020.102898)
+[^T2b]: Williams S.A. et al., "Earliest evidence of hominin bipedalism in *Sahelanthropus tchadensis*", *Science Advances* 12 (2026). DOI [10.1126/sciadv.adv0130](https://doi.org/10.1126/sciadv.adv0130)
+[^T2c]: Macchiarelli R. et al., "Postcranial evidence does not support habitual bipedalism in *Sahelanthropus tchadensis*", *Journal of Human Evolution* (2026). **DOI to be confirmed** — do not link until resolved via Crossref or publisher page.
 [^T3]: White T.D., Asfaw B., Beyene Y. et al., "*Ardipithecus ramidus* and the Paleobiology of Early Hominids", *Science* 326:64–86 (2009). DOI [10.1126/science.1175802](https://doi.org/10.1126/science.1175802)
 [^T4]: Lordkipanidze D. et al., "A Complete Skull from Dmanisi, Georgia, and the Evolutionary Biology of Early *Homo*", *Science* 342:326–331 (2013). DOI [10.1126/science.1238484](https://doi.org/10.1126/science.1238484)
 [^T5]: Carbonell E., Bermúdez de Castro J.M. et al., "The first hominin of Europe", *Nature* 452:465–469 (2008). DOI [10.1038/nature06815](https://doi.org/10.1038/nature06815)
 [^T6]: Hublin J.-J. et al., work on the phylogenetic reassessment of *H. antecessor* in light of Thomas Quarry I, *Nature* (2026). DOI [10.1038/s41586-025-09914-y](https://doi.org/10.1038/s41586-025-09914-y)
 [^T8]: Martinón-Torres M. et al., "No scientific evidence that *Homo naledi* buried their dead and produced rock art", *Journal of Human Evolution* 195:103464 (2024). DOI [10.1016/j.jhevol.2023.103464](https://doi.org/10.1016/j.jhevol.2023.103464)
+[^T8b]: Berger L.R. et al., "Evidence for deliberate burial of the dead by *Homo naledi*", *eLife* 12: RP89106 (1 September 2025). PMC12401548. DOI [10.7554/eLife.89106](https://doi.org/10.7554/eLife.89106). Note: the *eLife* reviewed-preprint process produced diverging assessments — at least one reviewer updated to a supportive position in March 2025; a second reviewer retained substantial reservations. The methodological critique by Martinón-Torres et al. 2024[^T8] stands in the literature unrebutted. Claim status: ACTIVE_DEBATE / INDIRECT_DATA (tokens unchanged).
+[^T8c]: Currie A. & Sterelny K., "Buried, or maybe not: adherence to evidential standards in palaeontology", *Biology & Philosophy* (published online 22 July 2026). DOI [10.1007/s10539-026-10026-8](https://doi.org/10.1007/s10539-026-10026-8). A philosophy-of-science analysis of whether the burial evidence meets field standards. Does not resolve the empirical debate.
 [^HJ1]: Bae C.J. & Wu X., "Making sense of eastern Asian Late Quaternary hominin variability", *Nature Communications* 15:9479 (2 November 2024). DOI [10.1038/s41467-024-53918-7](https://doi.org/10.1038/s41467-024-53918-7)
 [^HJ2]: Feng X., Yin Q., Gao F., Lu D. et al., with Stringer C. & Ni X., "The phylogenetic position of the Yunxian cranium elucidates the origin of *Homo longi* and the Denisovans", *Science* 389(6767):1320–1324 (25 September 2025). DOI [10.1126/science.ado9202](https://doi.org/10.1126/science.ado9202)
 [^HJ3]: Author correction to Bae & Wu 2024, *Nature Communications* 15:10697 (19 December 2024). DOI [10.1038/s41467-024-55313-8](https://doi.org/10.1038/s41467-024-55313-8)
@@ -286,4 +295,4 @@ that verification over the whole repository.
 [^LG1]: Villmoare B. et al., "New discoveries of *Australopithecus* and *Homo* from Ledi-Geraru", *Nature* 650:374–380 (2025). DOI [10.1038/s41586-025-09390-4](https://doi.org/10.1038/s41586-025-09390-4)
 [^FL1]: Gordon et al., *PNAS* 105, 1342–1347 (2008). DOI [10.1073/pnas.0710041105](https://doi.org/10.1073/pnas.0710041105)
 [^FL2]: van den Bergh G.D. et al., "*Homo floresiensis*-like fossils from the early Middle Pleistocene of Flores", *Nature* 534:245–248 (2016). DOI [10.1038/nature17999](https://doi.org/10.1038/nature17999)
-[^17]: Perretti A. et al., "Inference of human pigmentation from ancient DNA by genotype likelihood", bioRxiv (2025). DOI [10.1101/2025.01.29.635495](https://doi.org/10.1101/2025.01.29.635495)
+[^17]: Perretti S. et al., "Inference of human pigmentation from ancient DNA by genotype likelihoods", *Proceedings of the National Academy of Sciences* 122(29): e2502158122 (2025). DOI [10.1073/pnas.2502158122](https://doi.org/10.1073/pnas.2502158122). [PubMed](https://pubmed.ncbi.nlm.nih.gov/40663601/)
