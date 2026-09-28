@@ -120,7 +120,18 @@ async function launch({ width = 1440, height = 900, mobile = false, locale = 'en
   const slowMo = parseInt(process.env.PLAYWRIGHT_SLOWMO || '0', 10) || undefined;
   const launchOpts = {
     headless: !headed,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    // Text rasterisation is what makes a snapshot machine-dependent: hinting and
+    // subpixel positioning move glyphs by a fraction of a pixel, which the pixel
+    // diff counts the same way it counts a real layout shift. Pinning them keeps
+    // a reference PNG comparable on a different host.
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--font-render-hinting=none',
+      '--disable-font-subpixel-positioning',
+      '--disable-lcd-text',
+      '--force-color-profile=srgb',
+    ],
   };
   if (slowMo) launchOpts.slowMo = slowMo;
   if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
