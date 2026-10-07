@@ -2617,6 +2617,26 @@ html.demo-active .event-marker.demo-artifact-spotlight {
   width: 100%;
   height: 100%;
 }
+.maplibre-walking-figure-label {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: #1a1208;
+  background: rgba(255, 250, 242, 0.96);
+  border: 1.5px solid transparent;
+  border-radius: 4px;
+  padding: 1px 6px 2px;
+  box-shadow: 0 1px 2px rgba(26, 18, 8, 0.22);
+}
 .maplibre-walking-figure-body.is-arriving {
   animation: homininArrive 1.15s cubic-bezier(.2, .85, .2, 1) both;
 }
@@ -3418,6 +3438,49 @@ function speciesForGroupedLaneClick(model, t) {
     return selectedSpecies;
   }
   return representativeSpeciesFromGroupMembers(members, t);
+}
+
+/**
+ * Map caption for a walking figure: the same name as its timeline row.
+ * Text stays black on a light chip; the chip border uses that row’s fill
+ * (per species, including each stripe of a grouped bar).
+ * Simple view uses the merged lane name (H. erectus s.l., Homo sapiens, Asian clade);
+ * detailed view uses each catalogue name.
+ */
+function figureMapCaption(species) {
+  var label = ((species && species.name) || '').replace('Homo sapiens — ', 'H.s. ');
+  var color = speciesSkinVisual(species).laneFill;
+  if (timelineViewMode !== 'detailed' && species) {
+    var models = buildTimelineLaneModels();
+    for (var i = 0; i < models.length; i++) {
+      var model = models[i];
+      if (model.kind === 'group' && model.members.some(function (m) { return m.id === species.id; })) {
+        label = groupLaneTimelineLabel(model);
+        break;
+      }
+    }
+  }
+  return { label: label, color: color };
+}
+
+function applyFigureMapCaption(root, species) {
+  if (!root || !species) return;
+  var labelEl = root.querySelector('.maplibre-walking-figure-label');
+  if (!labelEl) return;
+  var cap = figureMapCaption(species);
+  labelEl.textContent = cap.label;
+  labelEl.style.color = '#1a1208';
+  labelEl.style.borderColor = cap.color;
+}
+
+function refreshWalkingFigureCaptions() {
+  if (typeof speciesFigures === 'undefined') return;
+  Object.keys(speciesFigures).forEach(function (id) {
+    var entry = speciesFigures[id];
+    var species = speciesRecordByCatalogueId(id);
+    var root = entry && entry.marker && entry.marker.getElement && entry.marker.getElement();
+    if (root && species) applyFigureMapCaption(root, species);
+  });
 }
 
 /** Display name of a grouped lane in the active UI language. */
@@ -5504,6 +5567,8 @@ function initTimeline() {
       setTime(linearToTime(Math.max(0, Math.min(1, x))));
     });
   }
+
+  refreshWalkingFigureCaptions();
 }
 
 // =====================================================================
@@ -11793,10 +11858,26 @@ function relocaliseData() {
 // walkState = { mig, from, to, dur, t0, pausedAt } | null
 const speciesFigures = {};
 
+/**
+ * Skin fill for the walking figure only.
+ * sapiens-neolithic (−10 to −5 ka, Anatolia → Europe) uses the lightening tone
+ * (skinVariantColor, « claire en augmentation »), not the darker base.
+ * sapiens-bronze (−5 to −2 ka) uses the pale end of the documented spectrum.
+ */
+function mapWalkingSkinColor(species) {
+  const skin = (species && species.pigmentation && species.pigmentation.skin) || {};
+  const base = skin.color || (species && species.color) || '#8B6347';
+  if (species && species.id === 'sapiens-neolithic' && skin.variantColor) return skin.variantColor;
+  if (species && species.id === 'sapiens-bronze' && skin.spectrumColors && skin.spectrumColors.length) {
+    return skin.spectrumColors[skin.spectrumColors.length - 1];
+  }
+  return base;
+}
+
 /** DOM element for a walking silhouette (size from heightM). */
 function makeMapLibreFigureElement(species) {
   const pig       = species.pigmentation || {};
-  const skinColor = (pig.skin  && pig.skin.color)  || species.color || '#8B6347';
+  const skinColor = mapWalkingSkinColor(species);
   const eyeColor  = (pig.eyes  && pig.eyes.color)  || '#2a1400';
   const hairColor = (pig.hair  && pig.hair.color) || '#1a0800';
   const hStr  = (species.biometrics && species.biometrics.heightM || '170').replace(/[^\d.\u2013-]/g, '');
@@ -11808,6 +11889,10 @@ function makeMapLibreFigureElement(species) {
   el.className = 'maplibre-walking-figure';
   el.setAttribute('data-species-id', species.id || '');
   el.style.cssText = 'width:' + w + 'px;height:' + h + 'px;';
+  const label = document.createElement('div');
+  label.className = 'maplibre-walking-figure-label';
+  label.setAttribute('translate', 'no');
+  el.appendChild(label);
   const body = document.createElement('div');
   body.className = 'maplibre-walking-figure-body';
   body.style.cssText = 'width:' + w + 'px;height:' + h + 'px;display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.72));';
@@ -11815,6 +11900,7 @@ function makeMapLibreFigureElement(species) {
     ' xmlns="http://www.w3.org/2000/svg" style="display:block">' +
     humanFigureSVG(skinColor, eyeColor, hairColor, 60) + '</svg>';
   el.appendChild(body);
+  applyFigureMapCaption(el, species);
   return el;
 }
 

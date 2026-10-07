@@ -263,6 +263,31 @@ async function runMapLibreTests() {
       await new Promise(resolve => setTimeout(resolve, 700));
       const secondPos = firstMarker && firstMarker.getLngLat ? firstMarker.getLngLat() : null;
       stopPlay();
+      function captionState() {
+        return [...document.querySelectorAll('.maplibre-walking-figure')].map(fig => {
+          const id = fig.getAttribute('data-species-id');
+          const lab = fig.querySelector('.maplibre-walking-figure-label');
+          const sp = (SPECIES_DATA || []).find(s => s.id === id);
+          const cap = sp && figureMapCaption(sp);
+          const box = fig.getBoundingClientRect();
+          const lb = lab ? lab.getBoundingClientRect() : null;
+          const ctx = document.createElement('canvas').getContext('2d');
+          function norm(c) { ctx.fillStyle = c || '#000'; return ctx.fillStyle; }
+          const ink = lab ? norm(getComputedStyle(lab).color) : '';
+          const edge = lab ? norm(getComputedStyle(lab).borderTopColor) : '';
+          return {
+            id,
+            ok: !!(lab && cap && lab.textContent === cap.label && ink === norm('#1a1208') && edge === norm(cap.color)),
+            above: !!(lb && lb.height > 0 && lb.bottom <= box.top + 2),
+            text: lab ? lab.textContent : '',
+          };
+        });
+      }
+      const captions = captionState();
+      const mode = timelineViewMode;
+      setTimelineViewMode(mode === 'detailed' ? 'simple' : 'detailed');
+      const switched = captionState();
+      setTimelineViewMode(mode);
       return {
         figureCount: document.querySelectorAll('.maplibre-walking-figure').length,
         trackedCount: mapLibreFigureMarkers.size,
@@ -270,11 +295,15 @@ async function runMapLibreTests() {
           Math.abs(firstPos.lng - secondPos.lng) > 0.0001 ||
           Math.abs(firstPos.lat - secondPos.lat) > 0.0001
         )),
+        captionsOk: captions.length > 0 && captions.every(c => c.ok && c.above),
+        switchedOk: switched.length > 0 && switched.every(c => c.ok && c.above),
       };
     });
     assert(result.figureCount > 0, `MapLibre walking figures rendered (${result.figureCount})`);
     assert(result.trackedCount > 0, `MapLibre figure markers are tracked (${result.trackedCount})`);
     assert(result.moved, 'At least one MapLibre figure moves along a migration path during play');
+    assert(result.captionsOk, 'Walking figures show a timeline-coloured label above the silhouette');
+    assert(result.switchedOk, 'Figure labels follow the simple or detailed timeline name');
   });
 
   await test('Map hover popup stays in the map and does not scroll the layout', async () => {
