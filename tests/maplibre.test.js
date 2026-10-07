@@ -83,7 +83,7 @@ async function runMapLibreTests() {
     }
   });
 
-  await test('Returning visitors keep the standard welcome overlay until the readable map is ready', async () => {
+  await test('Returning visitors skip the welcome panel and the timeline starts', async () => {
     const { browser: returningBrowser, page: returningPage } = await launch({ width: 1440, height: 900 });
     try {
       await returningPage.addInitScript(() => {
@@ -93,18 +93,17 @@ async function runMapLibreTests() {
       await returningPage.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded' });
       const initial = await returningPage.evaluate(() => {
         const overlay = document.getElementById('welcome-modal-overlay');
+        const shown = overlay && getComputedStyle(overlay).display !== 'none' && !overlay.classList.contains('hidden');
         return {
-          hidden: overlay ? overlay.classList.contains('hidden') : true,
-          transient: overlay ? overlay.classList.contains('welcome-modal-transient') : false,
-          startVisible: !!document.getElementById('welcome-start-btn') && getComputedStyle(document.getElementById('welcome-start-btn')).display !== 'none',
+          shown: !!shown,
+          returning: document.documentElement.getAttribute('data-returning'),
           mapFilter: getComputedStyle(document.getElementById('map')).filter,
           mapOpacity: getComputedStyle(document.getElementById('map')).opacity,
           mapReady: document.documentElement.getAttribute('data-map-ready'),
         };
       });
-      assert(!initial.hidden, 'Returning visitor overlay is visible while the map is being prepared');
-      assert(!initial.transient, 'Returning visitor overlay uses the standard welcome modal');
-      assert(initial.startVisible, 'Standard welcome modal keeps its start button visible');
+      assert(!initial.shown, 'Returning visitor does not see the welcome panel');
+      assert(initial.returning === '1', 'Returning visit is marked before paint');
       assert(String(initial.mapFilter).includes('blur'), 'Map is blurred while the readable style is being prepared');
       assert(Number(initial.mapOpacity) === 0, 'Initial MapLibre colours are fully hidden while the readable style is being prepared');
       await returningPage.waitForFunction(() => document.documentElement.getAttribute('data-map-ready') === '1', null, { timeout: 20000 });
@@ -112,7 +111,9 @@ async function runMapLibreTests() {
         const overlay = document.getElementById('welcome-modal-overlay');
         const map = document.getElementById('map');
         const filter = map ? getComputedStyle(map).filter : '';
-        return overlay && overlay.classList.contains('hidden')
+        const overlayHidden = !overlay || overlay.classList.contains('hidden') || getComputedStyle(overlay).display === 'none';
+        return overlayHidden
+          && typeof isPlaying !== 'undefined' && isPlaying
           && Number(getComputedStyle(map).opacity) === 1
           && (filter === 'none' || filter === '');
       }, null, { timeout: 8000 });
@@ -120,12 +121,16 @@ async function runMapLibreTests() {
         const overlay = document.getElementById('welcome-modal-overlay');
         const map = document.getElementById('map');
         return {
-          hidden: overlay ? overlay.classList.contains('hidden') : false,
+          shown: !!(overlay && getComputedStyle(overlay).display !== 'none' && !overlay.classList.contains('hidden')),
           mapFilter: map ? getComputedStyle(map).filter : '',
           mapOpacity: map ? getComputedStyle(map).opacity : 0,
+          playing: typeof isPlaying !== 'undefined' && isPlaying,
+          time: typeof currentTime !== 'undefined' ? currentTime : 0,
         };
       });
-      assert(afterReady.hidden, 'Returning visitor overlay auto-hides after the readable map is ready');
+      assert(!afterReady.shown, 'Welcome panel stays hidden after the map is ready');
+      assert(afterReady.playing, 'Timeline playback starts on its own for a returning visitor');
+      assert(afterReady.time < -6000000, `Playback starts at the beginning of the timeline (time ${afterReady.time})`);
       assert(!/blur\(/i.test(String(afterReady.mapFilter)), 'Map blur is removed after the readable style is ready');
       assert(Number(afterReady.mapOpacity) === 1, 'Map is visible after the readable style is ready');
     } finally {

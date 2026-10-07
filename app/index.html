@@ -62,6 +62,11 @@
   var lng = bootLang();
   document.documentElement.lang = lng;
   document.documentElement.setAttribute('translate', lng === 'en' ? 'yes' : 'no');
+  try {
+    if (localStorage.getItem('ho_welcomed_v3') === '1') {
+      document.documentElement.setAttribute('data-returning', '1');
+    }
+  } catch (e) { /* ignore */ }
 })();
 </script>
 
@@ -2178,6 +2183,8 @@ html[data-map-ready="1"] #map {
   #welcome-modal-overlay { align-items: center; }
 }
 #welcome-modal-overlay.hidden { display: none !important; }
+/* Second visit onwards: no welcome panel, even before the welcome script runs. */
+html[data-returning="1"] #welcome-modal-overlay { display: none !important; }
 #welcome-modal {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -2601,6 +2608,46 @@ html.demo-active .event-marker.demo-artifact-spotlight {
 .maplibre-walking-figure {
   pointer-events: none;
   z-index: 1;
+}
+/* Inner wrapper: MapLibre owns transform on the marker root, so the pop-in
+   scale has to live on a child or it never plays. */
+.maplibre-walking-figure-body {
+  position: relative;
+  transform-origin: center bottom;
+  width: 100%;
+  height: 100%;
+}
+.maplibre-walking-figure-body.is-arriving {
+  animation: homininArrive 1.15s cubic-bezier(.2, .85, .2, 1) both;
+}
+.maplibre-walking-figure-body.is-arriving::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  border-radius: 50%;
+  border: 2px solid #f4e04a;
+  background: rgba(244, 224, 74, 0.45);
+  animation: homininArriveRing 1.15s ease-out both;
+}
+@keyframes homininArrive {
+  0% { transform: scale(0.15); opacity: 0; }
+  42% { transform: scale(1.75); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes homininArriveRing {
+  0% { transform: scale(0.2); opacity: 0; }
+  45% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .maplibre-walking-figure-body.is-arriving,
+  .maplibre-walking-figure-body.is-arriving::after {
+    animation: none;
+  }
 }
 
 /* MapLibre: the hover card paints above markers; pointer-events: none lets the
@@ -4303,25 +4350,28 @@ function syncMapLibreMigrationCues(visible) {
   if (layerStates.migrations) {
     visible.forEach(function (species) {
       species.migrations.forEach(function (mig, idx) {
-        const end = migrationEnd(mig);
-        const bearing = getBearing(mig.from, mig.to);
-        const t = 0.65;
-        cueItems.push({
-          id: species.id + '-migration-' + idx + '-arrow',
-          kind: 'arrow',
-          species: species,
-          bearing: bearing,
-          lngLat: [
-            mig.from[1] + (end[1] - mig.from[1]) * t,
-            mig.from[0] + (end[0] - mig.from[0]) * t,
-          ],
-        });
-        cueItems.push({
-          id: species.id + '-migration-' + idx + '-dot',
-          kind: 'dot',
-          species: species,
-          bearing: bearing,
-          lngLat: [end[1], end[0]],
+        migrationDisplayLegs(mig).forEach(function (leg, legIdx) {
+          const end = migrationEnd(leg);
+          const bearing = getBearing(leg.from, leg.to);
+          const t = 0.65;
+          const idBase = species.id + '-migration-' + idx + '-' + legIdx;
+          cueItems.push({
+            id: idBase + '-arrow',
+            kind: 'arrow',
+            species: species,
+            bearing: bearing,
+            lngLat: [
+              leg.from[1] + (end[1] - leg.from[1]) * t,
+              leg.from[0] + (end[0] - leg.from[0]) * t,
+            ],
+          });
+          cueItems.push({
+            id: idBase + '-dot',
+            kind: 'dot',
+            species: species,
+            bearing: bearing,
+            lngLat: [end[1], end[0]],
+          });
         });
       });
     });
@@ -4388,17 +4438,17 @@ function updateMapLibre() {
     }))
   ) : [];
   const migrationFeatures = layerStates.migrations ? visible.flatMap(species =>
-    species.migrations.map((mig, idx) => ({
+    species.migrations.flatMap((mig, idx) => migrationDisplayLegs(mig).map((leg, legIdx) => ({
       type: 'Feature',
-      geometry: { type: 'LineString', coordinates: [[mig.from[1], mig.from[0]], [unwrapLng(mig.from[1], mig.to[1]), mig.to[0]]] },
+      geometry: { type: 'LineString', coordinates: [[leg.from[1], leg.from[0]], [leg.to[1], leg.to[0]]] },
       properties: {
-        id: species.id + '-migration-' + idx,
+        id: species.id + '-migration-' + idx + '-' + legIdx,
         speciesId: species.id,
         speciesName: species.name,
-        label: mig.label,
+        label: leg.label,
         color: species.color,
       },
-    }))
+    })))
   ) : [];
   const siteFeatures = layerStates.sites ? visible.flatMap(species =>
     species.sites.map((site, idx) => ({
@@ -6662,7 +6712,12 @@ function resetMapToWorldView() {
 // Map: full updateMap() only when the set of living species changes;
 // during Play with the same set, only refresh migration cues + events.
 function setTime(time) {
+  const prevTime = currentTime;
   currentTime = Math.max(TIMELINE_MIN, Math.min(TIMELINE_MAX, time));
+  // A manual jump (scrub, intro, rewind) must not stay frozen on the previous arrival.
+  if (playbackArrivalCues && Math.abs(timeToLinear(currentTime) - timeToLinear(prevTime)) > 0.008) {
+    _introHoldUntil = 0;
+  }
   document.getElementById('timeline-current-label').textContent = formatTime(currentTime);
   if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
   updateNeedlePosition();
@@ -6807,6 +6862,10 @@ let showEvents = true;
 // Wrapping at TIMELINE_MAX jumps back to TIMELINE_MIN (loop).
 let playInterval = null;
 let isPlaying = false;
+/** Play-only: freeze the needle when a taxon first appears so the figure can pop in and start walking. */
+let playbackArrivalCues = false;
+let _introHoldUntil = 0;
+const _seenArrivalIds = new Set();
 
 // Speed map: log-scale steps per tick (in "log-time" fraction of total range)
 // At speed×1 we want to traverse the full timeline in ~60 seconds at 30fps ≈ 1800 ticks
@@ -6864,13 +6923,11 @@ function startPlay() {
   // Near end of timeline: clear figures + event markers so they can respawn cleanly,
   // but keep the needle where it is — Play always continues from the current time.
   const freshStart = currentTime >= TIMELINE_MAX - 1000;
+  playbackArrivalCues = true;
   if (freshStart) {
-    Object.keys(speciesFigures).forEach(function(id) {
-      const e = speciesFigures[id];
-      if (e.raf) cancelAnimationFrame(e.raf);
-      if (e.marker) e.marker.remove();
-      delete speciesFigures[id];
-    });
+    clearAllWalkingFigures();
+    _seenArrivalIds.clear();
+    _introHoldUntil = 0;
     clearMapLibreEventMarkers();
     _lastVisibleIds = '';
   }
@@ -6893,6 +6950,9 @@ function startPlay() {
   const speedEl = document.getElementById('play-speed');
 
   const tick = () => {
+    // A new taxon just appeared: keep the needle here until the figure has
+    // popped in and its first walk is far enough along to be seen.
+    if (playbackArrivalCues && performance.now() < _introHoldUntil) return;
     const speed = parseFloat(speedEl ? speedEl.value : '1');
     const totalLogRange = 1;
     const stepPerTick = (totalLogRange / PLAY_TOTAL_TICKS) * speed;
@@ -6900,6 +6960,7 @@ function startPlay() {
     const newLinear = currentLinear + stepPerTick;
 
     if (newLinear >= 1) {
+      _introHoldUntil = 0;
       setTime(TIMELINE_MIN);
       return;
     }
@@ -6914,6 +6975,7 @@ function startPlay() {
 function stopPlay() {
   if (!isPlaying) return;
   isPlaying = false;
+  playbackArrivalCues = false;
   if (playInterval) clearInterval(playInterval);
   playInterval = null;
   // Cancel rAF loops but leave markers visible (pause — figures stay in place)
@@ -6952,9 +7014,22 @@ function togglePlay() {
   else startPlay();
 }
 
+/** After the introduction: rewind to the oldest date and play every taxon in order. */
+function startTimelineFromOrigin() {
+  if (isPlaying) stopPlay();
+  _seenArrivalIds.clear();
+  _introHoldUntil = 0;
+  if (typeof clearAllWalkingFigures === 'function') clearAllWalkingFigures();
+  _lastVisibleIds = '';
+  setTime(TIMELINE_MIN);
+  if (typeof resetMapToWorldView === 'function') resetMapToWorldView();
+  startPlay();
+}
+
 window.startPlay = startPlay;
 window.stopPlay = stopPlay;
 window.togglePlay = togglePlay;
+window.startTimelineFromOrigin = startTimelineFromOrigin;
 
 // =====================================================================
 // ANIMATED MIGRATION ARROWS + ANTIMERIDIAN
@@ -6982,6 +7057,40 @@ function unwrapLng(fromLng, toLng) {
 // origin, so bearing, polyline and animation all take the same short path.
 function migrationEnd(mig) {
   return [mig.to[0], unwrapLng(mig.from[1], mig.to[1])];
+}
+
+function wrapLng(lng) {
+  let x = lng % 360;
+  if (x > 180) x -= 360;
+  if (x < -180) x += 360;
+  return x;
+}
+
+/**
+ * Short path, drawn as pieces that stay well inside [-180, 180].
+ * A point on the date line (±180) is redrawn by MapLibre the long way,
+ * so Siberia → Alaska became a stroke across the North Atlantic.
+ * Stop in Chukotka and resume in Alaska: the gap is the Bering Strait.
+ */
+function migrationDisplayLegs(mig) {
+  const fromLng = mig.from[1];
+  const fromLat = mig.from[0];
+  const end = migrationEnd(mig);
+  const toLat = end[0];
+  const toUnwrapped = end[1];
+  if (toUnwrapped <= 180 && toUnwrapped >= -180) {
+    return [{ from: [fromLat, fromLng], to: [toLat, toUnwrapped], label: mig.label }];
+  }
+  const eastward = toUnwrapped > fromLng;
+  const edge = eastward ? 165 : -165;
+  const span = toUnwrapped - fromLng;
+  const t = span === 0 ? 1 : (edge - fromLng) / span;
+  const latB = fromLat + (toLat - fromLat) * t;
+  const resumeLng = eastward ? -165 : 165;
+  return [
+    { from: [fromLat, fromLng], to: [latB, edge], label: mig.label, hop: true },
+    { from: [latB, resumeLng], to: [toLat, wrapLng(toUnwrapped)], label: mig.label }
+  ];
 }
 
 /** Compass bearing in degrees (0 = N, 90 = E) for a rhumb line; wraps longitude. */
@@ -11698,10 +11807,14 @@ function makeMapLibreFigureElement(species) {
   const el = document.createElement('div');
   el.className = 'maplibre-walking-figure';
   el.setAttribute('data-species-id', species.id || '');
-  el.style.cssText = 'width:' + w + 'px;height:' + h + 'px;display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.72));';
-  el.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 120 160" fill="none"' +
+  el.style.cssText = 'width:' + w + 'px;height:' + h + 'px;';
+  const body = document.createElement('div');
+  body.className = 'maplibre-walking-figure-body';
+  body.style.cssText = 'width:' + w + 'px;height:' + h + 'px;display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.72));';
+  body.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 120 160" fill="none"' +
     ' xmlns="http://www.w3.org/2000/svg" style="display:block">' +
     humanFigureSVG(skinColor, eyeColor, hairColor, 60) + '</svg>';
+  el.appendChild(body);
   return el;
 }
 
@@ -11711,6 +11824,19 @@ function setFigureMarkerPosition(marker, latlng) {
   marker.setLngLat([latlng[1], latlng[0]]);
 }
 
+function clearAllWalkingFigures() {
+  Object.keys(speciesFigures).forEach(function (id) {
+    const e = speciesFigures[id];
+    if (!e) return;
+    if (e.raf) cancelAnimationFrame(e.raf);
+    if (e.walkTimer) clearTimeout(e.walkTimer);
+    if (e.marker) e.marker.remove();
+    mapLibreFigureMarkers.delete(id);
+    delete speciesFigures[id];
+    _seenArrivalIds.delete(id);
+  });
+}
+
 // Remove figures for species that are no longer in the visible time window
 function syncFigureVisibility() {
   const visibleIds = new Set(getVisibleSpecies().map(function(s){ return s.id; }));
@@ -11718,35 +11844,124 @@ function syncFigureVisibility() {
     if (!visibleIds.has(id)) {
       const e = speciesFigures[id];
       if (e.raf) cancelAnimationFrame(e.raf);
+      if (e.walkTimer) clearTimeout(e.walkTimer);
       if (e.marker) e.marker.remove();
       mapLibreFigureMarkers.delete(id);
       delete speciesFigures[id];
+      // Allow the same taxon to arrive again if the needle comes back.
+      _seenArrivalIds.delete(id);
     }
   });
 }
 
-// Spawn a figure for a newly visible species and queue its migrations
+/** Drop fossil localities that sit on top of each other (same valley, not a visible trek). */
+function distinctLatLngs(points) {
+  const out = [];
+  (points || []).forEach(function (p) {
+    const lat = Array.isArray(p) ? p[0] : p && p.lat;
+    const lng = Array.isArray(p) ? p[1] : p && p.lng;
+    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return;
+    const prev = out[out.length - 1];
+    if (prev && Math.hypot(lat - prev[0], lng - prev[1]) < 1.2) return;
+    out.push([lat, lng]);
+  });
+  return out;
+}
+
+function migrationWalkDuration(mig) {
+  const from = mig.from;
+  const to = migrationEnd(mig);
+  const dist = Math.hypot(to[0] - from[0], to[1] - from[1]);
+  return Math.max(3000, Math.min(8000, 1500 + dist * 70));
+}
+
+/**
+ * Published migrations when the catalogue has them.
+ * Otherwise, during Play only, walk distinct fossil sites so a new taxon
+ * still appears and then moves. No migration line is drawn for that tour:
+ * it shows where fossils are known, not a claimed route.
+ */
+function movementQueue(species) {
+  const published = (species.migrations || []).filter(function (m) {
+    return m && m.from && m.to && m.from.length === 2 && m.to.length === 2;
+  });
+  if (published.length) {
+    const legs = [];
+    published.forEach(function (m) {
+      migrationDisplayLegs(m).forEach(function (leg) { legs.push(leg); });
+    });
+    return legs;
+  }
+  if (!playbackArrivalCues) return [];
+  const pts = distinctLatLngs(species.sites);
+  const queue = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    queue.push({ from: pts[i], to: pts[i + 1], label: '' });
+  }
+  // One locality only: step in from nearby so the arrival is still a movement.
+  // No migration line is drawn; this is not a claimed route.
+  if (!queue.length && pts.length === 1) {
+    queue.push({ from: [pts[0][0], pts[0][1] - 8], to: pts[0], label: '' });
+  }
+  return queue;
+}
+
+function arrivalHoldMs(queue) {
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 700;
+  } catch (e) { /* ignore */ }
+  if (!queue || !queue.length) return 1800;
+  return Math.min(6400, Math.max(2400, migrationWalkDuration(queue[0]) * 0.85));
+}
+
+function armArrivalHold(species, queue) {
+  if (!playbackArrivalCues || _seenArrivalIds.has(species.id)) return;
+  _seenArrivalIds.add(species.id);
+  _introHoldUntil = Math.max(_introHoldUntil, performance.now() + arrivalHoldMs(queue));
+}
+
+// Spawn a figure for a newly visible species and queue its movement
 function spawnFigure(species) {
   if (speciesFigures[species.id]) return;
-  const origin = (species.sites && species.sites[0]) || (species.regions && species.regions[0]);
-  const latlng = origin ? [origin.lat, origin.lng] : null;
+  const queue = movementQueue(species);
+  const site0 = species.sites && species.sites[0];
+  const region0 = species.regions && species.regions[0];
+  const origin = (queue[0] && queue[0].from)
+    || (site0 && typeof site0.lat === 'number' ? [site0.lat, site0.lng] : null)
+    || (region0 && typeof region0.lat === 'number' ? [region0.lat, region0.lng] : null);
+  const latlng = origin && typeof origin[0] === 'number' && typeof origin[1] === 'number' ? origin : null;
   let marker = null;
   if (latlng && mapLibreMap) {
-    marker = new maplibregl.Marker({ element: makeMapLibreFigureElement(species), anchor: 'bottom' })
+    const el = makeMapLibreFigureElement(species);
+    const body = el.querySelector('.maplibre-walking-figure-body');
+    if (body) {
+      body.classList.add('is-arriving');
+      body.addEventListener('animationend', function (ev) {
+        if (ev.animationName !== 'homininArrive') return;
+        body.classList.remove('is-arriving');
+      });
+    }
+    marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat([latlng[1], latlng[0]])
       .addTo(mapLibreMap);
     mapLibreFigureMarkers.set(species.id, marker);
   }
   speciesFigures[species.id] = {
     marker   : marker,
-    migQueue : (species.migrations || []).slice(),
+    migQueue : queue,
     walkState: null,
     raf      : null,
+    walkTimer: null,
   };
-  if (marker) setTimeout(function(){
-    var entry = speciesFigures[species.id];
-    if (entry && !entry.walkState && !entry.raf) advanceFigure(species.id);
-  }, 600);
+  armArrivalHold(species, queue);
+  if (marker) {
+    speciesFigures[species.id].walkTimer = setTimeout(function () {
+      const entry = speciesFigures[species.id];
+      if (!entry || entry.walkState || entry.raf) return;
+      entry.walkTimer = null;
+      advanceFigure(species.id);
+    }, 420);
+  }
 }
 
 // Start the next queued migration walk for a species
@@ -11763,8 +11978,7 @@ function startWalkFigure(id, mig, resumeElapsed) {
   // Unwrapped destination: keeps the walk continuous across the antimeridian
   // (and stops `dist` — hence the duration — being inflated by a 360° jump).
   const from = mig.from, to = migrationEnd(mig);
-  const dist = Math.sqrt(Math.pow(to[0]-from[0],2)+Math.pow(to[1]-from[1],2));
-  const dur  = Math.max(3000, Math.min(8000, 1500 + dist * 70));
+  const dur  = migrationWalkDuration(mig);
   const t0   = performance.now() - resumeElapsed;
   e.walkState = { mig, from, to, dur, t0 };
 
@@ -11786,7 +12000,9 @@ function startWalkFigure(id, mig, resumeElapsed) {
       setFigureMarkerPosition(entry.marker, to);  // stay at destination
       entry.raf       = null;
       entry.walkState = null;
-      setTimeout(function(){ advanceFigure(id); }, 600); // next migration
+      // Date-line hop: continue at once on the far side (Alaska), don't pause in the Pacific.
+      const gap = mig.hop ? 0 : 600;
+      setTimeout(function(){ advanceFigure(id); }, gap);
     }
   }
   e.raf = requestAnimationFrame(step);
@@ -11799,7 +12015,7 @@ function resumeAllFigureWalks() {
     if (!e || !e.marker) return;
     if (e.walkState && !e.raf) {
       startWalkFigure(id, e.walkState.mig, e.walkState.pausedAt || 0);
-    } else if (!e.walkState && !e.raf && e.migQueue.length) {
+    } else if (!e.walkState && !e.raf && !e.walkTimer && e.migQueue.length) {
       advanceFigure(id); // pending migrations not yet started
     }
   });
@@ -12533,6 +12749,7 @@ var demoController = (function () {
       if (chrome) chrome.style.visibility = '';
       resetFinaleLayout();
       fullCleanup(false);
+      if (typeof startTimelineFromOrigin === 'function') startTimelineFromOrigin();
     }
     if (fin && !fin.hidden && typeof foldUiToBurger === 'function') {
       foldUiToBurger(fin, done);
@@ -12777,6 +12994,7 @@ function bootApp() {
 
   function afterMapInited() {
     if (window.demoController && window.demoController.isActive()) return;
+    if (typeof isPlaying !== 'undefined' && isPlaying) return;
     setTime(TIMELINE_MIN);
     updateMap();
     requestAnimationFrame(function () {
@@ -12794,6 +13012,7 @@ function bootApp() {
       // Default species selection: brief delay so map + markers can attach
       setTimeout(function () {
         if (window.demoController && window.demoController.isActive()) return;
+        if (typeof isPlaying !== 'undefined' && isPlaying) return;
         if (SPECIES_DATA.length) {
           window._suppressMobileSwitch = true;
           selectSpecies(SPECIES_DATA[0]);
@@ -13752,11 +13971,12 @@ window.addEventListener('load', initDataViewer);
 })();
 
 // =====================================================================
-// WELCOME MODAL — first visit + returning-visitor "map warming" overlay
+// WELCOME MODAL — first visit only
 // =====================================================================
-// localStorage ho_welcomed_v3 skips the intro copy. Returning visitors
-// still see the same overlay until data-map-ready so the raw MapLibre
-// flash is hidden. Unsupported browser locales get a "Translate this page" hint.
+// localStorage ho_welcomed_v3 skips this panel. Returning visitors open
+// straight onto the map and the timeline starts from the beginning.
+// Unsupported browser locales get a "Translate this page" hint on the
+// first visit. The map itself stays blurred until data-map-ready.
 var welcomeBooted = false;
 function initWelcome() {
   if (welcomeBooted) return;
@@ -13812,23 +14032,6 @@ function initWelcome() {
     }
   }
 
-  function prefersReduced() {
-    try {
-      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    } catch (e) { return false; }
-  }
-
-  function foldOverlayToBurger() {
-    if (overlay.classList.contains('hidden') || overlay.style.display === 'none') return;
-    var modal = document.getElementById('welcome-modal');
-    if (typeof foldUiToBurger === 'function' && modal) {
-      overlay.classList.add('welcome-fold-to-burger');
-      foldUiToBurger(modal, hideOverlay);
-      return;
-    }
-    hideOverlay();
-  }
-
   function launchDemo() {
     storedSet();
     afterMapReady(function () {
@@ -13841,32 +14044,14 @@ function initWelcome() {
   }
 
   var alreadyWelcomed = !!storedGet();
-  var returningHeld = false;
-  var returningHideTimer = null;
-
-  function cancelReturningHide() {
-    if (returningHideTimer) {
-      clearTimeout(returningHideTimer);
-      returningHideTimer = null;
-    }
-  }
 
   if (alreadyWelcomed) {
+    hideOverlay();
     afterMapReady(function () {
-      returningHideTimer = setTimeout(function () {
-        returningHideTimer = null;
-        if (returningHeld) return;
-        foldOverlayToBurger();
-      }, 1000);
+      if (window.demoController && window.demoController.isActive()) return;
+      if (typeof startTimelineFromOrigin === 'function') startTimelineFromOrigin();
     });
-    var modal = document.getElementById('welcome-modal');
-    if (modal) {
-      modal.addEventListener('mouseenter', function () {
-        returningHeld = true;
-        cancelReturningHide();
-        overlay.classList.remove('welcome-fold-to-burger');
-      });
-    }
+    return;
   }
 
   try {
@@ -13896,19 +14081,8 @@ function initWelcome() {
     btn.removeAttribute('onclick');
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      cancelReturningHide();
       launchDemo();
     });
-  }
-
-  if (alreadyWelcomed) {
-    overlay.addEventListener('click', function (e) {
-      if (e.target !== overlay) return;
-      if (!returningHeld) return;
-      cancelReturningHide();
-      hideOverlay();
-    });
-    return;
   }
 
   overlay.addEventListener('click', function (e) {
