@@ -952,6 +952,29 @@ html[data-map-ready="1"] #map {
   height: 100%;
   overflow: hidden;
 }
+/* Mobile progress rail: one dot per hominin appearance (shown in the mobile media query) */
+#timeline-appear-marks {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.timeline-appear-mark {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-surface);
+  opacity: 0.45;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.timeline-appear-mark.is-reached {
+  opacity: 1;
+  transform: scale(1.15);
+}
 /* The rail underneath */
 .timeline-rail {
   display: none;
@@ -2984,6 +3007,70 @@ html.demo-active .event-marker.demo-artifact-spotlight {
     max-width: min(240px, calc(100vw - 16px)) !important;
     max-height: min(44vh, 300px) !important;
   }
+
+  /* Compact player: the map is the main view. One row of controls
+     (needle round + Play + date) above a single progress rail. */
+  #tl-title-strip,
+  #timeline-lanes,
+  #timeline-ticks-row,
+  #skin-band,
+  #events-band { display: none !important; }
+  #timeline {
+    max-height: none;
+    overflow: visible;
+    padding: 0 var(--space-3) var(--space-2);
+  }
+  #needle-wrapper {
+    margin-top: 0;
+    padding: 40px 14px 0;
+  }
+  /* Fixed controls on the left; the round rides on the rail itself. */
+  #timeline-full-needle,
+  #needle-control-rail { display: none !important; }
+  .timeline-needle-handle {
+    top: 37px !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+  #play-btn {
+    left: 14px !important;
+    top: 2px !important;
+    width: 96px;
+    height: 34px;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .timeline-current-label {
+    left: 120px !important;
+    top: 6px !important;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 2px 8px;
+    color: var(--color-text);
+    transition: none;
+  }
+  .timeline-species-track {
+    height: 22px !important;
+    overflow: visible;
+    cursor: pointer;
+  }
+  .timeline-species-track::before,
+  .timeline-species-track::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 99px;
+    pointer-events: none;
+  }
+  .timeline-species-track::before { right: 0; background: var(--color-border); }
+  .timeline-species-track::after {
+    width: var(--tl-progress, 0%);
+    background: var(--color-primary);
+  }
+  #timeline-appear-marks { display: block; }
 }
 
 /* TABLET */
@@ -3120,6 +3207,7 @@ html.demo-active .event-marker.demo-artifact-spotlight {
       <div class="timeline-species-track" id="timeline-species-track">
         <div class="timeline-rail"></div>
         <div id="timeline-lanes"></div>
+        <div id="timeline-appear-marks" aria-hidden="true"></div>
       </div>
 
       <!-- Row 3: date ticks -->
@@ -5364,8 +5452,8 @@ function updateMobileTimelineReserve() {
     var tl = document.getElementById('timeline');
     if (!tl) return;
     var h = Math.ceil(tl.getBoundingClientRect().height);
-    /* Match measured footer height (+ small gap); avoid a high floor that steals map space on short phones */
-    var reserve = Math.max(h + 16, 220);
+    /* Match measured footer height (+ small gap); the compact player is short, so keep the floor low */
+    var reserve = Math.max(h + 4, 64);
     document.documentElement.style.setProperty('--mobile-timeline-reserve', reserve + 'px');
   } catch (e) { /* ignore */ }
   if (typeof scheduleTimelineBandSync === 'function') scheduleTimelineBandSync();
@@ -5568,7 +5656,33 @@ function initTimeline() {
     });
   }
 
+  buildTimelineAppearMarks();
   refreshWalkingFigureCaptions();
+}
+
+/** Mobile rail: one dot at each hominin's first appearance, in its timeline colour. */
+function buildTimelineAppearMarks() {
+  var box = document.getElementById('timeline-appear-marks');
+  if (!box) return;
+  box.innerHTML = '';
+  (SPECIES_DATA || []).forEach(function (sp) {
+    if (typeof sp.start !== 'number' || sp.start < TIMELINE_MIN) return;
+    var dot = document.createElement('span');
+    dot.className = 'timeline-appear-mark';
+    dot.setAttribute('data-start', String(sp.start));
+    dot.style.left = (timeToLinear(sp.start) * 100) + '%';
+    dot.style.background = speciesSkinVisual(sp).laneFill;
+    box.appendChild(dot);
+  });
+  syncTimelineAppearMarks();
+}
+
+function syncTimelineAppearMarks() {
+  var box = document.getElementById('timeline-appear-marks');
+  if (!box) return;
+  box.querySelectorAll('.timeline-appear-mark').forEach(function (dot) {
+    dot.classList.toggle('is-reached', currentTime >= parseFloat(dot.getAttribute('data-start')));
+  });
 }
 
 // =====================================================================
@@ -6676,6 +6790,8 @@ function updateNeedlePosition() {
   const cx = trackLeft + (xpct / 100) * trackWidth;
   const needleCx = Math.max(0, Math.min(wrapperW, cx));
   fullNeedle.style.left = needleCx + 'px';
+  if (speciesTrackEl) speciesTrackEl.style.setProperty('--tl-progress', Math.max(0, Math.min(100, xpct)) + '%');
+  syncTimelineAppearMarks();
   const scrub = document.getElementById('timeline-scrubber');
   if (scrub) scrub.style.left = needleCx + 'px';
 
