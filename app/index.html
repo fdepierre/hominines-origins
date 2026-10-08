@@ -3801,12 +3801,20 @@ let _demoLockSelection = false;
 let _mapFocusSpeciesIds = null;
 
 const MAP_WORLD_CENTER = [20, 15];
+/** Phone portrait: shift east so Asia stays in frame when figures leave Africa. */
+const MAP_WORLD_CENTER_MOBILE = [48, 12];
 const MAP_WORLD_ZOOM_DESKTOP = 1.15;
-const MAP_WORLD_ZOOM_MOBILE = 0.72;
+/** Phone needs a wider view than desktop; 0.72 cut East Asia off the right edge. */
+const MAP_WORLD_ZOOM_MOBILE = 0.5;
 
-/** Initial / reset zoom: slightly closer on desktop than on a phone. */
+/** Initial / reset zoom: wider on a phone so intercontinental walks stay visible. */
 function mapWorldZoom() {
   return isMobileViewport() ? MAP_WORLD_ZOOM_MOBILE : MAP_WORLD_ZOOM_DESKTOP;
+}
+
+/** World-view centre: Africa–Europe on desktop, Eurasia-biased on phone. */
+function mapWorldCenter() {
+  return isMobileViewport() ? MAP_WORLD_CENTER_MOBILE.slice() : MAP_WORLD_CENTER.slice();
 }
 
 // MapLibre (~large) loads after the document and i18n; timeline + shell paint first on slow links.
@@ -4023,7 +4031,7 @@ function initMapLibre() {
   mapLibreMap = new maplibregl.Map({
     container: 'map',
     style: 'https://demotiles.maplibre.org/style.json',
-    center: MAP_WORLD_CENTER,
+    center: mapWorldCenter(),
     zoom: mapWorldZoom(),
     minZoom: 0.5,
     maxZoom: 7,
@@ -6999,10 +7007,14 @@ function fitMapToVisibleNarrative(opts) {
       bounds.extend([latlng[1], latlng[0]]);
     });
     const mobile = isMobileViewport();
-    const pad = mobile ? 12 : 52;
-    const maxZ = mobile ? 6 : 5;
+    // Phone: leave room for labels above figures; avoid a tight crop that clips Asia.
+    const pad = mobile ? 48 : 52;
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+    const lngSpan = Math.abs(ne.lng - sw.lng);
+    const maxZ = mobile ? (lngSpan > 60 ? 2.4 : 4.5) : 5;
     mapLibreMap.fitBounds(bounds, {
-      padding: [pad, pad],
+      padding: mobile ? { top: 56, bottom: 28, left: 36, right: 56 } : [pad, pad],
       maxZoom: maxZ,
       duration: opts && opts.animate ? 400 : 0,
     });
@@ -7013,7 +7025,7 @@ function fitMapToVisibleNarrative(opts) {
 function resetMapToWorldView() {
   if (!mapLibreMap) return;
   try {
-    mapLibreMap.easeTo({ center: MAP_WORLD_CENTER, zoom: mapWorldZoom(), duration: 400 });
+    mapLibreMap.easeTo({ center: mapWorldCenter(), zoom: mapWorldZoom(), duration: 400 });
   } catch (e) { /* ignore */ }
 }
 

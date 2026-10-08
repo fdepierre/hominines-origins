@@ -77,7 +77,12 @@ async function runMapLibreTests() {
         stopPlay();
         return window.__mapLibreMap.getZoom();
       });
-      assert(mobile <= 0.85, `Mobile play world view stays wide after timeline changes (zoom ${mobile.toFixed(2)})`);
+      assert(mobile <= 0.6, `Mobile play world view stays wide after timeline changes (zoom ${mobile.toFixed(2)})`);
+      const center = await mobilePage.evaluate(() => {
+        const c = window.__mapLibreMap.getCenter();
+        return { lng: c.lng, lat: c.lat };
+      });
+      assert(center.lng >= 35, `Mobile world view is shifted east so Asia stays in frame (lng ${center.lng.toFixed(1)})`);
     } finally {
       await mobileBrowser.close();
     }
