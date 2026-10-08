@@ -3008,31 +3008,53 @@ html.demo-active .event-marker.demo-artifact-spotlight {
     max-height: min(44vh, 300px) !important;
   }
 
-  /* Compact player: the map is the main view. One row of controls
-     (needle round + Play + date) above a single progress rail. */
-  #tl-title-strip,
-  #timeline-lanes,
-  #timeline-ticks-row,
-  #skin-band,
-  #events-band { display: none !important; }
-  #timeline {
+  /* Compact player (default): map-first. Expand via #mobile-timeline-expand-btn. */
+  #mobile-timeline-expand-btn {
+    display: flex !important;
+    position: absolute;
+    right: 8px;
+    top: 4px;
+    z-index: 55;
+    width: 40px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #mobile-timeline-expand-btn svg { display: block; transition: transform 0.2s ease; }
+  html[data-mobile-timeline="expanded"] #mobile-timeline-expand-btn svg {
+    transform: rotate(180deg);
+  }
+
+  html:not([data-mobile-timeline="expanded"]) #tl-title-strip,
+  html:not([data-mobile-timeline="expanded"]) #timeline-lanes,
+  html:not([data-mobile-timeline="expanded"]) #timeline-ticks-row,
+  html:not([data-mobile-timeline="expanded"]) #skin-band,
+  html:not([data-mobile-timeline="expanded"]) #events-band { display: none !important; }
+  html:not([data-mobile-timeline="expanded"]) #timeline {
     max-height: none;
     overflow: visible;
     padding: 0 var(--space-3) var(--space-2);
   }
-  #needle-wrapper {
+  html:not([data-mobile-timeline="expanded"]) #needle-wrapper {
     margin-top: 0;
     padding: 40px 14px 0;
   }
   /* Fixed controls on the left; the round rides on the rail itself. */
-  #timeline-full-needle,
-  #needle-control-rail { display: none !important; }
-  .timeline-needle-handle {
+  html:not([data-mobile-timeline="expanded"]) #timeline-full-needle,
+  html:not([data-mobile-timeline="expanded"]) #needle-control-rail { display: none !important; }
+  html:not([data-mobile-timeline="expanded"]) .timeline-needle-handle {
     top: 37px !important;
     width: 28px !important;
     height: 28px !important;
   }
-  #play-btn {
+  html:not([data-mobile-timeline="expanded"]) #play-btn {
     left: 14px !important;
     top: 2px !important;
     width: 96px;
@@ -3040,22 +3062,23 @@ html.demo-active .event-marker.demo-artifact-spotlight {
     justify-content: center;
     font-size: 12px;
   }
-  .timeline-current-label {
+  html:not([data-mobile-timeline="expanded"]) .timeline-current-label {
     left: 120px !important;
     top: 6px !important;
+    right: auto !important;
     font-size: 15px;
     font-weight: 700;
     padding: 2px 8px;
     color: var(--color-text);
     transition: none;
   }
-  .timeline-species-track {
+  html:not([data-mobile-timeline="expanded"]) .timeline-species-track {
     height: 22px !important;
     overflow: visible;
     cursor: pointer;
   }
-  .timeline-species-track::before,
-  .timeline-species-track::after {
+  html:not([data-mobile-timeline="expanded"]) .timeline-species-track::before,
+  html:not([data-mobile-timeline="expanded"]) .timeline-species-track::after {
     content: '';
     position: absolute;
     left: 0;
@@ -3065,12 +3088,45 @@ html.demo-active .event-marker.demo-artifact-spotlight {
     border-radius: 99px;
     pointer-events: none;
   }
-  .timeline-species-track::before { right: 0; background: var(--color-border); }
-  .timeline-species-track::after {
+  html:not([data-mobile-timeline="expanded"]) .timeline-species-track::before { right: 0; background: var(--color-border); }
+  html:not([data-mobile-timeline="expanded"]) .timeline-species-track::after {
     width: var(--tl-progress, 0%);
     background: var(--color-primary);
   }
-  #timeline-appear-marks { display: block; }
+  html:not([data-mobile-timeline="expanded"]) #timeline-appear-marks { display: block; }
+
+  /* Expanded: restore full timeline so jalons / lanes are tappable again. */
+  html[data-mobile-timeline="expanded"] #timeline {
+    max-height: min(48dvh, 420px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--space-1) var(--space-2) var(--space-1);
+  }
+  html[data-mobile-timeline="expanded"] #tl-title-strip {
+    display: flex !important;
+  }
+  html[data-mobile-timeline="expanded"] #tl-app-desc { display: none; }
+  html[data-mobile-timeline="expanded"] #timeline-lanes,
+  html[data-mobile-timeline="expanded"] #timeline-ticks-row {
+    display: block !important;
+  }
+  html[data-mobile-timeline="expanded"] #skin-band,
+  html[data-mobile-timeline="expanded"] #events-band {
+    display: flex !important;
+  }
+  html[data-mobile-timeline="expanded"] #timeline-appear-marks { display: none !important; }
+  html[data-mobile-timeline="expanded"] #needle-wrapper {
+    margin-top: 10px;
+    padding-top: 36px;
+  }
+  html[data-mobile-timeline="expanded"] #mobile-timeline-expand-btn {
+    top: 2px;
+  }
+}
+
+@media (min-width: 769px) {
+  #mobile-timeline-expand-btn { display: none !important; }
 }
 
 /* TABLET */
@@ -3199,6 +3255,14 @@ html.demo-active .event-marker.demo-artifact-spotlight {
       </button>
       <!-- Time label floats next to play btn -->
       <span class="timeline-current-label" id="timeline-current-label">— 4.1 Ma</span>
+      <!-- Mobile only: expand compact player → full timeline (lanes + jalons) -->
+      <button type="button" id="mobile-timeline-expand-btn" data-testid="mobile-timeline-expand"
+              aria-expanded="false" data-i18n-title="ui.mobileTimelineExpand" title="Show full timeline">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 14 12 8 18 14"></polyline>
+        </svg>
+      </button>
 
       <!-- Vertical needle shaft UNDER species lanes so lane labels aren't covered; handle is sibling below -->
       <div class="timeline-full-needle" id="timeline-full-needle" aria-hidden="true"></div>
@@ -5682,6 +5746,71 @@ function syncTimelineAppearMarks() {
   if (!box) return;
   box.querySelectorAll('.timeline-appear-mark').forEach(function (dot) {
     dot.classList.toggle('is-reached', currentTime >= parseFloat(dot.getAttribute('data-start')));
+  });
+}
+
+/** Mobile: compact player (default) vs expanded full timeline (lanes + jalons). */
+function isMobileTimelineExpanded() {
+  return document.documentElement.getAttribute('data-mobile-timeline') === 'expanded';
+}
+
+function syncMobileTimelineExpandBtn() {
+  var btn = document.getElementById('mobile-timeline-expand-btn');
+  if (!btn) return;
+  var open = isMobileTimelineExpanded();
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  var key = open ? 'ui.mobileTimelineCollapse' : 'ui.mobileTimelineExpand';
+  var fallback = open ? 'Hide full timeline' : 'Show full timeline';
+  var title = (typeof i18next !== 'undefined' && i18next.isInitialized) ? i18next.t(key) : fallback;
+  btn.setAttribute('title', title);
+  btn.setAttribute('aria-label', title);
+}
+
+/**
+ * Expand or collapse the mobile timeline footer.
+ * Opening always restores the simple lane view (fewer rows, clearer jalons).
+ */
+function setMobileTimelineExpanded(open) {
+  if (!isMobileViewport()) {
+    document.documentElement.removeAttribute('data-mobile-timeline');
+    syncMobileTimelineExpandBtn();
+    return;
+  }
+  if (open) {
+    document.documentElement.setAttribute('data-mobile-timeline', 'expanded');
+    if (typeof setTimelineViewMode === 'function') setTimelineViewMode('simple');
+  } else {
+    document.documentElement.removeAttribute('data-mobile-timeline');
+  }
+  syncMobileTimelineExpandBtn();
+  _lastLaneLayoutKey = '';
+  if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
+  if (typeof updateNeedlePosition === 'function') updateNeedlePosition();
+  requestAnimationFrame(function () {
+    updateMobileTimelineReserve();
+    if (typeof scheduleTimelineBandSync === 'function') scheduleTimelineBandSync();
+    if (mapLibreMap) {
+      try { mapLibreMap.resize(); } catch (e) { /* ignore */ }
+    }
+  });
+}
+
+function initMobileTimelineExpand() {
+  var btn = document.getElementById('mobile-timeline-expand-btn');
+  if (!btn || btn._hoExpandWired) return;
+  btn._hoExpandWired = true;
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setMobileTimelineExpanded(!isMobileTimelineExpanded());
+  });
+  syncMobileTimelineExpandBtn();
+  window.addEventListener('resize', function () {
+    if (!isMobileViewport() && isMobileTimelineExpanded()) {
+      setMobileTimelineExpanded(false);
+    } else {
+      syncMobileTimelineExpandBtn();
+    }
   });
 }
 
@@ -13184,6 +13313,7 @@ function bootApp() {
   loadTimelineViewModeFromStorage();
   initTimeline();
   initTimelineViewControls();
+  initMobileTimelineExpand();
   wireMapSpeciesFocusClear();
   window.addEventListener('resize', function () {
     if (typeof layoutSpeciesLanesForCurrentTime === 'function') layoutSpeciesLanesForCurrentTime();
@@ -13471,6 +13601,8 @@ const TRANSLATIONS = {
         timelineViewGroupAria: 'Control how timeline rows are grouped (merged view or full catalogue rows).',
         timelineViewSimple: 'Simple view',
         timelineViewDetailed: 'Detailed view',
+        mobileTimelineExpand: 'Show full timeline',
+        mobileTimelineCollapse: 'Hide full timeline',
         catalogueLangSection: 'Language',
         welcomeTagline: 'From African origins to the peopling of the world',
         welcomeCriticsNote: 'Experimental - Draft for comments',
@@ -13621,6 +13753,8 @@ const TRANSLATIONS = {
         timelineViewGroupAria: 'Regroupement des lignes de la frise (vue fusionnée ou catalogue complet).',
         timelineViewSimple: 'Vue simple',
         timelineViewDetailed: 'Vue détaillée',
+        mobileTimelineExpand: 'Afficher la frise complète',
+        mobileTimelineCollapse: 'Masquer la frise complète',
         catalogueLangSection: 'Langue',
         welcomeTagline: 'Des origines africaines au peuplement de la Terre',
         welcomeCriticsNote: 'Expérimental - Ébauche pour commentaires',
